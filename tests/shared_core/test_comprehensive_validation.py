@@ -51,6 +51,47 @@ class TestComprehensiveValidation(unittest.TestCase):
         rule_name = type(node).__name__.replace('Context', '')
         return {rule_name: children}
     
+    def _validate_precedence_semantics(self, tree, expr, expected_grouping):
+        """Validate operator precedence using semantic analysis of parse tree"""
+        # Get actual parse tree structure
+        structure = self.get_tree_structure(tree)
+        structure_str = str(structure)
+        
+        # Validate based on expression pattern
+        if "A + B * C" == expr:
+            # Addition should be at root, multiplication nested inside
+            self.assertIn('AdditiveExpression', structure_str)
+            self.assertIn('MultiplicativeExpression', structure_str)
+            # Multiplication should be nested (appear after addition in string)
+            add_pos = structure_str.find('AdditiveExpression')
+            mul_pos = structure_str.find('MultiplicativeExpression')
+            self.assertLess(add_pos, mul_pos, "Multiplication should be nested within addition")
+            
+        elif "A ** B ** C" == expr:
+            # Power should be right-associative: A ** (B ** C)
+            self.assertIn('PowerExpression', structure_str)
+            # Should have nested PowerExpression for right associativity
+            power_count = structure_str.count('PowerExpression')
+            self.assertGreaterEqual(power_count, 2, "Power should be right-associative with nested PowerExpression")
+            
+        elif "A * B ** C" == expr:
+            # Multiplication at root, power nested inside
+            self.assertIn('MultiplicativeExpression', structure_str)
+            self.assertIn('PowerExpression', structure_str)
+            # Power should be nested within multiplication
+            mul_pos = structure_str.find('MultiplicativeExpression')
+            pow_pos = structure_str.find('PowerExpression')
+            self.assertLess(mul_pos, pow_pos, "Power should be nested within multiplication")
+            
+        elif "(A + B) * C" == expr:
+            # Multiplication at root due to parentheses
+            self.assertIn('MultiplicativeExpression', structure_str)
+            self.assertIn('AdditiveExpression', structure_str)
+            # Addition should be nested within multiplication (due to parentheses)
+            mul_pos = structure_str.find('MultiplicativeExpression')
+            add_pos = structure_str.find('AdditiveExpression')
+            self.assertLess(mul_pos, add_pos, "Addition should be nested within multiplication due to parentheses")
+    
     def test_operator_precedence_comprehensive(self):
         """Test that all operator precedence is correctly implemented"""
         precedence_cases = [
@@ -73,21 +114,8 @@ class TestComprehensiveValidation(unittest.TestCase):
                 tree = self.parse_expression(expr)
                 self.assertIsNotNone(tree, f"Failed to parse: {expr}")
                 
-                # Verify the structure reflects correct precedence
-                structure = self.get_tree_structure(tree)
-                structure_str = str(structure)
-                
-                # For A + B * C, should find MultiplicativeExpression nested in AdditiveExpression
-                if "A + B * C" in expr:
-                    self.assertIn('AdditiveExpression', structure_str)
-                    self.assertIn('MultiplicativeExpression', structure_str)
-                
-                # For A ** B ** C, should find nested PowerExpression (right associative)
-                elif "A ** B ** C" in expr:
-                    self.assertIn('PowerExpression', structure_str)
-                    # Should have nested PowerExpression for right associativity
-                    power_count = structure_str.count('PowerExpression')
-                    self.assertGreaterEqual(power_count, 2)
+                # Verify parse tree structure using semantic validation
+                self._validate_precedence_semantics(tree, expr, expected_grouping)
     
     def test_call_statements_comprehensive(self):
         """Test CALL statements with all variations"""
