@@ -2,8 +2,11 @@
 validation/pdfs/          # ISO specification PDFs
 validation/cache/         # Processing cache
 validation/auto-generated/ # Generated reference grammars
-validation/external/      # Downloaded external tools (kaby76/fortran)
+validation/auto-generated # Also match without trailing slash
+validation/external/      # Downloaded external tools (kaby76/fortran)  
+validation/external       # Also match without trailing slash
 validation/dependencies/ # Downloaded .NET SDK and tools (ALL DOWNLOADED)
+validation/dependencies  # Also match without trailing slash
 *.java                    # ANTLR4 generated Java files
 *.class                   # Compiled Java
 *.tokens                  # ANTLR4 token files
