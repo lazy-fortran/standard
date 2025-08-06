@@ -108,14 +108,16 @@ COMMON : C O M M O N ;
 // Statement labels (1957): 1-5 digits, cannot start with 0
 // Used extensively for GOTO targets and DO loop termination
 // Example: 100 CONTINUE
-LABEL : [1-9] [0-9]? [0-9]? [0-9]? [0-9]? ;
+// Range: 1-99999 (exactly as specified in 1957 FORTRAN manual)
+LABEL : [1-9] ([0-9] ([0-9] ([0-9] [0-9]?)?)?)? ;
 
 // Hollerith constants (1957 string literals)
 // Format: nHcharacters where n = number of characters following H
 // Example: 5HHELLO represents the string literal "HELLO"
 // This was the ONLY way to represent text in 1957 FORTRAN!
 // Usage: FORMAT statements, debugging output, data initialization
-HOLLERITH : [1-9] [0-9]* H ~[\r\n]+ ;
+// Improved pattern: count must match actual character length (semantic validation needed)
+HOLLERITH : [1-9] [0-9]* H ~[\r\n]*? ;
 
 // Fixed-form newlines (significant in punch card format)
 NEWLINE : '\r'? '\n' ;
