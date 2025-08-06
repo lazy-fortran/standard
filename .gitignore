@@ -3,6 +3,7 @@ validation/pdfs/          # ISO specification PDFs
 validation/cache/         # Processing cache
 validation/auto-generated/ # Generated reference grammars
 validation/external/      # Downloaded external tools (kaby76/fortran)
+validation/dependencies/ # Downloaded .NET SDK and tools (ALL DOWNLOADED)
 *.java                    # ANTLR4 generated Java files
 *.class                   # Compiled Java
 *.tokens                  # ANTLR4 token files
