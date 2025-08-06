@@ -1,6 +1,8 @@
 // FORTRAN 1957 Parser - Original IBM 704 Language
 parser grammar FORTRAN1957Parser;
 
+import SharedCoreParser;  // Import universal constructs
+
 options {
     tokenVocab = FORTRAN1957Lexer;
 }
@@ -16,17 +18,17 @@ fortran_program
     ;
 
 statement_list
-    : (statement NEWLINE?)*
+    : statement*
     ;
 
 // Statement with optional label
 statement
-    : label? statement_body
-    |         // Empty statement (blank line)
+    : label? statement_body NEWLINE?
+    | NEWLINE  // Empty line
     ;
 
 label
-    : LABEL
+    : LABEL_1957
     ;
 
 // 1957 Statement types
@@ -113,7 +115,7 @@ format_item
     ;
 
 format_descriptor
-    : [IEFGAHX]  // 1957 format codes (simplified)
+    : IDENTIFIER  // Format descriptors like I, E, F, G, A, H, X
     ;
 
 // Declaration statements (1957)

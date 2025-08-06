@@ -40,18 +40,44 @@ fi
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 
+# Handle grammar dependencies via imports
+# ANTLR4 needs access to imported grammars
+IMPORT_PATH=""
+if [ "$GRAMMAR_NAME" != "shared_core" ]; then
+    IMPORT_PATH="-lib $PROJECT_ROOT/grammars/shared_core"
+    
+    # For FORTRAN II and later, also include parent grammar
+    case "$GRAMMAR_NAME" in
+        fortran_ii)
+            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/fortran1957"
+            ;;
+        fortran_iv)
+            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/fortran_ii"
+            ;;
+        fortran66)
+            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/fortran_iv"
+            ;;
+        fortran77)
+            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/fortran66"
+            ;;
+        fortran90)
+            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/fortran77"
+            ;;
+    esac
+fi
+
 # Find and generate lexer
 LEXER_FILE=$(find "$GRAMMAR_DIR" -name "*Lexer.g4" | head -1)
 if [ -n "$LEXER_FILE" ]; then
     echo "Generating lexer from $(basename "$LEXER_FILE")..."
-    antlr4 -Dlanguage=Python3 "$LEXER_FILE"
+    antlr4 -Dlanguage=Python3 -o "$BUILD_DIR" $IMPORT_PATH "$LEXER_FILE"
 fi
 
 # Find and generate parser  
 PARSER_FILE=$(find "$GRAMMAR_DIR" -name "*Parser.g4" | head -1)
 if [ -n "$PARSER_FILE" ]; then
     echo "Generating parser from $(basename "$PARSER_FILE")..."
-    antlr4 -Dlanguage=Python3 "$PARSER_FILE"
+    antlr4 -Dlanguage=Python3 -o "$BUILD_DIR" $IMPORT_PATH "$PARSER_FILE"
 fi
 
 echo "Grammar build completed successfully!"
