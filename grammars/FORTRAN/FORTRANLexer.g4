@@ -1,6 +1,6 @@
-// FORTRAN 1957 Lexer - Original IBM 704 Language
+// FORTRAN Lexer - Original IBM 704 Language (1957)
 // The first high-level programming language for scientific computation
-lexer grammar FORTRAN1957Lexer;
+lexer grammar FORTRANLexer;
 
 import SharedCoreLexer;  // Import universal constructs
 
@@ -57,8 +57,8 @@ COMMON   : C O M M O N ;       // Shared storage
 // - No underscores allowed (SharedCore allows them)
 // This would need special handling in the parser
 
-// Statement labels (1957 - more restrictive than later standards)
-LABEL_1957 : [1-9] [0-9]? [0-9]? [0-9]? [0-9]? ; // 1-5 digits, can't start with 0
+// Statement labels (FORTRAN - more restrictive than later standards)
+LABEL : [1-9] [0-9]? [0-9]? [0-9]? [0-9]? ; // 1-5 digits, can't start with 0
 
 // Hollerith constants (string literals in 1957)
 // Format: nHtext where n is the number of characters

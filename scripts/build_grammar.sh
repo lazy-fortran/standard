@@ -48,20 +48,20 @@ if [ "$GRAMMAR_NAME" != "shared_core" ]; then
     
     # For FORTRAN II and later, also include parent grammar
     case "$GRAMMAR_NAME" in
-        fortran_ii)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/fortran1957"
+        FORTRAN_II)
+            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN"
             ;;
-        fortran_iv)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/fortran_ii"
+        FORTRAN_IV)
+            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN_II"
             ;;
-        fortran66)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/fortran_iv"
+        FORTRAN66)
+            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN_IV"
             ;;
-        fortran77)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/fortran66"
+        FORTRAN77)
+            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN66"
             ;;
-        fortran90)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/fortran77"
+        Fortran90)
+            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN77"
             ;;
     esac
 fi

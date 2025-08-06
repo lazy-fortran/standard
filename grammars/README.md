@@ -7,9 +7,9 @@ This directory contains the modular FORTRAN grammar implementations, designed wi
 ```
 SharedCore (Universal constructs 1957-2023+)
     ↓
-FORTRAN 1957 (Original IBM 704)
+FORTRAN (Original IBM 704, 1957)
     ↓
-FORTRAN II (1958) - inherits from 1957
+FORTRAN II (1958) - inherits from FORTRAN
     ↓
 FORTRAN IV (1962) - inherits from II
     ↓
@@ -43,8 +43,8 @@ LazyFortran (2023+) - inherits from 2023
 - Basic expression parsing with correct precedence
 - Universal delimiters and literals
 
-### fortran1957/
-**Historical Foundation** - Original IBM 704 FORTRAN:
+### FORTRAN/
+**Historical Foundation** - Original IBM 704 FORTRAN (1957):
 - Imports: `SharedCore`
 - Adds: PAUSE, PRINT, PUNCH, FORMAT
 - Adds: DIMENSION, EQUIVALENCE, FREQUENCY, COMMON
@@ -52,9 +52,9 @@ LazyFortran (2023+) - inherits from 2023
 - Adds: Arithmetic IF (three-way branch)
 - Adds: Computed GOTO
 
-### fortran_ii/ (Future)
+### FORTRAN_II/ (Future)
 **First Extension** - FORTRAN II (1958):
-- Imports: `FORTRAN1957`
+- Imports: `FORTRAN`
 - Adds: FUNCTION keyword
 - Adds: SUBROUTINE keyword
 - Adds: Improved COMMON blocks
@@ -101,11 +101,11 @@ Each grammar builds upon its predecessor:
 # Build shared core first
 ./scripts/build_grammar.sh shared_core
 
-# Then build FORTRAN 1957 (imports SharedCore)
-./scripts/build_grammar.sh fortran1957
+# Then build FORTRAN (imports SharedCore)
+./scripts/build_grammar.sh FORTRAN
 
-# Future: Build FORTRAN II (will import FORTRAN1957)
-./scripts/build_grammar.sh fortran_ii
+# Future: Build FORTRAN II (will import FORTRAN)
+./scripts/build_grammar.sh FORTRAN_II
 ```
 
 ## Design Principles
@@ -126,7 +126,7 @@ Each grammar module contains:
 ## Implementation Status
 
 - ✅ **SharedCore** - Complete, fully tested
-- ✅ **FORTRAN 1957** - Complete, historical accuracy verified
+- ✅ **FORTRAN** - Complete, historical accuracy verified (1957)
 - 🔄 **FORTRAN II** - Planned
 - 🔄 **FORTRAN IV** - Planned
 - 🔄 **FORTRAN 66** - Planned
@@ -138,7 +138,7 @@ Each grammar module contains:
 
 Each grammar level has its own test suite:
 - `tests/shared_core/` - Tests universal constructs
-- `tests/fortran1957/` - Tests 1957-specific features
+- `tests/FORTRAN/` - Tests original FORTRAN features
 - Future test directories for each standard
 
 Tests validate:

@@ -1,10 +1,10 @@
-// FORTRAN 1957 Parser - Original IBM 704 Language
-parser grammar FORTRAN1957Parser;
+// FORTRAN Parser - Original IBM 704 Language (1957)
+parser grammar FORTRANParser;
 
 import SharedCoreParser;  // Import universal constructs
 
 options {
-    tokenVocab = FORTRAN1957Lexer;
+    tokenVocab = FORTRANLexer;
 }
 
 // ====================================================================
@@ -28,7 +28,7 @@ statement
     ;
 
 label
-    : LABEL_1957
+    : LABEL
     ;
 
 // 1957 Statement types
