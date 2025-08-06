@@ -238,6 +238,7 @@ class ExtractionRunner:
             'trquery ': f'{os.path.join(bin_dir, "trquery")} ',
             'trtext ': f'{os.path.join(bin_dir, "trtext")} ',
             'trsponge ': f'{os.path.join(bin_dir, "trsponge")} ',
+            'dos2unix': os.path.join(self.target_dir, 'validation', 'tools', 'dos2unix'),
             
             # Fix path references for our RuleExtraction tool
             './extraction/bin/Debug/net8.0/RuleExtraction.exe': 

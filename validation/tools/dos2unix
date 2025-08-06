@@ -1,0 +1,13 @@
+#!/bin/bash
+# Simple dos2unix replacement - converts Windows line endings to Unix
+if [ $# -eq 0 ]; then
+    # Read from stdin, write to stdout
+    sed 's/\r$//'
+else
+    # Process files in-place
+    for file in "$@"; do
+        if [ -f "$file" ]; then
+            sed -i 's/\r$//' "$file"
+        fi
+    done
+fi
