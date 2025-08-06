@@ -29,7 +29,7 @@ Fortran 2018 (2018) - inherits from 2008
     ↓
 Fortran 2023 (2023) - inherits from 2018
     ↓
-LazyFortran (2023+) - inherits from 2023
+LazyFortran2025 (2025+) - inherits from 2023
 ```
 
 ## Module Structure
