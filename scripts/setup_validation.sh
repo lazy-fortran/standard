@@ -1,8 +1,6 @@
 #!/bin/bash
-"""
-Automated setup script for the validation infrastructure.
-Downloads kaby76/fortran tools and sets up the complete validation pipeline.
-"""
+# Automated setup script for the validation infrastructure.
+# Downloads reference Fortran grammars and sets up the validation pipeline.
 
 set -euo pipefail
 
@@ -51,18 +49,18 @@ else
     echo "✓ java found"
 fi
 
-# Download kaby76/fortran tools
+# Download reference Fortran grammars
 echo ""
-echo "Downloading kaby76/fortran tools..."
+echo "Downloading reference Fortran grammars from kaby76/fortran..."
 cd "$REPO_ROOT"
-OMP_NUM_THREADS=24 python3 validation/tools/download_kaby76.py "$REPO_ROOT"
+python3 validation/tools/download_reference_grammars.py "$REPO_ROOT"
 
 # Verify the download
-KABY76_DIR="$REPO_ROOT/validation/external/kaby76-fortran"
-if [[ -f "$KABY76_DIR/extract.sh" && -f "$KABY76_DIR/FortranLexer.g4" ]]; then
-    echo "✓ kaby76/fortran tools downloaded successfully"
+REFERENCE_DIR="$REPO_ROOT/validation/auto-generated/fortran-reference"
+if [[ -f "$REFERENCE_DIR/FortranLexer.g4" && -f "$REFERENCE_DIR/FortranParser.g4" ]]; then
+    echo "✓ Reference grammars downloaded successfully"
 else
-    echo "✗ kaby76/fortran download failed"
+    echo "✗ Reference grammar download failed"
     exit 1
 fi
 
@@ -70,7 +68,6 @@ fi
 echo ""
 echo "Setting up permissions..."
 chmod +x "$REPO_ROOT/scripts"/*.sh
-chmod +x "$KABY76_DIR/extract.sh"
 echo "✓ Permissions set"
 
 echo ""
@@ -78,11 +75,10 @@ echo "=== Setup Complete! ==="
 echo ""
 echo "Next steps:"
 echo "1. Run validation tests: ./scripts/validate_all.sh"
-echo "2. Generate reference grammars: ./scripts/generate_references.sh"
-echo "3. Compare grammars: ./scripts/compare_grammars.sh"
+echo "2. Compare grammars: ./scripts/compare_grammars.sh"
 echo ""
 echo "Key directories:"
-echo "  - validation/external/kaby76-fortran/ - Downloaded tools (NEVER COMMITTED)"
+echo "  - validation/auto-generated/fortran-reference/ - Reference grammars (NEVER COMMITTED)"
 echo "  - validation/reports/ - Validation reports (COMMITTED)"
 echo "  - handcrafted/ - Our modular grammars (COMMITTED)"
 echo ""
