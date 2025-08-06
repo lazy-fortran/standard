@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Extraction runner that uses kaby76/fortran tools to generate reference grammars.
-Wraps the kaby76 extraction process with a clean Python interface.
+Runs the complete PDF extraction pipeline to generate ANTLR4 grammars from ISO specs.
 """
 
 import os
@@ -10,10 +10,11 @@ import json
 import shutil
 from pathlib import Path
 from download_kaby76 import Kaby76Downloader
+from setup_dependencies import DependencyManager
 
 
 class ExtractionRunner:
-    """Runs kaby76/fortran extraction to generate reference grammars."""
+    """Runs kaby76/fortran extraction to generate reference grammars from PDFs."""
     
     def __init__(self, target_dir):
         """Initialize extraction runner with target directory."""
@@ -24,100 +25,259 @@ class ExtractionRunner:
             target_dir, 'validation', 'auto-generated'
         )
         
+        # Initialize dependency manager
+        self.deps_manager = DependencyManager(target_dir)
+        
         # Ensure auto-generated directory exists
         os.makedirs(self.auto_generated_dir, exist_ok=True)
     
     def verify_setup(self):
-        """Verify that kaby76 tools are properly downloaded and available."""
+        """Verify that kaby76 tools and dependencies are available."""
+        # Check kaby76 tools
         required_files = [
             os.path.join(self.kaby76_dir, 'extract.sh'),
-            os.path.join(self.kaby76_dir, 'FortranLexer.g4'),
-            os.path.join(self.kaby76_dir, 'FortranParser.g4')
+            os.path.join(self.kaby76_dir, 'extraction')
         ]
         
-        return all(os.path.exists(f) for f in required_files)
+        kaby76_ok = all(os.path.exists(f) for f in required_files)
+        
+        # Check dependencies
+        deps_ok = self.deps_manager.verify_dependencies()
+        
+        return kaby76_ok and all(deps_ok.values())
+    
+    def setup_dependencies(self):
+        """Set up all required dependencies for extraction."""
+        print("Setting up extraction dependencies...")
+        return self.deps_manager.setup_all_dependencies()
     
     def list_available_standards(self):
-        """List available Fortran standards that can be extracted."""
-        if not self.verify_setup():
-            return []
+        """List available Fortran standards that can be extracted from PDFs."""
+        standards = []
         
-        # For now, return the standards we know kaby76/fortran supports
-        # This could be enhanced to scan the repository for actual PDFs
-        standards = [
-            {
-                'name': 'Fortran 2023',
-                'file': '23-007r1.pdf',
-                'description': 'Latest Fortran standard (2023)'
+        # Check which PDFs are actually available in kaby76 repo
+        pdf_mapping = {
+            'N692.pdf': {
+                'name': 'Fortran 90',
+                'description': 'Fortran 90 standard (1990)'
             },
-            {
-                'name': 'Fortran 2018', 
-                'file': '18-007r1.pdf',
+            'N1191.pdf': {
+                'name': 'Fortran 95', 
+                'description': 'Fortran 95 standard (1995)'
+            },
+            '04-007.pdf': {
+                'name': 'Fortran 2003',
+                'description': 'Fortran 2003 standard'
+            },
+            '10-007.pdf': {
+                'name': 'Fortran 2008',
+                'description': 'Fortran 2008 standard'
+            },
+            '18-007r1.pdf': {
+                'name': 'Fortran 2018',
                 'description': 'Fortran 2018 standard'
             },
-            {
-                'name': 'Fortran 2008',
-                'file': '10-006r2.pdf', 
-                'description': 'Fortran 2008 standard'
+            '23-007r1.pdf': {
+                'name': 'Fortran 2023',
+                'description': 'Latest Fortran standard (2023)'
             }
-        ]
+        }
+        
+        for pdf_file, info in pdf_mapping.items():
+            pdf_path = os.path.join(self.kaby76_dir, pdf_file)
+            if os.path.exists(pdf_path):
+                standards.append({
+                    'name': info['name'],
+                    'file': pdf_file,
+                    'description': info['description'],
+                    'path': pdf_path
+                })
         
         return standards
     
     def extract_standard(self, standard_name):
-        """Extract a specific Fortran standard to generate reference grammar."""
+        """Extract a specific Fortran standard by running kaby76 extraction on PDF."""
         if not self.verify_setup():
+            # Try to set up dependencies first
+            setup_result = self.setup_dependencies()
+            if not setup_result.get('dotnet', {}).get('success') or not setup_result.get('tritext', {}).get('success'):
+                return {
+                    'success': False,
+                    'error': 'Dependencies not available and setup failed'
+                }
+        
+        # Find the PDF file for this standard
+        available_standards = self.list_available_standards()
+        pdf_file = None
+        for std in available_standards:
+            if std['name'] == standard_name:
+                pdf_file = std['file']
+                break
+        
+        if not pdf_file:
             return {
                 'success': False,
-                'error': 'kaby76 tools not properly set up'
+                'error': f'PDF not found for standard: {standard_name}'
             }
         
-        # Map standard name to expected output
-        standard_mapping = {
-            'Fortran 2023': 'fortran2023',
-            'Fortran 2018': 'fortran2018', 
-            'Fortran 2008': 'fortran2008'
-        }
-        
-        if standard_name not in standard_mapping:
-            return {
-                'success': False,
-                'error': f'Unknown standard: {standard_name}'
-            }
-        
-        standard_key = standard_mapping[standard_name]
+        standard_key = standard_name.lower().replace(' ', '')
         output_dir = os.path.join(self.auto_generated_dir, standard_key)
         os.makedirs(output_dir, exist_ok=True)
         
         try:
-            # Copy the base grammar files to our output directory
-            lexer_src = os.path.join(self.kaby76_dir, 'FortranLexer.g4')
-            parser_src = os.path.join(self.kaby76_dir, 'FortranParser.g4')
+            # Run the actual kaby76 extraction
+            result = self._run_kaby76_extraction(pdf_file, output_dir)
             
-            lexer_dst = os.path.join(output_dir, 'FortranLexer.g4')
-            parser_dst = os.path.join(output_dir, 'FortranParser.g4')
-            
-            shutil.copy2(lexer_src, lexer_dst)
-            shutil.copy2(parser_src, parser_dst)
-            
-            # Create a combined grammar file for easier validation
-            combined_grammar = os.path.join(output_dir, f'{standard_key}.g4')
-            self._create_combined_grammar(lexer_dst, parser_dst, combined_grammar)
-            
-            return {
-                'success': True,
-                'standard': standard_name,
-                'grammar_file': combined_grammar,
-                'lexer_file': lexer_dst,
-                'parser_file': parser_dst,
-                'output_dir': output_dir
-            }
+            if result['success']:
+                return {
+                    'success': True,
+                    'standard': standard_name,
+                    'grammar_file': result.get('combined_grammar'),
+                    'lexer_file': result.get('lexer_file'),
+                    'parser_file': result.get('parser_file'),
+                    'output_dir': output_dir,
+                    'extraction_log': result.get('log', [])
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': result.get('error', 'Extraction failed'),
+                    'extraction_log': result.get('log', [])
+                }
             
         except Exception as e:
             return {
                 'success': False,
                 'error': f'Extraction failed: {str(e)}'
             }
+    
+    def _run_kaby76_extraction(self, pdf_file, output_dir):
+        """Run the kaby76 extract.sh script on a specific PDF."""
+        pdf_path = os.path.join(self.kaby76_dir, pdf_file)
+        
+        if not os.path.exists(pdf_path):
+            return {'success': False, 'error': f'PDF file not found: {pdf_path}'}
+        
+        log = []
+        
+        try:
+            # First, patch the extract.sh script to use our tools
+            self._patch_extract_script()
+            
+            # Set up environment with our dependencies
+            env = os.environ.copy()
+            env.update(self.deps_manager.get_environment_vars())
+            
+            log.append(f"Running extraction on {pdf_file}")
+            
+            # Run the extraction script in the kaby76 directory
+            result = subprocess.run([
+                './extract.sh', pdf_file
+            ], cwd=self.kaby76_dir, env=env, capture_output=True, text=True, timeout=300)
+            
+            log.append(f"Extract script exit code: {result.returncode}")
+            if result.stdout:
+                log.extend(result.stdout.split('\n'))
+            if result.stderr:
+                log.extend([f"STDERR: {line}" for line in result.stderr.split('\n')])
+            
+            if result.returncode != 0:
+                return {
+                    'success': False,
+                    'error': f'Extract script failed with code {result.returncode}',
+                    'log': log
+                }
+            
+            # Copy generated files to our output directory
+            generated_files = self._collect_generated_files(output_dir)
+            
+            return {
+                'success': True,
+                'log': log,
+                **generated_files
+            }
+            
+        except subprocess.TimeoutExpired:
+            return {
+                'success': False,
+                'error': 'Extraction timed out after 5 minutes',
+                'log': log
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e),
+                'log': log
+            }
+    
+    def _patch_extract_script(self):
+        """Patch the kaby76 extract.sh script to use our local tools."""
+        extract_script = os.path.join(self.kaby76_dir, 'extract.sh')
+        backup_script = os.path.join(self.kaby76_dir, 'extract.sh.backup')
+        
+        # Only patch once
+        if os.path.exists(backup_script):
+            return
+        
+        # Read the original script
+        with open(extract_script, 'r') as f:
+            content = f.read()
+        
+        # Create backup
+        shutil.copy2(extract_script, backup_script)
+        
+        # Apply patches to use our tools
+        bin_dir = os.path.join(self.target_dir, 'validation', 'dependencies', 'bin')
+        dotnet_path = os.path.join(self.target_dir, 'validation', 'dependencies', 'dotnet', 'dotnet')
+        
+        patches = {
+            # Replace tool calls with our versions
+            'tritext.exe': os.path.join(bin_dir, 'tritext'),
+            'dotnet build': f'{dotnet_path} build',
+            'trparse ': f'{os.path.join(bin_dir, "trparse")} ',
+            'trquery ': f'{os.path.join(bin_dir, "trquery")} ',
+            'trtext ': f'{os.path.join(bin_dir, "trtext")} ',
+            'trsponge ': f'{os.path.join(bin_dir, "trsponge")} ',
+            
+            # Fix path references for our RuleExtraction tool
+            './extraction/bin/Debug/net8.0/RuleExtraction.exe': 
+                f'{dotnet_path} ./extraction/bin/Debug/net8.0/RuleExtraction.dll'
+        }
+        
+        # Apply all patches
+        patched_content = content
+        for old, new in patches.items():
+            patched_content = patched_content.replace(old, new)
+        
+        # Write the patched script
+        with open(extract_script, 'w') as f:
+            f.write(patched_content)
+    
+    def _collect_generated_files(self, output_dir):
+        """Collect the generated grammar files from kaby76 directory."""
+        result = {}
+        
+        # Look for generated grammar files in kaby76 directory
+        lexer_src = os.path.join(self.kaby76_dir, 'FortranLexer.g4')
+        parser_src = os.path.join(self.kaby76_dir, 'FortranParser.g4')
+        
+        if os.path.exists(lexer_src):
+            lexer_dst = os.path.join(output_dir, 'FortranLexer.g4')
+            shutil.copy2(lexer_src, lexer_dst)
+            result['lexer_file'] = lexer_dst
+        
+        if os.path.exists(parser_src):
+            parser_dst = os.path.join(output_dir, 'FortranParser.g4')
+            shutil.copy2(parser_src, parser_dst)
+            result['parser_file'] = parser_dst
+        
+        # Create combined grammar if both files exist
+        if 'lexer_file' in result and 'parser_file' in result:
+            combined_file = os.path.join(output_dir, 'combined.g4')
+            self._create_combined_grammar(result['lexer_file'], result['parser_file'], combined_file)
+            result['combined_grammar'] = combined_file
+        
+        return result
     
     def _create_combined_grammar(self, lexer_file, parser_file, output_file):
         """Create a combined grammar file from lexer and parser."""
