@@ -1,3 +1,35 @@
+# NEVER commit auto-generated content, PDFs, or external tools
+validation/pdfs/          # ISO specification PDFs
+validation/cache/         # Processing cache
+validation/auto-generated/ # Generated reference grammars (all files)
+validation/external/    # Downloaded external tools (kaby76/fortran - all files)  
+validation/dependencies/ # Downloaded .NET SDK and tools (all files)
+*.java                    # ANTLR4 generated Java files
+*.class                   # Compiled Java
+*.tokens                  # ANTLR4 token files
+*.interp                  # ANTLR4 interpreter files
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
 # Prerequisites
 *.d
 
@@ -39,3 +71,9 @@
 
 # debug information files
 *.dwo
+
+# ALWAYS commit handcrafted grammars and validation reports
+!handcrafted/             # Our beautiful modular grammars (COMMIT)
+!validation/reports/      # Validation results (COMMIT)
+!validation/tools/        # Validation scripts (COMMIT)
+!scripts/                 # Automation scripts (COMMIT)
