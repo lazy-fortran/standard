@@ -1,9 +1,9 @@
 # NEVER commit auto-generated content, PDFs, or external tools
 validation/pdfs/          # ISO specification PDFs
 validation/cache/         # Processing cache
-validation/auto-generated/** # Generated reference grammars (all files)
-validation/external/**    # Downloaded external tools (kaby76/fortran - all files)  
-validation/dependencies/** # Downloaded .NET SDK and tools (all files)
+validation/auto-generated/ # Generated reference grammars (all files)
+validation/external/    # Downloaded external tools (kaby76/fortran - all files)  
+validation/dependencies/ # Downloaded .NET SDK and tools (all files)
 *.java                    # ANTLR4 generated Java files
 *.class                   # Compiled Java
 *.tokens                  # ANTLR4 token files
