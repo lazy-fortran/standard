@@ -4,10 +4,9 @@ validation/cache/         # Processing cache
 validation/auto-generated/ # Generated reference grammars (all files)
 validation/external/    # Downloaded external tools (kaby76/fortran - all files)  
 validation/dependencies/ # Downloaded .NET SDK and tools (all files)
-*.java                    # ANTLR4 generated Java files
-*.class                   # Compiled Java
-*.tokens                  # ANTLR4 token files
-*.interp                  # ANTLR4 interpreter files
+
+# Build directory - all generated ANTLR4 files
+build/                    # Generated parser/lexer files (all files)
 
 # Python cache files
 __pycache__/
@@ -72,8 +71,9 @@ Thumbs.db
 # debug information files
 *.dwo
 
-# ALWAYS commit handcrafted grammars and validation reports
-!handcrafted/             # Our beautiful modular grammars (COMMIT)
+# ALWAYS commit source files and validation reports
+!grammars/                # Grammar source files (.g4) (COMMIT)
+!tests/                   # All test files (COMMIT)
+!scripts/                 # Build and utility scripts (COMMIT)
 !validation/reports/      # Validation results (COMMIT)
 !validation/tools/        # Validation scripts (COMMIT)
-!scripts/                 # Automation scripts (COMMIT)
