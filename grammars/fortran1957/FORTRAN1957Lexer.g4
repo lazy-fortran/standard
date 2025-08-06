@@ -2,6 +2,8 @@
 // The first high-level programming language for scientific computation
 lexer grammar FORTRAN1957Lexer;
 
+import SharedCoreLexer;  // Import universal constructs
+
 // ====================================================================
 // FORTRAN 1957 HISTORICAL DOCUMENTATION
 // ====================================================================
@@ -18,111 +20,55 @@ lexer grammar FORTRAN1957Lexer;
 // - Arithmetic expressions with +, -, *, /, ** (yes, ** was in 1957!)
 // ====================================================================
 
-// Keywords (1957 - very limited set)
-IF       : I F ;
-GOTO     : G O T O ;
-DO       : D O ;
-END      : E N D ;
-CONTINUE : C O N T I N U E ;
-STOP     : S T O P ;
-PAUSE    : P A U S E ;        // PAUSE was in 1957
-RETURN   : R E T U R N ;
+// ====================================================================
+// FORTRAN 1957-SPECIFIC KEYWORDS (not in SharedCore)
+// ====================================================================
 
-// I/O statements (1957)
-READ     : R E A D ;
-PRINT    : P R I N T ;
-PUNCH    : P U N C H ;        // Output to punch cards
-FORMAT   : F O R M A T ;
+// Keywords unique to 1957 (not universal)
+PAUSE    : P A U S E ;        // PAUSE for operator intervention (removed in later standards)
+RETURN   : R E T U R N ;      // RETURN from functions
+
+// I/O statements specific to 1957
+PRINT    : P R I N T ;        // Line printer output
+PUNCH    : P U N C H ;        // Output to punch cards (1957 only!)
+FORMAT   : F O R M A T ;      // FORMAT statements
 
 // Declaration keywords (1957)
 DIMENSION : D I M E N S I O N ; // Array dimensions
 EQUIVALENCE : E Q U I V A L E N C E ; // Memory sharing
-FREQUENCY : F R E Q U E N C Y ; // Optimization hint (1957!)
+FREQUENCY : F R E Q U E N C Y ; // Optimization hint (unique to 1957!)
 COMMON   : C O M M O N ;       // Shared storage
 
-// Type keywords (implicit typing in 1957)
-// Variables starting with I-N were INTEGER by default
-// Variables starting with A-H, O-Z were REAL by default
-// No explicit type declarations in 1957!
+// Note: All basic keywords (IF, GOTO, DO, END, CONTINUE, STOP, READ, WRITE)
+// are inherited from SharedCoreLexer
 
-// Subprogram support (1957 - very basic)
-// Note: FUNCTION was not a keyword in 1957 - functions were implicit
+// Note: All operators (+, -, *, /, **, =) are inherited from SharedCoreLexer
 
-// Arithmetic operators
-ASSIGN   : '=' ;
-PLUS     : '+' ;
-MINUS    : '-' ;
-MULTIPLY : '*' ;
-DIVIDE   : '/' ;
-POWER    : '**' ;  // Yes, ** was in FORTRAN 1957!
+// Note: All delimiters (parentheses, comma) are inherited from SharedCoreLexer
 
-// Relational operators (1957 style - no dots!)
-// In 1957, relational operators were written without dots in arithmetic IF
+// ====================================================================
+// FORTRAN 1957-SPECIFIC TOKENS
+// ====================================================================
 
-// Delimiters
-LPAREN   : '(' ;
-RPAREN   : ')' ;
-COMMA    : ',' ;
+// Note: INTEGER_LITERAL and REAL_LITERAL inherited from SharedCore
 
-// Literals
-fragment DIGIT : [0-9] ;
-fragment LETTER : [A-Z] ;  // Only uppercase in 1957
+// Identifiers in 1957 had stricter rules:
+// - Maximum 6 characters (override SharedCore's unlimited length)
+// - No underscores allowed (SharedCore allows them)
+// This would need special handling in the parser
 
-INTEGER_LITERAL : DIGIT+ ;
-
-// Fixed-point constants with optional scale factor
-REAL_LITERAL 
-    : DIGIT+ '.' DIGIT*
-    | DIGIT+ ('E' [+-]? DIGIT+)  // E notation was in 1957
-    | DIGIT+ '.' DIGIT* ('E' [+-]? DIGIT+)
-    ;
-
-// Identifiers (1957 rules)
-// - Up to 6 characters
-// - Start with letter
-// - Letters and digits only (no underscore in 1957!)
-IDENTIFIER : LETTER (LETTER | DIGIT)* {getText().length() <= 6}? ;
-
-// Statement labels (1957)
-LABEL : DIGIT DIGIT? DIGIT? DIGIT? DIGIT? ; // 1-5 digits
+// Statement labels (1957 - more restrictive than later standards)
+LABEL_1957 : [1-9] [0-9]? [0-9]? [0-9]? [0-9]? ; // 1-5 digits, can't start with 0
 
 // Hollerith constants (string literals in 1957)
 // Format: nHtext where n is the number of characters
-HOLLERITH : DIGIT+ H .+? {
-    // Complex validation would go here
-    // The number must match the character count
-};
+// Example: 5HHELLO represents the string "HELLO"
+HOLLERITH : [1-9] [0-9]* H ~[\r\n]+ ;  // Simplified - needs semantic validation
 
-fragment A : [Aa] ;
-fragment B : [Bb] ;
-fragment C : [Cc] ;
-fragment D : [Dd] ;
-fragment E : [Ee] ;
-fragment F : [Ff] ;
-fragment G : [Gg] ;
-fragment H : [Hh] ;
-fragment I : [Ii] ;
-fragment J : [Jj] ;
-fragment K : [Kk] ;
-fragment L : [Ll] ;
-fragment M : [Mm] ;
-fragment N : [Nn] ;
-fragment O : [Oo] ;
-fragment P : [Pp] ;
-fragment Q : [Qq] ;
-fragment R : [Rr] ;
-fragment S : [Ss] ;
-fragment T : [Tt] ;
-fragment U : [Uu] ;
-fragment V : [Vv] ;
-fragment W : [Ww] ;
-fragment X : [Xx] ;
-fragment Y : [Yy] ;
-fragment Z : [Zz] ;
-
-// Whitespace (spaces were significant in fixed-form!)
-WS : [ \t]+ -> skip ;
-NEWLINE : '\r'? '\n' ;
+// Fixed-form specific handling
+NEWLINE : '\r'? '\n' ;  // Newlines are significant in fixed-form
 
 // Comments in 1957 were indicated by 'C' in column 1
-// This needs special handling in fixed-form parsing
+// This requires special fixed-form parsing, not handled in lexer
+
+// Note: Case-insensitive fragments inherited from SharedCore
