@@ -63,6 +63,26 @@ pip install antlr4-python3-runtime pytest
 
 ### Building Grammars
 
+The project includes a comprehensive Makefile for building all grammars:
+
+```bash
+# Build all grammars in dependency order
+make all
+
+# Build specific standard
+make Fortran2003
+
+# Clean generated files
+make clean
+
+# Show available targets and help
+make help
+
+# Run tests after building
+make test
+```
+
+Alternative manual build (if needed):
 ```bash
 # Build SharedCore (foundation)
 ./scripts/build_grammar.sh shared_core
@@ -93,8 +113,10 @@ python tests/shared_core/test_comprehensive_validation.py
 | FORTRAN IV | 🔄 Planned | Adds LOGICAL type, logical operators |
 | FORTRAN 66 | 🔄 Planned | First ANSI standard |
 | FORTRAN 77 | 🔄 Planned | Adds CHARACTER, IF-THEN-ELSE |
-| Fortran 90 | 🔄 Planned | Free-form, modules, arrays |
-| Fortran 95-2023 | 🔄 Future | Modern features |
+| Fortran 90 | ✅ Complete | Free-form, modules, arrays |
+| Fortran 95 | ✅ Complete | Minor enhancements |
+| **Fortran 2003** | **🔶 45% Complete** | **Basic OOP working, advanced features pending** |
+| Fortran 2008-2023 | 🔄 Future | Modern features |
 | LazyFortran2025 | 🔄 Future | Type inference extensions |
 
 ## Key Features
@@ -114,6 +136,24 @@ python tests/shared_core/test_comprehensive_validation.py
 - Hollerith constants (nHtext)
 - DIMENSION, EQUIVALENCE, COMMON
 - FREQUENCY optimization hints
+
+### Fortran 2003 (45% Complete) 🔶
+**✅ Working Features:**
+- Basic object-oriented programming (types, inheritance, abstract types)
+- CLASS declarations and SELECT TYPE constructs
+- Module system with CONTAINS, INTERFACE blocks, IMPORT statements
+- VOLATILE, PROTECTED, PARAMETER attributes
+- Complete lexical analysis (100% tokens recognized)
+
+**⏳ Pending Features (Separate Issues):**
+- Type-bound procedures and method binding (Issue #22)
+- ASSOCIATE and BLOCK constructs (Issue #25)
+- Procedure pointers (Issue #23)
+- Full C interoperability (Issue #24)
+- Advanced parameterized derived types (Issue #26)
+
+**Production Ready For:**
+Basic OOP projects, module-based programs, F90/F95 migration
 
 ## Development
 
