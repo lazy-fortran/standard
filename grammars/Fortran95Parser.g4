@@ -430,6 +430,11 @@ construct_f95
     | forall_construct            // F95 addition
     ;
 
+// F95 DO construct (inherits from F90 with minor enhancements)
+do_construct_f95
+    : do_construct_f90            // Inherit F90 DO construct
+    ;
+
 // F95 assignment statements
 assignment_stmt_f95
     : variable_f95 ASSIGN expr_f95
