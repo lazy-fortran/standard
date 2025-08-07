@@ -192,6 +192,7 @@ derived_type_def_f2003
 // F2003 enhanced type statement with OOP attributes  
 derived_type_stmt_f2003
     : TYPE (COMMA type_attr_spec_list)? DOUBLE_COLON type_name (LPAREN type_param_name_list RPAREN)?
+    | TYPE DOUBLE_COLON type_name (LPAREN type_param_name_list RPAREN)?
     ;
 
 // F2003 end type statement 
@@ -244,7 +245,9 @@ type_bound_proc_binding
 // Type-bound procedure statement  
 type_bound_procedure_stmt
     : PROCEDURE (LPAREN IDENTIFIER RPAREN)?
-      (COMMA proc_attr_spec_list)? DOUBLE_COLON?
+      (COMMA proc_attr_spec_list)? DOUBLE_COLON
+      proc_binding_list NEWLINE
+    | PROCEDURE (COMMA proc_attr_spec_list)? COLON COLON
       proc_binding_list NEWLINE
     ;
 

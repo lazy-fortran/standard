@@ -67,6 +67,9 @@ PROTECTED        : P R O T E C T E D ;
 // Generic type-bound procedures (NEW in F2003)
 GENERIC          : G E N E R I C ;
 
+// Override F90 keywords that conflict with FIXED_FORM_COMMENT
+CONTAINS         : C O N T A I N S ;
+
 // ============================================================================
 // CASE-INSENSITIVE FRAGMENTS
 // ============================================================================
