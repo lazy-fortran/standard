@@ -237,7 +237,7 @@ NONE            : ('n'|'N') ('o'|'O') ('n'|'N') ('e'|'E') ;
 
 // Whitespace and newlines
 WHITESPACE : [ \t]+ -> skip ;
-NEWLINE    : [\r\n]+ -> skip ;
+NEWLINE    : [\r\n]+ ;
 
 // Whitespace fragment for compound tokens
 fragment WS : [ \t]+ ;
