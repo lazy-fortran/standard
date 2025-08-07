@@ -63,6 +63,15 @@ if [ "$GRAMMAR_NAME" != "shared_core" ]; then
         Fortran90)
             IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN77"
             ;;
+        fortran_90)
+            # F90 unified - no additional imports beyond shared_core
+            ;;
+        fortran_95)
+            IMPORT_PATH="$IMPORT_PATH -lib $PROJECT_ROOT/grammars/fortran_90"
+            ;;
+        fortran_2003)
+            IMPORT_PATH="$IMPORT_PATH -lib $PROJECT_ROOT/grammars/fortran_90 -lib $PROJECT_ROOT/grammars/fortran_95"
+            ;;
     esac
 fi
 
@@ -70,6 +79,7 @@ fi
 LEXER_FILE=$(find "$GRAMMAR_DIR" -name "*Lexer.g4" | head -1)
 if [ -n "$LEXER_FILE" ]; then
     echo "Generating lexer from $(basename "$LEXER_FILE")..."
+    cd "$PROJECT_ROOT"  # Ensure correct working directory for imports
     antlr4 -Dlanguage=Python3 -o "$BUILD_DIR" $IMPORT_PATH "$LEXER_FILE"
 fi
 
@@ -77,6 +87,7 @@ fi
 PARSER_FILE=$(find "$GRAMMAR_DIR" -name "*Parser.g4" | head -1)
 if [ -n "$PARSER_FILE" ]; then
     echo "Generating parser from $(basename "$PARSER_FILE")..."
+    cd "$PROJECT_ROOT"  # Ensure correct working directory for imports
     antlr4 -Dlanguage=Python3 -o "$BUILD_DIR" $IMPORT_PATH "$PARSER_FILE"
 fi
 
