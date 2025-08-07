@@ -110,8 +110,11 @@ IDENTIFIER      : LETTER (LETTER | DIGIT | '_')* ;
 // ============================================================================
 // WHITESPACE AND COMMENTS: Basic handling
 // ============================================================================
-// Skip whitespace (tabs, spaces, newlines)
-WS : [ \t\r\n]+ -> skip ;
+// Skip whitespace (tabs, spaces only - newlines handled separately)
+WS : [ \t]+ -> skip ;
+
+// Newlines are significant in Fortran (statement terminators)
+NEWLINE : [\r\n]+ ;
 
 // Comments: Only handle ! style to avoid conflicts with C identifiers
 // Column 1 'C' comments will be handled in format-specific lexers
