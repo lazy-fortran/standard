@@ -37,20 +37,19 @@ EQUIVALENCE  : E Q U I V A L E N C E ; // Memory sharing
 FORMAT       : F O R M A T ;         // I/O formatting
 COMMON       : C O M M O N ;         // Shared variable storage
 
-// Procedural Programming (FORTRAN I, 1957)
-// Note: FORTRAN I had user-defined subroutines but monolithic compilation
-CALL         : C A L L ;             // Subroutine call
-SUBROUTINE   : S U B R O U T I N E ;   // Subroutine definition
-FUNCTION     : F U N C T I O N ;     // Function definition  
-RETURN       : R E T U R N ;         // Return from subprogram
+// Statement Functions (FORTRAN I, 1957)
+// Note: FORTRAN I only had statement functions (names ending in F)
+// Full subroutines with CALL/SUBROUTINE/FUNCTION/RETURN came in FORTRAN II (1958)
 
 // Program Control (FORTRAN I, 1957)  
 PAUSE        : P A U S E ;           // Operator intervention
 FREQUENCY    : F R E Q U E N C Y ;   // Optimization hint (1957 only)
+ASSIGN       : A S S I G N ;         // Assign label to variable (assigned GOTO)
 
 // Data Types (FORTRAN I, 1957)
 INTEGER      : I N T E G E R ;
 REAL         : R E A L ;
+IMPLICIT     : I M P L I C I T ;    // Implicit typing rules (I-N integer, else real)
 
 // NOTE: FORTRAN I (1957) included user-defined subroutines/functions:
 // - SUBROUTINE: Present in FORTRAN I (1957) - monolithic compilation
@@ -71,7 +70,7 @@ REAL         : R E A L ;
 // ============================================================================
 // OPERATORS: Arithmetic (Universal since 1957)
 // ============================================================================
-ASSIGN       : '=' ;
+EQUALS       : '=' ;  // Assignment operator
 PLUS         : '+' ;
 MINUS        : '-' ;
 MULTIPLY     : '*' ;
