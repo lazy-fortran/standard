@@ -2,7 +2,7 @@
 // Revolutionary Modern Foundation with Complete Format Compatibility
 lexer grammar Fortran90Lexer;
 
-import Fortran77Lexer;  // Inherit F77 (1977) constructs
+import FORTRAN77Lexer;  // Inherit F77 (1977) constructs
 
 // ====================================================================
 // FORTRAN 90 UNIFIED LEXER OVERVIEW
@@ -231,9 +231,7 @@ SEMICOLON : ';' ;
 // F90-specific tokens (not in earlier standards)
 // Note: DOUBLE, PRECISION, COMPLEX inherited from FORTRAN IV (1962)
 // Note: SAVE, CONCAT inherited from FORTRAN 77 (1977)
-
-EQUIVALENCE     : ('e'|'E') ('q'|'Q') ('u'|'U') ('i'|'I') ('v'|'V') ('a'|'A') ('l'|'L') ('e'|'E') ('n'|'N') ('c'|'C') ('e'|'E') ;
-DIMENSION       : ('d'|'D') ('i'|'I') ('m'|'M') ('e'|'E') ('n'|'N') ('s'|'S') ('i'|'I') ('o'|'O') ('n'|'N') ;
+// Note: EQUIVALENCE, DIMENSION inherited from SharedCoreLexer (FORTRAN I, 1957)
 IMPLICIT        : ('i'|'I') ('m'|'M') ('p'|'P') ('l'|'L') ('i'|'I') ('c'|'C') ('i'|'I') ('t'|'T') ;
 NONE            : ('n'|'N') ('o'|'O') ('n'|'N') ('e'|'E') ;
 

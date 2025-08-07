@@ -1,8 +1,8 @@
-// FORTRAN (1957) + FORTRAN II (1958) - Foundation Standards
-// First high-level language + procedural programming support  
-lexer grammar FORTRANLexer;
+// FORTRAN II (1958) - Procedural Programming Revolution
+// Adds user-written subroutines and functions to FORTRAN I (1957)
+lexer grammar FORTRANIILexer;
 
-import SharedCoreLexer;  // Import 1957 constructs
+import SharedCoreLexer;  // Import FORTRAN I (1957) constructs
 
 // ====================================================================
 // FORTRAN 1957 HISTORICAL DOCUMENTATION [COMPREHENSIVE STUB]
@@ -78,14 +78,8 @@ COMMON       : C O M M O N ;
 
 // HISTORICAL KEYWORDS UNIQUE TO 1957 (not in SharedCore)
 //
-// Additional FORTRAN (1957) + FORTRAN II (1958) specific keywords
-PAUSE       : P A U S E ;       // Operator intervention (1957)
-PRINT       : P R I N T ;       // Line printer output (1957) 
-PUNCH       : P U N C H ;       // Card punch output (1957)
-FORMAT      : F O R M A T ;     // Format specifications (1957)
-DIMENSION   : D I M E N S I O N ; // Array declarations (1957)
-EQUIVALENCE : E Q U I V A L E N C E ; // Memory sharing (1957)
-FREQUENCY   : F R E Q U E N C Y ; // Optimization hint (1957 only)
+// Note: FORTRAN I (1957) features now inherited from SharedCoreLexer:
+// PAUSE, PRINT, PUNCH, FORMAT, DIMENSION, EQUIVALENCE, FREQUENCY
 
 // Note: Core keywords inherited from SharedCoreLexer:
 //       IF, GOTO, DO, END, CONTINUE, STOP, READ, WRITE, INTEGER, REAL

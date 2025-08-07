@@ -1,8 +1,8 @@
 // FORTRAN IV (1962) - Data Type Revolution
 // Added LOGICAL and DOUBLE PRECISION data types
-lexer grammar FortranIVLexer;
+lexer grammar FORTRANIVLexer;
 
-import FORTRANLexer;  // Import FORTRAN II (1958) constructs
+import FORTRANIILexer;  // Import FORTRAN II (1958) constructs
 
 // ====================================================================
 // FORTRAN IV (1962) HISTORICAL OVERVIEW
