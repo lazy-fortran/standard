@@ -1,8 +1,8 @@
-// FORTRAN 1957 HISTORICAL STUB - Original IBM 704 Language
-// HISTORICAL DOCUMENTATION STUB - Compiles but provides minimal functionality
+// FORTRAN (1957) + FORTRAN II (1958) - Foundation Standards
+// First high-level language + procedural programming support  
 lexer grammar FORTRANLexer;
 
-import SharedCoreLexer;  // Import universal constructs
+import SharedCoreLexer;  // Import 1957 constructs
 
 // ====================================================================
 // FORTRAN 1957 HISTORICAL DOCUMENTATION [COMPREHENSIVE STUB]
@@ -46,54 +46,46 @@ import SharedCoreLexer;  // Import universal constructs
 // ====================================================================
 
 // ====================================================================
-// FORTRAN 1957-SPECIFIC TOKENS [DOCUMENTED STUB]
+// FORTRAN II (1958) FEATURES - Procedural Programming Revolution
 // ====================================================================
+//
+// FORTRAN II (1958) introduced:
+// - CALL statement for subroutine calls
+// - SUBROUTINE statement for defining subroutines  
+// - FUNCTION statement for defining functions
+// - RETURN statement for returning from procedures
+// - COMMON statement for shared variables between procedures
+// - END statement enhanced for procedures
+//
+// This was revolutionary: moved from monolithic programs to modular code!
+
+// Procedural programming keywords (added in FORTRAN II, 1958)
+CALL         : C A L L ;
+SUBROUTINE   : S U B R O U T I N E ;
+FUNCTION     : F U N C T I O N ;
+RETURN       : R E T U R N ;
+COMMON       : C O M M O N ;
+
+// ====================================================================
+// FORTRAN 1957 ORIGINAL FEATURES (via SharedCoreLexer)
+// ====================================================================
+// The following are inherited from SharedCoreLexer:
+// - IF, GOTO, DO, END, CONTINUE, STOP (control flow)
+// - READ, WRITE (I/O operations)  
+// - INTEGER, REAL (data types)
+// - Arithmetic operators: +, -, *, /, **
+// - Comparison operators, delimiters, literals
 
 // HISTORICAL KEYWORDS UNIQUE TO 1957 (not in SharedCore)
 //
-// PAUSE - For operator intervention (removed in later FORTRAN versions)
-//         Used to halt program execution and wait for operator action
-//         Example: PAUSE 1234 (displays code 1234 and waits)
-PAUSE : P A U S E ;
-
-// RETURN - Return from functions and subroutines
-//          Essential for subprogram control flow
-RETURN : R E T U R N ;
-
-// PRINT - Line printer output (1957 primary output device)
-//         Example: PRINT 100, A, B, C (format 100, variables A, B, C)
-PRINT : P R I N T ;
-
-// PUNCH - Output to punch cards (1957 data storage method)
-//         Example: PUNCH 200, X, Y (punch variables X, Y with format 200)
-//         This was how programs created data files in 1957!
-PUNCH : P U N C H ;
-
-// FORMAT - Format specifications for I/O operations
-//          Example: 100 FORMAT (I5, F10.2, E15.6)
-//          Revolutionary feature allowing formatted input/output
-FORMAT : F O R M A T ;
-
-// DIMENSION - Array dimension declarations
-//             Example: DIMENSION A(100), B(10,20)
-//             Arrays were revolutionary in 1957 high-level languages
-DIMENSION : D I M E N S I O N ;
-
-// EQUIVALENCE - Memory sharing between variables
-//               Example: EQUIVALENCE (A, B(1)), (C, D(5))
-//               Used to overlay variables in memory (memory was precious!)
-EQUIVALENCE : E Q U I V A L E N C E ;
-
-// FREQUENCY - Optimization hint unique to 1957 FORTRAN
-//             Example: FREQUENCY 10 (25, 3, 1)
-//             Told compiler how often statement 10 executed for optimization
-//             This feature was removed in later FORTRAN versions
-FREQUENCY : F R E Q U E N C Y ;
-
-// COMMON - Shared storage between program units
-//          Example: COMMON A, B, C
-//          Essential for sharing data between main program and subprograms
-COMMON : C O M M O N ;
+// Additional FORTRAN (1957) + FORTRAN II (1958) specific keywords
+PAUSE       : P A U S E ;       // Operator intervention (1957)
+PRINT       : P R I N T ;       // Line printer output (1957) 
+PUNCH       : P U N C H ;       // Card punch output (1957)
+FORMAT      : F O R M A T ;     // Format specifications (1957)
+DIMENSION   : D I M E N S I O N ; // Array declarations (1957)
+EQUIVALENCE : E Q U I V A L E N C E ; // Memory sharing (1957)
+FREQUENCY   : F R E Q U E N C Y ; // Optimization hint (1957 only)
 
 // Note: Core keywords inherited from SharedCoreLexer:
 //       IF, GOTO, DO, END, CONTINUE, STOP, READ, WRITE, INTEGER, REAL
