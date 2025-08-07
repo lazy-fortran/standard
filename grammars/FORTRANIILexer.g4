@@ -2,7 +2,7 @@
 // Adds user-written subroutines and functions to FORTRAN I (1957)
 lexer grammar FORTRANIILexer;
 
-import SharedCoreLexer;  // Import FORTRAN I (1957) constructs
+import FORTRANLexer;  // Import FORTRAN I (1957) constructs
 
 // ====================================================================
 // FORTRAN 1957 HISTORICAL DOCUMENTATION [COMPREHENSIVE STUB]
