@@ -111,7 +111,7 @@ executable_construct_f2003
 // Enhanced derived type definition with OOP features
 derived_type_def_f2003
     : type_attr_spec_list? TYPE (LPAREN type_param_name_list RPAREN)? 
-      (COMMA type_attr_spec_list)? COLON_COLON? type_name 
+      (COMMA type_attr_spec_list)? DOUBLE_COLON? type_name 
       (LPAREN parent_type_name RPAREN)? NEWLINE
       type_param_def_stmt_list?
       component_def_stmt_list?
@@ -136,9 +136,9 @@ component_def_stmt_list
     ;
 
 component_def_stmt
-    : INTEGER (COMMA (PUBLIC | PRIVATE))? COLON_COLON IDENTIFIER NEWLINE
-    | REAL (COMMA (PUBLIC | PRIVATE))? COLON_COLON IDENTIFIER NEWLINE
-    | CHARACTER (COMMA (PUBLIC | PRIVATE))? COLON_COLON IDENTIFIER NEWLINE
+    : INTEGER (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON IDENTIFIER NEWLINE
+    | REAL (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON IDENTIFIER NEWLINE
+    | CHARACTER (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON IDENTIFIER NEWLINE
     ;
 
 // Type-bound procedure bindings
@@ -153,7 +153,7 @@ type_bound_proc_binding
 // Type-bound procedure statement  
 type_bound_procedure_stmt
     : PROCEDURE (LPAREN IDENTIFIER RPAREN)?
-      (COMMA proc_attr_spec_list)? COLON_COLON?
+      (COMMA proc_attr_spec_list)? DOUBLE_COLON?
       IDENTIFIER (ARROW IDENTIFIER)? NEWLINE
     ;
 
@@ -168,6 +168,7 @@ proc_attr_spec
     | NOPASS
     | PASS (LPAREN IDENTIFIER RPAREN)?
     | DEFERRED
+    | POINTER    // F2003 procedure pointers
     ;
 
 // Type attribute specifications
@@ -188,7 +189,7 @@ type_param_def_stmt_list
     ;
 
 type_param_def_stmt
-    : INTEGER COMMA type_param_attr_spec COLON_COLON 
+    : INTEGER COMMA type_param_attr_spec DOUBLE_COLON 
       type_param_name_list NEWLINE
     ;
 
@@ -239,8 +240,8 @@ block_construct
 // ============================================================================
 
 procedure_declaration_stmt
-    : PROCEDURE LPAREN IDENTIFIER RPAREN 
-      (COMMA proc_attr_spec_list)? COLON_COLON 
+    : PROCEDURE LPAREN (IDENTIFIER | INTERFACE) RPAREN 
+      (COMMA proc_attr_spec_list)? DOUBLE_COLON 
       IDENTIFIER NEWLINE
     ;
 
@@ -250,7 +251,7 @@ procedure_declaration_stmt
 
 class_declaration_stmt
     : CLASS LPAREN IDENTIFIER RPAREN (COMMA attr_spec_list)? 
-      COLON_COLON IDENTIFIER NEWLINE
+      DOUBLE_COLON IDENTIFIER NEWLINE
     ;
 
 // ============================================================================
@@ -258,7 +259,7 @@ class_declaration_stmt
 // ============================================================================
 
 import_stmt
-    : IMPORT (COLON_COLON import_name_list)? NEWLINE
+    : IMPORT (DOUBLE_COLON import_name_list)? NEWLINE
     ;
 
 import_name_list
@@ -322,11 +323,11 @@ flush_spec
 // ============================================================================
 
 volatile_stmt
-    : VOLATILE COLON_COLON object_name_list NEWLINE
+    : VOLATILE DOUBLE_COLON object_name_list NEWLINE
     ;
 
 protected_stmt
-    : PROTECTED COLON_COLON object_name_list NEWLINE
+    : PROTECTED DOUBLE_COLON object_name_list NEWLINE
     ;
 
 object_name_list
@@ -360,11 +361,11 @@ declaration_construct
     ;
 
 type_declaration_stmt
-    : INTEGER (COMMA attr_spec_list)? COLON_COLON entity_decl_list NEWLINE
-    | REAL (COMMA attr_spec_list)? COLON_COLON entity_decl_list NEWLINE
-    | CHARACTER (COMMA attr_spec_list)? COLON_COLON entity_decl_list NEWLINE
+    : INTEGER (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
+    | REAL (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
+    | CHARACTER (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
     | TYPE LPAREN IDENTIFIER RPAREN (COMMA attr_spec_list)? 
-      COLON_COLON entity_decl_list NEWLINE
+      DOUBLE_COLON entity_decl_list NEWLINE
     ;
 
 attr_spec_list
