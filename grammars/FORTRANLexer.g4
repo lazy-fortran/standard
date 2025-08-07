@@ -1,48 +1,76 @@
 /*
- * SharedCoreLexer.g4
+ * FORTRANLexer.g4
  * 
- * Lexer grammar for shared FORTRAN language constructs
- * present across ALL standards from FORTRAN 1957 to LazyFortran 2023+
+ * FORTRAN I (1957) - The Original IBM 704 FORTRAN
+ * The world's first high-level programming language
  * 
- * This foundational lexer eliminates duplication and provides a single
- * source of truth for universal language elements.
+ * This lexer defines the complete FORTRAN I language as released in 1957,
+ * serving as the foundation for all subsequent FORTRAN/Fortran standards.
  */
 
-lexer grammar SharedCoreLexer;
+lexer grammar FORTRANLexer;
 
+// ============================================================================  
+// FORTRAN I (1957) ORIGINAL FEATURES - IBM 704
 // ============================================================================
-// KEYWORDS: Present in ALL FORTRAN/Fortran versions (1957-2023)
-// ============================================================================
-// These tokens have remained consistent across the entire evolution
-// and form the core of every FORTRAN variant ever created
+// Based on historical research: FORTRAN I had user-defined subroutines and
+// functions, but required monolithic compilation (no separate compilation).
+// FORTRAN II (1958) added independent compilation of subroutines.
 
-// Control Flow (Universal since 1957)
-IF           : I F ;
-GOTO         : G O T O ; 
-DO           : D O ;
-END          : E N D ;
-CONTINUE     : C O N T I N U E ;
-STOP         : S T O P ;
+// Control Flow (FORTRAN I, 1957) 
+IF           : I F ;        // Arithmetic IF (three-way branch)
+GOTO         : G O T O ;    // Unconditional branch  
+DO           : D O ;        // DO loops with statement labels
+END          : E N D ;      // End of program
+CONTINUE     : C O N T I N U E ; // DO loop continuation
+STOP         : S T O P ;    // Program termination
 
-// I/O Operations (Universal since 1957)
-READ         : R E A D ;
-WRITE        : W R I T E ;
+// I/O Operations (FORTRAN I, 1957)
+READ         : R E A D ;    // Input from cards/tape
+WRITE        : W R I T E ;  // Output (same as PRINT)
+PRINT        : P R I N T ;  // Line printer output
+PUNCH        : P U N C H ;  // Card punch output
 
-// Subroutine calls (Universal since FORTRAN II, ~1958)
-CALL         : C A L L ;
+// Array and Memory (FORTRAN I, 1957)
+DIMENSION    : D I M E N S I O N ;    // Array declarations
+EQUIVALENCE  : E Q U I V A L E N C E ; // Memory sharing
+FORMAT       : F O R M A T ;         // I/O formatting
+COMMON       : C O M M O N ;         // Shared variable storage
 
-// ============================================================================
-// DATA TYPES: Universal subset present from earliest standards
-// ============================================================================
+// Statement Functions (FORTRAN I, 1957)
+// Note: FORTRAN I only had statement functions (names ending in F)
+// Full subroutines with CALL/SUBROUTINE/FUNCTION/RETURN came in FORTRAN II (1958)
+
+// Program Control (FORTRAN I, 1957)  
+PAUSE        : P A U S E ;           // Operator intervention
+FREQUENCY    : F R E Q U E N C Y ;   // Optimization hint (1957 only)
+ASSIGN       : A S S I G N ;         // Assign label to variable (assigned GOTO)
+
+// Data Types (FORTRAN I, 1957)
 INTEGER      : I N T E G E R ;
 REAL         : R E A L ;
-// Note: CHARACTER added in F77+, LOGICAL added in F77+
-// These will be handled in format-specific extensions
+IMPLICIT     : I M P L I C I T ;    // Implicit typing rules (I-N integer, else real)
+
+// NOTE: FORTRAN I (1957) included user-defined subroutines/functions:
+// - SUBROUTINE: Present in FORTRAN I (1957) - monolithic compilation
+// - FUNCTION: Present in FORTRAN I (1957) - monolithic compilation  
+// - CALL: Present in FORTRAN I (1957) - subroutine calls
+// - RETURN: Present in FORTRAN I (1957) - return from subprograms
+//
+// Keywords added later:
+// - PROGRAM: Added in FORTRAN 77 (1977) 
+// - CHARACTER: Added in FORTRAN 77 (1977)
+// - LOGICAL: Added in FORTRAN IV (1962)
+// - PARAMETER: Added in FORTRAN 77 (1977)
+// - THEN/ELSE: Added in FORTRAN 77 (1977)
+//
+// This grammar defines FORTRAN I (1957) as the foundation for all 
+// subsequent FORTRAN/Fortran standards through inheritance.
 
 // ============================================================================
 // OPERATORS: Arithmetic (Universal since 1957)
 // ============================================================================
-ASSIGN       : '=' ;
+EQUALS       : '=' ;  // Assignment operator
 PLUS         : '+' ;
 MINUS        : '-' ;
 MULTIPLY     : '*' ;
