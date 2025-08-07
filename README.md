@@ -63,6 +63,26 @@ pip install antlr4-python3-runtime pytest
 
 ### Building Grammars
 
+The project includes a comprehensive Makefile for building all grammars:
+
+```bash
+# Build all grammars in dependency order
+make all
+
+# Build specific standard
+make Fortran2003
+
+# Clean generated files
+make clean
+
+# Show available targets and help
+make help
+
+# Run tests after building
+make test
+```
+
+Alternative manual build (if needed):
 ```bash
 # Build SharedCore (foundation)
 ./scripts/build_grammar.sh shared_core
