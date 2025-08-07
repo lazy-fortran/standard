@@ -1,17 +1,17 @@
 /*
- * SharedCoreParser.g4
+ * FORTRANParser.g4
  * 
- * Parser grammar for shared FORTRAN language constructs
- * present across ALL standards from FORTRAN 1957 to LazyFortran 2023+
+ * FORTRAN I (1957) - The Original IBM 704 FORTRAN Parser
+ * The world's first high-level programming language
  * 
- * This foundational parser defines universal syntax patterns that
- * have remained consistent across the entire FORTRAN evolution.
+ * This parser defines the complete FORTRAN I language as released in 1957,
+ * serving as the foundation for all subsequent FORTRAN/Fortran standards.
  */
 
-parser grammar SharedCoreParser;
+parser grammar FORTRANParser;
 
 options {
-    tokenVocab = SharedCoreLexer;
+    tokenVocab = FORTRANLexer;
 }
 
 // ============================================================================
@@ -42,7 +42,6 @@ statement_body
     | do_stmt_basic
     | read_stmt_basic
     | write_stmt_basic
-    | call_stmt
     | CONTINUE
     | STOP
     | END
@@ -50,7 +49,7 @@ statement_body
 
 // Assignment statement (universal since 1957)
 assignment_stmt
-    : variable ASSIGN expr
+    : variable EQUALS expr
     ;
 
 // GOTO statement (universal since 1957)
@@ -68,7 +67,7 @@ if_stmt_arithmetic
 // Basic DO loop (1957 form)
 // DO label variable = expr, expr [, expr]
 do_stmt_basic
-    : DO label variable ASSIGN expr COMMA expr (COMMA expr)?
+    : DO label variable EQUALS expr COMMA expr (COMMA expr)?
     ;
 
 // Basic I/O statements (simplified universal forms)
@@ -80,10 +79,6 @@ write_stmt_basic
     : WRITE output_list
     ;
 
-// CALL statement (universal since FORTRAN II, ~1958)
-call_stmt
-    : CALL IDENTIFIER (LPAREN expr_list RPAREN)?
-    ;
 
 // ============================================================================
 // EXPRESSIONS: Proper precedence hierarchy (FORTRAN operator precedence)
