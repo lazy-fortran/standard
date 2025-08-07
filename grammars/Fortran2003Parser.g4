@@ -70,7 +70,7 @@ internal_subprogram_part_f2003
 
 // Enhanced specification part for F2003
 specification_part_f2003
-    : (use_stmt | import_stmt | declaration_construct_f2003)*
+    : (use_stmt | import_stmt | implicit_stmt | declaration_construct_f2003)*
     ;
 
 // Enhanced declaration construct for F2003
@@ -110,9 +110,8 @@ executable_construct_f2003
 
 // Enhanced derived type definition with OOP features
 derived_type_def_f2003
-    : type_attr_spec_list? TYPE (LPAREN type_param_name_list RPAREN)? 
-      (COMMA type_attr_spec_list)? DOUBLE_COLON? type_name 
-      (LPAREN parent_type_name RPAREN)? NEWLINE
+    : TYPE (COMMA type_attr_spec_list)? (LPAREN type_param_name_list RPAREN)? 
+      DOUBLE_COLON? type_name NEWLINE
       type_param_def_stmt_list?
       component_def_stmt_list?
       type_bound_procedure_part?
@@ -180,6 +179,7 @@ type_attr_spec
     : PUBLIC
     | PRIVATE
     | ABSTRACT
+    | EXTENDS LPAREN IDENTIFIER RPAREN
     | BIND LPAREN C RPAREN
     ;
 
@@ -345,6 +345,36 @@ specification_part
 use_stmt
     : USE IDENTIFIER NEWLINE
     | USE IDENTIFIER COMMA ONLY COLON only_list NEWLINE
+    ;
+
+implicit_stmt
+    : IMPLICIT NONE NEWLINE
+    | IMPLICIT implicit_spec_list NEWLINE
+    ;
+
+implicit_spec_list
+    : implicit_spec (COMMA implicit_spec)*
+    ;
+
+implicit_spec
+    : type_spec LPAREN letter_spec_list RPAREN
+    ;
+
+type_spec
+    : INTEGER
+    | REAL
+    | COMPLEX
+    | CHARACTER
+    | LOGICAL
+    ;
+
+letter_spec_list
+    : letter_spec (COMMA letter_spec)*
+    ;
+
+letter_spec
+    : IDENTIFIER
+    | IDENTIFIER MINUS IDENTIFIER
     ;
 
 only_list
