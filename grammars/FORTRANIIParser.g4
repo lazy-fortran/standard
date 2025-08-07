@@ -1,5 +1,5 @@
 // FORTRAN II (1958) - Parser for Procedural Programming Revolution
-// Adds user-written subroutines and functions to FORTRAN I (1957)
+// Introduces separately compiled subroutines and functions
 parser grammar FORTRANIIParser;
 
 import FORTRANParser;  // Import FORTRAN I (1957) constructs
@@ -9,45 +9,8 @@ options {
 }
 
 // ====================================================================
-// FORTRAN 1957 HISTORICAL GRAMMAR DOCUMENTATION [COMPREHENSIVE STUB]
+// FORTRAN II (1958) NEW PARSER RULES
 // ====================================================================
-//
-// This is a HISTORICAL STUB documenting the original 1957 FORTRAN grammar
-// structure as implemented for IBM 704 computers.
-//
-// HISTORICAL CONTEXT (1957):
-// The original FORTRAN compiler was a revolutionary achievement that:
-// - Translated mathematical formulas into efficient machine code
-// - Proved high-level languages could match hand-coded assembly efficiency
-// - Required 18 person-years to develop (1954-1957)
-// - Fit in 32K of IBM 704 memory (including runtime system!)
-// - Produced optimized code that often exceeded human assembly programmers
-//
-// PROGRAM STRUCTURE (1957 - No modules, no procedures):
-// - Main program: Simple sequence of statements with optional labels
-// - No PROGRAM statement: Programs started with first executable statement
-// - No separate compilation: Entire program compiled as single unit
-// - Subprograms: FUNCTION definitions embedded within main program
-// - Memory layout: Single address space, no stack, limited recursion
-//
-// CONTROL FLOW PHILOSOPHY (1957):
-// - Statement labels: Primary control flow mechanism (1-99999)
-// - GOTO statements: Unrestricted jumping to any labeled statement
-// - Arithmetic IF: Three-way branching based on expression sign
-// - DO loops: Counted iteration with mandatory labels for termination
-// - No structured programming: GOTO-based spaghetti code was normal!
-//
-// DATA MODEL (1957):
-// - Variables: Maximum 6 characters, no declarations required (implicit typing)
-// - Arrays: Multi-dimensional with compile-time bounds only
-// - Types: INTEGER and REAL only (no CHARACTER, LOGICAL, COMPLEX)
-// - Memory: All variables global, COMMON for sharing, EQUIVALENCE for overlaying
-// - Constants: Numeric literals and Hollerith strings (nHcharacters)
-//
-// I/O PHILOSOPHY (1957):
-// - Devices: Punch cards (input), line printer (output), card punch (storage)
-// - Formatting: FORMAT statements with descriptors (I, E, F, G, A, H, X)
-// - No interactive I/O: Pure batch processing environment
 // - No file system: Magnetic tapes and card decks were the "files"
 //
 // MATHEMATICAL FOCUS (1957):
@@ -59,14 +22,17 @@ options {
 // ====================================================================
 
 // ====================================================================
-// PROGRAM STRUCTURE [DOCUMENTED STUB]
+// FORTRAN II (1958) - SUBROUTINE AND FUNCTION DEFINITIONS
 // ====================================================================
 
-// FORTRAN 1957 program (no explicit PROGRAM statement in 1957)
-// Just a sequence of statements, possibly with labels
-// The first executable statement begins program execution
+// FORTRAN II program with separately compiled units
 fortran_program
-    : statement_list EOF
+    : (main_program | subroutine_subprogram | function_subprogram) EOF
+    ;
+
+// Main program (inherited from FORTRAN I)
+main_program
+    : statement_list
     ;
 
 // Statement list allowing empty lines (punch cards could be blank)
@@ -86,9 +52,30 @@ label
     : LABEL
     ;
 
-// ====================================================================
-// STATEMENT TYPES [DOCUMENTED STUB]
-// ====================================================================
+// Subroutine definition (NEW in FORTRAN II)
+subroutine_subprogram
+    : SUBROUTINE IDENTIFIER parameter_list? NEWLINE
+      statement_list
+      END
+    ;
+
+// Function definition (NEW in FORTRAN II)
+function_subprogram
+    : type_spec? FUNCTION IDENTIFIER parameter_list NEWLINE
+      statement_list
+      END
+    ;
+
+// Parameter list for subprograms
+parameter_list
+    : LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
+    ;
+
+// Type specification for functions
+type_spec
+    : INTEGER
+    | REAL
+    ;
 
 // All statement types available in 1957 FORTRAN
 // This was a remarkably small language by today's standards!
@@ -111,11 +98,14 @@ statement_body
     | common_stmt        // Global variable declarations
     | end_stmt          // End of program
     | return_stmt       // Return from subprogram
+    | call_stmt         // NEW in FORTRAN II: Call subroutine
     ;
 
-// ====================================================================
-// ASSIGNMENT AND EXPRESSIONS [DOCUMENTED STUB]
-// ====================================================================
+// CALL statement (NEW in FORTRAN II)
+call_stmt
+    : CALL IDENTIFIER (LPAREN expr_list? RPAREN)?
+    ;
+
 
 // Assignment statement (1957 revolutionary syntax!)
 // This natural mathematical notation was groundbreaking in 1957
@@ -125,9 +115,6 @@ assignment_stmt
     : variable ASSIGN expr
     ;
 
-// ====================================================================
-// CONTROL FLOW STATEMENTS [DOCUMENTED STUB]
-// ====================================================================
 
 // Unconditional GOTO (1957 primary control flow)
 // Example: GO TO 100 (jump to statement labeled 100)
@@ -157,9 +144,6 @@ do_stmt
     : DO label variable ASSIGN expr COMMA expr (COMMA expr)?
     ;
 
-// ====================================================================
-// CONTROL STATEMENTS [DOCUMENTED STUB]
-// ====================================================================
 
 // CONTINUE statement (DO loop termination and general jump target)
 continue_stmt : CONTINUE ;
@@ -173,15 +157,12 @@ stop_stmt : STOP integer_expr? ;
 // Example: PAUSE 1234 (display code 1234 and wait for operator)
 pause_stmt : PAUSE integer_expr? ;
 
-// RETURN statement (return from function or subroutine)
+// RETURN statement (NEW in FORTRAN II for separate compilation)
 return_stmt : RETURN ;
 
 // END statement (end of main program or subprogram)
 end_stmt : END ;
 
-// ====================================================================
-// INPUT/OUTPUT STATEMENTS [DOCUMENTED STUB]
-// ====================================================================
 
 // READ statement (input from punch cards or magnetic tape)
 // Example: READ 100, A, B, C (read using format 100)
@@ -204,9 +185,6 @@ punch_stmt
     : PUNCH integer_expr COMMA output_list   // PUNCH format, list
     ;
 
-// ====================================================================
-// FORMAT STATEMENTS [DOCUMENTED STUB]
-// ====================================================================
 
 // FORMAT statement (I/O formatting - revolutionary feature!)
 // Example: 100 FORMAT (I5, F10.2, E15.6, 5HHELLO)
@@ -231,9 +209,6 @@ format_descriptor
     : IDENTIFIER  // Format codes like I, E, F, G, A, H, X
     ;
 
-// ====================================================================
-// DECLARATION STATEMENTS [DOCUMENTED STUB]
-// ====================================================================
 
 // DIMENSION statement (array declarations - arrays were revolutionary!)
 // Example: DIMENSION A(100), B(10,20), C(5,5,5)
@@ -279,9 +254,6 @@ common_stmt
     : COMMON variable_list
     ;
 
-// ====================================================================
-// EXPRESSIONS AND PRIMARIES [DOCUMENTED STUB]
-// ====================================================================
 
 // Expression evaluation (1957 mathematical focus)
 // Full operator precedence with parentheses override
@@ -326,9 +298,6 @@ function_reference
     : IDENTIFIER LPAREN expr_list RPAREN
     ;
 
-// ====================================================================
-// UTILITY RULES [DOCUMENTED STUB]  
-// ====================================================================
 
 // Various lists used throughout the grammar
 label_list
