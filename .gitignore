@@ -8,6 +8,19 @@ validation/dependencies/ # Downloaded .NET SDK and tools (all files)
 # Build directory - all generated ANTLR4 files
 build/                    # Generated parser/lexer files (all files)
 
+# Generated ANTLR files in grammars directory
+grammars/*.py
+grammars/*.pyc
+grammars/*.tokens
+grammars/*.interp
+grammars/*Listener.py
+grammars/*Visitor.py
+
+# Debug and temporary files
+debug_*.py
+*.tmp
+*.bak
+
 # Python cache files
 __pycache__/
 *.py[cod]
