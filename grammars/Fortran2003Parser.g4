@@ -24,6 +24,7 @@ identifier_or_keyword
     : IDENTIFIER
     | VALUE        // VALUE can be used as an identifier when not in C-binding context
     | NAME         // NAME can be used as an identifier
+    | RESULT       // RESULT can be used as a variable name
     ;
 
 // F2003 program unit (enhanced with OOP features)
@@ -125,6 +126,7 @@ end_function_stmt_interface
 // Override interface_stmt and end_interface_stmt for NEWLINE support
 interface_stmt
     : INTERFACE (generic_spec)? NEWLINE
+    | ABSTRACT INTERFACE NEWLINE
     ;
 
 end_interface_stmt
@@ -143,13 +145,13 @@ specification_part_f2003
 
 // Enhanced declaration construct for F2003
 declaration_construct_f2003
-    : derived_type_def_f2003
-    | type_declaration_stmt         // Try this first - handles "integer, protected ::" 
-    | class_declaration_stmt
-    | procedure_declaration_stmt
+    : derived_type_def_f2003        // Try TYPE definitions first
+    | class_declaration_stmt        // CLASS declarations before TYPE variables
+    | procedure_declaration_stmt    // PROCEDURE declarations  
     | interface_block              // F90 interface blocks
     | volatile_stmt                 // Standalone "volatile :: vars"
     | protected_stmt               // Standalone "protected :: vars"
+    | type_declaration_stmt         // TYPE variables last (more specific first)
     | declaration_construct        // Inherit F95 declarations
     ;
 
@@ -173,6 +175,7 @@ executable_construct_f2003
     | if_construct
     | do_construct
     | select_case_construct
+    | type_declaration_stmt   // F2003 allows mixed declarations and executable statements
     | executable_construct    // Inherit F95 constructs
     ;
 
@@ -223,6 +226,7 @@ component_def_stmt_list
 
 component_def_stmt
     : type_declaration_stmt          // F2003 component declarations (reuse existing rule)
+    | proc_component_def_stmt        // F2003 procedure pointer components (different syntax)
     | private_sequence_stmt          // PRIVATE or SEQUENCE (inherited from F90)
     ;
 
@@ -378,7 +382,36 @@ block_construct
 procedure_declaration_stmt
     : PROCEDURE LPAREN (IDENTIFIER | INTERFACE) RPAREN 
       (COMMA proc_attr_spec_list)? DOUBLE_COLON 
-      IDENTIFIER NEWLINE
+      procedure_entity_decl_list NEWLINE
+    ;
+
+procedure_entity_decl_list
+    : IDENTIFIER (COMMA IDENTIFIER)*
+    ;
+
+// Procedure pointer components (different syntax from regular procedure declarations)
+proc_component_def_stmt
+    : PROCEDURE LPAREN (IDENTIFIER | INTERFACE) RPAREN COMMA proc_component_attr_spec_list DOUBLE_COLON proc_decl_list NEWLINE
+    ;
+
+proc_component_attr_spec_list
+    : proc_component_attr_spec (COMMA proc_component_attr_spec)*
+    ;
+
+proc_component_attr_spec
+    : PUBLIC
+    | PRIVATE
+    | NOPASS
+    | PASS (LPAREN IDENTIFIER RPAREN)?
+    | POINTER
+    ;
+
+proc_decl_list
+    : proc_decl (COMMA proc_decl)*
+    ;
+
+proc_decl
+    : IDENTIFIER (POINTER_ASSIGN IDENTIFIER)?  // proc_name [=> init_target]
     ;
 
 // ============================================================================
@@ -693,12 +726,14 @@ executable_construct
 
 // Simplified constructs (inherit complex ones from F95)
 assignment_stmt
-    : IDENTIFIER ASSIGN primary NEWLINE
-    | IDENTIFIER PERCENT IDENTIFIER ASSIGN primary NEWLINE
+    : identifier_or_keyword EQUALS primary NEWLINE
+    | identifier_or_keyword PERCENT identifier_or_keyword EQUALS primary NEWLINE
+    | identifier_or_keyword POINTER_ASSIGN primary NEWLINE                      // Procedure pointer assignment
+    | identifier_or_keyword PERCENT identifier_or_keyword POINTER_ASSIGN primary NEWLINE   // Component procedure pointer assignment
     ;
 
 call_stmt
-    : CALL IDENTIFIER (LPAREN actual_arg_list? RPAREN)? NEWLINE
+    : CALL identifier_or_keyword (LPAREN actual_arg_list? RPAREN)? NEWLINE
     ;
 
 actual_arg_list
@@ -747,8 +782,8 @@ case_value_list
 // ============================================================================
 
 primary
-    : IDENTIFIER (PERCENT IDENTIFIER)*
-    | IDENTIFIER LPAREN actual_arg_list? RPAREN
+    : identifier_or_keyword (PERCENT identifier_or_keyword)*
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN
     | intrinsic_function_call
     | INTEGER_LITERAL
     | LABEL              // Accept LABEL as integer literal (token precedence issue)
