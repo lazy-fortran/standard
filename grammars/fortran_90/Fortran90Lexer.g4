@@ -2,8 +2,7 @@
 // The bridge between 1957-1977 fixed-form FORTRAN and modern free-form Fortran
 lexer grammar Fortran90Lexer;
 
-import SharedCoreLexer;  // Universal constructs (temporary - will change to FreeFormSourceLexer when merged)
-// TODO: Change to FreeFormSourceLexer when PR #14 is merged
+import FreeFormSourceLexer;  // Revolutionary free-form source format (F90 primary)
 // import FixedFormSourceLexer; // Legacy compatibility (F77 interop) - stub for now
 
 // ====================================================================
@@ -31,41 +30,6 @@ import SharedCoreLexer;  // Universal constructs (temporary - will change to Fre
 // ====================================================================
 
 // ====================================================================
-// BASIC TOKENS (normally inherited from FreeFormSourceLexer)
-// ====================================================================
-
-// These would normally be inherited from FreeFormSourceLexer
-// TODO: Remove when switching to FreeFormSourceLexer import
-DOUBLE_COLON    : '::' ;
-POINTER_ASSIGN  : '=>' ;
-PERCENT         : '%' ;
-LBRACKET        : '[' ;
-RBRACKET        : ']' ;
-DOT_TRUE        : '.' ('t'|'T') ('r'|'R') ('u'|'U') ('e'|'E') '.' ;
-DOT_FALSE       : '.' ('f'|'F') ('a'|'A') ('l'|'L') ('s'|'S') ('e'|'E') '.' ;
-
-// Basic operators that might be missing
-EQ_OP           : '==' ;
-NE_OP           : '/=' ;
-LT_OP           : '<' ;
-LE_OP           : '<=' ;
-GT_OP           : '>' ;
-GE_OP           : '>=' ;
-
-// Additional literals
-INTEGER_LITERAL_KIND : DIGIT+ ('_' IDENTIFIER)? ;
-REAL_LITERAL_KIND    : DIGIT+ '.' DIGIT* EXPONENT? ('_' IDENTIFIER)? ;
-DOUBLE_QUOTE_STRING  : '"' (~'"' | '""')* '"' ;
-SINGLE_QUOTE_STRING  : '\'' (~'\'' | '\'\'')* '\'' ;
-
-// BOZ constants
-BINARY_CONSTANT : ('b'|'B') '\'' [01]+ '\'' ;
-OCTAL_CONSTANT  : ('o'|'O') '\'' [0-7]+ '\'' ;
-HEX_CONSTANT    : ('z'|'Z'|'x'|'X') '\'' [0-9a-fA-F]+ '\'' ;
-
-fragment EXPONENT : [eEdD] [+-]? DIGIT+ ;
-
-// ====================================================================
 // FORTRAN 90 KEYWORDS (REVOLUTIONARY FEATURES)
 // ====================================================================
 
@@ -91,16 +55,14 @@ ELEMENTAL       : ('e'|'E') ('l'|'L') ('e'|'E') ('m'|'M') ('e'|'E') ('n'|'N') ('
 RESULT          : ('r'|'R') ('e'|'E') ('s'|'S') ('u'|'U') ('l'|'L') ('t'|'T') ;
 
 // Derived types (F90 major innovation - user-defined structures)  
-TYPE            : ('t'|'T') ('y'|'Y') ('p'|'P') ('e'|'E') ;
+// Note: TYPE is inherited from FreeFormSourceLexer
 END_TYPE        : ('e'|'E') ('n'|'N') ('d'|'D') [ \t]+ ('t'|'T') ('y'|'Y') ('p'|'P') ('e'|'E') ;
 SEQUENCE        : ('s'|'S') ('e'|'E') ('q'|'Q') ('u'|'U') ('e'|'E') ('n'|'N') ('c'|'C') ('e'|'E') ;
 
 // Dynamic arrays and pointers (F90 major innovation - runtime memory management)
-ALLOCATABLE     : ('a'|'A') ('l'|'L') ('l'|'L') ('o'|'O') ('c'|'C') ('a'|'A') ('t'|'T') ('a'|'A') ('b'|'B') ('l'|'L') ('e'|'E') ;
+// Note: ALLOCATABLE, POINTER, TARGET are inherited from FreeFormSourceLexer
 ALLOCATE        : ('a'|'A') ('l'|'L') ('l'|'L') ('o'|'O') ('c'|'C') ('a'|'A') ('t'|'T') ('e'|'E') ;
 DEALLOCATE      : ('d'|'D') ('e'|'E') ('a'|'A') ('l'|'L') ('l'|'L') ('o'|'O') ('c'|'C') ('a'|'A') ('t'|'T') ('e'|'E') ;
-POINTER         : ('p'|'P') ('o'|'O') ('i'|'I') ('n'|'N') ('t'|'T') ('e'|'E') ('r'|'R') ;
-TARGET          : ('t'|'T') ('a'|'A') ('r'|'R') ('g'|'G') ('e'|'E') ('t'|'T') ;
 NULLIFY         : ('n'|'N') ('u'|'U') ('l'|'L') ('l'|'L') ('i'|'I') ('f'|'F') ('y'|'Y') ;
 ASSOCIATED      : ('a'|'A') ('s'|'S') ('s'|'S') ('o'|'O') ('c'|'C') ('i'|'I') ('a'|'A') ('t'|'T') ('e'|'E') ('d'|'D') ;
 
@@ -126,74 +88,37 @@ EOR             : ('e'|'E') ('o'|'O') ('r'|'R') ;
 IOSTAT          : ('i'|'I') ('o'|'O') ('s'|'S') ('t'|'T') ('a'|'A') ('t'|'T') ;
 
 // Intent specifications (F90 procedure interface enhancement)
-INTENT          : ('i'|'I') ('n'|'N') ('t'|'T') ('e'|'E') ('n'|'N') ('t'|'T') ;
-IN              : ('i'|'I') ('n'|'N') ;
-OUT             : ('o'|'O') ('u'|'U') ('t'|'T') ;
-INOUT           : ('i'|'I') ('n'|'N') ('o'|'O') ('u'|'U') ('t'|'T') ;
+// Note: INTENT, IN, OUT, INOUT are inherited from FreeFormSourceLexer
 
 // Optional and keyword arguments (F90 procedure enhancement)
 OPTIONAL        : ('o'|'O') ('p'|'P') ('t'|'T') ('i'|'I') ('o'|'O') ('n'|'N') ('a'|'A') ('l'|'L') ;
 PRESENT         : ('p'|'P') ('r'|'R') ('e'|'E') ('s'|'S') ('e'|'E') ('n'|'N') ('t'|'T') ;
 
 // Enhanced data types (F90 improvements)
-KIND            : ('k'|'K') ('i'|'I') ('n'|'N') ('d'|'D') ;
-LEN             : ('l'|'L') ('e'|'E') ('n'|'N') ;
+// Note: KIND and LEN are inherited from FreeFormSourceLexer
 SELECTED_INT_KIND     : ('s'|'S') ('e'|'E') ('l'|'L') ('e'|'E') ('c'|'C') ('t'|'T') ('e'|'E') ('d'|'D') '_' ('i'|'I') ('n'|'N') ('t'|'T') '_' ('k'|'K') ('i'|'I') ('n'|'N') ('d'|'D') ;
 SELECTED_REAL_KIND    : ('s'|'S') ('e'|'E') ('l'|'L') ('e'|'E') ('c'|'C') ('t'|'T') ('e'|'E') ('d'|'D') '_' ('r'|'R') ('e'|'E') ('a'|'A') ('l'|'L') '_' ('k'|'K') ('i'|'I') ('n'|'N') ('d'|'D') ;
 
-// Additional F90 keywords
+// Additional F90-specific keywords (not in FreeFormSourceLexer)
 CONTAINS        : ('c'|'C') ('o'|'O') ('n'|'N') ('t'|'T') ('a'|'A') ('i'|'I') ('n'|'N') ('s'|'S') ;
 IMPORT          : ('i'|'I') ('m'|'M') ('p'|'P') ('o'|'O') ('r'|'R') ('t'|'T') ;
 PROCEDURE       : ('p'|'P') ('r'|'R') ('o'|'O') ('c'|'C') ('e'|'E') ('d'|'D') ('u'|'U') ('r'|'R') ('e'|'E') ;
-PROGRAM         : ('p'|'P') ('r'|'R') ('o'|'O') ('g'|'G') ('r'|'R') ('a'|'A') ('m'|'M') ;
 UNIT            : ('u'|'U') ('n'|'N') ('i'|'I') ('t'|'T') ;
 FMT             : ('f'|'F') ('m'|'M') ('t'|'T') ;
 REC             : ('r'|'R') ('e'|'E') ('c'|'C') ;
 ERR             : ('e'|'E') ('r'|'R') ('r'|'R') ;
-SAVE            : ('s'|'S') ('a'|'A') ('v'|'V') ('e'|'E') ;
-DATA            : ('d'|'D') ('a'|'A') ('t'|'T') ('a'|'A') ;
-EXTERNAL        : ('e'|'E') ('x'|'X') ('t'|'T') ('e'|'E') ('r'|'R') ('n'|'N') ('a'|'A') ('l'|'L') ;
-INTRINSIC       : ('i'|'I') ('n'|'N') ('t'|'T') ('r'|'R') ('i'|'I') ('n'|'N') ('s'|'S') ('i'|'I') ('c'|'C') ;
 WHILE           : ('w'|'W') ('h'|'H') ('i'|'I') ('l'|'L') ('e'|'E') ;
 
-// Basic language constructs (normally inherited)
-ARROW           : '=' '>' ;  // For renaming in USE statements
-DOUBLE          : ('d'|'D') ('o'|'O') ('u'|'U') ('b'|'B') ('l'|'L') ('e'|'E') ;
-PRECISION       : ('p'|'P') ('r'|'R') ('e'|'E') ('c'|'C') ('i'|'I') ('s'|'S') ('i'|'I') ('o'|'O') ('n'|'N') ;
-COMPLEX         : ('c'|'C') ('o'|'O') ('m'|'M') ('p'|'P') ('l'|'L') ('e'|'E') ('x'|'X') ;
-PARAMETER       : ('p'|'P') ('a'|'A') ('r'|'R') ('a'|'A') ('m'|'M') ('e'|'E') ('t'|'T') ('e'|'E') ('r'|'R') ;
-DIMENSION       : ('d'|'D') ('i'|'I') ('m'|'M') ('e'|'E') ('n'|'N') ('s'|'S') ('i'|'I') ('o'|'O') ('n'|'N') ;
-FUNCTION        : ('f'|'F') ('u'|'U') ('n'|'N') ('c'|'C') ('t'|'T') ('i'|'I') ('o'|'O') ('n'|'N') ;
-SUBROUTINE      : ('s'|'S') ('u'|'U') ('b'|'B') ('r'|'R') ('o'|'O') ('u'|'U') ('t'|'T') ('i'|'I') ('n'|'N') ('e'|'E') ;
-COMMON          : ('c'|'C') ('o'|'O') ('m'|'M') ('m'|'M') ('o'|'O') ('n'|'N') ;
-EQUIVALENCE     : ('e'|'E') ('q'|'Q') ('u'|'U') ('i'|'I') ('v'|'V') ('a'|'A') ('l'|'L') ('e'|'E') ('n'|'N') ('c'|'C') ('e'|'E') ;
-RETURN          : ('r'|'R') ('e'|'E') ('t'|'T') ('u'|'U') ('r'|'R') ('n'|'N') ;
-THEN            : ('t'|'T') ('h'|'H') ('e'|'E') ('n'|'N') ;
-SLASH           : '/' ;
-
-// Fortran operators (normally inherited from SharedCoreLexer)
-DOT_EQ          : '.' ('e'|'E') ('q'|'Q') '.' ;
-DOT_NE          : '.' ('n'|'N') ('e'|'E') '.' ;  
-DOT_LT          : '.' ('l'|'L') ('t'|'T') '.' ;
-DOT_LE          : '.' ('l'|'L') ('e'|'E') '.' ;
-DOT_GT          : '.' ('g'|'G') ('t'|'T') '.' ;
-DOT_GE          : '.' ('g'|'G') ('e'|'E') '.' ;
-DOT_AND         : '.' ('a'|'A') ('n'|'N') ('d'|'D') '.' ;
-DOT_OR          : '.' ('o'|'O') ('r'|'R') '.' ;
-DOT_NOT         : '.' ('n'|'N') ('o'|'O') ('t'|'T') '.' ;
-DOT_EQV         : '.' ('e'|'E') ('q'|'Q') ('v'|'V') '.' ;
-DOT_NEQV        : '.' ('n'|'N') ('e'|'E') ('q'|'Q') ('v'|'V') '.' ;
-CONCAT          : '//' ;
+// F90-specific BOZ constants (not in FreeFormSourceLexer)
+BINARY_CONSTANT : ('b'|'B') '\'' [01]+ '\'' ;
+OCTAL_CONSTANT  : ('o'|'O') '\'' [0-7]+ '\'' ;
+HEX_CONSTANT    : ('z'|'Z'|'x'|'X') '\'' [0-9a-fA-F]+ '\'' ;
 
 // ====================================================================  
-// FORTRAN 90 OPERATORS (NEW AND ENHANCED)
+// FORTRAN 90 OPERATORS
 // ====================================================================
-
-// Note: Basic operators (::, =>, %, [], ==, /=, etc.) are already defined above
-// in the temporary section for SharedCoreLexer compatibility
-
-// Logical operators (F90 improvements - both .AND. and .and. styles supported)
-// Case-insensitive versions are already handled by SharedCoreLexer inheritance
+// Note: All operators (::, =>, %, [], ==, /=, etc.) are inherited from FreeFormSourceLexer
+// No F90-specific operators need to be defined here
 
 // ====================================================================
 // FORTRAN 90 INTRINSIC FUNCTIONS (MAJOR ADDITIONS)

@@ -44,41 +44,47 @@ cd "$BUILD_DIR"
 # ANTLR4 needs access to imported grammars
 IMPORT_PATH=""
 if [ "$GRAMMAR_NAME" != "shared_core" ]; then
-    IMPORT_PATH="-lib $PROJECT_ROOT/grammars/shared_core"
+    IMPORT_PATH="-lib grammars/shared_core -lib grammars/fixed_form_base -lib grammars/free_form_base"
     
     # For FORTRAN II and later, also include parent grammar
     case "$GRAMMAR_NAME" in
         FORTRAN_II)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN"
+            IMPORT_PATH="$IMPORT_PATH -lib grammars/FORTRAN"
             ;;
         FORTRAN_IV)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN_II"
+            IMPORT_PATH="$IMPORT_PATH -lib grammars/FORTRAN_II"
             ;;
         FORTRAN66)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN_IV"
+            IMPORT_PATH="$IMPORT_PATH -lib grammars/FORTRAN_IV"
             ;;
         FORTRAN77)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN66"
+            IMPORT_PATH="$IMPORT_PATH -lib grammars/FORTRAN66"
             ;;
-        Fortran90)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN77"
+        fortran_90)
+            # For dual parser architecture - build both variants
+            if [ -f "$GRAMMAR_DIR/Fortran90FreeLexer.g4" ]; then
+                echo "Building F90 free-form variant..."
+            fi
+            if [ -f "$GRAMMAR_DIR/Fortran90FixedLexer.g4" ]; then
+                echo "Building F90 fixed-form variant..."
+            fi
             ;;
     esac
 fi
 
-# Find and generate lexer
-LEXER_FILE=$(find "$GRAMMAR_DIR" -name "*Lexer.g4" | head -1)
-if [ -n "$LEXER_FILE" ]; then
+# Find and generate lexer(s)
+find "$GRAMMAR_DIR" -name "*Lexer.g4" | while read LEXER_FILE; do
     echo "Generating lexer from $(basename "$LEXER_FILE")..."
+    cd "$PROJECT_ROOT"  # Ensure we're in the right directory for imports
     antlr4 -Dlanguage=Python3 -o "$BUILD_DIR" $IMPORT_PATH "$LEXER_FILE"
-fi
+done
 
-# Find and generate parser  
-PARSER_FILE=$(find "$GRAMMAR_DIR" -name "*Parser.g4" | head -1)
-if [ -n "$PARSER_FILE" ]; then
+# Find and generate parser(s)
+find "$GRAMMAR_DIR" -name "*Parser.g4" | while read PARSER_FILE; do
     echo "Generating parser from $(basename "$PARSER_FILE")..."
+    cd "$PROJECT_ROOT"  # Ensure we're in the right directory for imports  
     antlr4 -Dlanguage=Python3 -o "$BUILD_DIR" $IMPORT_PATH "$PARSER_FILE"
-fi
+done
 
 echo "Grammar build completed successfully!"
 echo ""

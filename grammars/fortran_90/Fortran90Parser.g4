@@ -2,8 +2,7 @@
 // The bridge between 1957-1977 fixed-form FORTRAN and modern free-form Fortran
 parser grammar Fortran90Parser;
 
-import SharedCoreParser;  // Universal constructs (temporary - will change to FreeFormSourceParser when merged) 
-// TODO: Change to FreeFormSourceParser when PR #14 is merged
+import FreeFormSourceParser;  // Revolutionary free-form parsing rules
 // import FixedFormSourceParser; // Legacy compatibility (F77 interop) - stub for now
 
 options {
@@ -887,29 +886,6 @@ end_subroutine_stmt
 function_reference_f90
     : IDENTIFIER LPAREN actual_arg_spec_list? RPAREN
     ;
-
-// ====================================================================
-// MISSING RULES (normally inherited from FreeFormSourceParser/SharedCoreParser)  
-// ====================================================================
-
-// TODO: Remove these stubs when switching to proper inheritance
-procedure_stmt : PROCEDURE ;
-parameter_stmt : PARAMETER ;
-data_stmt : DATA ;
-common_stmt : COMMON ;
-equivalence_stmt : EQUIVALENCE ;
-dimension_stmt : DIMENSION ;
-save_stmt : SAVE ;
-external_stmt : EXTERNAL ;
-intrinsic_stmt : INTRINSIC ;
-return_stmt : RETURN ;
-stop_stmt : STOP ;
-arithmetic_if_stmt : IF LPAREN expr_f90 RPAREN label COMMA label COMMA label ;
-continue_stmt : CONTINUE ;
-if_construct : if_construct_stmt execution_part? end_if_stmt ;
-if_construct_stmt : IF LPAREN expr_f90 RPAREN THEN ;
-end_if_stmt : END IF ;
-goto_stmt : GOTO label ;
 
 // ====================================================================
 // UTILITY RULES AND COMPATIBILITY
