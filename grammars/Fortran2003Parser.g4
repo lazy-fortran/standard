@@ -111,11 +111,11 @@ executable_construct_f2003
 // Enhanced derived type definition with OOP features
 derived_type_def_f2003
     : TYPE (COMMA type_attr_spec_list)? (LPAREN type_param_name_list RPAREN)? 
-      DOUBLE_COLON? type_name NEWLINE
+      DOUBLE_COLON? type_name NEWLINE?
       type_param_def_stmt_list?
       component_def_stmt_list?
       type_bound_procedure_part?
-      END TYPE type_name? NEWLINE
+      END TYPE type_name? NEWLINE?
     ;
 
 // Parent type specification for inheritance
@@ -125,7 +125,7 @@ parent_type_name
 
 // Type-bound procedure part
 type_bound_procedure_part
-    : CONTAINS NEWLINE
+    : CONTAINS NEWLINE?
       type_bound_proc_binding_list
     ;
 
@@ -135,9 +135,9 @@ component_def_stmt_list
     ;
 
 component_def_stmt
-    : INTEGER (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON IDENTIFIER NEWLINE
-    | REAL (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON IDENTIFIER NEWLINE
-    | CHARACTER (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON IDENTIFIER NEWLINE
+    : INTEGER (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON IDENTIFIER NEWLINE?
+    | REAL (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON IDENTIFIER NEWLINE?
+    | CHARACTER (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON IDENTIFIER NEWLINE?
     ;
 
 // Type-bound procedure bindings
@@ -153,7 +153,7 @@ type_bound_proc_binding
 type_bound_procedure_stmt
     : PROCEDURE (LPAREN IDENTIFIER RPAREN)?
       (COMMA proc_attr_spec_list)? DOUBLE_COLON?
-      IDENTIFIER (ARROW IDENTIFIER)? NEWLINE
+      IDENTIFIER (ARROW IDENTIFIER)? NEWLINE?
     ;
 
 // Procedure attribute specifications
@@ -348,8 +348,8 @@ use_stmt
     ;
 
 implicit_stmt
-    : IMPLICIT NONE NEWLINE
-    | IMPLICIT implicit_spec_list NEWLINE
+    : IMPLICIT NONE NEWLINE?
+    | IMPLICIT implicit_spec_list NEWLINE?
     ;
 
 implicit_spec_list
