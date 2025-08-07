@@ -36,6 +36,16 @@ main_program_f2003
     : program_stmt specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_program_stmt
     ;
 
+// F2003 program statement with newline support
+program_stmt
+    : PROGRAM IDENTIFIER NEWLINE*
+    ;
+
+// F2003 end program statement with newline support
+end_program_stmt
+    : END (PROGRAM (IDENTIFIER)?)? NEWLINE*
+    ;
+
 // Enhanced module for F2003
 module_f2003
     : module_stmt_f2003 specification_part_f2003? module_subprogram_part? end_module_stmt_f2003
@@ -330,7 +340,7 @@ type_param_name_list
 
 associate_construct
     : (IDENTIFIER COLON)? ASSOCIATE LPAREN association_list RPAREN NEWLINE
-      execution_part_f2003
+      execution_part_f2003?
       END ASSOCIATE (IDENTIFIER)? NEWLINE
     ;
 
@@ -351,10 +361,10 @@ selector
 // ============================================================================
 
 block_construct
-    : IDENTIFIER? COLON? BLOCK NEWLINE
-      specification_part?
-      execution_part
-      END BLOCK IDENTIFIER? NEWLINE
+    : (IDENTIFIER COLON)? BLOCK NEWLINE
+      specification_part_f2003?
+      execution_part_f2003?
+      END BLOCK (IDENTIFIER)? NEWLINE
     ;
 
 // ============================================================================
