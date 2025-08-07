@@ -1,17 +1,17 @@
 /*
- * SharedCoreParser.g4
+ * FORTRANParser.g4
  * 
- * Parser grammar for shared FORTRAN language constructs
- * present across ALL standards from FORTRAN 1957 to LazyFortran 2023+
+ * FORTRAN I (1957) - The Original IBM 704 FORTRAN Parser
+ * The world's first high-level programming language
  * 
- * This foundational parser defines universal syntax patterns that
- * have remained consistent across the entire FORTRAN evolution.
+ * This parser defines the complete FORTRAN I language as released in 1957,
+ * serving as the foundation for all subsequent FORTRAN/Fortran standards.
  */
 
-parser grammar SharedCoreParser;
+parser grammar FORTRANParser;
 
 options {
-    tokenVocab = SharedCoreLexer;
+    tokenVocab = FORTRANLexer;
 }
 
 // ============================================================================

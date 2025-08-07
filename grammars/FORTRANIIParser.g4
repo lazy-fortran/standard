@@ -2,7 +2,7 @@
 // Adds user-written subroutines and functions to FORTRAN I (1957)
 parser grammar FORTRANIIParser;
 
-import SharedCoreParser;  // Import FORTRAN I (1957) constructs
+import FORTRANParser;  // Import FORTRAN I (1957) constructs
 
 options {
     tokenVocab = FORTRANIILexer;

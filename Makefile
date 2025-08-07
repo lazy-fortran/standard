@@ -8,7 +8,7 @@ GRAMMAR_DIR = grammars
 BUILD_DIR = build
 
 # Grammar inheritance chain (build order matters!)
-GRAMMARS = SharedCore FORTRANII FORTRANIV FORTRAN66 FORTRAN77 Fortran90 Fortran95
+GRAMMARS = FORTRAN FORTRANII FORTRANIV FORTRAN66 FORTRAN77 Fortran90 Fortran95
 
 # Default target
 .PHONY: all clean test help
@@ -16,7 +16,7 @@ GRAMMARS = SharedCore FORTRANII FORTRANIV FORTRAN66 FORTRAN77 Fortran90 Fortran9
 all: $(GRAMMARS)
 
 # Individual grammar targets
-SharedCore: $(BUILD_DIR)/SharedCore/SharedCoreLexer.py
+FORTRAN: $(BUILD_DIR)/FORTRAN/FORTRANLexer.py
 FORTRANII: $(BUILD_DIR)/FORTRANII/FORTRANIILexer.py
 FORTRANIV: $(BUILD_DIR)/FORTRANIV/FORTRANIVLexer.py
 FORTRAN66: $(BUILD_DIR)/FORTRAN66/FORTRAN66Lexer.py
@@ -24,16 +24,16 @@ FORTRAN77: $(BUILD_DIR)/FORTRAN77/FORTRAN77Lexer.py
 Fortran90: $(BUILD_DIR)/Fortran90/Fortran90Lexer.py
 Fortran95: $(BUILD_DIR)/Fortran95/Fortran95Lexer.py
 
-# SharedCore (FORTRAN I, 1957) - Foundation
-$(BUILD_DIR)/SharedCore/SharedCoreLexer.py: $(GRAMMAR_DIR)/SharedCoreLexer.g4 $(GRAMMAR_DIR)/SharedCoreParser.g4
-	@echo "Building SharedCore (FORTRAN I, 1957)..."
-	@mkdir -p $(BUILD_DIR)/SharedCore
-	cd $(BUILD_DIR)/SharedCore && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib ../../$(GRAMMAR_DIR) ../../$(GRAMMAR_DIR)/SharedCoreLexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib ../../$(GRAMMAR_DIR) ../../$(GRAMMAR_DIR)/SharedCoreParser.g4
+# FORTRAN I (1957) - Foundation
+$(BUILD_DIR)/FORTRAN/FORTRANLexer.py: $(GRAMMAR_DIR)/FORTRANLexer.g4 $(GRAMMAR_DIR)/FORTRANParser.g4
+	@echo "Building FORTRAN I (1957)..."
+	@mkdir -p $(BUILD_DIR)/FORTRAN
+	cd $(BUILD_DIR)/FORTRAN && \
+	$(ANTLR4) $(ANTLR4_PYTHON) -lib ../../$(GRAMMAR_DIR) ../../$(GRAMMAR_DIR)/FORTRANLexer.g4 && \
+	$(ANTLR4) $(ANTLR4_PYTHON) -lib ../../$(GRAMMAR_DIR) ../../$(GRAMMAR_DIR)/FORTRANParser.g4
 
-# FORTRAN II (1958) - Procedural Programming
-$(BUILD_DIR)/FORTRANII/FORTRANIILexer.py: $(GRAMMAR_DIR)/FORTRANIILexer.g4 $(GRAMMAR_DIR)/FORTRANIIParser.g4 SharedCore
+# FORTRAN II (1958) - Independent Compilation
+$(BUILD_DIR)/FORTRANII/FORTRANIILexer.py: $(GRAMMAR_DIR)/FORTRANIILexer.g4 $(GRAMMAR_DIR)/FORTRANIIParser.g4 FORTRAN
 	@echo "Building FORTRAN II (1958)..."
 	@mkdir -p $(BUILD_DIR)/FORTRANII
 	cd $(BUILD_DIR)/FORTRANII && \
@@ -93,7 +93,7 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "  all         Build all grammars in dependency order"
-	@echo "  SharedCore  Build FORTRAN I (1957) foundation"
+	@echo "  FORTRAN     Build FORTRAN I (1957) foundation"
 	@echo "  FORTRANII   Build FORTRAN II (1958) procedural features"
 	@echo "  FORTRANIV   Build FORTRAN IV (1962) data types"
 	@echo "  FORTRAN66   Build FORTRAN 66 (1966) first standard"
@@ -105,7 +105,7 @@ help:
 	@echo "  help        Show this help"
 	@echo ""
 	@echo "Grammar Inheritance Chain:"
-	@echo "  SharedCore → FORTRANII → FORTRANIV → FORTRAN66 → FORTRAN77 → Fortran90 → Fortran95"
+	@echo "  FORTRAN → FORTRANII → FORTRANIV → FORTRAN66 → FORTRAN77 → Fortran90 → Fortran95"
 	@echo ""
 	@echo "Historical Timeline:"
 	@echo "  1957: FORTRAN I  (IBM 704, monolithic programs)"

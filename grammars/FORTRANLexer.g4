@@ -1,14 +1,14 @@
 /*
- * SharedCoreLexer.g4
+ * FORTRANLexer.g4
  * 
- * Lexer grammar for shared FORTRAN language constructs
- * present across ALL standards from FORTRAN 1957 to LazyFortran 2023+
+ * FORTRAN I (1957) - The Original IBM 704 FORTRAN
+ * The world's first high-level programming language
  * 
- * This foundational lexer eliminates duplication and provides a single
- * source of truth for universal language elements.
+ * This lexer defines the complete FORTRAN I language as released in 1957,
+ * serving as the foundation for all subsequent FORTRAN/Fortran standards.
  */
 
-lexer grammar SharedCoreLexer;
+lexer grammar FORTRANLexer;
 
 // ============================================================================  
 // FORTRAN I (1957) ORIGINAL FEATURES - IBM 704
@@ -65,8 +65,8 @@ REAL         : R E A L ;
 // - PARAMETER: Added in FORTRAN 77 (1977)
 // - THEN/ELSE: Added in FORTRAN 77 (1977)
 //
-// SharedCore should only contain features present across ALL standards.
-// Later features will be added in appropriate standard-specific grammars.
+// This grammar defines FORTRAN I (1957) as the foundation for all 
+// subsequent FORTRAN/Fortran standards through inheritance.
 
 // ============================================================================
 // OPERATORS: Arithmetic (Universal since 1957)

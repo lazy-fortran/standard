@@ -2,7 +2,7 @@
 // Revolutionary Modern Foundation with Complete Format Compatibility
 parser grammar Fortran90Parser;
 
-import SharedCoreParser;  // Universal constructs
+import FORTRANParser;  // FORTRAN I (1957) foundation
 
 options {
     tokenVocab = Fortran90Lexer;
