@@ -46,25 +46,19 @@ import SharedCoreLexer;  // Import FORTRAN I (1957) constructs
 // ====================================================================
 
 // ====================================================================
-// FORTRAN II (1958) FEATURES - Procedural Programming Revolution
+// FORTRAN II (1958) FEATURES - Independent Compilation Revolution
 // ====================================================================
 //
-// FORTRAN II (1958) introduced:
-// - CALL statement for subroutine calls
-// - SUBROUTINE statement for defining subroutines  
-// - FUNCTION statement for defining functions
-// - RETURN statement for returning from procedures
-// - COMMON statement for shared variables between procedures
-// - END statement enhanced for procedures
+// FORTRAN II (1958) major innovation:
+// - Independent compilation of subroutines (vs monolithic in FORTRAN I)
+// - Improved COMMON and EQUIVALENCE statement implementation
+// - Bug fixes and enhanced reliability over FORTRAN I
 //
-// This was revolutionary: moved from monolithic programs to modular code!
-
-// Procedural programming keywords (added in FORTRAN II, 1958)
-CALL         : C A L L ;
-SUBROUTINE   : S U B R O U T I N E ;
-FUNCTION     : F U N C T I O N ;
-RETURN       : R E T U R N ;
-COMMON       : C O M M O N ;
+// Note: CALL, SUBROUTINE, FUNCTION, RETURN, COMMON were present in FORTRAN I
+// but FORTRAN II enabled separate compilation, making modular programming practical.
+//
+// FORTRAN II added no major new language features - its achievement was
+// engineering: reliable separate compilation and improved implementation.
 
 // ====================================================================
 // FORTRAN 1957 ORIGINAL FEATURES (via SharedCoreLexer)

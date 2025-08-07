@@ -13,8 +13,9 @@ lexer grammar SharedCoreLexer;
 // ============================================================================  
 // FORTRAN I (1957) ORIGINAL FEATURES - IBM 704
 // ============================================================================
-// Based on historical research: FORTRAN I was monolithic - NO user-written
-// subroutines, functions, or modular programming. Only built-in functions.
+// Based on historical research: FORTRAN I had user-defined subroutines and
+// functions, but required monolithic compilation (no separate compilation).
+// FORTRAN II (1958) added independent compilation of subroutines.
 
 // Control Flow (FORTRAN I, 1957) 
 IF           : I F ;        // Arithmetic IF (three-way branch)
@@ -34,6 +35,14 @@ PUNCH        : P U N C H ;  // Card punch output
 DIMENSION    : D I M E N S I O N ;    // Array declarations
 EQUIVALENCE  : E Q U I V A L E N C E ; // Memory sharing
 FORMAT       : F O R M A T ;         // I/O formatting
+COMMON       : C O M M O N ;         // Shared variable storage
+
+// Procedural Programming (FORTRAN I, 1957)
+// Note: FORTRAN I had user-defined subroutines but monolithic compilation
+CALL         : C A L L ;             // Subroutine call
+SUBROUTINE   : S U B R O U T I N E ;   // Subroutine definition
+FUNCTION     : F U N C T I O N ;     // Function definition  
+RETURN       : R E T U R N ;         // Return from subprogram
 
 // Program Control (FORTRAN I, 1957)  
 PAUSE        : P A U S E ;           // Operator intervention
@@ -43,10 +52,14 @@ FREQUENCY    : F R E Q U E N C Y ;   // Optimization hint (1957 only)
 INTEGER      : I N T E G E R ;
 REAL         : R E A L ;
 
-// NOTE: FORTRAN 1957 was very basic. Most "common" keywords were added later:
+// NOTE: FORTRAN I (1957) included user-defined subroutines/functions:
+// - SUBROUTINE: Present in FORTRAN I (1957) - monolithic compilation
+// - FUNCTION: Present in FORTRAN I (1957) - monolithic compilation  
+// - CALL: Present in FORTRAN I (1957) - subroutine calls
+// - RETURN: Present in FORTRAN I (1957) - return from subprograms
+//
+// Keywords added later:
 // - PROGRAM: Added in FORTRAN 77 (1977) 
-// - SUBROUTINE: Added in FORTRAN II (1958)
-// - FUNCTION: Added in FORTRAN II (1958)
 // - CHARACTER: Added in FORTRAN 77 (1977)
 // - LOGICAL: Added in FORTRAN IV (1962)
 // - PARAMETER: Added in FORTRAN 77 (1977)
