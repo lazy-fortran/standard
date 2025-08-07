@@ -38,24 +38,15 @@ import SharedCoreLexer;  // Universal constructs
 // Default mode is free-form (F90+ primary format)
 // Fixed-form mode can be activated by parser based on file extension
 
-// Fixed-form comment (C, c, *, or ! in column 1)
-FIXED_COMMENT
-    : {getCharPositionInLine() == 0}? [Cc*!] ~[\r\n]* -> channel(HIDDEN)
+// Unified comment handling (supports both fixed and free form)
+// Handles both ! comments (free-form) and C/c/* comments (fixed-form)
+COMMENT
+    : ('!' | [Cc*]) ~[\r\n]* -> channel(HIDDEN)
     ;
 
-// Fixed-form continuation (any char except blank/0 in column 6)
-FIXED_CONTINUATION
-    : {getCharPositionInLine() == 5}? ~[ 0\r\n\t] -> channel(HIDDEN)
-    ;
-
-// Free-form comment (! anywhere)
-FREE_COMMENT
-    : '!' ~[\r\n]* -> channel(HIDDEN)
-    ;
-
-// Free-form continuation (& at end of line)
-FREE_CONTINUATION
-    : '&' [ \t]* FREE_COMMENT? -> channel(HIDDEN)
+// Free-form continuation (& at end of line)  
+CONTINUATION
+    : '&' [ \t]* COMMENT? -> channel(HIDDEN)
     ;
 
 // ====================================================================
@@ -182,7 +173,6 @@ OCTAL_CONSTANT  : ('o'|'O') '\'' [0-7]+ '\'' ;
 HEX_CONSTANT    : ('z'|'Z'|'x'|'X') '\'' [0-9a-fA-F]+ '\'' ;
 
 fragment EXPONENT : [eEdD] [+-]? DIGIT+ ;
-fragment DIGIT : [0-9] ;
 
 // ====================================================================
 // FORTRAN 90 INTRINSIC FUNCTIONS (MAJOR ADDITIONS)
@@ -227,29 +217,23 @@ REPEAT_INTRINSIC      : ('r'|'R') ('e'|'E') ('p'|'P') ('e'|'E') ('a'|'A') ('t'|'
 // Semicolon for multiple statements per line (free-form)
 SEMICOLON : ';' ;
 
-// Whitespace fragment for use in compound tokens
-fragment WS : [ \t]+ ;
-
 // ====================================================================
-// ADDITIONAL INHERITED TOKENS (from SharedCoreLexer - temporarily defined)
+// F90-SPECIFIC TOKENS (not in SharedCoreLexer)
 // ====================================================================
-// TODO: These should be inherited from SharedCoreLexer but appear to be missing
 
-// Basic data types
+// F90 specific data types
 DOUBLE          : ('d'|'D') ('o'|'O') ('u'|'U') ('b'|'B') ('l'|'L') ('e'|'E') ;
 PRECISION       : ('p'|'P') ('r'|'R') ('e'|'E') ('c'|'C') ('i'|'I') ('s'|'S') ('i'|'I') ('o'|'O') ('n'|'N') ;
 COMPLEX         : ('c'|'C') ('o'|'O') ('m'|'M') ('p'|'P') ('l'|'L') ('e'|'E') ('x'|'X') ;
 LOGICAL         : ('l'|'L') ('o'|'O') ('g'|'G') ('i'|'I') ('c'|'C') ('a'|'A') ('l'|'L') ;
 CHARACTER       : ('c'|'C') ('h'|'H') ('a'|'A') ('r'|'R') ('a'|'A') ('c'|'C') ('t'|'T') ('e'|'E') ('r'|'R') ;
 
-// Control flow
+// Missing SharedCoreLexer tokens that parser needs
 PROGRAM         : ('p'|'P') ('r'|'R') ('o'|'O') ('g'|'G') ('r'|'R') ('a'|'A') ('m'|'M') ;
 FUNCTION        : ('f'|'F') ('u'|'U') ('n'|'N') ('c'|'C') ('t'|'T') ('i'|'I') ('o'|'O') ('n'|'N') ;
 SUBROUTINE      : ('s'|'S') ('u'|'U') ('b'|'B') ('r'|'R') ('o'|'O') ('u'|'U') ('t'|'T') ('i'|'I') ('n'|'N') ('e'|'E') ;
 THEN            : ('t'|'T') ('h'|'H') ('e'|'E') ('n'|'N') ;
 ELSE            : ('e'|'E') ('l'|'L') ('s'|'S') ('e'|'E') ;
-
-// Statements
 PARAMETER       : ('p'|'P') ('a'|'A') ('r'|'R') ('a'|'A') ('m'|'M') ('e'|'E') ('t'|'T') ('e'|'E') ('r'|'R') ;
 DATA            : ('d'|'D') ('a'|'A') ('t'|'T') ('a'|'A') ;
 COMMON          : ('c'|'C') ('o'|'O') ('m'|'M') ('m'|'M') ('o'|'O') ('n'|'N') ;
@@ -258,18 +242,15 @@ DIMENSION       : ('d'|'D') ('i'|'I') ('m'|'M') ('e'|'E') ('n'|'N') ('s'|'S') ('
 SAVE            : ('s'|'S') ('a'|'A') ('v'|'V') ('e'|'E') ;
 EXTERNAL        : ('e'|'E') ('x'|'X') ('t'|'T') ('e'|'E') ('r'|'R') ('n'|'N') ('a'|'A') ('l'|'L') ;
 INTRINSIC       : ('i'|'I') ('n'|'N') ('t'|'T') ('r'|'R') ('i'|'I') ('n'|'N') ('s'|'S') ('i'|'I') ('c'|'C') ;
+IMPLICIT        : ('i'|'I') ('m'|'M') ('p'|'P') ('l'|'L') ('i'|'I') ('c'|'C') ('i'|'I') ('t'|'T') ;
+NONE            : ('n'|'N') ('o'|'O') ('n'|'N') ('e'|'E') ;
 RETURN          : ('r'|'R') ('e'|'E') ('t'|'T') ('u'|'U') ('r'|'R') ('n'|'N') ;
-STOP            : ('s'|'S') ('t'|'T') ('o'|'O') ('p'|'P') ;
-CONTINUE        : ('c'|'C') ('o'|'O') ('n'|'N') ('t'|'T') ('i'|'I') ('n'|'N') ('u'|'U') ('e'|'E') ;
-GOTO            : ('g'|'G') ('o'|'O') WS+ ('t'|'T') ('o'|'O') | ('g'|'G') ('o'|'O') ('t'|'T') ('o'|'O') ;
-
-// Logical literals
-DOT_TRUE        : '.' ('t'|'T') ('r'|'R') ('u'|'U') ('e'|'E') '.' ;
-DOT_FALSE       : '.' ('f'|'F') ('a'|'A') ('l'|'L') ('s'|'S') ('e'|'E') '.' ;
 
 // Logical operators
+DOT_TRUE        : '.' ('t'|'T') ('r'|'R') ('u'|'U') ('e'|'E') '.' ;
+DOT_FALSE       : '.' ('f'|'F') ('a'|'A') ('l'|'L') ('s'|'S') ('e'|'E') '.' ;
 DOT_EQ          : '.' ('e'|'E') ('q'|'Q') '.' ;
-DOT_NE          : '.' ('n'|'N') ('e'|'E') '.' ;  
+DOT_NE          : '.' ('n'|'N') ('e'|'E') '.' ;
 DOT_LT          : '.' ('l'|'L') ('t'|'T') '.' ;
 DOT_LE          : '.' ('l'|'L') ('e'|'E') '.' ;
 DOT_GT          : '.' ('g'|'G') ('t'|'T') '.' ;
@@ -280,11 +261,16 @@ DOT_NOT         : '.' ('n'|'N') ('o'|'O') ('t'|'T') '.' ;
 DOT_EQV         : '.' ('e'|'E') ('q'|'Q') ('v'|'V') '.' ;
 DOT_NEQV        : '.' ('n'|'N') ('e'|'E') ('q'|'Q') ('v'|'V') '.' ;
 
-// String concatenation
+// String concatenation  
 CONCAT          : '//' ;
-
-// Basic operators
 SLASH           : '/' ;
+
+// Whitespace and newlines
+WHITESPACE : [ \t]+ -> skip ;
+NEWLINE    : [\r\n]+ -> skip ;
+
+// Whitespace fragment for compound tokens
+fragment WS : [ \t]+ ;
 
 // ====================================================================
 // FORTRAN 90 LEXER STATUS  

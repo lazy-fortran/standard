@@ -14,16 +14,19 @@ set -e  # Exit on any error
 
 # Get project root directory
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-GRAMMAR_NAME="${1:-shared_core}"
+GRAMMAR_NAME="${1:-SharedCore}"
 
-GRAMMAR_DIR="$PROJECT_ROOT/grammars/$GRAMMAR_NAME"
+GRAMMAR_DIR="$PROJECT_ROOT/grammars"
 BUILD_DIR="$PROJECT_ROOT/build/$GRAMMAR_NAME"
 
-# Validate grammar directory exists
-if [ ! -d "$GRAMMAR_DIR" ]; then
-    echo "Error: Grammar directory not found: $GRAMMAR_DIR"
+# Validate grammar files exist
+LEXER_FILE="$GRAMMAR_DIR/${GRAMMAR_NAME}Lexer.g4"
+PARSER_FILE="$GRAMMAR_DIR/${GRAMMAR_NAME}Parser.g4"
+
+if [ ! -f "$LEXER_FILE" ] && [ ! -f "$PARSER_FILE" ]; then
+    echo "Error: Grammar files not found for $GRAMMAR_NAME"
     echo "Available grammars:"
-    ls -1 "$PROJECT_ROOT/grammars" 2>/dev/null || echo "  None"
+    ls -1 "$PROJECT_ROOT/grammars"/*Lexer.g4 2>/dev/null | sed 's/.*\///g' | sed 's/Lexer.g4//g' || echo "  None"
     exit 1
 fi
 
@@ -40,53 +43,21 @@ fi
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 
-# Handle grammar dependencies via imports
-# ANTLR4 needs access to imported grammars
-IMPORT_PATH=""
-if [ "$GRAMMAR_NAME" != "shared_core" ]; then
-    IMPORT_PATH="-lib $PROJECT_ROOT/grammars/shared_core"
-    
-    # For FORTRAN II and later, also include parent grammar
-    case "$GRAMMAR_NAME" in
-        FORTRAN_II)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN"
-            ;;
-        FORTRAN_IV)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN_II"
-            ;;
-        FORTRAN66)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN_IV"
-            ;;
-        FORTRAN77)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN66"
-            ;;
-        Fortran90)
-            IMPORT_PATH="$IMPORT_PATH:$PROJECT_ROOT/grammars/FORTRAN77"
-            ;;
-        fortran_90)
-            # F90 unified - no additional imports beyond shared_core
-            ;;
-        fortran_95)
-            IMPORT_PATH="$IMPORT_PATH -lib $PROJECT_ROOT/grammars/fortran_90"
-            ;;
-        fortran_2003)
-            IMPORT_PATH="$IMPORT_PATH -lib $PROJECT_ROOT/grammars/fortran_90 -lib $PROJECT_ROOT/grammars/fortran_95"
-            ;;
-    esac
-fi
+# All grammars are in flat structure - simple import path
+IMPORT_PATH="-lib $PROJECT_ROOT/grammars"
 
-# Find and generate lexer
-LEXER_FILE=$(find "$GRAMMAR_DIR" -name "*Lexer.g4" | head -1)
-if [ -n "$LEXER_FILE" ]; then
-    echo "Generating lexer from $(basename "$LEXER_FILE")..."
+# Generate lexer if exists
+LEXER_FILE="$GRAMMAR_DIR/${GRAMMAR_NAME}Lexer.g4"
+if [ -f "$LEXER_FILE" ]; then
+    echo "Generating lexer from ${GRAMMAR_NAME}Lexer.g4..."
     cd "$PROJECT_ROOT"  # Ensure correct working directory for imports
     antlr4 -Dlanguage=Python3 -o "$BUILD_DIR" $IMPORT_PATH "$LEXER_FILE"
 fi
 
-# Find and generate parser  
-PARSER_FILE=$(find "$GRAMMAR_DIR" -name "*Parser.g4" | head -1)
-if [ -n "$PARSER_FILE" ]; then
-    echo "Generating parser from $(basename "$PARSER_FILE")..."
+# Generate parser if exists  
+PARSER_FILE="$GRAMMAR_DIR/${GRAMMAR_NAME}Parser.g4"
+if [ -f "$PARSER_FILE" ]; then
+    echo "Generating parser from ${GRAMMAR_NAME}Parser.g4..."
     cd "$PROJECT_ROOT"  # Ensure correct working directory for imports
     antlr4 -Dlanguage=Python3 -o "$BUILD_DIR" $IMPORT_PATH "$PARSER_FILE"
 fi
@@ -94,7 +65,7 @@ fi
 echo "Grammar build completed successfully!"
 echo ""
 echo "Generated files in $BUILD_DIR:"
-ls -1 *.py *.tokens 2>/dev/null | sed 's/^/  - /'
+cd "$BUILD_DIR" && ls -1 *.py *.tokens 2>/dev/null | sed 's/^/  - /'
 echo ""
 echo "WARNING: DO NOT manually edit these generated files!"
 echo "All changes must be made to the .g4 grammar files in $GRAMMAR_DIR"
