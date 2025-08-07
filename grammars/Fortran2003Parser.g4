@@ -36,6 +36,16 @@ main_program_f2003
     : program_stmt specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_program_stmt
     ;
 
+// F2003 program statement with newline support
+program_stmt
+    : PROGRAM IDENTIFIER NEWLINE*
+    ;
+
+// F2003 end program statement with newline support
+end_program_stmt
+    : END (PROGRAM (IDENTIFIER)?)? NEWLINE*
+    ;
+
 // Enhanced module for F2003
 module_f2003
     : module_stmt_f2003 specification_part_f2003? module_subprogram_part? end_module_stmt_f2003
@@ -153,6 +163,7 @@ executable_construct_f2003
     : assignment_stmt
     | call_stmt
     | print_stmt
+    | stop_stmt
     | select_type_construct
     | associate_construct
     | block_construct
@@ -242,12 +253,12 @@ proc_binding_list
     ;
 
 proc_binding
-    : IDENTIFIER (ARROW IDENTIFIER)?
+    : IDENTIFIER (POINTER_ASSIGN IDENTIFIER)?
     ;
 
 // Generic type-bound procedures
 type_bound_generic_stmt
-    : GENERIC (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON generic_spec ARROW generic_binding_list NEWLINE
+    : GENERIC (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON generic_spec POINTER_ASSIGN generic_binding_list NEWLINE
     ;
 
 generic_binding_list
@@ -330,7 +341,7 @@ type_param_name_list
 
 associate_construct
     : (IDENTIFIER COLON)? ASSOCIATE LPAREN association_list RPAREN NEWLINE
-      execution_part_f2003
+      execution_part_f2003?
       END ASSOCIATE (IDENTIFIER)? NEWLINE
     ;
 
@@ -339,7 +350,7 @@ association_list
     ;
 
 association
-    : IDENTIFIER ARROW selector
+    : IDENTIFIER POINTER_ASSIGN selector
     ;
 
 selector
@@ -351,10 +362,10 @@ selector
 // ============================================================================
 
 block_construct
-    : IDENTIFIER? COLON? BLOCK NEWLINE
-      specification_part?
-      execution_part
-      END BLOCK IDENTIFIER? NEWLINE
+    : (IDENTIFIER COLON)? BLOCK NEWLINE
+      specification_part_f2003?
+      execution_part_f2003?
+      END BLOCK (IDENTIFIER)? NEWLINE
     ;
 
 // ============================================================================
@@ -389,7 +400,7 @@ select_type_construct
     ;
 
 select_type_stmt
-    : (IDENTIFIER COLON)? SELECT_TYPE LPAREN (IDENTIFIER ARROW)? selector_expr RPAREN
+    : (IDENTIFIER COLON)? SELECT_TYPE LPAREN (IDENTIFIER POINTER_ASSIGN)? selector_expr RPAREN
     ;
 
 selector_expr
@@ -493,6 +504,11 @@ print_stmt
     : PRINT '*' COMMA actual_arg_list NEWLINE         // print *, args
     | PRINT primary COMMA actual_arg_list NEWLINE     // print format, args
     | PRINT '*' NEWLINE                               // print *
+    ;
+
+// STOP statement
+stop_stmt
+    : STOP (INTEGER_LITERAL | STRING_LITERAL)? NEWLINE
     ;
 
 // ============================================================================
@@ -732,6 +748,7 @@ primary
     | IDENTIFIER LPAREN actual_arg_list? RPAREN
     | intrinsic_function_call
     | INTEGER_LITERAL
+    | LABEL              // Accept LABEL as integer literal (token precedence issue)
     | REAL_LITERAL
     | STRING_LITERAL
     | SINGLE_QUOTE_STRING
@@ -752,6 +769,19 @@ function_reference_f90
     | SELECTED_REAL_KIND LPAREN actual_arg_spec_list? RPAREN  
     | SELECTED_INT_KIND LPAREN actual_arg_spec_list? RPAREN
     | KIND LPAREN actual_arg_spec_list? RPAREN
+    ;
+
+// Override F90 literal_f90 to accept LABEL as integer literal
+literal_f90
+    : INTEGER_LITERAL_KIND          // Integer with kind (123_int32)
+    | INTEGER_LITERAL               // Traditional integer
+    | LABEL                         // Accept LABEL as integer (token precedence issue)
+    | REAL_LITERAL_KIND             // Real with kind (3.14_real64)  
+    | REAL_LITERAL                  // Traditional real
+    | DOUBLE_QUOTE_STRING           // Double-quoted string (F90)
+    | SINGLE_QUOTE_STRING           // Single-quoted string
+    | logical_literal_f90           // Enhanced logical literals
+    | boz_literal_constant          // Binary/octal/hex literals (F90)
     ;
 
 // Type name
