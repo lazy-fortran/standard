@@ -231,9 +231,9 @@ SEMICOLON : ';' ;
 // F90-specific tokens (not in earlier standards)
 // Note: DOUBLE, PRECISION, COMPLEX inherited from FORTRAN IV (1962)
 // Note: SAVE, CONCAT inherited from FORTRAN 77 (1977)
-// Note: EQUIVALENCE, DIMENSION inherited from SharedCoreLexer (FORTRAN I, 1957)
-IMPLICIT        : ('i'|'I') ('m'|'M') ('p'|'P') ('l'|'L') ('i'|'I') ('c'|'C') ('i'|'I') ('t'|'T') ;
-NONE            : ('n'|'N') ('o'|'O') ('n'|'N') ('e'|'E') ;
+// Note: EQUIVALENCE, DIMENSION, IMPLICIT inherited from FORTRAN I (1957)
+// IMPLICIT NONE combination is new in Fortran 90
+NONE            : ('n'|'N') ('o'|'O') ('n'|'N') ('e'|'E') ;  // For IMPLICIT NONE
 
 // Whitespace and newlines
 WHITESPACE : [ \t]+ -> skip ;

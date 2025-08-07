@@ -46,10 +46,7 @@ PARAMETER       : P A R A M E T E R ;
 // Variable persistence (added in FORTRAN 77, 1977)
 SAVE            : S A V E ;
 
-// Additional statements enhanced in FORTRAN 77
-DATA            : D A T A ;
-EXTERNAL        : E X T E R N A L ;
-INTRINSIC       : I N T R I N S I C ;
+// Note: DATA, EXTERNAL, INTRINSIC inherited from FORTRAN 66
 
 // Enhanced loop control (FORTRAN 77 improvements)
 // DO loops with modern END DO (though labels still supported)
