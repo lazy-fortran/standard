@@ -108,14 +108,24 @@ executable_construct_f2003
 // FORTRAN 2003 NEW CONSTRUCTS - Object-Oriented Programming
 // ============================================================================
 
-// Enhanced derived type definition with OOP features
+// Enhanced derived type definition with OOP features (F2003)
 derived_type_def_f2003
+    : derived_type_stmt_f2003 
+      type_param_def_stmt*
+      component_def_stmt*
+      type_bound_procedure_part?
+      end_type_stmt_f2003
+    ;
+
+// F2003 enhanced type statement with OOP attributes
+derived_type_stmt_f2003
     : TYPE (COMMA type_attr_spec_list)? (LPAREN type_param_name_list RPAREN)? 
       DOUBLE_COLON? type_name NEWLINE?
-      type_param_def_stmt_list?
-      component_def_stmt_list?
-      type_bound_procedure_part?
-      END TYPE type_name? NEWLINE?
+    ;
+
+// F2003 end type statement 
+end_type_stmt_f2003
+    : END_TYPE type_name? NEWLINE?
     ;
 
 // Parent type specification for inheritance
@@ -135,9 +145,13 @@ component_def_stmt_list
     ;
 
 component_def_stmt
-    : INTEGER (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON IDENTIFIER NEWLINE?
-    | REAL (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON IDENTIFIER NEWLINE?
-    | CHARACTER (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON IDENTIFIER NEWLINE?
+    : type_declaration_stmt          // F2003 component declarations (reuse existing rule)
+    | private_sequence_stmt          // PRIVATE or SEQUENCE (inherited from F90)
+    ;
+
+private_sequence_stmt
+    : PRIVATE NEWLINE?
+    | SEQUENCE NEWLINE?
     ;
 
 // Type-bound procedure bindings
