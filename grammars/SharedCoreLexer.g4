@@ -16,7 +16,7 @@ lexer grammar SharedCoreLexer;
 // These tokens have remained consistent across the entire evolution
 // and form the core of every FORTRAN variant ever created
 
-// Control Flow (Universal since 1957)
+// Control Flow (Actually present in FORTRAN 1957)
 IF           : I F ;
 GOTO         : G O T O ; 
 DO           : D O ;
@@ -24,20 +24,30 @@ END          : E N D ;
 CONTINUE     : C O N T I N U E ;
 STOP         : S T O P ;
 
-// I/O Operations (Universal since 1957)
+// I/O Operations (Present in FORTRAN 1957)
 READ         : R E A D ;
 WRITE        : W R I T E ;
 
-// Subroutine calls (Universal since FORTRAN II, ~1958)
-CALL         : C A L L ;
+// NOTE: CALL was added in FORTRAN II (1958), not 1957
+// It should be added in FORTRAN grammar, not SharedCore
 
 // ============================================================================
-// DATA TYPES: Universal subset present from earliest standards
+// DATA TYPES: Present in FORTRAN 1957
 // ============================================================================
 INTEGER      : I N T E G E R ;
 REAL         : R E A L ;
-// Note: CHARACTER added in F77+, LOGICAL added in F77+
-// These will be handled in format-specific extensions
+
+// NOTE: FORTRAN 1957 was very basic. Most "common" keywords were added later:
+// - PROGRAM: Added in FORTRAN 77 (1977) 
+// - SUBROUTINE: Added in FORTRAN II (1958)
+// - FUNCTION: Added in FORTRAN II (1958)
+// - CHARACTER: Added in FORTRAN 77 (1977)
+// - LOGICAL: Added in FORTRAN IV (1962)
+// - PARAMETER: Added in FORTRAN 77 (1977)
+// - THEN/ELSE: Added in FORTRAN 77 (1977)
+//
+// SharedCore should only contain features present across ALL standards.
+// Later features will be added in appropriate standard-specific grammars.
 
 // ============================================================================
 // OPERATORS: Arithmetic (Universal since 1957)

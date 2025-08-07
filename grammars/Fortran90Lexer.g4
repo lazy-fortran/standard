@@ -2,7 +2,7 @@
 // Revolutionary Modern Foundation with Complete Format Compatibility
 lexer grammar Fortran90Lexer;
 
-import SharedCoreLexer;  // Universal constructs
+import Fortran77Lexer;  // Inherit F77 (1977) constructs
 
 // ====================================================================
 // FORTRAN 90 UNIFIED LEXER OVERVIEW
@@ -38,15 +38,22 @@ import SharedCoreLexer;  // Universal constructs
 // Default mode is free-form (F90+ primary format)
 // Fixed-form mode can be activated by parser based on file extension
 
-// Unified comment handling (supports both fixed and free form)
-// Handles both ! comments (free-form) and C/c/* comments (fixed-form)
-COMMENT
-    : ('!' | [Cc*]) ~[\r\n]* -> channel(HIDDEN)
+// Unified comment handling with improved format detection
+// Priority: Free-form ! comments (most common in F90+)
+FREE_FORM_COMMENT
+    : '!' ~[\r\n]* -> channel(HIDDEN)
+    ;
+
+// Fixed-form comments: C, c, or * at start of line
+// Note: This is a simplified approach - full column-position detection
+// would require lexer modes or custom logic
+FIXED_FORM_COMMENT  
+    : [Cc*] ~[\r\n]* -> channel(HIDDEN)
     ;
 
 // Free-form continuation (& at end of line)  
 CONTINUATION
-    : '&' [ \t]* COMMENT? -> channel(HIDDEN)
+    : '&' [ \t]* FREE_FORM_COMMENT? -> channel(HIDDEN)
     ;
 
 // ====================================================================
@@ -221,49 +228,14 @@ SEMICOLON : ';' ;
 // F90-SPECIFIC TOKENS (not in SharedCoreLexer)
 // ====================================================================
 
-// F90 specific data types
-DOUBLE          : ('d'|'D') ('o'|'O') ('u'|'U') ('b'|'B') ('l'|'L') ('e'|'E') ;
-PRECISION       : ('p'|'P') ('r'|'R') ('e'|'E') ('c'|'C') ('i'|'I') ('s'|'S') ('i'|'I') ('o'|'O') ('n'|'N') ;
-COMPLEX         : ('c'|'C') ('o'|'O') ('m'|'M') ('p'|'P') ('l'|'L') ('e'|'E') ('x'|'X') ;
-LOGICAL         : ('l'|'L') ('o'|'O') ('g'|'G') ('i'|'I') ('c'|'C') ('a'|'A') ('l'|'L') ;
-CHARACTER       : ('c'|'C') ('h'|'H') ('a'|'A') ('r'|'R') ('a'|'A') ('c'|'C') ('t'|'T') ('e'|'E') ('r'|'R') ;
+// F90-specific tokens (not in earlier standards)
+// Note: DOUBLE, PRECISION, COMPLEX inherited from FORTRAN IV (1962)
+// Note: SAVE, CONCAT inherited from FORTRAN 77 (1977)
 
-// Missing SharedCoreLexer tokens that parser needs
-PROGRAM         : ('p'|'P') ('r'|'R') ('o'|'O') ('g'|'G') ('r'|'R') ('a'|'A') ('m'|'M') ;
-FUNCTION        : ('f'|'F') ('u'|'U') ('n'|'N') ('c'|'C') ('t'|'T') ('i'|'I') ('o'|'O') ('n'|'N') ;
-SUBROUTINE      : ('s'|'S') ('u'|'U') ('b'|'B') ('r'|'R') ('o'|'O') ('u'|'U') ('t'|'T') ('i'|'I') ('n'|'N') ('e'|'E') ;
-THEN            : ('t'|'T') ('h'|'H') ('e'|'E') ('n'|'N') ;
-ELSE            : ('e'|'E') ('l'|'L') ('s'|'S') ('e'|'E') ;
-PARAMETER       : ('p'|'P') ('a'|'A') ('r'|'R') ('a'|'A') ('m'|'M') ('e'|'E') ('t'|'T') ('e'|'E') ('r'|'R') ;
-DATA            : ('d'|'D') ('a'|'A') ('t'|'T') ('a'|'A') ;
-COMMON          : ('c'|'C') ('o'|'O') ('m'|'M') ('m'|'M') ('o'|'O') ('n'|'N') ;
 EQUIVALENCE     : ('e'|'E') ('q'|'Q') ('u'|'U') ('i'|'I') ('v'|'V') ('a'|'A') ('l'|'L') ('e'|'E') ('n'|'N') ('c'|'C') ('e'|'E') ;
 DIMENSION       : ('d'|'D') ('i'|'I') ('m'|'M') ('e'|'E') ('n'|'N') ('s'|'S') ('i'|'I') ('o'|'O') ('n'|'N') ;
-SAVE            : ('s'|'S') ('a'|'A') ('v'|'V') ('e'|'E') ;
-EXTERNAL        : ('e'|'E') ('x'|'X') ('t'|'T') ('e'|'E') ('r'|'R') ('n'|'N') ('a'|'A') ('l'|'L') ;
-INTRINSIC       : ('i'|'I') ('n'|'N') ('t'|'T') ('r'|'R') ('i'|'I') ('n'|'N') ('s'|'S') ('i'|'I') ('c'|'C') ;
 IMPLICIT        : ('i'|'I') ('m'|'M') ('p'|'P') ('l'|'L') ('i'|'I') ('c'|'C') ('i'|'I') ('t'|'T') ;
 NONE            : ('n'|'N') ('o'|'O') ('n'|'N') ('e'|'E') ;
-RETURN          : ('r'|'R') ('e'|'E') ('t'|'T') ('u'|'U') ('r'|'R') ('n'|'N') ;
-
-// Logical operators
-DOT_TRUE        : '.' ('t'|'T') ('r'|'R') ('u'|'U') ('e'|'E') '.' ;
-DOT_FALSE       : '.' ('f'|'F') ('a'|'A') ('l'|'L') ('s'|'S') ('e'|'E') '.' ;
-DOT_EQ          : '.' ('e'|'E') ('q'|'Q') '.' ;
-DOT_NE          : '.' ('n'|'N') ('e'|'E') '.' ;
-DOT_LT          : '.' ('l'|'L') ('t'|'T') '.' ;
-DOT_LE          : '.' ('l'|'L') ('e'|'E') '.' ;
-DOT_GT          : '.' ('g'|'G') ('t'|'T') '.' ;
-DOT_GE          : '.' ('g'|'G') ('e'|'E') '.' ;
-DOT_AND         : '.' ('a'|'A') ('n'|'N') ('d'|'D') '.' ;
-DOT_OR          : '.' ('o'|'O') ('r'|'R') '.' ;
-DOT_NOT         : '.' ('n'|'N') ('o'|'O') ('t'|'T') '.' ;
-DOT_EQV         : '.' ('e'|'E') ('q'|'Q') ('v'|'V') '.' ;
-DOT_NEQV        : '.' ('n'|'N') ('e'|'E') ('q'|'Q') ('v'|'V') '.' ;
-
-// String concatenation  
-CONCAT          : '//' ;
-SLASH           : '/' ;
 
 // Whitespace and newlines
 WHITESPACE : [ \t]+ -> skip ;
