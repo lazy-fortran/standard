@@ -1,11 +1,11 @@
-// FORTRAN 1957 HISTORICAL STUB - Parser for Original IBM 704 Language
-// HISTORICAL DOCUMENTATION STUB - Compiles but provides minimal functionality
-parser grammar FORTRANParser;
+// FORTRAN II (1958) - Parser for Procedural Programming Revolution
+// Adds user-written subroutines and functions to FORTRAN I (1957)
+parser grammar FORTRANIIParser;
 
-import SharedCoreParser;  // Import universal constructs
+import SharedCoreParser;  // Import FORTRAN I (1957) constructs
 
 options {
-    tokenVocab = FORTRANLexer;
+    tokenVocab = FORTRANIILexer;
 }
 
 // ====================================================================

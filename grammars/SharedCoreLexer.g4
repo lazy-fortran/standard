@@ -10,30 +10,36 @@
 
 lexer grammar SharedCoreLexer;
 
+// ============================================================================  
+// FORTRAN I (1957) ORIGINAL FEATURES - IBM 704
 // ============================================================================
-// KEYWORDS: Present in ALL FORTRAN/Fortran versions (1957-2023)
-// ============================================================================
-// These tokens have remained consistent across the entire evolution
-// and form the core of every FORTRAN variant ever created
+// Based on historical research: FORTRAN I was monolithic - NO user-written
+// subroutines, functions, or modular programming. Only built-in functions.
 
-// Control Flow (Actually present in FORTRAN 1957)
-IF           : I F ;
-GOTO         : G O T O ; 
-DO           : D O ;
-END          : E N D ;
-CONTINUE     : C O N T I N U E ;
-STOP         : S T O P ;
+// Control Flow (FORTRAN I, 1957) 
+IF           : I F ;        // Arithmetic IF (three-way branch)
+GOTO         : G O T O ;    // Unconditional branch  
+DO           : D O ;        // DO loops with statement labels
+END          : E N D ;      // End of program
+CONTINUE     : C O N T I N U E ; // DO loop continuation
+STOP         : S T O P ;    // Program termination
 
-// I/O Operations (Present in FORTRAN 1957)
-READ         : R E A D ;
-WRITE        : W R I T E ;
+// I/O Operations (FORTRAN I, 1957)
+READ         : R E A D ;    // Input from cards/tape
+WRITE        : W R I T E ;  // Output (same as PRINT)
+PRINT        : P R I N T ;  // Line printer output
+PUNCH        : P U N C H ;  // Card punch output
 
-// NOTE: CALL was added in FORTRAN II (1958), not 1957
-// It should be added in FORTRAN grammar, not SharedCore
+// Array and Memory (FORTRAN I, 1957)
+DIMENSION    : D I M E N S I O N ;    // Array declarations
+EQUIVALENCE  : E Q U I V A L E N C E ; // Memory sharing
+FORMAT       : F O R M A T ;         // I/O formatting
 
-// ============================================================================
-// DATA TYPES: Present in FORTRAN 1957
-// ============================================================================
+// Program Control (FORTRAN I, 1957)  
+PAUSE        : P A U S E ;           // Operator intervention
+FREQUENCY    : F R E Q U E N C Y ;   // Optimization hint (1957 only)
+
+// Data Types (FORTRAN I, 1957)
 INTEGER      : I N T E G E R ;
 REAL         : R E A L ;
 

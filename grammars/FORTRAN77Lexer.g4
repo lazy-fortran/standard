@@ -1,8 +1,8 @@
 // FORTRAN 77 (1977) - Structured Programming Revolution  
 // Added CHARACTER data type, IF-THEN-ELSE, and PROGRAM statement
-lexer grammar Fortran77Lexer;
+lexer grammar FORTRAN77Lexer;
 
-import FortranIVLexer;  // Import FORTRAN IV (1962) constructs
+import FORTRAN66Lexer;  // Import FORTRAN 66 (1966) constructs
 
 // ====================================================================
 // FORTRAN 77 (1977) HISTORICAL OVERVIEW  
