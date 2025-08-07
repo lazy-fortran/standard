@@ -1,20 +1,21 @@
-// Fortran 90 (1990) Lexer - Revolutionary Modern Foundation
+// Fortran 90 (1990) Free-Form Lexer - Revolutionary Modern Foundation
 // The bridge between 1957-1977 fixed-form FORTRAN and modern free-form Fortran
-lexer grammar Fortran90Lexer;
+lexer grammar Fortran90FreeLexer;
 
-import FreeFormSourceLexer;  // Revolutionary free-form source format (F90 primary)
-// import FixedFormSourceLexer; // Legacy compatibility (F77 interop) - stub for now
+import FreeFormBaseLexer;  // Revolutionary free-form source format
 
 // ====================================================================
-// FORTRAN 90 LEXER OVERVIEW
+// FORTRAN 90 FREE-FORM LEXER OVERVIEW
 // ====================================================================
 //
 // Fortran 90 (ISO 1539:1991) represents the most significant revolution 
 // in Fortran history - the transition from rigid fixed-form punch card 
 // format to flexible free-form source layout.
 //
-// REVOLUTIONARY CHANGES FROM FORTRAN 77:
-// - Free-form source format (abandons 80-column punch card restrictions)
+// This lexer defines the F90 LANGUAGE features in free-form format.
+// Format rules are inherited from FreeFormBaseLexer.
+//
+// REVOLUTIONARY F90 LANGUAGE CHANGES:
 // - Module system with explicit interfaces and data encapsulation
 // - Dynamic arrays with runtime allocation (ALLOCATABLE, POINTER)
 // - Derived types (user-defined structures)
@@ -23,14 +24,10 @@ import FreeFormSourceLexer;  // Revolutionary free-form source format (F90 prima
 // - Modern I/O (NAMELIST, non-advancing)
 // - 31-character identifiers vs 6-character F77 limit
 //
-// STRATEGIC IMPORTANCE:
-// F90 serves as foundation for ALL modern standards:
-// F90 → F95 → F2003 → F2008 → F2018 → F2023 → LazyFortran2025
-//
 // ====================================================================
 
 // ====================================================================
-// FORTRAN 90 KEYWORDS (REVOLUTIONARY FEATURES)
+// FORTRAN 90 LANGUAGE KEYWORDS
 // ====================================================================
 
 // Module system (F90 major innovation - explicit interfaces and encapsulation)
@@ -55,12 +52,14 @@ ELEMENTAL       : ('e'|'E') ('l'|'L') ('e'|'E') ('m'|'M') ('e'|'E') ('n'|'N') ('
 RESULT          : ('r'|'R') ('e'|'E') ('s'|'S') ('u'|'U') ('l'|'L') ('t'|'T') ;
 
 // Derived types (F90 major innovation - user-defined structures)  
-// Note: TYPE is inherited from FreeFormSourceLexer
+TYPE            : ('t'|'T') ('y'|'Y') ('p'|'P') ('e'|'E') ;
 END_TYPE        : ('e'|'E') ('n'|'N') ('d'|'D') [ \t]+ ('t'|'T') ('y'|'Y') ('p'|'P') ('e'|'E') ;
 SEQUENCE        : ('s'|'S') ('e'|'E') ('q'|'Q') ('u'|'U') ('e'|'E') ('n'|'N') ('c'|'C') ('e'|'E') ;
 
 // Dynamic arrays and pointers (F90 major innovation - runtime memory management)
-// Note: ALLOCATABLE, POINTER, TARGET are inherited from FreeFormSourceLexer
+ALLOCATABLE     : ('a'|'A') ('l'|'L') ('l'|'L') ('o'|'O') ('c'|'C') ('a'|'A') ('t'|'T') ('a'|'A') ('b'|'B') ('l'|'L') ('e'|'E') ;
+POINTER         : ('p'|'P') ('o'|'O') ('i'|'I') ('n'|'N') ('t'|'T') ('e'|'E') ('r'|'R') ;
+TARGET          : ('t'|'T') ('a'|'A') ('r'|'R') ('g'|'G') ('e'|'E') ('t'|'T') ;
 ALLOCATE        : ('a'|'A') ('l'|'L') ('l'|'L') ('o'|'O') ('c'|'C') ('a'|'A') ('t'|'T') ('e'|'E') ;
 DEALLOCATE      : ('d'|'D') ('e'|'E') ('a'|'A') ('l'|'L') ('l'|'L') ('o'|'O') ('c'|'C') ('a'|'A') ('t'|'T') ('e'|'E') ;
 NULLIFY         : ('n'|'N') ('u'|'U') ('l'|'L') ('l'|'L') ('i'|'I') ('f'|'F') ('y'|'Y') ;
@@ -88,18 +87,22 @@ EOR             : ('e'|'E') ('o'|'O') ('r'|'R') ;
 IOSTAT          : ('i'|'I') ('o'|'O') ('s'|'S') ('t'|'T') ('a'|'A') ('t'|'T') ;
 
 // Intent specifications (F90 procedure interface enhancement)
-// Note: INTENT, IN, OUT, INOUT are inherited from FreeFormSourceLexer
+INTENT          : ('i'|'I') ('n'|'N') ('t'|'T') ('e'|'E') ('n'|'N') ('t'|'T') ;
+IN              : ('i'|'I') ('n'|'N') ;
+OUT             : ('o'|'O') ('u'|'U') ('t'|'T') ;
+INOUT           : ('i'|'I') ('n'|'N') ('o'|'O') ('u'|'U') ('t'|'T') ;
 
 // Optional and keyword arguments (F90 procedure enhancement)
 OPTIONAL        : ('o'|'O') ('p'|'P') ('t'|'T') ('i'|'I') ('o'|'O') ('n'|'N') ('a'|'A') ('l'|'L') ;
 PRESENT         : ('p'|'P') ('r'|'R') ('e'|'E') ('s'|'S') ('e'|'E') ('n'|'N') ('t'|'T') ;
 
 // Enhanced data types (F90 improvements)
-// Note: KIND and LEN are inherited from FreeFormSourceLexer
+KIND            : ('k'|'K') ('i'|'I') ('n'|'N') ('d'|'D') ;
+LEN             : ('l'|'L') ('e'|'E') ('n'|'N') ;
 SELECTED_INT_KIND     : ('s'|'S') ('e'|'E') ('l'|'L') ('e'|'E') ('c'|'C') ('t'|'T') ('e'|'E') ('d'|'D') '_' ('i'|'I') ('n'|'N') ('t'|'T') '_' ('k'|'K') ('i'|'I') ('n'|'N') ('d'|'D') ;
 SELECTED_REAL_KIND    : ('s'|'S') ('e'|'E') ('l'|'L') ('e'|'E') ('c'|'C') ('t'|'T') ('e'|'E') ('d'|'D') '_' ('r'|'R') ('e'|'E') ('a'|'A') ('l'|'L') '_' ('k'|'K') ('i'|'I') ('n'|'N') ('d'|'D') ;
 
-// Additional F90-specific keywords (not in FreeFormSourceLexer)
+// Additional F90-specific keywords
 CONTAINS        : ('c'|'C') ('o'|'O') ('n'|'N') ('t'|'T') ('a'|'A') ('i'|'I') ('n'|'N') ('s'|'S') ;
 IMPORT          : ('i'|'I') ('m'|'M') ('p'|'P') ('o'|'O') ('r'|'R') ('t'|'T') ;
 PROCEDURE       : ('p'|'P') ('r'|'R') ('o'|'O') ('c'|'C') ('e'|'E') ('d'|'D') ('u'|'U') ('r'|'R') ('e'|'E') ;
@@ -109,16 +112,14 @@ REC             : ('r'|'R') ('e'|'E') ('c'|'C') ;
 ERR             : ('e'|'E') ('r'|'R') ('r'|'R') ;
 WHILE           : ('w'|'W') ('h'|'H') ('i'|'I') ('l'|'L') ('e'|'E') ;
 
-// F90-specific BOZ constants (not in FreeFormSourceLexer)
+// F90-specific operators (inherits others from FreeFormBase)
+DOUBLE_COLON    : '::' ;
+POINTER_ASSIGN  : '=>' ;
+
+// F90-specific BOZ constants
 BINARY_CONSTANT : ('b'|'B') '\'' [01]+ '\'' ;
 OCTAL_CONSTANT  : ('o'|'O') '\'' [0-7]+ '\'' ;
 HEX_CONSTANT    : ('z'|'Z'|'x'|'X') '\'' [0-9a-fA-F]+ '\'' ;
-
-// ====================================================================  
-// FORTRAN 90 OPERATORS
-// ====================================================================
-// Note: All operators (::, =>, %, [], ==, /=, etc.) are inherited from FreeFormSourceLexer
-// No F90-specific operators need to be defined here
 
 // ====================================================================
 // FORTRAN 90 INTRINSIC FUNCTIONS (MAJOR ADDITIONS)
@@ -157,58 +158,15 @@ ADJUSTR_INTRINSIC     : ('a'|'A') ('d'|'D') ('j'|'J') ('u'|'U') ('s'|'S') ('t'|'
 REPEAT_INTRINSIC      : ('r'|'R') ('e'|'E') ('p'|'P') ('e'|'E') ('a'|'A') ('t'|'T') ;
 
 // ====================================================================
-// INHERITED TOKENS FROM MODULES
+// FORTRAN 90 FREE-FORM LEXER STATUS
 // ====================================================================
 //
-// The following tokens are inherited from imported modules:
+// IMPLEMENTATION STATUS: Complete F90 language feature coverage
+// INHERITANCE: Integrates FreeFormBaseLexer for format rules
+// ARCHITECTURE: Clean separation of format (base) and language (this)
+// INNOVATIONS: All major F90 language constructs tokenized
 //
-// From FreeFormSourceLexer:
-// - Modern source format (flexible layout, !, &, long identifiers)
-// - Basic operators (+, -, *, /, **, =, <, >, etc.)
-// - Basic keywords (IF, DO, END, FUNCTION, SUBROUTINE, etc.)
-// - Literals (INTEGER_LITERAL, REAL_LITERAL, STRING_LITERAL)
-// - Comments and whitespace handling
-//
-// From SharedCoreLexer (via FreeFormSourceLexer):
-// - Universal constructs (assignments, expressions, control flow)
-// - All FORTRAN/Fortran keywords common across standards
-// - Mathematical operators and precedence
-// - Basic I/O keywords (READ, WRITE, PRINT)
-//
-// From FixedFormSourceLexer (when implemented):
-// - Fixed-form compatibility for F77 interoperability
-// - Column-sensitive parsing for legacy code
-// - F77-style continuation and comments
-//
-// ====================================================================
-
-// ====================================================================
-// FORTRAN 90 LEXER STATUS
-// ====================================================================
-//
-// IMPLEMENTATION STATUS: Complete F90 keyword and operator coverage
-// INHERITANCE: Fully integrates with FreeFormSourceLexer and SharedCoreLexer  
-// COMPATIBILITY: Supports both F90 free-form and F77 fixed-form (when implemented)
-// INNOVATIONS: All major F90 features tokenized (modules, interfaces, derived types, etc.)
-//
-// MAJOR F90 FEATURES COVERED:
-// ✅ Module system (MODULE, USE, PUBLIC, PRIVATE) 
-// ✅ Interface blocks (INTERFACE, GENERIC, OPERATOR)
-// ✅ Derived types (TYPE, END TYPE, component access)
-// ✅ Dynamic arrays (ALLOCATABLE, POINTER, TARGET)
-// ✅ Memory management (ALLOCATE, DEALLOCATE, NULLIFY)
-// ✅ Enhanced control flow (SELECT CASE, WHERE, CYCLE, EXIT)
-// ✅ Modern I/O (NAMELIST, ADVANCE, non-advancing I/O)
-// ✅ Enhanced procedures (RECURSIVE, OPTIONAL, INTENT)
-// ✅ Array operations (constructors, intrinsics, whole-array ops)
-// ✅ Modern operators (::, =>, %, [], ==, /=, <=, >=)
-// ✅ F90 intrinsic functions (100+ new functions)
-//
-// VALIDATION: Ready for cross-validation against auto-generated F90 reference
-// EXTENSIBILITY: Prepared for F95 inheritance and extension
-// PERFORMANCE: Optimized for modular compilation and parsing efficiency
-//
-// This lexer enables complete F90 syntax recognition while maintaining
-// full backward compatibility with F77 through the shared inheritance chain.
+// This lexer enables complete F90 syntax recognition in free-form format
+// while inheriting format handling from FreeFormBaseLexer.
 //
 // ====================================================================
