@@ -30,19 +30,24 @@ import FORTRANIVLexer;  // Import FORTRAN IV (1962) constructs
 // FORTRAN 66 STANDARDIZATION FEATURES
 // ====================================================================
 
-// FORTRAN 66 introduced standardized specifications for:
+// FORTRAN 66 (X3.9-1966) standardized and formalized:
 // - Program unit structure (MAIN, SUBROUTINE, FUNCTION, BLOCK DATA)
 // - Data types (INTEGER, REAL, DOUBLE PRECISION, COMPLEX, LOGICAL)
 // - Control flow (standardized GOTO, IF, DO semantics)
 // - I/O operations (standardized READ, WRITE, FORMAT)
 // - Subprogram linkage (CALL, RETURN, COMMON, EXTERNAL)
+// - Removed machine-dependent features from FORTRAN IV implementations
 
 // Standard program unit keywords (formalized in FORTRAN 66)
-BLOCK           : B L O C K ;
-DATA            : D A T A ;
+BLOCKDATA       : B L O C K D A T A ;  // BLOCK DATA program unit
+DATA            : D A T A ;            // Data initialization statement
 
 // Standard procedure specifications (formalized in FORTRAN 66)
-EXTERNAL        : E X T E R N A L ;
+EXTERNAL        : E X T E R N A L ;    // External procedure declaration
+INTRINSIC       : I N T R I N S I C ;  // Intrinsic function specification
+
+// Standardized statement labels (1-99999, no leading zeros)
+// This was formalized in FORTRAN 66 to ensure portability
 
 // ====================================================================
 // FORTRAN 66 (1966) HISTORICAL SIGNIFICANCE
