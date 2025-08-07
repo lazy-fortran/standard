@@ -16,6 +16,95 @@ options {
 }
 
 // ============================================================================
+// FORTRAN 2003 PROGRAM STRUCTURE
+// ============================================================================
+
+// F2003 program unit (enhanced with OOP features)
+program_unit_f2003
+    : main_program_f2003
+    | module_f2003  
+    | external_subprogram_f2003
+    ;
+
+// Enhanced main program for F2003
+main_program_f2003
+    : program_stmt specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_program_stmt
+    ;
+
+// Enhanced module for F2003
+module_f2003
+    : module_stmt specification_part_f2003? module_subprogram_part? end_module_stmt
+    ;
+
+// Enhanced external subprogram for F2003
+external_subprogram_f2003
+    : function_subprogram_f2003
+    | subroutine_subprogram_f2003
+    ;
+
+// Enhanced function subprogram for F2003
+function_subprogram_f2003
+    : function_stmt_f2003 specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_function_stmt
+    ;
+
+// Enhanced subroutine subprogram for F2003
+subroutine_subprogram_f2003
+    : subroutine_stmt_f2003 specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_subroutine_stmt
+    ;
+
+// Enhanced function statement for F2003
+function_stmt_f2003
+    : prefix? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN suffix? NEWLINE
+    ;
+
+// Enhanced subroutine statement for F2003
+subroutine_stmt_f2003
+    : prefix? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? BIND LPAREN C (COMMA NAME ASSIGN STRING_LITERAL)? RPAREN NEWLINE
+    | prefix? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? NEWLINE
+    ;
+
+// Enhanced internal subprogram part for F2003
+internal_subprogram_part_f2003
+    : contains_stmt internal_subprogram+
+    ;
+
+// Enhanced specification part for F2003
+specification_part_f2003
+    : (use_stmt | import_stmt | declaration_construct_f2003)*
+    ;
+
+// Enhanced declaration construct for F2003
+declaration_construct_f2003
+    : derived_type_def_f2003
+    | class_declaration_stmt
+    | procedure_declaration_stmt
+    | type_declaration_stmt
+    | volatile_stmt
+    | protected_stmt
+    | declaration_construct    // Inherit F95 declarations
+    ;
+
+// Enhanced execution part for F2003
+execution_part_f2003
+    : executable_construct_f2003*
+    ;
+
+// Enhanced executable construct for F2003
+executable_construct_f2003
+    : assignment_stmt
+    | call_stmt
+    | associate_construct
+    | block_construct
+    | allocate_stmt_f2003
+    | wait_stmt
+    | flush_stmt
+    | if_construct
+    | do_construct
+    | select_case_construct
+    | executable_construct    // Inherit F95 constructs
+    ;
+
+// ============================================================================
 // FORTRAN 2003 NEW CONSTRUCTS - Object-Oriented Programming
 // ============================================================================
 

@@ -9,8 +9,8 @@ import os
 import pytest
 from pathlib import Path
 
-# Add build directories to path
-sys.path.append(str(Path(__file__).parent.parent.parent / "build" / "Fortran2003"))
+# Add grammars directory to path
+sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
 
 from antlr4 import *
 
@@ -27,7 +27,7 @@ class TestFortran2003Unified:
             lexer = Fortran2003Lexer(input_stream)
             parser = Fortran2003Parser(CommonTokenStream(lexer))
             
-            tree = parser.program_unit_f90()  # Start with F90 rule
+            tree = parser.program_unit_f2003()  # Use F2003 rule
             errors = parser.getNumberOfSyntaxErrors()
             
             if expect_success:
