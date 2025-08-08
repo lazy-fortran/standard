@@ -80,6 +80,7 @@ end module test"""
         tree, errors = self.parse_code(code)
         assert errors == 0, f"IEEE arithmetic ONLY import failed: {errors} errors"
     
+    
     @pytest.mark.xfail(reason="PROGRAM unit parsing issue - line 10:8 'if' construct not recognized in program context")
     def test_ieee_exception_handling_basic(self):
         """Basic IEEE exception handling should parse"""
