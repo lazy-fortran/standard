@@ -73,7 +73,7 @@ suffix
 
 // Override F90 module to use F2003 specification part
 module
-    : module_stmt specification_part_f2003? module_subprogram_part? end_module_stmt
+    : module_stmt NEWLINE* specification_part_f2003? NEWLINE* module_subprogram_part? NEWLINE* end_module_stmt
     ;
 
 // Override F90 module_stmt to handle newlines
