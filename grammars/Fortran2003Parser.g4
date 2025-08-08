@@ -211,7 +211,7 @@ executable_construct_f2003
 
 // Enhanced derived type definition with OOP features (F2003)
 derived_type_def_f2003
-    : derived_type_stmt_f2003
+    : derived_type_stmt_f2003 NEWLINE*
       type_param_def_stmt*
       private_or_sequence*
       component_part?
@@ -245,9 +245,9 @@ binding_private_stmt
     ;
 
 type_bound_proc_binding
-    : type_bound_procedure_stmt
-    | type_bound_generic_stmt  
-    | final_procedure_stmt
+    : type_bound_procedure_stmt NEWLINE?
+    | type_bound_generic_stmt NEWLINE?
+    | final_procedure_stmt NEWLINE?
     ;
 
 // Override F90 contains_stmt to handle NEWLINE properly in F2003
@@ -261,8 +261,8 @@ component_part
     ;
 
 component_def_stmt
-    : data_component_def_stmt        // Data component declarations
-    | proc_component_def_stmt        // Procedure pointer components
+    : data_component_def_stmt NEWLINE?   // Data component declarations
+    | proc_component_def_stmt NEWLINE?   // Procedure pointer components
     ;
 
 data_component_def_stmt
@@ -287,7 +287,9 @@ sequence_stmt
 // Type-bound procedure statement (following reference grammar)
 type_bound_procedure_stmt
     : PROCEDURE ((COMMA binding_attr_list)? DOUBLE_COLON)?
-      type_bound_proc_decl_list NEWLINE
+      type_bound_proc_decl_list
+    | PROCEDURE LPAREN IDENTIFIER RPAREN (COMMA binding_attr_list)? DOUBLE_COLON
+      type_bound_proc_decl_list
     ;
 
 binding_attr_list
