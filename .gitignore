@@ -85,9 +85,3 @@ Thumbs.db
 # debug information files
 *.dwo
 
-# ALWAYS commit source files and validation reports
-!grammars/                # Grammar source files (.g4) (COMMIT)
-!tests/                   # All test files (COMMIT)
-!scripts/                 # Build and utility scripts (COMMIT)
-!validation/reports/      # Validation results (COMMIT)
-!validation/tools/        # Validation scripts (COMMIT)

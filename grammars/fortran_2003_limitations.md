@@ -70,19 +70,26 @@ These features are tracked in separate GitHub issues for future implementation:
 - **Missing**: Complex polymorphic operations
 - **Missing**: Advanced abstract interface features with IMPORT
 
-### 6. C Interoperability (Issue #24 - COMPLETE ✅)
-- ✅ **Working**: All 34 C interop type tokens recognized (C_INT, C_FLOAT, C_PTR, etc.)
-- ✅ **Working**: BIND(C) syntax for subroutines and functions
-- ✅ **Working**: BIND(C, NAME="...") with explicit naming
-- ✅ **Working**: BIND(C) syntax for derived types (`type, bind(c) :: name`)
-- ✅ **Working**: USE ISO_C_BINDING module support
-- ✅ **Working**: USE ISO_C_BINDING with ONLY clause
-- ✅ **Working**: Kind selectors with C types (`integer(c_int)`, `real(c_float)`)
-- ✅ **Working**: VALUE attribute for procedure arguments
-- ✅ **Working**: IMPORT statements with C types (`import :: c_double`)
-- ✅ **Working**: Complete C interoperability examples with all features
-- ✅ **Test Status**: 10/10 comprehensive C interop tests passing
-- **Status**: Full C interoperability implementation complete
+### 6. C Interoperability (Issue #24 - PARTIALLY COMPLETE)
+**Working Features:**
+- ✅ All 34 C interop type tokens recognized (C_INT, C_FLOAT, C_PTR, etc.)
+- ✅ Basic BIND(C) syntax without NAME clause (`subroutine name() bind(c)`)
+- ✅ USE ISO_C_BINDING module support
+- ✅ USE ISO_C_BINDING with ONLY clause  
+- ✅ Kind selectors with C types (`integer(c_int)`, `real(c_float)`)
+- ✅ VALUE attribute for procedure arguments
+- ✅ C types in variable declarations
+
+**Known Limitations (Not Yet Implemented):**
+- ❌ BIND(C, NAME="...") syntax fails parsing
+- ❌ BIND(C) for functions may have issues
+- ❌ BIND(C) for derived types untested
+- ❌ Complex IMPORT statements untested
+
+**Test Status:**
+- Semantic validation: 10/10 tests passing
+- Tests explicitly verify and document known limitations
+- **Status**: Basic C interoperability works; advanced features pending
 
 ## Working Features
 
