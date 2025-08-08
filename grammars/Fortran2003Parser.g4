@@ -932,10 +932,21 @@ assignment_stmt
         // Procedure pointer assignment
     ;
 
-// Enhanced F2003 expression that includes intrinsic functions
+// Enhanced F2003 expression that includes intrinsic functions  
 expr_f2003
-    : expr_f90    // Inherit F90 expressions
-    | primary     // Use F2003 primary (includes intrinsic_function_call)
+    : expr_f2003 GT expr_f2003                // Greater than
+    | expr_f2003 LT expr_f2003                // Less than  
+    | expr_f2003 GE expr_f2003                // Greater than or equal
+    | expr_f2003 LE expr_f2003                // Less than or equal
+    | expr_f2003 EQ expr_f2003                // Equal
+    | expr_f2003 NE expr_f2003                // Not equal
+    | expr_f2003 POWER expr_f2003             // Exponentiation (highest precedence)
+    | expr_f2003 (MULTIPLY | DIVIDE) expr_f2003  // Multiplication/division
+    | expr_f2003 (PLUS | MINUS) expr_f2003    // Addition/subtraction
+    | MINUS expr_f2003                        // Unary minus
+    | PLUS expr_f2003                         // Unary plus
+    | expr_f90                                // Inherit F90 expressions  
+    | primary                                 // Use F2003 primary (includes intrinsic_function_call)
     ;
 
 // Left-hand side expression (variable, array element, component)
@@ -968,7 +979,7 @@ if_construct
     ;
 
 logical_expr
-    : primary
+    : expr_f2003
     ;
 
 do_construct
@@ -1032,6 +1043,7 @@ intrinsic_function_call
     | LOGICAL LPAREN actual_arg_list RPAREN     // LOGICAL type conversion
     | CHARACTER LPAREN actual_arg_list RPAREN   // CHARACTER type conversion
     | COMPLEX LPAREN actual_arg_list RPAREN     // COMPLEX type conversion
+    | SUM_INTRINSIC LPAREN actual_arg_list RPAREN  // SUM function
     | ieee_function_call
     ;
 
