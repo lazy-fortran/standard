@@ -474,6 +474,7 @@ proc_component_attr_spec
     | NOPASS
     | PASS (LPAREN IDENTIFIER RPAREN)?
     | POINTER
+    | DEFERRED      // F2003 deferred type-bound procedures
     ;
 
 proc_decl_list
