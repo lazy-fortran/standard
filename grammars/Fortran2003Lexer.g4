@@ -152,12 +152,17 @@ IEEE_ROUNDING    : I E E E '_' R O U N D I N G ;
 IEEE_SQRT        : I E E E '_' S Q R T ;
 IEEE_UNDERFLOW_FLAG : I E E E '_' U N D E R F L O W '_' F L A G ;
 
-// Override F90 keywords that conflict with FIXED_FORM_COMMENT
-CONTAINS         : [cC] O N T A I N S ;
+// Override F90 keywords to ensure they take precedence
+CONTAINS         : C O N T A I N S ;
 
-// Override FIXED_FORM_COMMENT to be extremely restrictive - only match at line start  
+// Override FIXED_FORM_COMMENT to prevent conflicts - only match 'C' or 'c' followed by space 
 FIXED_FORM_COMMENT  
-    : [\r\n][ \t]*[cC] ~[\r\n]*  -> channel(HIDDEN)  // Only match 'c' at start of line
+    : [\r\n][ \t]*[cC][ \t] ~[\r\n]*  -> channel(HIDDEN)  // 'C' or 'c' followed by space
+    ;
+
+// Additional fixed-form comment styles  
+FIXED_FORM_COMMENT_STAR
+    : [\r\n][ \t]*[cC][*!] ~[\r\n]*  -> channel(HIDDEN)   // 'C*' or 'C!' style comments
     ;
 
 STAR_COMMENT
