@@ -113,6 +113,43 @@ CLASS_DEFAULT    : C L A S S '_' D E F A U L T ;
 ERRMSG           : E R R M S G ;
 ID               : I D ;
 
+// IEEE arithmetic module names (F2003)
+IEEE_EXCEPTIONS  : I E E E '_' E X C E P T I O N S ;
+IEEE_ARITHMETIC  : I E E E '_' A R I T H M E T I C ;
+IEEE_FEATURES    : I E E E '_' F E A T U R E S ;
+
+// IEEE exception types  
+IEEE_OVERFLOW    : I E E E '_' O V E R F L O W ;
+IEEE_UNDERFLOW   : I E E E '_' U N D E R F L O W ;
+IEEE_DIVIDE_BY_ZERO : I E E E '_' D I V I D E '_' B Y '_' Z E R O ;
+IEEE_INVALID     : I E E E '_' I N V A L I D ;
+IEEE_INEXACT     : I E E E '_' I N E X A C T ;
+
+// IEEE special values
+IEEE_POSITIVE_INF : I E E E '_' P O S I T I V E '_' I N F ;
+IEEE_NEGATIVE_INF : I E E E '_' N E G A T I V E '_' I N F ;
+IEEE_QUIET_NAN   : I E E E '_' Q U I E T '_' N A N ;
+IEEE_SIGNALING_NAN : I E E E '_' S I G N A L I N G '_' N A N ;
+
+// IEEE rounding modes
+IEEE_NEAREST     : I E E E '_' N E A R E S T ;
+IEEE_TO_ZERO     : I E E E '_' T O '_' Z E R O ;
+IEEE_UP          : I E E E '_' U P ;
+IEEE_DOWN        : I E E E '_' D O W N ;
+
+// IEEE features
+IEEE_DATATYPE    : I E E E '_' D A T A T Y P E ;
+IEEE_DENORMAL    : I E E E '_' D E N O R M A L ;
+IEEE_DIVIDE      : I E E E '_' D I V I D E ;
+IEEE_HALTING     : I E E E '_' H A L T I N G ;
+IEEE_INEXACT_FLAG : I E E E '_' I N E X A C T '_' F L A G ;
+IEEE_INF         : I E E E '_' I N F ;
+IEEE_INVALID_FLAG : I E E E '_' I N V A L I D '_' F L A G ;
+IEEE_NAN         : I E E E '_' N A N ;
+IEEE_ROUNDING    : I E E E '_' R O U N D I N G ;
+IEEE_SQRT        : I E E E '_' S Q R T ;
+IEEE_UNDERFLOW_FLAG : I E E E '_' U N D E R F L O W '_' F L A G ;
+
 // Override F90 keywords that conflict with FIXED_FORM_COMMENT
 CONTAINS         : [cC] O N T A I N S ;
 
