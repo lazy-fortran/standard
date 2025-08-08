@@ -54,10 +54,10 @@ main_program
 
 // Enhanced module for F2003
 module_f2003
-    : module_stmt_f2003 specification_part_f2003? module_subprogram_part? end_module_stmt_f2003
+    : module_stmt specification_part_f2003? module_subprogram_part? end_module_stmt
     ;
 
-// Override F90 rules to use F2003 enhanced versions
+// Override F90 specification_part to use F2003 enhanced version
 specification_part
     : specification_part_f2003
     ;
@@ -74,16 +74,6 @@ module_stmt
 
 // Override F90 end_module_stmt to handle newlines
 end_module_stmt
-    : END_MODULE (IDENTIFIER)? NEWLINE*
-    ;
-
-// F2003 module statement with newline support
-module_stmt_f2003
-    : MODULE IDENTIFIER NEWLINE*
-    ;
-
-// F2003 end module statement with newline support  
-end_module_stmt_f2003
     : END_MODULE (IDENTIFIER)? NEWLINE*
     ;
 
@@ -329,7 +319,7 @@ type_attr_spec
     | PRIVATE
     | ABSTRACT
     | EXTENDS LPAREN IDENTIFIER RPAREN
-    | BIND LPAREN C RPAREN
+    | BIND LPAREN IDENTIFIER RPAREN    // BIND(C) where C is an identifier
     ;
 
 // Type parameter definitions
@@ -568,7 +558,7 @@ print_stmt
 
 // STOP statement
 stop_stmt
-    : STOP (INTEGER_LITERAL | STRING_LITERAL)? NEWLINE
+    : STOP (INTEGER_LITERAL | string_literal)? NEWLINE
     ;
 
 // ============================================================================
@@ -822,7 +812,6 @@ primary
     | INTEGER_LITERAL
     | LABEL              // Accept LABEL as integer literal (token precedence issue)
     | REAL_LITERAL
-    | STRING_LITERAL
     | SINGLE_QUOTE_STRING
     | DOUBLE_QUOTE_STRING  
     | LPAREN primary RPAREN
@@ -858,8 +847,14 @@ literal_f90
 
 // BIND(C) specification for C interoperability
 binding_spec
-    : BIND LPAREN C RPAREN
-    | BIND LPAREN C COMMA NAME EQUALS STRING_LITERAL RPAREN
+    : BIND LPAREN IDENTIFIER RPAREN                                      // BIND(C)
+    | BIND LPAREN IDENTIFIER COMMA NAME EQUALS string_literal RPAREN     // BIND(C, NAME="func")
+    ;
+
+// String literal for BIND(C) name
+string_literal
+    : DOUBLE_QUOTE_STRING
+    | SINGLE_QUOTE_STRING
     ;
 
 // C interoperability types

@@ -110,14 +110,8 @@ CLASS_DEFAULT    : C L A S S '_' D E F A U L T ;
 ERRMSG           : E R R M S G ;
 ID               : I D ;
 
-// Single letter token for C (for BIND(C)) - override fragment
-C                : [cC] ;
-
-// String literals (alias for F90 strings)
-STRING_LITERAL   : DOUBLE_QUOTE_STRING | SINGLE_QUOTE_STRING ;
-
 // Override F90 keywords that conflict with FIXED_FORM_COMMENT
-CONTAINS         : C O N T A I N S ;
+CONTAINS         : [cC] O N T A I N S ;
 
 // ============================================================================
 // CASE-INSENSITIVE FRAGMENTS
@@ -125,7 +119,7 @@ CONTAINS         : C O N T A I N S ;
 
 fragment A : [aA] ;
 fragment B : [bB] ;
-// fragment C : [cC] ; // Removed - C is now a token, not fragment
+fragment C : [cC] ;
 fragment D : [dD] ;
 fragment E : [eE] ;
 fragment F : [fF] ;
