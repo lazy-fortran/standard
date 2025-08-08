@@ -47,18 +47,33 @@ end_program_stmt
     : END (PROGRAM (IDENTIFIER)?)? NEWLINE*
     ;
 
-// Enhanced module for F2003
-module_f2003
-    : module_stmt_f2003 specification_part_f2003? module_subprogram_part? end_module_stmt_f2003
+// Override F90 main_program to use F2003 specification part
+main_program
+    : program_stmt specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_program_stmt
     ;
 
-// F2003 module statement with newline support
-module_stmt_f2003
+// Enhanced module for F2003
+module_f2003
+    : module_stmt specification_part_f2003? module_subprogram_part? end_module_stmt
+    ;
+
+// Override F90 specification_part to use F2003 enhanced version
+specification_part
+    : specification_part_f2003
+    ;
+
+// Override F90 module to use F2003 specification part
+module
+    : module_stmt specification_part_f2003? module_subprogram_part? end_module_stmt
+    ;
+
+// Override F90 module_stmt to handle newlines
+module_stmt  
     : MODULE IDENTIFIER NEWLINE*
     ;
 
-// F2003 end module statement with newline support  
-end_module_stmt_f2003
+// Override F90 end_module_stmt to handle newlines
+end_module_stmt
     : END_MODULE (IDENTIFIER)? NEWLINE*
     ;
 
@@ -80,13 +95,12 @@ subroutine_subprogram_f2003
 
 // Enhanced function statement for F2003
 function_stmt_f2003
-    : prefix? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN suffix? NEWLINE
+    : prefix? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN suffix? binding_spec? NEWLINE
     ;
 
 // Enhanced subroutine statement for F2003
 subroutine_stmt_f2003
-    : prefix? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? BIND LPAREN C (COMMA NAME ASSIGN STRING_LITERAL)? RPAREN NEWLINE
-    | prefix? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? NEWLINE
+    : prefix? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? binding_spec? NEWLINE
     ;
 
 // Enhanced internal subprogram part for F2003
@@ -108,11 +122,11 @@ interface_body
 
 // Interface-specific statement overrides with NEWLINE support
 subroutine_stmt_interface
-    : (prefix)? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? NEWLINE
+    : (prefix)? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? binding_spec? NEWLINE
     ;
 
 function_stmt_interface
-    : (prefix)? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN (suffix)? NEWLINE
+    : (prefix)? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN (suffix)? binding_spec? NEWLINE
     ;
 
 end_subroutine_stmt_interface
@@ -305,7 +319,7 @@ type_attr_spec
     | PRIVATE
     | ABSTRACT
     | EXTENDS LPAREN IDENTIFIER RPAREN
-    | BIND LPAREN C RPAREN
+    | BIND LPAREN IDENTIFIER RPAREN    // BIND(C) where C is an identifier
     ;
 
 // Type parameter definitions
@@ -544,7 +558,7 @@ print_stmt
 
 // STOP statement
 stop_stmt
-    : STOP (INTEGER_LITERAL | STRING_LITERAL)? NEWLINE
+    : STOP (INTEGER_LITERAL | string_literal)? NEWLINE
     ;
 
 // ============================================================================
@@ -566,10 +580,6 @@ object_name_list
 // ============================================================================
 // SIMPLIFIED UTILITY RULES
 // ============================================================================
-
-specification_part
-    : (use_stmt | import_stmt | declaration_construct)*
-    ;
 
 use_stmt
     : USE IDENTIFIER NEWLINE
@@ -595,6 +605,7 @@ type_spec
     | COMPLEX
     | CHARACTER
     | LOGICAL
+    | c_interop_type
     ;
 
 letter_spec_list
@@ -607,7 +618,12 @@ letter_spec
     ;
 
 only_list
-    : IDENTIFIER (COMMA IDENTIFIER)*
+    : only_name (COMMA only_name)*
+    ;
+
+only_name
+    : IDENTIFIER
+    | c_interop_type
     ;
 
 declaration_construct
@@ -623,14 +639,20 @@ type_declaration_stmt
     : INTEGER kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
     | REAL kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
     | CHARACTER char_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
+    | c_interop_type (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
     | TYPE LPAREN derived_type_spec RPAREN (COMMA attr_spec_list)? 
       DOUBLE_COLON entity_decl_list NEWLINE
     ;
 
 // Kind selector for parameterized types
 kind_selector
-    : LPAREN IDENTIFIER RPAREN              // (k) - kind parameter
-    | LPAREN KIND EQUALS IDENTIFIER RPAREN  // (kind=k) - explicit kind
+    : LPAREN kind_param RPAREN              // (k) - kind parameter
+    | LPAREN KIND EQUALS kind_param RPAREN  // (kind=k) - explicit kind
+    ;
+
+kind_param
+    : IDENTIFIER
+    | c_interop_type
     ;
 
 // Character selector (simplified)
@@ -643,6 +665,7 @@ char_selector
 derived_type_spec
     : IDENTIFIER                                          // Basic type name
     | IDENTIFIER LPAREN type_param_spec_list RPAREN      // Parameterized type
+    | c_interop_type                                      // C interop types like c_int, c_ptr
     ;
 
 // Type parameter specification list for instantiation
@@ -670,6 +693,7 @@ attr_spec
     | VOLATILE
     | PROTECTED
     | PARAMETER
+    | VALUE        // F2003 C interoperability attribute
     ;
 
 intent_spec
@@ -788,7 +812,6 @@ primary
     | INTEGER_LITERAL
     | LABEL              // Accept LABEL as integer literal (token precedence issue)
     | REAL_LITERAL
-    | STRING_LITERAL
     | SINGLE_QUOTE_STRING
     | DOUBLE_QUOTE_STRING  
     | LPAREN primary RPAREN
@@ -820,6 +843,54 @@ literal_f90
     | SINGLE_QUOTE_STRING           // Single-quoted string
     | logical_literal_f90           // Enhanced logical literals
     | boz_literal_constant          // Binary/octal/hex literals (F90)
+    ;
+
+// BIND(C) specification for C interoperability
+binding_spec
+    : BIND LPAREN IDENTIFIER RPAREN                                      // BIND(C)
+    | BIND LPAREN IDENTIFIER COMMA NAME EQUALS string_literal RPAREN     // BIND(C, NAME="func")
+    ;
+
+// String literal for BIND(C) name
+string_literal
+    : DOUBLE_QUOTE_STRING
+    | SINGLE_QUOTE_STRING
+    ;
+
+// C interoperability types
+c_interop_type
+    : C_INT
+    | C_SHORT
+    | C_LONG
+    | C_LONG_LONG
+    | C_SIGNED_CHAR
+    | C_SIZE_T
+    | C_INT8_T
+    | C_INT16_T
+    | C_INT32_T
+    | C_INT64_T
+    | C_INT_LEAST8_T
+    | C_INT_LEAST16_T
+    | C_INT_LEAST32_T
+    | C_INT_LEAST64_T
+    | C_INT_FAST8_T
+    | C_INT_FAST16_T
+    | C_INT_FAST32_T
+    | C_INT_FAST64_T
+    | C_INTMAX_T
+    | C_INTPTR_T
+    | C_FLOAT
+    | C_DOUBLE
+    | C_LONG_DOUBLE
+    | C_FLOAT_COMPLEX
+    | C_DOUBLE_COMPLEX
+    | C_LONG_DOUBLE_COMPLEX
+    | C_BOOL
+    | C_CHAR
+    | C_PTR
+    | C_FUNPTR
+    | C_NULL_PTR
+    | C_NULL_FUNPTR
     ;
 
 // Type name
