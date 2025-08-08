@@ -35,7 +35,8 @@ program_unit_f2003
 
 // Enhanced main program for F2003
 main_program_f2003
-    : program_stmt specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_program_stmt
+    : program_stmt specification_part_f2003? execution_part_f2003?
+      internal_subprogram_part_f2003? end_program_stmt
     ;
 
 // F2003 program statement with newline support
@@ -50,7 +51,8 @@ end_program_stmt
 
 // Override F90 main_program to use F2003 specification part
 main_program
-    : program_stmt specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_program_stmt
+    : program_stmt specification_part_f2003? execution_part_f2003?
+      internal_subprogram_part_f2003? end_program_stmt
     ;
 
 // Enhanced module for F2003
@@ -91,17 +93,20 @@ external_subprogram_f2003
 
 // Enhanced function subprogram for F2003
 function_subprogram_f2003
-    : function_stmt_f2003 specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_function_stmt
+    : function_stmt_f2003 specification_part_f2003? execution_part_f2003?
+      internal_subprogram_part_f2003? end_function_stmt
     ;
 
 // Enhanced subroutine subprogram for F2003
 subroutine_subprogram_f2003
-    : subroutine_stmt_f2003 specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_subroutine_stmt
+    : subroutine_stmt_f2003 specification_part_f2003? execution_part_f2003?
+      internal_subprogram_part_f2003? end_subroutine_stmt
     ;
 
 // Enhanced function statement for F2003
 function_stmt_f2003
-    : prefix? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN suffix? binding_spec? NEWLINE
+    : prefix? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN
+      suffix? binding_spec? NEWLINE
     ;
 
 // Enhanced subroutine statement for F2003
@@ -132,7 +137,8 @@ subroutine_stmt_interface
     ;
 
 function_stmt_interface
-    : (prefix)? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN (suffix)? binding_spec? NEWLINE
+    : (prefix)? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN
+      (suffix)? binding_spec? NEWLINE
     ;
 
 end_subroutine_stmt_interface
@@ -214,7 +220,8 @@ derived_type_def_f2003
 
 // F2003 enhanced type statement with OOP attributes  
 derived_type_stmt_f2003
-    : TYPE (COMMA type_attr_spec_list)? DOUBLE_COLON type_name (LPAREN type_param_name_list RPAREN)?
+    : TYPE (COMMA type_attr_spec_list)? DOUBLE_COLON type_name
+      (LPAREN type_param_name_list RPAREN)?
     | TYPE DOUBLE_COLON type_name (LPAREN type_param_name_list RPAREN)?
     ;
 
@@ -285,7 +292,8 @@ proc_binding
 
 // Generic type-bound procedures
 type_bound_generic_stmt
-    : GENERIC (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON generic_spec POINTER_ASSIGN generic_binding_list NEWLINE
+    : GENERIC (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON generic_spec
+      POINTER_ASSIGN generic_binding_list NEWLINE
     ;
 
 generic_binding_list
@@ -411,7 +419,8 @@ procedure_entity_decl_list
 
 // Procedure pointer components (different syntax from regular procedure declarations)
 proc_component_def_stmt
-    : PROCEDURE LPAREN (IDENTIFIER | INTERFACE) RPAREN COMMA proc_component_attr_spec_list DOUBLE_COLON proc_decl_list NEWLINE
+    : PROCEDURE LPAREN (IDENTIFIER | INTERFACE) RPAREN COMMA
+      proc_component_attr_spec_list DOUBLE_COLON proc_decl_list NEWLINE
     ;
 
 proc_component_attr_spec_list
@@ -713,11 +722,16 @@ declaration_construct
     ;
 
 type_declaration_stmt
-    : INTEGER kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
-    | REAL kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
-    | LOGICAL kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
-    | CHARACTER char_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
-    | c_interop_type (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
+    : INTEGER kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON 
+      entity_decl_list NEWLINE
+    | REAL kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON 
+      entity_decl_list NEWLINE
+    | LOGICAL kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON 
+      entity_decl_list NEWLINE
+    | CHARACTER char_selector? (COMMA attr_spec_list)? DOUBLE_COLON 
+      entity_decl_list NEWLINE
+    | c_interop_type (COMMA attr_spec_list)? DOUBLE_COLON 
+      entity_decl_list NEWLINE
     | TYPE LPAREN derived_type_spec RPAREN (COMMA attr_spec_list)? 
       DOUBLE_COLON entity_decl_list NEWLINE
     ;
@@ -793,12 +807,14 @@ entity_decl_list
     ;
 
 entity_decl
-    : identifier_or_keyword (LPAREN array_spec RPAREN)? (EQUALS expr_f90)?  // F2003 entity declaration with initialization
+    : identifier_or_keyword (LPAREN array_spec RPAREN)? (EQUALS expr_f90)?
+        // F2003 entity declaration with initialization
     ;
 
 // Override F90 entity declaration to support keywords as identifiers
 entity_decl_f90
-    : identifier_or_keyword (LPAREN array_spec_f90 RPAREN)? (MULTIPLY char_length)? (ASSIGN expr_f90)?
+    : identifier_or_keyword (LPAREN array_spec_f90 RPAREN)? (MULTIPLY char_length)?
+      (ASSIGN expr_f90)?
     ;
 
 // Override F90 module_subprogram_part to handle NEWLINEs properly
@@ -838,8 +854,10 @@ executable_construct
 assignment_stmt
     : identifier_or_keyword EQUALS primary NEWLINE
     | identifier_or_keyword PERCENT identifier_or_keyword EQUALS primary NEWLINE
-    | identifier_or_keyword POINTER_ASSIGN primary NEWLINE                      // Procedure pointer assignment
-    | identifier_or_keyword PERCENT identifier_or_keyword POINTER_ASSIGN primary NEWLINE   // Component procedure pointer assignment
+    | identifier_or_keyword POINTER_ASSIGN primary NEWLINE
+        // Procedure pointer assignment
+    | identifier_or_keyword PERCENT identifier_or_keyword POINTER_ASSIGN primary NEWLINE
+        // Component procedure pointer assignment
     ;
 
 call_stmt
