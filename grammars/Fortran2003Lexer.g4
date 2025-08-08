@@ -161,7 +161,7 @@ FIXED_FORM_COMMENT
     ;
 
 STAR_COMMENT
-    : '*' ~[\r\n]* -> channel(HIDDEN)              // Star comments
+    : [\r\n][ \t]*'*' ~[\r\n]* -> channel(HIDDEN)  // Star comments only at start of line
     ;
 
 // ============================================================================
