@@ -71,10 +71,12 @@ suffix
     : RESULT LPAREN identifier_or_keyword RPAREN
     ;
 
-// Override F90 module to use F2003 specification part - inline module procedures
+// Override F90 module to use F2003 specification part - be explicit about structure
 module
-    : module_stmt NEWLINE* specification_part_f2003? NEWLINE* contains_stmt NEWLINE* (function_subprogram_f2003 | subroutine_subprogram_f2003) (NEWLINE* (function_subprogram_f2003 | subroutine_subprogram_f2003))* NEWLINE* end_module_stmt
-    | module_stmt NEWLINE* specification_part_f2003? NEWLINE* end_module_stmt
+    : module_stmt NEWLINE* 
+      specification_part_f2003? NEWLINE* 
+      ( contains_stmt NEWLINE* (module_subprogram NEWLINE*)* )? 
+      end_module_stmt
     ;
 
 // Override F90 module_stmt to handle newlines
@@ -175,9 +177,13 @@ interface_block
     : interface_stmt (NEWLINE* interface_specification)* NEWLINE* end_interface_stmt
     ;
 
-// Enhanced specification part for F2003 - follow F90 structure for better boundaries
+// Enhanced specification part for F2003 - non-greedy to avoid consuming module-level contains
 specification_part_f2003
-    : (NEWLINE* (use_stmt | import_stmt))* (NEWLINE* implicit_stmt)* (NEWLINE* declaration_construct_f2003 NEWLINE?)*
+    : specification_element_f2003*
+    ;
+
+specification_element_f2003
+    : NEWLINE* (use_stmt | import_stmt | implicit_stmt | declaration_construct_f2003) NEWLINE?
     ;
 
 // Enhanced declaration construct for F2003  
@@ -266,7 +272,7 @@ contains_stmt
     : CONTAINS NEWLINE?
     ;
 
-// Component part (following reference grammar)
+// Component part (general version for other contexts)
 component_part
     : component_def_stmt*
     ;
@@ -475,11 +481,11 @@ proc_target
     ;
 
 // Procedure pointer components (different syntax from regular procedure declarations)
+// Must have either parentheses or POINTER attribute to be a component
 proc_component_def_stmt
     : PROCEDURE LPAREN (IDENTIFIER | INTERFACE) RPAREN COMMA
       proc_component_attr_spec_list DOUBLE_COLON proc_decl_list NEWLINE
-    | PROCEDURE LPAREN IDENTIFIER RPAREN DOUBLE_COLON proc_decl_list NEWLINE
-    | PROCEDURE DOUBLE_COLON proc_decl_list NEWLINE
+    | PROCEDURE LPAREN (IDENTIFIER | INTERFACE) RPAREN DOUBLE_COLON proc_decl_list NEWLINE
     ;
 
 proc_component_attr_spec_list
@@ -879,7 +885,7 @@ entity_decl_f90
 
 // Override F90 module_subprogram_part to handle NEWLINEs properly
 module_subprogram_part
-    : contains_stmt NEWLINE* (module_subprogram NEWLINE*)+ 
+    : contains_stmt NEWLINE* (module_subprogram NEWLINE*)*
     ;
 
 // Array specification (simplified)
@@ -912,10 +918,10 @@ executable_construct
 
 // Simplified constructs (inherit complex ones from F95)
 assignment_stmt
-    : identifier_or_keyword EQUALS primary NEWLINE
-    | identifier_or_keyword PERCENT identifier_or_keyword EQUALS primary NEWLINE
+    : identifier_or_keyword EQUALS expr_f90 NEWLINE
+    | identifier_or_keyword PERCENT identifier_or_keyword EQUALS expr_f90 NEWLINE
     | identifier_or_keyword POINTER_ASSIGN primary NEWLINE
-        // Procedure pointer assignment
+        // Procedure pointer assignment (keep primary for procedure names)
     | identifier_or_keyword PERCENT identifier_or_keyword POINTER_ASSIGN primary NEWLINE
         // Component procedure pointer assignment
     ;
