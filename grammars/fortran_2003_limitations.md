@@ -5,7 +5,7 @@
 ### Quick Summary
 - **Basic OOP**: ✅ Working (types, inheritance, CLASS)
 - **Advanced OOP**: ✅ Working (type-bound procedures, DEFERRED, FINAL, GENERIC)
-- **Parameterized Derived Types**: ✅ Working (KIND/LEN parameters, deferred/assumed values)
+- **Parameterized Derived Types**: ✅ Working (KIND/LEN params, deferred/assumed)
 - **Procedure Pointers**: ✅ Working (abstract interfaces, declarations, assignments, calls)
 - **Module System**: ✅ Working (CONTAINS, interfaces, IMPORT)
 - **New Constructs**: ✅ Working (ASSOCIATE, BLOCK, PROGRAM units)
