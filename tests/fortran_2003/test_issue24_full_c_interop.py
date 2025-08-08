@@ -57,10 +57,12 @@ end function add"""
     
     def test_bind_c_derived_type(self):
         """BIND(C) derived type should parse"""
-        code = """type, bind(c) :: my_struct
-    integer(c_int) :: x
-    real(c_float) :: y
-end type my_struct"""
+        code = """module types
+    type, bind(c) :: my_struct
+        integer(c_int) :: x
+        real(c_float) :: y
+    end type my_struct
+end module types"""
         
         tree, errors = self.parse_code(code)
         assert errors == 0, f"BIND(C) derived type should parse, got {errors}"

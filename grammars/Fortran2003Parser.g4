@@ -487,7 +487,12 @@ import_stmt
     ;
 
 import_name_list
-    : IDENTIFIER (COMMA IDENTIFIER)*
+    : import_name (COMMA import_name)*
+    ;
+
+import_name
+    : IDENTIFIER
+    | c_interop_type  // Allow C interop types in IMPORT statements
     ;
 
 // ============================================================================
