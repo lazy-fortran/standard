@@ -36,7 +36,7 @@ class TestF2008Submodules:
 end submodule child_sub"""
         
         tree, errors = self.parse_code(code)
-        print(f"Basic submodule declaration: {errors} errors")
+        assert tree is not None, "Basic submodule failed to produce parse tree"
         # This is a new F2008 construct - some parsing issues expected initially
         assert errors <= 3, f"Too many errors for basic submodule: {errors}"
     
@@ -47,7 +47,8 @@ end submodule child_sub"""
 end submodule child_sub"""
         
         tree, errors = self.parse_code(code)
-        print(f"Submodule with parent hierarchy: {errors} errors")
+        assert tree is not None, "Parent hierarchy failed to produce parse tree"
+        assert errors <= 5, f"Too many errors for parent hierarchy: {errors}"
     
     def test_submodule_with_procedures(self):
         """Test submodule containing module procedure implementations"""
@@ -65,7 +66,7 @@ contains
 end submodule implementation_sub"""
         
         tree, errors = self.parse_code(code)
-        print(f"Submodule with procedures: {errors} errors")
+        assert tree is not None, "Procedure submodule failed to produce parse tree"
         # Complex submodule - expect more parsing issues
         assert errors <= 8, f"Too many errors for procedure submodule: {errors}"
 
@@ -76,7 +77,8 @@ end submodule implementation_sub"""
 end submodule grandchild_sub"""
         
         tree, errors = self.parse_code(code)
-        print(f"Nested submodule reference: {errors} errors")
+        assert tree is not None, "Nested submodule failed to produce parse tree"
+        assert errors <= 5, f"Too many errors for nested submodule: {errors}"
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

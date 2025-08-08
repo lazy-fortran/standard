@@ -50,8 +50,9 @@ end module test_mod"""
         for code, description in test_cases:
             tree, errors = self.parse_code(code)
             # We expect some parsing issues but tokens should be recognized
-            # The key is that lexer errors (unrecognized tokens) don't occur
-            print(f"Testing {description}: {errors} parser errors (token recognition OK)")
+            assert tree is not None, f"{description} failed to produce parse tree"
+            # Allow some parser errors but not too many (indicates lexer working)
+            assert errors <= 5, f"{description}: too many errors ({errors})"
     
     def test_submodule_basic_syntax(self):
         """Test basic submodule syntax recognition"""
@@ -61,7 +62,8 @@ end submodule child_sub"""
         
         tree, errors = self.parse_code(code)
         # May have parser errors but submodule tokens should be recognized
-        print(f"Submodule syntax test: {errors} errors (expected for initial implementation)")
+        assert tree is not None, "Submodule syntax failed to produce parse tree"
+        assert errors <= 5, f"Too many errors for basic submodule: {errors}"
     
     def test_do_concurrent_tokens(self):
         """Test DO CONCURRENT token recognition"""
@@ -74,7 +76,9 @@ end submodule child_sub"""
 end module test"""
         
         tree, errors = self.parse_code(code)
-        print(f"DO CONCURRENT test: {errors} errors (token recognition focus)")
+        assert tree is not None, "DO CONCURRENT failed to produce parse tree"
+        # DO CONCURRENT is complex - allow more errors but ensure tokens recognized
+        assert errors <= 10, f"Too many errors for DO CONCURRENT: {errors}"
     
     def test_enhanced_intrinsic_tokens(self):
         """Test that F2008 intrinsic function tokens are recognized"""
@@ -91,7 +95,8 @@ end module test"""
 end module test_intrinsics"""
         
         tree, errors = self.parse_code(code)
-        print(f"Enhanced intrinsics test: {errors} errors (token focus)")
+        assert tree is not None, "Enhanced intrinsics failed to produce parse tree"
+        assert errors <= 10, f"Too many errors for intrinsics test: {errors}"
     
     def test_new_integer_kinds(self):
         """Test F2008 enhanced integer kind tokens"""
@@ -104,7 +109,9 @@ end module test_intrinsics"""
 end module test_kinds"""
         
         tree, errors = self.parse_code(code)
-        print(f"New integer kinds test: {errors} errors (expected parsing issues)")
+        assert tree is not None, "Integer kinds failed to produce parse tree"
+        # New kinds may have parsing issues initially
+        assert errors <= 10, f"Too many errors for integer kinds: {errors}"
 
     def test_error_stop_token(self):
         """Test ERROR STOP statement token"""
@@ -113,7 +120,8 @@ end module test_kinds"""
 end program test"""
         
         tree, errors = self.parse_code(code)
-        print(f"ERROR STOP test: {errors} errors (token recognition)")
+        assert tree is not None, "ERROR STOP failed to produce parse tree"
+        assert errors <= 5, f"Too many errors for ERROR STOP: {errors}"
     
     def test_contiguous_attribute_token(self):
         """Test CONTIGUOUS attribute token"""
@@ -123,7 +131,8 @@ end program test"""
 end module test_contiguous"""
         
         tree, errors = self.parse_code(code)
-        print(f"CONTIGUOUS attribute test: {errors} errors (expected)")
+        assert tree is not None, "CONTIGUOUS attribute failed to produce parse tree"
+        assert errors <= 10, f"Too many errors for CONTIGUOUS: {errors}"
 
     def test_image_intrinsics(self):
         """Test coarray intrinsic functions"""
@@ -135,7 +144,8 @@ end module test_contiguous"""
 end program coarray_test"""
         
         tree, errors = self.parse_code(code)
-        print(f"Image intrinsics test: {errors} errors (token recognition)")
+        assert tree is not None, "Image intrinsics failed to produce parse tree"
+        assert errors <= 10, f"Too many errors for image intrinsics: {errors}"
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

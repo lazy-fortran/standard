@@ -19,7 +19,8 @@ options {
 
 // F2008 program unit (enhanced with coarray and submodule support)
 program_unit_f2008
-    : NEWLINE* (main_program_f2008 | module_f2008 | submodule_f2008 | external_subprogram_f2008) NEWLINE*
+    : NEWLINE* (main_program_f2008 | module_f2008 | submodule_f2008 
+      | external_subprogram_f2008) NEWLINE*
     ;
 
 // Enhanced main program for F2008

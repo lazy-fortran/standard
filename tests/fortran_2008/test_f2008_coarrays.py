@@ -39,7 +39,7 @@ end module coarray_mod"""
         
         tree, errors = self.parse_code(code)
         # Focus on lexical recognition - parser structure may have issues
-        print(f"Coarray [*] declaration: {errors} errors")
+        assert tree is not None, "Coarray [*] declaration failed to produce parse tree"
         assert errors <= 5, f"Too many errors for basic coarray syntax: {errors}"
     
     def test_sync_all_statement(self):
@@ -49,7 +49,8 @@ end module coarray_mod"""
 end program sync_test"""
         
         tree, errors = self.parse_code(code)
-        print(f"SYNC ALL statement: {errors} errors")
+        assert tree is not None, "SYNC ALL failed to produce parse tree"
+        assert errors <= 5, f"Too many errors for SYNC ALL: {errors}"
     
     def test_sync_images_statement(self):
         """Test SYNC IMAGES statement"""  
@@ -59,7 +60,8 @@ end program sync_test"""
 end program sync_images_test"""
         
         tree, errors = self.parse_code(code)
-        print(f"SYNC IMAGES statement: {errors} errors")
+        assert tree is not None, "SYNC IMAGES failed to produce parse tree"
+        assert errors <= 10, f"Too many errors for SYNC IMAGES: {errors}"
     
     def test_sync_memory_statement(self):
         """Test SYNC MEMORY statement"""
@@ -68,7 +70,8 @@ end program sync_images_test"""
 end program sync_memory_test"""
         
         tree, errors = self.parse_code(code)
-        print(f"SYNC MEMORY statement: {errors} errors")
+        assert tree is not None, "SYNC MEMORY failed to produce parse tree"
+        assert errors <= 5, f"Too many errors for SYNC MEMORY: {errors}"
     
     def test_this_image_function(self):
         """Test THIS_IMAGE() intrinsic function"""
@@ -79,7 +82,8 @@ end program sync_memory_test"""
 end program this_image_test"""
         
         tree, errors = self.parse_code(code)
-        print(f"THIS_IMAGE() function: {errors} errors")
+        assert tree is not None, "THIS_IMAGE() failed to produce parse tree"
+        assert errors <= 10, f"Too many errors for THIS_IMAGE: {errors}"
     
     def test_num_images_function(self):
         """Test NUM_IMAGES() intrinsic function"""
@@ -90,7 +94,8 @@ end program this_image_test"""
 end program num_images_test"""
         
         tree, errors = self.parse_code(code)
-        print(f"NUM_IMAGES() function: {errors} errors")
+        assert tree is not None, "NUM_IMAGES() failed to produce parse tree"
+        assert errors <= 10, f"Too many errors for NUM_IMAGES: {errors}"
 
     def test_coarray_with_sync_comprehensive(self):
         """Comprehensive coarray example with sync operations"""
@@ -120,7 +125,7 @@ contains
 end module comprehensive_coarray_mod"""
         
         tree, errors = self.parse_code(code)
-        print(f"Comprehensive coarray example: {errors} errors")
+        assert tree is not None, "Comprehensive coarray failed to produce parse tree"
         # This is a complex test - we expect some parser issues but key tokens should work
         assert errors <= 10, f"Too many errors for comprehensive coarray test: {errors}"
 
