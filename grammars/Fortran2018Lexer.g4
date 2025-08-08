@@ -78,6 +78,20 @@ LOCAL_INIT       : L O C A L '_' I N I T ;
 LOCAL            : L O C A L ;
 SHARED           : S H A R E D ;
 
+// Missing tokens referenced in parser (NEW in F2018)
+RESULT_IMAGE     : R E S U L T '_' I M A G E ;
+SOURCE_IMAGE     : S O U R C E '_' I M A G E ;
+ARROW            : '->' ;
+NEW_INDEX        : N E W '_' I N D E X ;
+COUNT            : C O U N T ;
+UNTIL_COUNT      : U N T I L '_' C O U N T ;
+DOT_DOT          : '..' ;
+TEAM             : T E A M ;
+DIM              : D I M ;
+MASK             : M A S K ;
+NONE             : N O N E ;
+KIND             : K I N D ;
+
 // ============================================================================
 // F2018 Fragment Helpers (inherit all from F2008)
 // ============================================================================
