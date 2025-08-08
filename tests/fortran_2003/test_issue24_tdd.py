@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""TDD tests for Issue #24 - F2003 C Interoperability"""
+"""TDD tests for Issue #24 - F2003 C Type Token Support
+
+These tests validate that C interoperability type tokens are recognized
+and can be used as standalone type declarations. Full BIND(C) syntax
+and ISO_C_BINDING module support are planned for future iterations.
+"""
 
 import sys
 import pytest
@@ -10,7 +15,7 @@ from Fortran2003Lexer import Fortran2003Lexer
 from Fortran2003Parser import Fortran2003Parser
 
 class TestIssue24TDD:
-    """Test-driven development for Issue #24 C interoperability fixes"""
+    """Test-driven development for Issue #24 C type token support"""
     
     def parse_code(self, code):
         """Parse Fortran 2003 code and return (tree, errors)"""
@@ -22,24 +27,24 @@ class TestIssue24TDD:
         errors = parser.getNumberOfSyntaxErrors()
         return tree, errors
     
-    def test_bind_c_procedure_interface(self):
-        """BIND(C) procedure interface should parse"""
+    def test_c_float_type_token(self):
+        """C_FLOAT type token should be recognized"""
         code = """module test
     c_float :: x
 end module test"""
         
         tree, errors = self.parse_code(code)
-        assert errors == 0, f"BIND(C) procedure interface should parse, got {errors}"
+        assert errors == 0, f"C_FLOAT type token should parse, got {errors}"
     
-    def test_bind_c_type_declaration(self):
-        """C type declarations should parse"""
+    def test_multiple_c_type_tokens(self):
+        """Multiple C type tokens should be recognized"""
         code = """module test
     c_int :: i
     c_float :: x
 end module test"""
         
         tree, errors = self.parse_code(code)
-        assert errors == 0, f"BIND(C) type declaration should parse, got {errors}"
+        assert errors == 0, f"Multiple C type tokens should parse, got {errors}"
     
     def test_value_attribute_in_procedure(self):
         """VALUE attribute should parse"""
@@ -60,18 +65,18 @@ end module pointers"""
         tree, errors = self.parse_code(code)
         assert errors == 0, f"C pointer declarations should parse, got {errors}"
     
-    def test_c_function_with_name_binding(self):
-        """C double type should parse"""
+    def test_c_double_type_token(self):
+        """C_DOUBLE type token should be recognized"""
         code = """module bindings
 c_double :: x
 c_double :: res
 end module bindings"""
         
         tree, errors = self.parse_code(code)
-        assert errors == 0, f"C function with name binding should parse, got {errors}"
+        assert errors == 0, f"C_DOUBLE type token should parse, got {errors}"
     
-    def test_iso_c_binding_usage(self):
-        """Multiple C types should parse"""
+    def test_c_interop_type_variety(self):
+        """Various C interop types should be recognized"""
         code = """module isobinding
 c_int :: i
 c_float :: x
@@ -80,7 +85,7 @@ c_null_ptr :: nullp
 end module isobinding"""
         
         tree, errors = self.parse_code(code)
-        assert errors == 0, f"ISO_C_BINDING module usage should parse, got {errors}"
+        assert errors == 0, f"Various C interop types should parse, got {errors}"
     
     def test_comprehensive_c_interop_example(self):
         """Comprehensive C type test should parse"""
