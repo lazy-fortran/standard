@@ -129,16 +129,18 @@ end subroutine my_func"""
         assert 'subroutine' in tokens, \
             f"subroutine keyword missing: {tokens}"
         
-        # Test limitation: BIND(C, NAME="...") has parsing issues currently
+        # Test enhanced: BIND(C, NAME="...") syntax now works correctly
         code_with_name = """subroutine calc() bind(c, name="calculate")
 end subroutine calc"""
         
-        # This currently fails - acknowledging implementation limitation
-        tree, errors, parser = self.parse_and_validate(
-            code_with_name, expect_errors=1
-        )
-        assert errors > 0, \
-            "BIND(C, NAME='...') syntax limitation acknowledged"
+        # This now works - limitation has been fixed
+        tree, errors, parser = self.parse_and_validate(code_with_name)
+        tokens = self.extract_all_tokens(tree)
+        
+        # Verify enhanced BIND(C, NAME="...") sequence works
+        assert self.verify_token_sequence(
+            tokens, ['bind', '(', 'c', ',', 'name', '=']
+        ), f"Enhanced BIND(C, NAME=...) sequence not found: {tokens}"
     
     def test_c_interop_types_token_validation(self):
         """Validate C interop types appear as distinct tokens"""

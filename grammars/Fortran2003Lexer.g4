@@ -10,6 +10,23 @@ lexer grammar Fortran2003Lexer;
 import Fortran95Lexer;
 
 // ============================================================================
+// COMMENTS - MUST BE FIRST TO HAVE PRECEDENCE OVER KEYWORDS
+// ============================================================================
+
+// Fixed-form comments - simply use a more comprehensive pattern
+FIXED_FORM_COMMENT  
+    : ([ \t]*|[\r\n][ \t]*) [cC] [ \t] ~[\r\n]*  -> channel(HIDDEN)
+    ;
+    
+FIXED_FORM_COMMENT_STAR
+    : ([ \t]*|[\r\n][ \t]*) [cC] [*!] ~[\r\n]*  -> channel(HIDDEN) 
+    ;
+
+STAR_COMMENT
+    : ([ \t]*|[\r\n][ \t]*) '*' ~[\r\n]* -> channel(HIDDEN)
+    ;
+
+// ============================================================================
 // FORTRAN 2003 NEW FEATURES - Object-Oriented Programming
 // ============================================================================
 
@@ -155,19 +172,6 @@ IEEE_UNDERFLOW_FLAG : I E E E '_' U N D E R F L O W '_' F L A G ;
 // Override F90 keywords to ensure they take precedence
 CONTAINS         : C O N T A I N S ;
 
-// Override FIXED_FORM_COMMENT to prevent conflicts - only match 'C' or 'c' followed by space 
-FIXED_FORM_COMMENT  
-    : [\r\n][ \t]*[cC][ \t] ~[\r\n]*  -> channel(HIDDEN)  // 'C' or 'c' followed by space
-    ;
-
-// Additional fixed-form comment styles  
-FIXED_FORM_COMMENT_STAR
-    : [\r\n][ \t]*[cC][*!] ~[\r\n]*  -> channel(HIDDEN)   // 'C*' or 'C!' style comments
-    ;
-
-STAR_COMMENT
-    : [\r\n][ \t]*'*' ~[\r\n]* -> channel(HIDDEN)  // Star comments only at start of line
-    ;
 
 // ============================================================================
 // CASE-INSENSITIVE FRAGMENTS

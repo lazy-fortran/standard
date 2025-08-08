@@ -32,6 +32,11 @@ identifier_or_keyword
     | LEN          // LEN can be used as parameter name in character declarations
     | TRIM_INTRINSIC  // TRIM can be used as function name
     | SIZE         // SIZE can be used as function name (F90 token)
+    | SHAPE_INTRINSIC  // SHAPE can be used as a type name
+    | STAT         // STAT can be used as variable name in ALLOCATE
+    | ERRMSG       // ERRMSG can be used as variable name in ALLOCATE
+    | SOURCE       // SOURCE can be used as variable name 
+    | MOLD         // MOLD can be used as variable name
     ;
 
 // F2003 program unit (enhanced with OOP features)
@@ -205,11 +210,16 @@ declaration_construct_f2003
 
 // Enhanced execution part for F2003
 execution_part_f2003
-    : (NEWLINE* executable_construct_f2003)*
+    : execution_construct_f2003*
+    ;
+
+// Execution construct with newline handling  
+execution_construct_f2003
+    : NEWLINE* executable_construct_f2003_inner NEWLINE*
     ;
 
 // Enhanced executable construct for F2003
-executable_construct_f2003
+executable_construct_f2003_inner
     : assignment_stmt
     | call_stmt
     | print_stmt
@@ -520,11 +530,12 @@ proc_decl
 
 class_declaration_stmt
     : CLASS LPAREN type_spec_or_star RPAREN (COMMA attr_spec_list)? 
-      DOUBLE_COLON entity_decl_list NEWLINE
+      DOUBLE_COLON entity_decl_list
     ;
 
 type_spec_or_star
-    : IDENTIFIER           // CLASS(type_name)
+    : type_spec            // CLASS(INTEGER) - intrinsic types
+    | IDENTIFIER           // CLASS(type_name) - derived types
     | '*'                  // CLASS(*) - unlimited polymorphic
     ;
 
@@ -590,12 +601,12 @@ allocation_list
 
 allocation
     : type_spec_allocation
-    | IDENTIFIER (LPAREN allocate_shape_spec_list RPAREN)?
+    | identifier_or_keyword (LPAREN allocate_shape_spec_list RPAREN)?
     ;
 
 // Type specification in ALLOCATE for PDTs
 type_spec_allocation
-    : derived_type_spec DOUBLE_COLON IDENTIFIER 
+    : derived_type_spec DOUBLE_COLON identifier_or_keyword 
       (LPAREN allocate_shape_spec_list RPAREN)?
     ;
 
@@ -612,10 +623,10 @@ alloc_opt_list
     ;
 
 alloc_opt
-    : STAT EQUALS variable_f90
-    | ERRMSG EQUALS variable_f90  
-    | SOURCE EQUALS expr_f90
-    | MOLD EQUALS expr_f90
+    : STAT EQUALS identifier_or_keyword
+    | ERRMSG EQUALS identifier_or_keyword  
+    | SOURCE EQUALS expr_f2003
+    | MOLD EQUALS expr_f2003
     ;
 
 // ============================================================================
@@ -657,6 +668,11 @@ print_stmt
 // STOP statement
 stop_stmt
     : STOP (INTEGER_LITERAL | string_literal)? NEWLINE
+    ;
+
+// DEALLOCATE statement
+deallocate_stmt
+    : DEALLOCATE LPAREN allocation_list RPAREN NEWLINE
     ;
 
 // ============================================================================
@@ -915,9 +931,12 @@ execution_part
 executable_construct
     : assignment_stmt
     | call_stmt
+    | print_stmt
+    | stop_stmt
     | associate_construct
     | block_construct
     | allocate_stmt_f2003
+    | deallocate_stmt
     | wait_stmt
     | flush_stmt
     | if_construct
@@ -934,12 +953,12 @@ assignment_stmt
 
 // Enhanced F2003 expression that includes intrinsic functions  
 expr_f2003
-    : expr_f2003 GT expr_f2003                // Greater than
-    | expr_f2003 LT expr_f2003                // Less than  
-    | expr_f2003 GE expr_f2003                // Greater than or equal
-    | expr_f2003 LE expr_f2003                // Less than or equal
-    | expr_f2003 EQ expr_f2003                // Equal
-    | expr_f2003 NE expr_f2003                // Not equal
+    : expr_f2003 (GT | GT_OP) expr_f2003      // Greater than
+    | expr_f2003 (LT | LT_OP) expr_f2003      // Less than  
+    | expr_f2003 (GE | GE_OP) expr_f2003      // Greater than or equal
+    | expr_f2003 (LE | LE_OP) expr_f2003      // Less than or equal
+    | expr_f2003 (EQ | EQ_OP) expr_f2003      // Equal
+    | expr_f2003 (NE | NE_OP) expr_f2003      // Not equal
     | expr_f2003 POWER expr_f2003             // Exponentiation (highest precedence)
     | expr_f2003 (MULTIPLY | DIVIDE) expr_f2003  // Multiplication/division
     | expr_f2003 (PLUS | MINUS) expr_f2003    // Addition/subtraction
@@ -1135,6 +1154,6 @@ c_interop_type
 
 // Type name
 type_name
-    : IDENTIFIER
+    : identifier_or_keyword
     ;
 
