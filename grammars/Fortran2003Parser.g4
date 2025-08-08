@@ -29,6 +29,9 @@ identifier_or_keyword
     | ID           // ID can be used as a variable name (common identifier)
     | DATA         // DATA can be used as a variable name (legacy keyword)
     | KIND         // KIND can be used as parameter name in type instantiation
+    | LEN          // LEN can be used as parameter name in character declarations
+    | TRIM_INTRINSIC  // TRIM can be used as function name
+    | SIZE         // SIZE can be used as function name (F90 token)
     ;
 
 // F2003 program unit (enhanced with OOP features)
@@ -441,11 +444,11 @@ association_list
     ;
 
 association
-    : IDENTIFIER POINTER_ASSIGN selector
+    : identifier_or_keyword POINTER_ASSIGN selector
     ;
 
 selector
-    : expr_f90   // Any expression, not just primary
+    : expr_f2003   // Any F2003 expression including component references
     ;
 
 // ============================================================================
@@ -817,10 +820,14 @@ kind_param
     | c_interop_type
     ;
 
-// Character selector (simplified)
+// Character selector (enhanced for F2003)
 char_selector
-    : LPAREN IDENTIFIER RPAREN              // (len) - length parameter  
-    | LPAREN LEN EQUALS IDENTIFIER RPAREN   // (len=n) - explicit length
+    : LPAREN char_length_spec RPAREN              // (len) or (len=n)
+    ;
+
+char_length_spec
+    : expr_f2003                                   // Simple length: (50)
+    | LEN EQUALS expr_f2003                       // Explicit length: (len=50)  
     ;
 
 // Derived type specification (enhanced for F2003)
