@@ -66,6 +66,19 @@ PENDING          : P E N D I N G ;
 WAIT             : W A I T ;
 FLUSH            : F L U S H ;
 
+// Additional I/O keywords (some from earlier standards, exposed in F2003)
+FILE             : F I L E ;
+ACCESS           : A C C E S S ;
+FORM             : F O R M ;
+STATUS           : S T A T U S ;
+BLANK            : B L A N K ;
+POSITION         : P O S I T I O N ;
+ACTION           : A C T I O N ;
+DELIM            : D E L I M ;
+PAD              : P A D ;
+RECL             : R E C L ;
+IOMSG            : I O M S G ;
+
 // ASSOCIATE construct (NEW in F2003)
 ASSOCIATE        : A S S O C I A T E ;
 ENDASSOCIATE     : E N D A S S O C I A T E ;

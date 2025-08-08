@@ -37,6 +37,20 @@ identifier_or_keyword
     | ERRMSG       // ERRMSG can be used as variable name in ALLOCATE
     | SOURCE       // SOURCE can be used as variable name 
     | MOLD         // MOLD can be used as variable name
+    | UNIT         // UNIT can be used as variable name in I/O
+    | IOSTAT       // IOSTAT can be used as variable name
+    | FILE         // FILE can be used as variable name in I/O
+    | ACCESS       // ACCESS can be used as variable name in I/O
+    | FORM         // FORM can be used as variable name in I/O
+    | STATUS       // STATUS can be used as variable name in I/O
+    | BLANK        // BLANK can be used as variable name in I/O
+    | POSITION     // POSITION can be used as variable name in I/O
+    | ACTION       // ACTION can be used as variable name in I/O
+    | DELIM        // DELIM can be used as variable name in I/O
+    | PAD          // PAD can be used as variable name in I/O
+    | RECL         // RECL can be used as variable name in I/O
+    | IOMSG        // IOMSG can be used as variable name in I/O
+    | ASYNCHRONOUS // ASYNCHRONOUS can be used as variable name in I/O
     ;
 
 // F2003 program unit (enhanced with OOP features)
@@ -230,6 +244,10 @@ executable_construct_f2003_inner
     | allocate_stmt_f2003
     | wait_stmt
     | flush_stmt
+    | open_stmt
+    | close_stmt
+    | write_stmt
+    | read_stmt
     | if_construct
     | do_construct
     | select_case_construct
@@ -642,8 +660,7 @@ wait_spec_list
     ;
 
 wait_spec
-    : UNIT ASSIGN primary
-    | ID ASSIGN primary
+    : identifier_or_keyword EQUALS primary    // Generic specifier=value (includes UNIT, ID)
     ;
 
 flush_stmt
@@ -655,7 +672,82 @@ flush_spec_list
     ;
 
 flush_spec
-    : UNIT ASSIGN primary
+    : identifier_or_keyword EQUALS primary    // Generic specifier=value (includes UNIT)
+    ;
+
+// Basic I/O statements
+open_stmt
+    : OPEN LPAREN open_spec_list RPAREN NEWLINE?
+    ;
+
+close_stmt
+    : CLOSE LPAREN close_spec_list RPAREN NEWLINE?
+    ;
+
+write_stmt
+    : WRITE LPAREN io_control_spec_list RPAREN (output_item_list)? NEWLINE?
+    ;
+
+read_stmt
+    : READ LPAREN io_control_spec_list RPAREN (input_item_list)? NEWLINE?
+    ;
+
+// I/O specification lists
+open_spec_list
+    : open_spec (COMMA open_spec)*
+    ;
+
+open_spec
+    : identifier_or_keyword EQUALS primary    // Generic specifier=value (includes UNIT)
+    ;
+
+close_spec_list
+    : close_spec (COMMA close_spec)*
+    ;
+
+close_spec
+    : identifier_or_keyword EQUALS primary    // Generic specifier=value (includes UNIT)
+    ;
+
+io_control_spec_list
+    : io_control_spec (COMMA io_control_spec)*
+    ;
+
+io_control_spec
+    : identifier_or_keyword EQUALS primary    // Named specifier: unit=10, fmt=*, etc.
+    | primary                                 // Positional specifier: *, 10, etc.
+    ;
+
+output_item_list
+    : output_item (COMMA output_item)*
+    ;
+
+output_item
+    : expr_f2003
+    | io_implied_do
+    ;
+
+input_item_list
+    : input_item (COMMA input_item)*
+    ;
+
+input_item
+    : identifier_or_keyword
+    | io_implied_do
+    ;
+
+io_implied_do
+    : LPAREN io_implied_do_object_list COMMA identifier_or_keyword EQUALS 
+      expr_f2003 COMMA expr_f2003 (COMMA expr_f2003)? RPAREN
+    ;
+
+io_implied_do_object_list
+    : io_implied_do_object (COMMA io_implied_do_object)*
+    ;
+
+io_implied_do_object
+    : input_item
+    | output_item
     ;
 
 // PRINT statement (legacy I/O support)
@@ -821,6 +913,8 @@ type_declaration_stmt
       entity_decl_list NEWLINE
     | TYPE LPAREN derived_type_spec RPAREN (COMMA attr_spec_list)? 
       DOUBLE_COLON entity_decl_list NEWLINE
+    | CLASS LPAREN type_spec_or_star RPAREN (COMMA attr_spec_list)?
+      DOUBLE_COLON entity_decl_list NEWLINE
     ;
 
 // Kind selector for parameterized types
@@ -842,7 +936,8 @@ char_selector
     ;
 
 char_length_spec
-    : expr_f2003                                   // Simple length: (50)
+    : c_interop_type                               // C interop: (c_char)
+    | expr_f2003                                   // Simple length: (50)
     | LEN EQUALS expr_f2003                       // Explicit length: (len=50)  
     ;
 
@@ -959,6 +1054,7 @@ expr_f2003
     | expr_f2003 (LE | LE_OP) expr_f2003      // Less than or equal
     | expr_f2003 (EQ | EQ_OP) expr_f2003      // Equal
     | expr_f2003 (NE | NE_OP) expr_f2003      // Not equal
+    | expr_f2003 CONCAT expr_f2003            // String concatenation (//)
     | expr_f2003 POWER expr_f2003             // Exponentiation (highest precedence)
     | expr_f2003 (MULTIPLY | DIVIDE) expr_f2003  // Multiplication/division
     | expr_f2003 (PLUS | MINUS) expr_f2003    // Addition/subtraction
@@ -1034,13 +1130,16 @@ case_value_list
 primary
     : identifier_or_keyword (PERCENT identifier_or_keyword)*
     | identifier_or_keyword LPAREN actual_arg_list? RPAREN
+    | identifier_or_keyword DOUBLE_QUOTE_STRING      // Prefixed string: c_char_"Hello"
+    | identifier_or_keyword SINGLE_QUOTE_STRING      // Prefixed string: c_char_'Hello'
     | intrinsic_function_call
     | ieee_constant
     | INTEGER_LITERAL
     | LABEL              // Accept LABEL as integer literal (token precedence issue)
     | REAL_LITERAL
     | SINGLE_QUOTE_STRING
-    | DOUBLE_QUOTE_STRING  
+    | DOUBLE_QUOTE_STRING
+    | '*'                // Asterisk for I/O format specifiers (*, list-directed)
     | LPAREN primary RPAREN
     ;
 
