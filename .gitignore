@@ -15,6 +15,7 @@ grammars/*.tokens
 grammars/*.interp
 grammars/*Listener.py
 grammars/*Visitor.py
+grammars/grammars/  # Prevent nested directory
 
 # Debug and temporary files
 debug_*.py
