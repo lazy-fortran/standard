@@ -295,14 +295,12 @@ sequence_stmt
 
 // Removed private_sequence_stmt - replaced by private_or_sequence
 
-// Type-bound procedure statement (following reference grammar)
+// Type-bound procedure statement - simplified and more explicit
 type_bound_procedure_stmt
-    : PROCEDURE ((COMMA binding_attr_list)? DOUBLE_COLON)?
-      type_bound_proc_decl_list
-    | PROCEDURE LPAREN IDENTIFIER RPAREN COMMA binding_attr_list DOUBLE_COLON
-      type_bound_proc_decl_list
-    | PROCEDURE LPAREN IDENTIFIER RPAREN DOUBLE_COLON
-      type_bound_proc_decl_list
+    : PROCEDURE DOUBLE_COLON type_bound_proc_decl_list
+    | PROCEDURE COMMA binding_attr_list DOUBLE_COLON type_bound_proc_decl_list
+    | PROCEDURE LPAREN IDENTIFIER RPAREN DOUBLE_COLON type_bound_proc_decl_list
+    | PROCEDURE LPAREN IDENTIFIER RPAREN COMMA binding_attr_list DOUBLE_COLON type_bound_proc_decl_list
     ;
 
 binding_attr_list
