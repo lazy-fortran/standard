@@ -1031,8 +1031,8 @@ entity_decl_list
     ;
 
 entity_decl
-    : identifier_or_keyword (LPAREN array_spec RPAREN)? (EQUALS expr_f90)?
-        // F2003 entity declaration with initialization
+    : identifier_or_keyword (LPAREN array_spec RPAREN)? (EQUALS expr_f2003)?
+        // F2003 entity declaration with initialization - use F2003 expressions for array constructors
     ;
 
 // Override F90 entity declaration to support keywords as identifiers
@@ -1140,7 +1140,7 @@ do_construct
     : DO NEWLINE
       execution_part_f2003?
       END DO NEWLINE?
-    | DO identifier_or_keyword EQUALS primary COMMA primary NEWLINE
+    | DO identifier_or_keyword EQUALS expr_f2003 COMMA expr_f2003 (COMMA expr_f2003)? NEWLINE
       execution_part_f2003?
       END DO NEWLINE?
     ;
@@ -1210,7 +1210,8 @@ intrinsic_function_call
     : SELECTED_REAL_KIND LPAREN actual_arg_list RPAREN
     | SELECTED_INT_KIND LPAREN actual_arg_list RPAREN
     | KIND LPAREN actual_arg_list RPAREN
-    | REAL LPAREN actual_arg_list RPAREN         // REAL type conversion
+    | SIZE LPAREN actual_arg_list RPAREN        // SIZE intrinsic function
+    | REAL LPAREN actual_arg_list RPAREN        // REAL type conversion
     | INTEGER LPAREN actual_arg_list RPAREN     // INTEGER type conversion
     | LOGICAL LPAREN actual_arg_list RPAREN     // LOGICAL type conversion
     | CHARACTER LPAREN actual_arg_list RPAREN   // CHARACTER type conversion
