@@ -216,3 +216,19 @@ fragment W : [wW] ;
 fragment X : [xX] ;
 fragment Y : [yY] ;
 fragment Z : [zZ] ;
+
+// ============================================================================
+// FREE-FORM LINE CONTINUATION
+// ============================================================================
+
+// Enhanced continuation handling - hide both & and following newline+whitespace
+CONTINUATION
+    : '&' [ \t]* ('\r'? '\n') [ \t]* -> channel(HIDDEN)
+    ;
+
+// Override inherited NEWLINE to work properly with continuations
+NEWLINE : [\r\n]+ ;
+
+// Array constructor brackets (F90+ feature)
+LSQUARE : '[' ;
+RSQUARE : ']' ;

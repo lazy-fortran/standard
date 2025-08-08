@@ -552,9 +552,10 @@ class_declaration_stmt
     ;
 
 type_spec_or_star
-    : type_spec            // CLASS(INTEGER) - intrinsic types
-    | IDENTIFIER           // CLASS(type_name) - derived types
+    : SHAPE_INTRINSIC      // CLASS(SHAPE) - derived type named SHAPE (most specific first)
     | '*'                  // CLASS(*) - unlimited polymorphic
+    | type_spec            // CLASS(INTEGER) - intrinsic types
+    | IDENTIFIER           // CLASS(type_name) - derived types
     ;
 
 // SELECT TYPE construct for runtime type selection
@@ -660,7 +661,14 @@ wait_spec_list
     ;
 
 wait_spec
-    : identifier_or_keyword EQUALS primary    // Generic specifier=value (includes UNIT, ID)
+    : UNIT EQUALS primary                     // unit=value
+    | ID EQUALS primary                       // id=async_id
+    | IOSTAT EQUALS primary                   // iostat=variable
+    | IOMSG EQUALS primary                    // iomsg=variable
+    | ERR EQUALS primary                      // err=label
+    | END EQUALS primary                      // end=label (wait for endfile)
+    | EOR EQUALS primary                      // eor=label (wait for end-of-record)
+    | primary                                 // Positional unit specification
     ;
 
 flush_stmt
@@ -672,61 +680,80 @@ flush_spec_list
     ;
 
 flush_spec
-    : identifier_or_keyword EQUALS primary    // Generic specifier=value (includes UNIT)
+    : UNIT EQUALS primary                     // unit=value (most common)
+    | IOSTAT EQUALS primary                   // iostat=variable  
+    | IOMSG EQUALS primary                    // iomsg=variable
+    | ERR EQUALS primary                      // err=label
+    | primary                                 // Positional unit specification
     ;
 
-// Basic I/O statements
+// Override F90 io_control_spec to use EQUALS instead of ASSIGN (F2003 syntax)
+io_control_spec
+    : UNIT EQUALS primary                    // unit=10, unit=*
+    | FMT EQUALS primary                     // fmt=*, fmt=100, fmt=format_var
+    | IOSTAT EQUALS primary                  // iostat=ios_var
+    | ERR EQUALS primary                     // err=100
+    | END EQUALS primary                     // end=200  
+    | EOR EQUALS primary                     // eor=300
+    | ADVANCE EQUALS primary                 // advance='yes'/'no'
+    | SIZE EQUALS primary                    // size=size_var
+    | REC EQUALS primary                     // rec=record_num
+    | primary                                // Positional unit
+    ;
+
+io_control_spec_list
+    : io_control_spec (COMMA io_control_spec)*
+    ;
+
+// F2003 I/O statements - completely override parent rules
 open_stmt
-    : OPEN LPAREN open_spec_list_f2003 RPAREN NEWLINE?
+    : OPEN LPAREN f2003_io_spec_list RPAREN NEWLINE?
     ;
 
 close_stmt
-    : CLOSE LPAREN close_spec_list_f2003 RPAREN NEWLINE?
+    : CLOSE LPAREN f2003_io_spec_list RPAREN NEWLINE?
     ;
 
 write_stmt
-    : WRITE LPAREN io_control_spec_list_f2003 RPAREN (output_item_list)? NEWLINE?
+    : WRITE LPAREN f2003_io_spec_list RPAREN (output_item_list)? NEWLINE?
     ;
 
 read_stmt
-    : READ LPAREN io_control_spec_list_f2003 RPAREN (input_item_list)? NEWLINE?
+    : READ LPAREN f2003_io_spec_list RPAREN (input_item_list)? NEWLINE?
     ;
 
-// F2003 I/O specification lists (unique names to avoid inheritance conflicts)
-open_spec_list_f2003
-    : open_spec_f2003 (COMMA open_spec_f2003)*
+// Unified F2003 I/O specification list - handles all I/O statements
+f2003_io_spec_list
+    : f2003_io_spec (COMMA f2003_io_spec)*
     ;
 
-open_spec_f2003
-    : identifier_or_keyword EQUALS primary    // Generic specifier=value (includes UNIT)
-    ;
-
-close_spec_list_f2003
-    : close_spec_f2003 (COMMA close_spec_f2003)*
-    ;
-
-close_spec_f2003
-    : identifier_or_keyword EQUALS primary    // Generic specifier=value (includes UNIT)
-    ;
-
-io_control_spec_list_f2003
-    : io_control_spec_f2003 (COMMA io_control_spec_f2003)*
-    ;
-
-io_control_spec_f2003
-    : UNIT EQUALS primary                     // unit=10, unit=*
-    | FMT EQUALS primary                      // fmt=*, fmt=100  
-    | IOSTAT EQUALS primary                   // iostat=ios
-    | ERR EQUALS primary                      // err=100
-    | END EQUALS primary                      // end=200
-    | EOR EQUALS primary                      // eor=300
-    | ADVANCE EQUALS primary                  // advance='yes'
-    | SIZE EQUALS primary                     // size=isize
-    | REC EQUALS primary                      // rec=irec
-    | ASYNCHRONOUS EQUALS primary             // asynchronous='yes' (F2003)
-    | ID EQUALS primary                       // id=id_var (F2003)  
-    | identifier_or_keyword EQUALS primary   // Other F2003 I/O specifiers
-    | primary                                 // Positional specifier: *, 10, etc.
+f2003_io_spec
+    : IDENTIFIER EQUALS primary                  // Regular identifier = value (file='test.dat')
+    | UNIT EQUALS primary                        // unit=10, unit=*
+    | FILE EQUALS primary                        // file='filename'
+    | ACCESS EQUALS primary                      // access='stream'
+    | FORM EQUALS primary                        // form='unformatted'
+    | STATUS EQUALS primary                      // status='new'
+    | BLANK EQUALS primary                       // blank='null'  
+    | POSITION EQUALS primary                    // position='rewind'
+    | ACTION EQUALS primary                      // action='read'
+    | DELIM EQUALS primary                       // delim='apostrophe'
+    | PAD EQUALS primary                         // pad='yes'
+    | RECL EQUALS primary                        // recl=100
+    | IOSTAT EQUALS primary                      // iostat=ios
+    | IOMSG EQUALS primary                       // iomsg=msg
+    | ERR EQUALS primary                         // err=100
+    | END EQUALS primary                         // end=200
+    | EOR EQUALS primary                         // eor=300
+    | ADVANCE EQUALS primary                     // advance='yes'
+    | SIZE EQUALS primary                        // size=isize
+    | REC EQUALS primary                         // rec=irec
+    | ASYNCHRONOUS EQUALS primary                // asynchronous='yes' (F2003)
+    | STREAM EQUALS primary                      // stream='yes' (F2003)
+    | PENDING EQUALS primary                     // pending=pending_var (F2003)
+    | ID EQUALS primary                          // id=id_var (F2003)
+    | FMT EQUALS primary                         // fmt=*, fmt=100
+    | primary                                    // Positional specifier: *, 10, etc.
     ;
 
 output_item_list
@@ -1084,7 +1111,8 @@ lhs_expression
     ;
 
 call_stmt
-    : CALL identifier_or_keyword (LPAREN actual_arg_list? RPAREN)?
+    : CALL lhs_expression                                            // Enhanced for F2003 - support component calls
+    | CALL identifier_or_keyword (LPAREN actual_arg_list? RPAREN)?  // Traditional procedure calls
     ;
 
 actual_arg_list
@@ -1151,7 +1179,22 @@ primary
     | SINGLE_QUOTE_STRING
     | DOUBLE_QUOTE_STRING
     | '*'                // Asterisk for I/O format specifiers (*, list-directed)
+    | array_constructor  // Array constructor [elem1, elem2, ...]
     | LPAREN primary RPAREN
+    ;
+
+// F90 Array constructor syntax
+array_constructor
+    : LSQUARE array_constructor_elements? RSQUARE
+    ;
+
+array_constructor_elements
+    : array_constructor_element (COMMA array_constructor_element)*
+    ;
+
+array_constructor_element
+    : expr_f2003                           // Regular expression
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN  // Constructor call: type_name(args)
     ;
 
 // IEEE constants that can appear in expressions
