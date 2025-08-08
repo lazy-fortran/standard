@@ -28,6 +28,7 @@ identifier_or_keyword
     | SUM_INTRINSIC  // SUM can be used as a variable/result name
     | ID           // ID can be used as a variable name (common identifier)
     | DATA         // DATA can be used as a variable name (legacy keyword)
+    | KIND         // KIND can be used as parameter name in type instantiation
     ;
 
 // F2003 program unit (enhanced with OOP features)
@@ -835,8 +836,8 @@ type_param_spec_list
     ;
 
 type_param_spec
-    : IDENTIFIER EQUALS type_param_value    // kind=real64, n=:, m=*
-    | type_param_value                      // positional parameter
+    : identifier_or_keyword EQUALS type_param_value    // kind=real64, n=:, m=*
+    | type_param_value                                  // positional parameter
     ;
 
 type_param_value
@@ -917,14 +918,25 @@ executable_construct
     | select_case_construct
     ;
 
-// Simplified constructs (inherit complex ones from F95)
+// Enhanced assignment statement for F2003 - support array access and components
 assignment_stmt
-    : identifier_or_keyword EQUALS expr_f90 NEWLINE
-    | identifier_or_keyword PERCENT identifier_or_keyword EQUALS expr_f90 NEWLINE
-    | identifier_or_keyword POINTER_ASSIGN primary NEWLINE
-        // Procedure pointer assignment (keep primary for procedure names)
-    | identifier_or_keyword PERCENT identifier_or_keyword POINTER_ASSIGN primary NEWLINE
-        // Component procedure pointer assignment
+    : lhs_expression EQUALS expr_f2003 NEWLINE
+    | lhs_expression POINTER_ASSIGN primary NEWLINE
+        // Procedure pointer assignment
+    ;
+
+// Enhanced F2003 expression that includes intrinsic functions
+expr_f2003
+    : expr_f90    // Inherit F90 expressions
+    | primary     // Use F2003 primary (includes intrinsic_function_call)
+    ;
+
+// Left-hand side expression (variable, array element, component)
+lhs_expression
+    : identifier_or_keyword                                          // Simple variable
+    | identifier_or_keyword LPAREN actual_arg_list RPAREN          // Array element
+    | identifier_or_keyword PERCENT identifier_or_keyword          // Component
+    | identifier_or_keyword PERCENT identifier_or_keyword LPAREN actual_arg_list RPAREN  // Component array
     ;
 
 call_stmt
@@ -932,7 +944,13 @@ call_stmt
     ;
 
 actual_arg_list
-    : primary (COMMA primary)*
+    : actual_arg (COMMA actual_arg)*
+    ;
+
+// Argument can be positional or named (keyword argument)
+actual_arg
+    : identifier_or_keyword EQUALS expr_f2003    // Named argument: kind=real64
+    | expr_f2003                                 // Positional argument
     ;
 
 if_construct
@@ -950,7 +968,7 @@ do_construct
     : DO NEWLINE
       execution_part
       END DO NEWLINE
-    | DO IDENTIFIER ASSIGN primary COMMA primary NEWLINE
+    | DO identifier_or_keyword EQUALS primary COMMA primary NEWLINE
       execution_part
       END DO NEWLINE
     ;
@@ -1002,6 +1020,11 @@ intrinsic_function_call
     : SELECTED_REAL_KIND LPAREN actual_arg_list RPAREN
     | SELECTED_INT_KIND LPAREN actual_arg_list RPAREN
     | KIND LPAREN actual_arg_list RPAREN
+    | REAL LPAREN actual_arg_list RPAREN         // REAL type conversion
+    | INTEGER LPAREN actual_arg_list RPAREN     // INTEGER type conversion
+    | LOGICAL LPAREN actual_arg_list RPAREN     // LOGICAL type conversion
+    | CHARACTER LPAREN actual_arg_list RPAREN   // CHARACTER type conversion
+    | COMPLEX LPAREN actual_arg_list RPAREN     // COMPLEX type conversion
     | ieee_function_call
     ;
 
