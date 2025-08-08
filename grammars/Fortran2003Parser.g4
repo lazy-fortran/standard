@@ -1141,8 +1141,12 @@ do_construct
       execution_part_f2003?
       END DO NEWLINE?
     | DO identifier_or_keyword EQUALS expr_f2003 COMMA expr_f2003 (COMMA expr_f2003)? NEWLINE
-      execution_part_f2003?
+      do_body_f2003
       END DO NEWLINE?
+    ;
+
+do_body_f2003
+    : (NEWLINE | assignment_stmt | call_stmt | print_stmt | allocate_stmt_f2003 | deallocate_stmt | if_construct | do_construct | block_construct)*
     ;
 
 select_case_construct
