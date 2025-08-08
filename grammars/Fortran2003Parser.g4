@@ -27,6 +27,7 @@ identifier_or_keyword
     | RESULT       // RESULT can be used as a variable name
     | SUM_INTRINSIC  // SUM can be used as a variable/result name
     | ID           // ID can be used as a variable name (common identifier)
+    | DATA         // DATA can be used as a variable name (legacy keyword)
     ;
 
 // F2003 program unit (enhanced with OOP features)
