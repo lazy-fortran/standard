@@ -81,9 +81,8 @@ end module test"""
         tree, errors = self.parse_code(code)
         assert errors == 0, f"Kind selectors failed: {errors} errors"
 
-    @pytest.mark.xfail(reason="PDT components not yet implemented")
     def test_pdt_with_components_real_usage(self):
-        """Real PDT usage with components - currently fails"""
+        """Real PDT usage with components - now working"""
         code = """module test
     type :: matrix(k, n, m)
         integer, kind :: k = 4
@@ -95,9 +94,8 @@ end module test"""
         tree, errors = self.parse_code(code)
         assert errors == 0, "PDT with real components should parse"
 
-    @pytest.mark.xfail(reason="PDT instantiation with parameters not implemented")
     def test_pdt_instantiation_with_params(self):
-        """PDT instantiation with actual parameters - currently fails"""
+        """PDT instantiation with actual parameters - now working"""
         code = """module test
     type :: vector(k, n)
         integer, kind :: k = 4
@@ -111,16 +109,14 @@ end module test"""
         tree, errors = self.parse_code(code)
         assert errors == 0, "PDT instantiation with params should parse"
 
-    @pytest.mark.xfail(reason="Deferred/assumed parameters not implemented")
     def test_pdt_deferred_assumed_params(self):
-        """Deferred (:) and assumed (*) parameters - currently fails"""
+        """Deferred (:) and assumed (*) parameters - now working"""
         code = """module test
     type :: flexible(k, n)
         integer, kind :: k = 4
         integer, len :: n
         real(k) :: data(n)
     end type flexible
-    
     type(flexible(k=:, n=*)) :: deferred_vector
 end module test"""
         
