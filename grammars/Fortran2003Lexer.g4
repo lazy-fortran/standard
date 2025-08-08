@@ -232,3 +232,6 @@ NEWLINE : [\r\n]+ ;
 // Array constructor brackets (F90+ feature)
 LSQUARE : '[' ;
 RSQUARE : ']' ;
+
+// Whitespace handling - MUST skip spaces and tabs
+WHITESPACE : [ \t]+ -> skip ;
