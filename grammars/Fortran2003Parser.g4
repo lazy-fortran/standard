@@ -35,7 +35,8 @@ program_unit_f2003
 
 // Enhanced main program for F2003
 main_program_f2003
-    : program_stmt specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_program_stmt
+    : program_stmt specification_part_f2003? execution_part_f2003?
+      internal_subprogram_part_f2003? end_program_stmt
     ;
 
 // F2003 program statement with newline support
@@ -50,7 +51,8 @@ end_program_stmt
 
 // Override F90 main_program to use F2003 specification part
 main_program
-    : program_stmt specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_program_stmt
+    : program_stmt specification_part_f2003? execution_part_f2003?
+      internal_subprogram_part_f2003? end_program_stmt
     ;
 
 // Enhanced module for F2003
@@ -91,17 +93,20 @@ external_subprogram_f2003
 
 // Enhanced function subprogram for F2003
 function_subprogram_f2003
-    : function_stmt_f2003 specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_function_stmt
+    : function_stmt_f2003 specification_part_f2003? execution_part_f2003?
+      internal_subprogram_part_f2003? end_function_stmt
     ;
 
 // Enhanced subroutine subprogram for F2003
 subroutine_subprogram_f2003
-    : subroutine_stmt_f2003 specification_part_f2003? execution_part_f2003? internal_subprogram_part_f2003? end_subroutine_stmt
+    : subroutine_stmt_f2003 specification_part_f2003? execution_part_f2003?
+      internal_subprogram_part_f2003? end_subroutine_stmt
     ;
 
 // Enhanced function statement for F2003
 function_stmt_f2003
-    : prefix? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN suffix? binding_spec? NEWLINE
+    : prefix? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN
+      suffix? binding_spec? NEWLINE
     ;
 
 // Enhanced subroutine statement for F2003
@@ -132,7 +137,8 @@ subroutine_stmt_interface
     ;
 
 function_stmt_interface
-    : (prefix)? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN (suffix)? binding_spec? NEWLINE
+    : (prefix)? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN
+      (suffix)? binding_spec? NEWLINE
     ;
 
 end_subroutine_stmt_interface
@@ -214,7 +220,8 @@ derived_type_def_f2003
 
 // F2003 enhanced type statement with OOP attributes  
 derived_type_stmt_f2003
-    : TYPE (COMMA type_attr_spec_list)? DOUBLE_COLON type_name (LPAREN type_param_name_list RPAREN)?
+    : TYPE (COMMA type_attr_spec_list)? DOUBLE_COLON type_name
+      (LPAREN type_param_name_list RPAREN)?
     | TYPE DOUBLE_COLON type_name (LPAREN type_param_name_list RPAREN)?
     ;
 
@@ -285,7 +292,8 @@ proc_binding
 
 // Generic type-bound procedures
 type_bound_generic_stmt
-    : GENERIC (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON generic_spec POINTER_ASSIGN generic_binding_list NEWLINE
+    : GENERIC (COMMA (PUBLIC | PRIVATE))? DOUBLE_COLON generic_spec
+      POINTER_ASSIGN generic_binding_list NEWLINE
     ;
 
 generic_binding_list
@@ -411,7 +419,8 @@ procedure_entity_decl_list
 
 // Procedure pointer components (different syntax from regular procedure declarations)
 proc_component_def_stmt
-    : PROCEDURE LPAREN (IDENTIFIER | INTERFACE) RPAREN COMMA proc_component_attr_spec_list DOUBLE_COLON proc_decl_list NEWLINE
+    : PROCEDURE LPAREN (IDENTIFIER | INTERFACE) RPAREN COMMA
+      proc_component_attr_spec_list DOUBLE_COLON proc_decl_list NEWLINE
     ;
 
 proc_component_attr_spec_list
@@ -602,6 +611,65 @@ object_name_list
 use_stmt
     : USE IDENTIFIER NEWLINE
     | USE IDENTIFIER COMMA ONLY COLON only_list NEWLINE
+    | USE COMMA INTRINSIC DOUBLE_COLON ieee_module_name NEWLINE
+    | USE COMMA INTRINSIC DOUBLE_COLON ieee_module_name COMMA 
+      ONLY COLON ieee_only_list NEWLINE
+    ;
+
+// IEEE intrinsic modules
+ieee_module_name
+    : IEEE_EXCEPTIONS
+    | IEEE_ARITHMETIC  
+    | IEEE_FEATURES
+    ;
+
+// IEEE-specific only list for intrinsic modules
+ieee_only_list
+    : ieee_entity (COMMA ieee_entity)*
+    ;
+
+ieee_entity
+    : ieee_exception_type
+    | ieee_special_value
+    | ieee_rounding_mode
+    | ieee_feature_name
+    | IDENTIFIER  // Other IEEE procedures/constants
+    ;
+
+ieee_exception_type
+    : IEEE_OVERFLOW
+    | IEEE_UNDERFLOW
+    | IEEE_DIVIDE_BY_ZERO
+    | IEEE_INVALID
+    | IEEE_INEXACT
+    ;
+
+ieee_special_value
+    : IEEE_POSITIVE_INF
+    | IEEE_NEGATIVE_INF
+    | IEEE_QUIET_NAN
+    | IEEE_SIGNALING_NAN
+    ;
+
+ieee_rounding_mode
+    : IEEE_NEAREST
+    | IEEE_TO_ZERO
+    | IEEE_UP
+    | IEEE_DOWN
+    ;
+
+ieee_feature_name
+    : IEEE_DATATYPE
+    | IEEE_DENORMAL
+    | IEEE_DIVIDE
+    | IEEE_HALTING
+    | IEEE_INEXACT_FLAG
+    | IEEE_INF
+    | IEEE_INVALID_FLAG
+    | IEEE_NAN
+    | IEEE_ROUNDING
+    | IEEE_SQRT
+    | IEEE_UNDERFLOW_FLAG
     ;
 
 implicit_stmt
@@ -654,10 +722,16 @@ declaration_construct
     ;
 
 type_declaration_stmt
-    : INTEGER kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
-    | REAL kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
-    | CHARACTER char_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
-    | c_interop_type (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
+    : INTEGER kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON 
+      entity_decl_list NEWLINE
+    | REAL kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON 
+      entity_decl_list NEWLINE
+    | LOGICAL kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON 
+      entity_decl_list NEWLINE
+    | CHARACTER char_selector? (COMMA attr_spec_list)? DOUBLE_COLON 
+      entity_decl_list NEWLINE
+    | c_interop_type (COMMA attr_spec_list)? DOUBLE_COLON 
+      entity_decl_list NEWLINE
     | TYPE LPAREN derived_type_spec RPAREN (COMMA attr_spec_list)? 
       DOUBLE_COLON entity_decl_list NEWLINE
     ;
@@ -733,12 +807,14 @@ entity_decl_list
     ;
 
 entity_decl
-    : identifier_or_keyword (LPAREN array_spec RPAREN)? (EQUALS expr_f90)?  // F2003 entity declaration with initialization
+    : identifier_or_keyword (LPAREN array_spec RPAREN)? (EQUALS expr_f90)?
+        // F2003 entity declaration with initialization
     ;
 
 // Override F90 entity declaration to support keywords as identifiers
 entity_decl_f90
-    : identifier_or_keyword (LPAREN array_spec_f90 RPAREN)? (MULTIPLY char_length)? (ASSIGN expr_f90)?
+    : identifier_or_keyword (LPAREN array_spec_f90 RPAREN)? (MULTIPLY char_length)?
+      (ASSIGN expr_f90)?
     ;
 
 // Override F90 module_subprogram_part to handle NEWLINEs properly
@@ -778,8 +854,10 @@ executable_construct
 assignment_stmt
     : identifier_or_keyword EQUALS primary NEWLINE
     | identifier_or_keyword PERCENT identifier_or_keyword EQUALS primary NEWLINE
-    | identifier_or_keyword POINTER_ASSIGN primary NEWLINE                      // Procedure pointer assignment
-    | identifier_or_keyword PERCENT identifier_or_keyword POINTER_ASSIGN primary NEWLINE   // Component procedure pointer assignment
+    | identifier_or_keyword POINTER_ASSIGN primary NEWLINE
+        // Procedure pointer assignment
+    | identifier_or_keyword PERCENT identifier_or_keyword POINTER_ASSIGN primary NEWLINE
+        // Component procedure pointer assignment
     ;
 
 call_stmt
@@ -835,6 +913,7 @@ primary
     : identifier_or_keyword (PERCENT identifier_or_keyword)*
     | identifier_or_keyword LPAREN actual_arg_list? RPAREN
     | intrinsic_function_call
+    | ieee_constant
     | INTEGER_LITERAL
     | LABEL              // Accept LABEL as integer literal (token precedence issue)
     | REAL_LITERAL
@@ -843,11 +922,37 @@ primary
     | LPAREN primary RPAREN
     ;
 
+// IEEE constants that can appear in expressions
+ieee_constant
+    : ieee_special_value
+    | ieee_exception_type
+    | ieee_rounding_mode
+    | ieee_feature_name
+    ;
+
 // Handle intrinsic function calls
 intrinsic_function_call
     : SELECTED_REAL_KIND LPAREN actual_arg_list RPAREN
     | SELECTED_INT_KIND LPAREN actual_arg_list RPAREN
     | KIND LPAREN actual_arg_list RPAREN
+    | ieee_function_call
+    ;
+
+// IEEE arithmetic function calls
+ieee_function_call
+    : ieee_inquiry_function LPAREN actual_arg_list RPAREN
+    | ieee_value_function LPAREN actual_arg_list RPAREN
+    | IDENTIFIER LPAREN actual_arg_list RPAREN  // General IEEE procedures
+    ;
+
+// IEEE inquiry functions
+ieee_inquiry_function
+    : IDENTIFIER  // ieee_is_nan, ieee_is_finite, ieee_is_normal, etc.
+    ;
+
+// IEEE value functions
+ieee_value_function
+    : IDENTIFIER  // ieee_value, ieee_copy_sign, ieee_next_after, etc.
     ;
 
 // Override F90 function_reference to handle intrinsic functions
