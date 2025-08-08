@@ -58,8 +58,8 @@ end module procedures"""
     def test_c_pointer_declarations(self):
         """C pointer type declarations should parse"""
         code = """module pointers
-c_ptr :: cptr
-c_funptr :: fptr
+type(c_ptr) :: cptr
+type(c_funptr) :: fptr
 end module pointers"""
         
         tree, errors = self.parse_code(code)
@@ -90,15 +90,15 @@ end module isobinding"""
     def test_comprehensive_c_interop_example(self):
         """Comprehensive C type test should parse"""
         code = """module test
-    c_int8_t :: i8
-    c_int16_t :: i16  
-    c_int32_t :: i32
-    c_int64_t :: i64
-    c_float :: f
-    c_double :: d
-    c_long_double :: ld
-    c_bool :: b
-    c_char :: ch
+integer(c_int8_t) :: i8
+integer(c_int16_t) :: i16  
+integer(c_int32_t) :: i32
+integer(c_int64_t) :: i64
+real(c_float) :: f
+real(c_double) :: d
+real(c_long_double) :: ld
+logical(c_bool) :: b
+character(c_char) :: ch
 end module test"""
         
         tree, errors = self.parse_code(code)

@@ -25,6 +25,7 @@ identifier_or_keyword
     | VALUE        // VALUE can be used as an identifier when not in C-binding context
     | NAME         // NAME can be used as an identifier
     | RESULT       // RESULT can be used as a variable name
+    | SUM_INTRINSIC  // SUM can be used as a variable/result name
     ;
 
 // F2003 program unit (enhanced with OOP features)
@@ -60,6 +61,11 @@ module_f2003
 // Override F90 specification_part to use F2003 enhanced version
 specification_part
     : specification_part_f2003
+    ;
+
+// Override F90 suffix to handle intrinsics as identifiers
+suffix
+    : RESULT LPAREN identifier_or_keyword RPAREN
     ;
 
 // Override F90 module to use F2003 specification part
@@ -319,7 +325,7 @@ type_attr_spec
     | PRIVATE
     | ABSTRACT
     | EXTENDS LPAREN IDENTIFIER RPAREN
-    | BIND LPAREN IDENTIFIER RPAREN    // BIND(C) where C is an identifier
+    | BIND LPAREN C RPAREN             // BIND(C) for derived types
     ;
 
 // Type parameter definitions
@@ -481,7 +487,12 @@ import_stmt
     ;
 
 import_name_list
-    : IDENTIFIER (COMMA IDENTIFIER)*
+    : import_name (COMMA import_name)*
+    ;
+
+import_name
+    : IDENTIFIER
+    | c_interop_type  // Allow C interop types in IMPORT statements
     ;
 
 // ============================================================================
@@ -845,10 +856,10 @@ literal_f90
     | boz_literal_constant          // Binary/octal/hex literals (F90)
     ;
 
-// BIND(C) specification for C interoperability
+// BIND(C) specification for C interoperability (simplified like external grammar)
 binding_spec
-    : BIND LPAREN IDENTIFIER RPAREN                                      // BIND(C)
-    | BIND LPAREN IDENTIFIER COMMA NAME EQUALS string_literal RPAREN     // BIND(C, NAME="func")
+    : BIND LPAREN C RPAREN                                               // BIND(C)
+    | BIND LPAREN C COMMA NAME EQUALS string_literal RPAREN             // BIND(C, NAME="func")
     ;
 
 // String literal for BIND(C) name
