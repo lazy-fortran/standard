@@ -602,6 +602,65 @@ object_name_list
 use_stmt
     : USE IDENTIFIER NEWLINE
     | USE IDENTIFIER COMMA ONLY COLON only_list NEWLINE
+    | USE COMMA INTRINSIC DOUBLE_COLON ieee_module_name NEWLINE
+    | USE COMMA INTRINSIC DOUBLE_COLON ieee_module_name COMMA 
+      ONLY COLON ieee_only_list NEWLINE
+    ;
+
+// IEEE intrinsic modules
+ieee_module_name
+    : IEEE_EXCEPTIONS
+    | IEEE_ARITHMETIC  
+    | IEEE_FEATURES
+    ;
+
+// IEEE-specific only list for intrinsic modules
+ieee_only_list
+    : ieee_entity (COMMA ieee_entity)*
+    ;
+
+ieee_entity
+    : ieee_exception_type
+    | ieee_special_value
+    | ieee_rounding_mode
+    | ieee_feature_name
+    | IDENTIFIER  // Other IEEE procedures/constants
+    ;
+
+ieee_exception_type
+    : IEEE_OVERFLOW
+    | IEEE_UNDERFLOW
+    | IEEE_DIVIDE_BY_ZERO
+    | IEEE_INVALID
+    | IEEE_INEXACT
+    ;
+
+ieee_special_value
+    : IEEE_POSITIVE_INF
+    | IEEE_NEGATIVE_INF
+    | IEEE_QUIET_NAN
+    | IEEE_SIGNALING_NAN
+    ;
+
+ieee_rounding_mode
+    : IEEE_NEAREST
+    | IEEE_TO_ZERO
+    | IEEE_UP
+    | IEEE_DOWN
+    ;
+
+ieee_feature_name
+    : IEEE_DATATYPE
+    | IEEE_DENORMAL
+    | IEEE_DIVIDE
+    | IEEE_HALTING
+    | IEEE_INEXACT_FLAG
+    | IEEE_INF
+    | IEEE_INVALID_FLAG
+    | IEEE_NAN
+    | IEEE_ROUNDING
+    | IEEE_SQRT
+    | IEEE_UNDERFLOW_FLAG
     ;
 
 implicit_stmt
@@ -656,6 +715,7 @@ declaration_construct
 type_declaration_stmt
     : INTEGER kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
     | REAL kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
+    | LOGICAL kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
     | CHARACTER char_selector? (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
     | c_interop_type (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
     | TYPE LPAREN derived_type_spec RPAREN (COMMA attr_spec_list)? 
@@ -835,6 +895,7 @@ primary
     : identifier_or_keyword (PERCENT identifier_or_keyword)*
     | identifier_or_keyword LPAREN actual_arg_list? RPAREN
     | intrinsic_function_call
+    | ieee_constant
     | INTEGER_LITERAL
     | LABEL              // Accept LABEL as integer literal (token precedence issue)
     | REAL_LITERAL
@@ -843,11 +904,37 @@ primary
     | LPAREN primary RPAREN
     ;
 
+// IEEE constants that can appear in expressions
+ieee_constant
+    : ieee_special_value
+    | ieee_exception_type
+    | ieee_rounding_mode
+    | ieee_feature_name
+    ;
+
 // Handle intrinsic function calls
 intrinsic_function_call
     : SELECTED_REAL_KIND LPAREN actual_arg_list RPAREN
     | SELECTED_INT_KIND LPAREN actual_arg_list RPAREN
     | KIND LPAREN actual_arg_list RPAREN
+    | ieee_function_call
+    ;
+
+// IEEE arithmetic function calls
+ieee_function_call
+    : ieee_inquiry_function LPAREN actual_arg_list RPAREN
+    | ieee_value_function LPAREN actual_arg_list RPAREN
+    | IDENTIFIER LPAREN actual_arg_list RPAREN  // General IEEE procedures
+    ;
+
+// IEEE inquiry functions
+ieee_inquiry_function
+    : IDENTIFIER  // ieee_is_nan, ieee_is_finite, ieee_is_normal, etc.
+    ;
+
+// IEEE value functions
+ieee_value_function
+    : IDENTIFIER  // ieee_value, ieee_copy_sign, ieee_next_after, etc.
     ;
 
 // Override F90 function_reference to handle intrinsic functions
