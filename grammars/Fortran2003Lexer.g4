@@ -155,9 +155,9 @@ IEEE_UNDERFLOW_FLAG : I E E E '_' U N D E R F L O W '_' F L A G ;
 // Override F90 keywords that conflict with FIXED_FORM_COMMENT
 CONTAINS         : [cC] O N T A I N S ;
 
-// Override FIXED_FORM_COMMENT to be extremely restrictive for C interop compatibility
+// Override FIXED_FORM_COMMENT to be extremely restrictive - only match at line start  
 FIXED_FORM_COMMENT  
-    : [cC] ~[\r\n),=_:]+ ~[\r\n]*  -> channel(HIDDEN)  // 'c' followed by content but not ), = _ or :
+    : [\r\n][ \t]*[cC] ~[\r\n]*  -> channel(HIDDEN)  // Only match 'c' at start of line
     ;
 
 STAR_COMMENT
