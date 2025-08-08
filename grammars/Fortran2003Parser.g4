@@ -446,7 +446,7 @@ type_param_name_list
 associate_construct
     : (IDENTIFIER COLON)? ASSOCIATE LPAREN association_list RPAREN NEWLINE
       execution_part_f2003?
-      END ASSOCIATE (IDENTIFIER)? NEWLINE
+      END ASSOCIATE (IDENTIFIER)? NEWLINE?
     ;
 
 association_list
@@ -469,7 +469,7 @@ block_construct
     : (IDENTIFIER COLON)? BLOCK NEWLINE
       specification_part_f2003?
       execution_part_f2003?
-      END BLOCK (IDENTIFIER)? NEWLINE
+      END BLOCK (IDENTIFIER)? NEWLINE?
     ;
 
 // ============================================================================
@@ -660,14 +660,14 @@ flush_spec
 
 // PRINT statement (legacy I/O support)
 print_stmt
-    : PRINT '*' COMMA actual_arg_list NEWLINE         // print *, args
-    | PRINT primary COMMA actual_arg_list NEWLINE     // print format, args
-    | PRINT '*' NEWLINE                               // print *
+    : PRINT '*' COMMA actual_arg_list                // print *, args
+    | PRINT primary COMMA actual_arg_list            // print format, args
+    | PRINT '*'                                      // print *
     ;
 
 // STOP statement
 stop_stmt
-    : STOP (INTEGER_LITERAL | string_literal)? NEWLINE
+    : STOP (INTEGER_LITERAL | string_literal)?
     ;
 
 // DEALLOCATE statement
@@ -946,8 +946,8 @@ executable_construct
 
 // Enhanced assignment statement for F2003 - support array access and components
 assignment_stmt
-    : lhs_expression EQUALS expr_f2003 NEWLINE
-    | lhs_expression POINTER_ASSIGN primary NEWLINE
+    : lhs_expression EQUALS expr_f2003
+    | lhs_expression POINTER_ASSIGN primary
         // Procedure pointer assignment
     ;
 
@@ -977,7 +977,7 @@ lhs_expression
     ;
 
 call_stmt
-    : CALL identifier_or_keyword (LPAREN actual_arg_list? RPAREN)? NEWLINE
+    : CALL identifier_or_keyword (LPAREN actual_arg_list? RPAREN)?
     ;
 
 actual_arg_list
@@ -992,9 +992,9 @@ actual_arg
 
 if_construct
     : IF LPAREN logical_expr RPAREN THEN NEWLINE
-      execution_part
-      (ELSE NEWLINE execution_part)?
-      END IF NEWLINE
+      execution_part_f2003?
+      (ELSE NEWLINE execution_part_f2003?)?
+      END IF NEWLINE?
     ;
 
 logical_expr
@@ -1003,24 +1003,24 @@ logical_expr
 
 do_construct
     : DO NEWLINE
-      execution_part
-      END DO NEWLINE
+      execution_part_f2003?
+      END DO NEWLINE?
     | DO identifier_or_keyword EQUALS primary COMMA primary NEWLINE
-      execution_part
-      END DO NEWLINE
+      execution_part_f2003?
+      END DO NEWLINE?
     ;
 
 select_case_construct
     : SELECT CASE LPAREN primary RPAREN NEWLINE
       case_construct+
-      END SELECT NEWLINE
+      END SELECT NEWLINE?
     ;
 
 case_construct
     : CASE LPAREN case_value_list RPAREN NEWLINE
-      execution_part
+      execution_part_f2003?
     | CASE DEFAULT NEWLINE
-      execution_part
+      execution_part_f2003?
     ;
 
 case_value_list
