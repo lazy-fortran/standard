@@ -71,9 +71,10 @@ suffix
     : RESULT LPAREN identifier_or_keyword RPAREN
     ;
 
-// Override F90 module to use F2003 specification part
+// Override F90 module to use F2003 specification part - inline module procedures
 module
-    : module_stmt NEWLINE* specification_part_f2003? NEWLINE* module_subprogram_part? NEWLINE* end_module_stmt
+    : module_stmt NEWLINE* specification_part_f2003? NEWLINE* contains_stmt NEWLINE* (function_subprogram_f2003 | subroutine_subprogram_f2003) (NEWLINE* (function_subprogram_f2003 | subroutine_subprogram_f2003))* NEWLINE* end_module_stmt
+    | module_stmt NEWLINE* specification_part_f2003? NEWLINE* end_module_stmt
     ;
 
 // Override F90 module_stmt to handle newlines
@@ -150,6 +151,15 @@ end_function_stmt_interface
     : END (FUNCTION (IDENTIFIER)?)? NEWLINE
     ;
 
+// Override F90 end statements to handle NEWLINE properly
+end_subroutine_stmt
+    : END (SUBROUTINE (IDENTIFIER)?)? NEWLINE?
+    ;
+
+end_function_stmt
+    : END (FUNCTION (IDENTIFIER)?)? NEWLINE?
+    ;
+
 // Override interface_stmt and end_interface_stmt for NEWLINE support
 interface_stmt
     : INTERFACE (generic_spec)? NEWLINE
@@ -165,9 +175,9 @@ interface_block
     : interface_stmt (NEWLINE* interface_specification)* NEWLINE* end_interface_stmt
     ;
 
-// Enhanced specification part for F2003
+// Enhanced specification part for F2003 - follow F90 structure for better boundaries
 specification_part_f2003
-    : (NEWLINE* (use_stmt | import_stmt | implicit_stmt | declaration_construct_f2003) NEWLINE?)*
+    : (NEWLINE* (use_stmt | import_stmt))* (NEWLINE* implicit_stmt)* (NEWLINE* declaration_construct_f2003 NEWLINE?)*
     ;
 
 // Enhanced declaration construct for F2003  
