@@ -70,11 +70,15 @@ These features are tracked in separate GitHub issues for future implementation:
 - **Missing**: Complex polymorphic operations
 - **Missing**: Advanced abstract interface features with IMPORT
 
-### 6. C Interoperability (Issue #27)
-- **Missing**: Full BIND(C) syntax
-- **Missing**: ISO_C_BINDING module support
-- **Missing**: VALUE attribute in C context
-- **Note**: Tokens recognized but parsing incomplete
+### 6. C Interoperability Type Tokens (Issue #24 - PARTIAL) 
+- ✅ **Working**: All 34 C interop type tokens recognized (C_INT, C_FLOAT, C_PTR, etc.)
+- ✅ **Working**: C types as standalone type declarations (`c_int :: i`)
+- ✅ **Working**: VALUE attribute for procedure arguments
+- ✅ **Working**: All 7 token recognition tests passing
+- ❌ **Not Implemented**: BIND(C) syntax with procedures and types
+- ❌ **Not Implemented**: USE ISO_C_BINDING module support
+- ❌ **Not Implemented**: Kind selectors with C types (`integer(c_int)`)
+- **Status**: Token foundation complete, full C interoperability pending
 
 ## Working Features
 
