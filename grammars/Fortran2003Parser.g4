@@ -464,7 +464,16 @@ procedure_declaration_stmt
     ;
 
 procedure_entity_decl_list
-    : IDENTIFIER (COMMA IDENTIFIER)*
+    : procedure_entity_decl (COMMA procedure_entity_decl)*
+    ;
+
+procedure_entity_decl
+    : IDENTIFIER (POINTER_ASSIGN proc_target)?
+    ;
+
+proc_target
+    : IDENTIFIER                    // Target procedure name
+    | IDENTIFIER LPAREN RPAREN     // null() or other function call
     ;
 
 // Procedure pointer components (different syntax from regular procedure declarations)
