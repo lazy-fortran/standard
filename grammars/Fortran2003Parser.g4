@@ -288,7 +288,9 @@ sequence_stmt
 type_bound_procedure_stmt
     : PROCEDURE ((COMMA binding_attr_list)? DOUBLE_COLON)?
       type_bound_proc_decl_list
-    | PROCEDURE LPAREN IDENTIFIER RPAREN (COMMA binding_attr_list)? DOUBLE_COLON
+    | PROCEDURE LPAREN IDENTIFIER RPAREN COMMA binding_attr_list DOUBLE_COLON
+      type_bound_proc_decl_list
+    | PROCEDURE LPAREN IDENTIFIER RPAREN DOUBLE_COLON
       type_bound_proc_decl_list
     ;
 
@@ -297,7 +299,7 @@ binding_attr_list
     ;
 
 binding_attr
-    : access_spec           // PUBLIC or PRIVATE
+    : access_spec           // PUBLIC or PRIVATE  
     | DEFERRED
     | NOPASS
     | PASS (LPAREN IDENTIFIER RPAREN)?
