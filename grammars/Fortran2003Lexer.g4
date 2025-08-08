@@ -13,6 +13,9 @@ import Fortran95Lexer;
 // FORTRAN 2003 NEW FEATURES - Object-Oriented Programming
 // ============================================================================
 
+// C token for BIND(C) - simple approach like external grammar
+C                : [cC] ;
+
 // Object-Oriented Programming (NEW in F2003)
 ABSTRACT         : A B S T R A C T ;
 EXTENDS          : E X T E N D S ;
@@ -113,13 +116,22 @@ ID               : I D ;
 // Override F90 keywords that conflict with FIXED_FORM_COMMENT
 CONTAINS         : [cC] O N T A I N S ;
 
+// Override FIXED_FORM_COMMENT to be extremely restrictive for C interop compatibility
+FIXED_FORM_COMMENT  
+    : [cC] ~[\r\n),=_:]+ ~[\r\n]*  -> channel(HIDDEN)  // 'c' followed by content but not ), = _ or :
+    ;
+
+STAR_COMMENT
+    : '*' ~[\r\n]* -> channel(HIDDEN)              // Star comments
+    ;
+
 // ============================================================================
 // CASE-INSENSITIVE FRAGMENTS
 // ============================================================================
 
 fragment A : [aA] ;
 fragment B : [bB] ;
-fragment C : [cC] ;
+// fragment C removed - now using C as token for BIND(C)
 fragment D : [dD] ;
 fragment E : [eE] ;
 fragment F : [fF] ;
