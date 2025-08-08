@@ -13,17 +13,17 @@ import Fortran95Lexer;
 // COMMENTS - MUST BE FIRST TO HAVE PRECEDENCE OVER KEYWORDS
 // ============================================================================
 
-// Fixed-form comments - simply use a more comprehensive pattern
+// Fixed-form comments - only after newlines (more restrictive to avoid conflicts)
 FIXED_FORM_COMMENT  
-    : ([ \t]*|[\r\n][ \t]*) [cC] [ \t] ~[\r\n]*  -> channel(HIDDEN)
+    : [\r\n][ \t]* [cC] [ \t] ~[\r\n]*  -> channel(HIDDEN)
     ;
     
 FIXED_FORM_COMMENT_STAR
-    : ([ \t]*|[\r\n][ \t]*) [cC] [*!] ~[\r\n]*  -> channel(HIDDEN) 
+    : [\r\n][ \t]* [cC] [*!] ~[\r\n]*  -> channel(HIDDEN) 
     ;
 
 STAR_COMMENT
-    : ([ \t]*|[\r\n][ \t]*) '*' ~[\r\n]* -> channel(HIDDEN)
+    : [\r\n][ \t]* '*' ~[\r\n]* -> channel(HIDDEN)
     ;
 
 // ============================================================================
