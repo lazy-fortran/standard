@@ -66,9 +66,25 @@ These features are tracked in separate GitHub issues for future implementation:
 - ✅ **Working**: Multiple procedure pointer declarations
 - ✅ **Working**: Component procedure pointer assignment (`obj%ptr => procedure`)
 
-### 5. Advanced OOP Features (Issue #26)
-- **Missing**: Complex polymorphic operations
-- **Missing**: Advanced abstract interface features with IMPORT
+### 5. Parameterized Derived Types (Issue #26 - IN PROGRESS)
+**Working Features:**
+- ✅ Basic PDT structure parsing (empty PDTs, parameter lists)
+- ✅ KIND and LEN parameter definitions 
+- ✅ Multiple parameter definitions
+- ✅ Basic PDT instantiation syntax
+- ✅ Improved kind selectors (real(4), real(8))
+
+**Missing Features:**
+- ❌ PDT components with type parameters (e.g., real(k) :: data)
+- ❌ PDT array components with LEN parameters
+- ❌ PDT instantiation with actual parameters
+- ❌ Deferred (:) and assumed (*) parameter values
+- ❌ Complex PDT allocation and initialization
+
+**Test Status:**
+- Basic infrastructure: 5/5 tests passing
+- Real-world usage: Not yet implemented
+- **Status**: ~30% of Issue #26 objectives completed
 
 ### 6. C Interoperability (Issue #24 - PARTIALLY COMPLETE)
 **Working Features:**
