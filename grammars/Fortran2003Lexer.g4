@@ -116,9 +116,9 @@ ID               : I D ;
 // Override F90 keywords that conflict with FIXED_FORM_COMMENT
 CONTAINS         : [cC] O N T A I N S ;
 
-// Override FIXED_FORM_COMMENT to be much more restrictive for BIND(C) compatibility
+// Override FIXED_FORM_COMMENT to be extremely restrictive for C interop compatibility
 FIXED_FORM_COMMENT  
-    : [cC] ~[\r\n),=]+ ~[\r\n]*  -> channel(HIDDEN)  // 'c' followed by content but not ), or =
+    : [cC] ~[\r\n),=_:]+ ~[\r\n]*  -> channel(HIDDEN)  // 'c' followed by content but not ), = _ or :
     ;
 
 STAR_COMMENT
