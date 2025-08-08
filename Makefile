@@ -8,7 +8,7 @@ GRAMMAR_DIR = grammars
 BUILD_DIR = build
 
 # Grammar inheritance chain (build order matters!)
-GRAMMARS = FORTRAN FORTRANII FORTRANIV FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003
+GRAMMARS = FORTRAN FORTRANII FORTRANIV FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008
 
 # Default target
 .PHONY: all clean test help
@@ -24,6 +24,7 @@ FORTRAN77: $(BUILD_DIR)/FORTRAN77/FORTRAN77Lexer.py
 Fortran90: $(BUILD_DIR)/Fortran90/Fortran90Lexer.py
 Fortran95: $(BUILD_DIR)/Fortran95/Fortran95Lexer.py
 Fortran2003: $(BUILD_DIR)/Fortran2003/Fortran2003Lexer.py
+Fortran2008: $(BUILD_DIR)/Fortran2008/Fortran2008Lexer.py
 
 # FORTRAN I (1957) - Foundation
 $(BUILD_DIR)/FORTRAN/FORTRANLexer.py: $(GRAMMAR_DIR)/FORTRANLexer.g4 $(GRAMMAR_DIR)/FORTRANParser.g4
@@ -86,6 +87,14 @@ $(BUILD_DIR)/Fortran2003/Fortran2003Lexer.py: $(GRAMMAR_DIR)/Fortran2003Lexer.g4
 	$(ANTLR4) $(ANTLR4_PYTHON) -lib ../../$(GRAMMAR_DIR) ../../$(GRAMMAR_DIR)/Fortran2003Lexer.g4 && \
 	$(ANTLR4) $(ANTLR4_PYTHON) -lib ../../$(GRAMMAR_DIR) ../../$(GRAMMAR_DIR)/Fortran2003Parser.g4
 
+# Fortran 2008 (2008) - Enhanced Parallel Programming
+$(BUILD_DIR)/Fortran2008/Fortran2008Lexer.py: $(GRAMMAR_DIR)/Fortran2008Lexer.g4 $(GRAMMAR_DIR)/Fortran2008Parser.g4 Fortran2003
+	@echo "Building Fortran 2008 (2008)..."
+	@mkdir -p $(BUILD_DIR)/Fortran2008
+	cd $(BUILD_DIR)/Fortran2008 && \
+	$(ANTLR4) $(ANTLR4_PYTHON) -lib ../../$(GRAMMAR_DIR) ../../$(GRAMMAR_DIR)/Fortran2008Lexer.g4 && \
+	$(ANTLR4) $(ANTLR4_PYTHON) -lib ../../$(GRAMMAR_DIR) ../../$(GRAMMAR_DIR)/Fortran2008Parser.g4
+
 # Test target
 test: all
 	@echo "Running comprehensive grammar tests..."
@@ -110,12 +119,13 @@ help:
 	@echo "  Fortran90   Build Fortran 90 (1990) modern foundation"
 	@echo "  Fortran95   Build Fortran 95 (1995) minor update"
 	@echo "  Fortran2003 Build Fortran 2003 (2003) object-oriented programming"
+	@echo "  Fortran2008 Build Fortran 2008 (2008) enhanced parallel programming"
 	@echo "  test        Run comprehensive test suite"
 	@echo "  clean       Remove all generated files"
 	@echo "  help        Show this help"
 	@echo ""
 	@echo "Grammar Inheritance Chain:"
-	@echo "  FORTRAN → FORTRANII → FORTRANIV → FORTRAN66 → FORTRAN77 → Fortran90 → Fortran95 → Fortran2003"
+	@echo "  FORTRAN → FORTRANII → FORTRANIV → FORTRAN66 → FORTRAN77 → Fortran90 → Fortran95 → Fortran2003 → Fortran2008"
 	@echo ""
 	@echo "Historical Timeline:"
 	@echo "  1957: FORTRAN I  (IBM 704, monolithic programs)"
@@ -126,6 +136,7 @@ help:
 	@echo "  1990: Fortran 90 (modern: modules, arrays, derived types)"
 	@echo "  1995: Fortran 95 (minor updates and clarifications)"
 	@echo "  2003: Fortran 2003 (object-oriented: CLASS, EXTENDS, C interop)"
+	@echo "  2008: Fortran 2008 (coarrays, submodules, DO CONCURRENT)"
 
 # Force rebuild
 .PHONY: $(GRAMMARS) force-rebuild
