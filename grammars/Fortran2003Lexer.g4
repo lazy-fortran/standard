@@ -125,7 +125,7 @@ FIXED_FORM_COMMENT
     ;
 
 STAR_COMMENT
-    : {self.column==0}? '*' ~[\r\n]* -> channel(HIDDEN)  // Star comments only at start of line
+    : {self.column==0}? '*' ~[\r\n]* -> channel(HIDDEN)  // Star at line start
     ;
 
 // ============================================================================
