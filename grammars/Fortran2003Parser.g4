@@ -677,44 +677,55 @@ flush_spec
 
 // Basic I/O statements
 open_stmt
-    : OPEN LPAREN open_spec_list RPAREN NEWLINE?
+    : OPEN LPAREN open_spec_list_f2003 RPAREN NEWLINE?
     ;
 
 close_stmt
-    : CLOSE LPAREN close_spec_list RPAREN NEWLINE?
+    : CLOSE LPAREN close_spec_list_f2003 RPAREN NEWLINE?
     ;
 
 write_stmt
-    : WRITE LPAREN io_control_spec_list RPAREN (output_item_list)? NEWLINE?
+    : WRITE LPAREN io_control_spec_list_f2003 RPAREN (output_item_list)? NEWLINE?
     ;
 
 read_stmt
-    : READ LPAREN io_control_spec_list RPAREN (input_item_list)? NEWLINE?
+    : READ LPAREN io_control_spec_list_f2003 RPAREN (input_item_list)? NEWLINE?
     ;
 
-// I/O specification lists
-open_spec_list
-    : open_spec (COMMA open_spec)*
+// F2003 I/O specification lists (unique names to avoid inheritance conflicts)
+open_spec_list_f2003
+    : open_spec_f2003 (COMMA open_spec_f2003)*
     ;
 
-open_spec
+open_spec_f2003
     : identifier_or_keyword EQUALS primary    // Generic specifier=value (includes UNIT)
     ;
 
-close_spec_list
-    : close_spec (COMMA close_spec)*
+close_spec_list_f2003
+    : close_spec_f2003 (COMMA close_spec_f2003)*
     ;
 
-close_spec
+close_spec_f2003
     : identifier_or_keyword EQUALS primary    // Generic specifier=value (includes UNIT)
     ;
 
-io_control_spec_list
-    : io_control_spec (COMMA io_control_spec)*
+io_control_spec_list_f2003
+    : io_control_spec_f2003 (COMMA io_control_spec_f2003)*
     ;
 
-io_control_spec
-    : identifier_or_keyword EQUALS primary    // Named specifier: unit=10, fmt=*, etc.
+io_control_spec_f2003
+    : UNIT EQUALS primary                     // unit=10, unit=*
+    | FMT EQUALS primary                      // fmt=*, fmt=100  
+    | IOSTAT EQUALS primary                   // iostat=ios
+    | ERR EQUALS primary                      // err=100
+    | END EQUALS primary                      // end=200
+    | EOR EQUALS primary                      // eor=300
+    | ADVANCE EQUALS primary                  // advance='yes'
+    | SIZE EQUALS primary                     // size=isize
+    | REC EQUALS primary                      // rec=irec
+    | ASYNCHRONOUS EQUALS primary             // asynchronous='yes' (F2003)
+    | ID EQUALS primary                       // id=id_var (F2003)  
+    | identifier_or_keyword EQUALS primary   // Other F2003 I/O specifiers
     | primary                                 // Positional specifier: *, 10, etc.
     ;
 
