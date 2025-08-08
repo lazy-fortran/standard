@@ -113,6 +113,9 @@ CLASS_DEFAULT    : C L A S S '_' D E F A U L T ;
 ERRMSG           : E R R M S G ;
 ID               : I D ;
 
+// Operators that need precedence over comments
+MULTIPLY         : '*' ;
+
 // Override F90 keywords that conflict with FIXED_FORM_COMMENT
 CONTAINS         : [cC] O N T A I N S ;
 
@@ -122,7 +125,7 @@ FIXED_FORM_COMMENT
     ;
 
 STAR_COMMENT
-    : '*' ~[\r\n]* -> channel(HIDDEN)              // Star comments
+    : {self.column==0}? '*' ~[\r\n]* -> channel(HIDDEN)  // Star comments only at start of line
     ;
 
 // ============================================================================

@@ -26,6 +26,7 @@ identifier_or_keyword
     | NAME         // NAME can be used as an identifier
     | RESULT       // RESULT can be used as a variable name
     | SUM_INTRINSIC  // SUM can be used as a variable/result name
+    | DATA         // DATA can be used as a variable name (PDT components)
     ;
 
 // F2003 program unit (enhanced with OOP features)
@@ -685,6 +686,10 @@ char_selector
 derived_type_spec
     : IDENTIFIER                                          // Basic type name
     | IDENTIFIER LPAREN type_param_spec_list RPAREN      // Parameterized type
+    | INTEGER                                             // Built-in INTEGER type
+    | REAL                                                // Built-in REAL type
+    | CHARACTER                                           // Built-in CHARACTER type
+    | LOGICAL                                             // Built-in LOGICAL type
     | c_interop_type                                      // C interop types like c_int, c_ptr
     ;
 
@@ -701,7 +706,7 @@ type_param_spec
 type_param_value
     : expr_f90        // Expression like 8, real64, or 100
     | COLON           // Deferred parameter (:)
-    | '*'             // Assumed parameter (*)
+    | MULTIPLY        // Assumed parameter (*)
     ;
 
 attr_spec_list
