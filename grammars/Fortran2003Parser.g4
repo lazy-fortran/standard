@@ -509,7 +509,14 @@ allocation_list
     ;
 
 allocation
-    : IDENTIFIER (LPAREN allocate_shape_spec_list RPAREN)?
+    : type_spec_allocation
+    | IDENTIFIER (LPAREN allocate_shape_spec_list RPAREN)?
+    ;
+
+// Type specification in ALLOCATE for PDTs
+type_spec_allocation
+    : derived_type_spec DOUBLE_COLON IDENTIFIER 
+      (LPAREN allocate_shape_spec_list RPAREN)?
     ;
 
 allocate_shape_spec_list
@@ -663,6 +670,8 @@ kind_selector
 
 kind_param
     : IDENTIFIER
+    | INTEGER_LITERAL    // For numeric kinds like 4, 8
+    | LABEL              // Statement labels are also parsed as integers
     | c_interop_type
     ;
 
@@ -685,8 +694,14 @@ type_param_spec_list
     ;
 
 type_param_spec
-    : IDENTIFIER EQUALS expr_f90    // kind=real64, rows=3
-    | expr_f90                      // positional parameter
+    : IDENTIFIER EQUALS type_param_value    // kind=real64, n=:, m=*
+    | type_param_value                      // positional parameter
+    ;
+
+type_param_value
+    : expr_f90        // Expression like 8, real64, or 100
+    | COLON           // Deferred parameter (:)
+    | '*'             // Assumed parameter (*)
     ;
 
 attr_spec_list
