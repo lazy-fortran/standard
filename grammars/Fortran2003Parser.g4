@@ -319,7 +319,7 @@ type_attr_spec
     | PRIVATE
     | ABSTRACT
     | EXTENDS LPAREN IDENTIFIER RPAREN
-    | BIND LPAREN IDENTIFIER RPAREN    // BIND(C) where C is an identifier
+    | BIND LPAREN C_TOKEN RPAREN       // BIND(C) where C is a special token
     ;
 
 // Type parameter definitions
@@ -847,8 +847,8 @@ literal_f90
 
 // BIND(C) specification for C interoperability
 binding_spec
-    : BIND LPAREN IDENTIFIER RPAREN                                      // BIND(C)
-    | BIND LPAREN IDENTIFIER COMMA NAME EQUALS string_literal RPAREN     // BIND(C, NAME="func")
+    : BIND LPAREN C_TOKEN RPAREN                                         // BIND(C)
+    | BIND LPAREN C_TOKEN COMMA NAME EQUALS string_literal RPAREN        // BIND(C, NAME="func")
     ;
 
 // String literal for BIND(C) name
