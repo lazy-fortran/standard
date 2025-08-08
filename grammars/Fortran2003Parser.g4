@@ -57,7 +57,7 @@ main_program
 
 // Enhanced module for F2003
 module_f2003
-    : module_stmt specification_part_f2003? module_subprogram_part? end_module_stmt
+    : module_stmt NEWLINE* specification_part_f2003? NEWLINE* module_subprogram_part? NEWLINE* end_module_stmt
     ;
 
 // Override F90 specification_part to use F2003 enhanced version
@@ -152,7 +152,7 @@ end_function_stmt_interface
 // Override interface_stmt and end_interface_stmt for NEWLINE support
 interface_stmt
     : INTERFACE (generic_spec)? NEWLINE
-    | ABSTRACT INTERFACE NEWLINE
+    | ABSTRACT_INTERFACE (generic_spec)? NEWLINE
     ;
 
 end_interface_stmt
@@ -166,15 +166,15 @@ interface_block
 
 // Enhanced specification part for F2003
 specification_part_f2003
-    : ((use_stmt | import_stmt | implicit_stmt | declaration_construct_f2003) NEWLINE*)*
+    : (NEWLINE* (use_stmt | import_stmt | implicit_stmt | declaration_construct_f2003) NEWLINE?)*
     ;
 
-// Enhanced declaration construct for F2003
+// Enhanced declaration construct for F2003  
 declaration_construct_f2003
-    : derived_type_def_f2003        // Try TYPE definitions first
+    : derived_type_def_f2003        // Try TYPE definitions first (highest priority)
+    | interface_block              // F90 interface blocks (before generic declarations)
     | class_declaration_stmt        // CLASS declarations before TYPE variables
     | procedure_declaration_stmt    // PROCEDURE declarations  
-    | interface_block              // F90 interface blocks
     | volatile_stmt                 // Standalone "volatile :: vars"
     | protected_stmt               // Standalone "protected :: vars"
     | type_declaration_stmt         // TYPE variables last (more specific first)
@@ -183,7 +183,7 @@ declaration_construct_f2003
 
 // Enhanced execution part for F2003
 execution_part_f2003
-    : executable_construct_f2003*
+    : (NEWLINE* executable_construct_f2003)*
     ;
 
 // Enhanced executable construct for F2003
@@ -211,18 +211,18 @@ executable_construct_f2003
 
 // Enhanced derived type definition with OOP features (F2003)
 derived_type_def_f2003
-    : derived_type_stmt_f2003 NEWLINE*
+    : derived_type_stmt_f2003
       type_param_def_stmt*
-      (NEWLINE* component_def_stmt)*
+      private_or_sequence*
+      component_part?
       type_bound_procedure_part?
       end_type_stmt_f2003
     ;
 
-// F2003 enhanced type statement with OOP attributes  
+// F2003 enhanced type statement with OOP attributes (following LLVM Flang structure)
 derived_type_stmt_f2003
-    : TYPE (COMMA type_attr_spec_list)? DOUBLE_COLON type_name
+    : TYPE (COMMA type_attr_spec_list DOUBLE_COLON | DOUBLE_COLON)? type_name
       (LPAREN type_param_name_list RPAREN)?
-    | TYPE DOUBLE_COLON type_name (LPAREN type_param_name_list RPAREN)?
     ;
 
 // F2003 end type statement 
@@ -235,10 +235,19 @@ parent_type_name
     : IDENTIFIER
     ;
 
-// Type-bound procedure part
+// Type-bound procedure part (following reference grammar)
 type_bound_procedure_part
-    : CONTAINS NEWLINE?
-      (NEWLINE* type_bound_proc_binding)*
+    : contains_stmt binding_private_stmt? type_bound_proc_binding*
+    ;
+
+binding_private_stmt
+    : PRIVATE NEWLINE
+    ;
+
+type_bound_proc_binding
+    : type_bound_procedure_stmt
+    | type_bound_generic_stmt  
+    | final_procedure_stmt
     ;
 
 // Override F90 contains_stmt to handle NEWLINE properly in F2003
@@ -246,49 +255,75 @@ contains_stmt
     : CONTAINS NEWLINE?
     ;
 
-// Component definition statement list (simplified)
-component_def_stmt_list
-    : component_def_stmt+
+// Component part (following reference grammar)
+component_part
+    : component_def_stmt*
     ;
 
 component_def_stmt
-    : type_declaration_stmt          // F2003 component declarations (reuse existing rule)
-    | proc_component_def_stmt        // F2003 procedure pointer components (different syntax)
-    | private_sequence_stmt          // PRIVATE or SEQUENCE (inherited from F90)
+    : data_component_def_stmt        // Data component declarations
+    | proc_component_def_stmt        // Procedure pointer components
     ;
 
-private_sequence_stmt
-    : PRIVATE NEWLINE?
-    | SEQUENCE NEWLINE?
+data_component_def_stmt
+    : type_declaration_stmt          // Regular type declarations for components
     ;
 
-// Type-bound procedure bindings
-type_bound_proc_binding_list
-    : type_bound_proc_binding+
+private_or_sequence
+    : private_components_stmt
+    | sequence_stmt
     ;
 
-type_bound_proc_binding
-    : type_bound_procedure_stmt
-    | type_bound_generic_stmt
-    | final_procedure_stmt
+private_components_stmt
+    : PRIVATE NEWLINE
     ;
 
-// Type-bound procedure statement  
+sequence_stmt
+    : SEQUENCE NEWLINE
+    ;
+
+// Removed private_sequence_stmt - replaced by private_or_sequence
+
+// Type-bound procedure statement (following reference grammar)
 type_bound_procedure_stmt
-    : PROCEDURE (LPAREN IDENTIFIER RPAREN)?
-      (COMMA proc_attr_spec_list)? DOUBLE_COLON
-      proc_binding_list NEWLINE
-    | PROCEDURE (COMMA proc_attr_spec_list)? COLON COLON
-      proc_binding_list NEWLINE
+    : PROCEDURE ((COMMA binding_attr_list)? DOUBLE_COLON)?
+      type_bound_proc_decl_list NEWLINE
     ;
 
-proc_binding_list
-    : proc_binding (COMMA proc_binding)*
+binding_attr_list
+    : binding_attr (COMMA binding_attr)*
     ;
 
-proc_binding
-    : IDENTIFIER (POINTER_ASSIGN IDENTIFIER)?
+binding_attr
+    : access_spec           // PUBLIC or PRIVATE
+    | DEFERRED
+    | NOPASS
+    | PASS (LPAREN IDENTIFIER RPAREN)?
+    | NON_OVERRIDABLE
     ;
+
+type_bound_proc_decl_list
+    : type_bound_proc_decl (COMMA type_bound_proc_decl)*
+    ;
+
+type_bound_proc_decl
+    : binding_name (POINTER_ASSIGN procedure_name)?
+    ;
+
+binding_name
+    : IDENTIFIER
+    ;
+
+procedure_name
+    : IDENTIFIER
+    ;
+
+access_spec
+    : PUBLIC
+    | PRIVATE
+    ;
+
+// Remove old proc_binding rules - replaced by type_bound_proc_decl
 
 // Generic type-bound procedures
 type_bound_generic_stmt
@@ -421,6 +456,8 @@ procedure_entity_decl_list
 proc_component_def_stmt
     : PROCEDURE LPAREN (IDENTIFIER | INTERFACE) RPAREN COMMA
       proc_component_attr_spec_list DOUBLE_COLON proc_decl_list NEWLINE
+    | PROCEDURE LPAREN IDENTIFIER RPAREN DOUBLE_COLON proc_decl_list NEWLINE
+    | PROCEDURE DOUBLE_COLON proc_decl_list NEWLINE
     ;
 
 proc_component_attr_spec_list

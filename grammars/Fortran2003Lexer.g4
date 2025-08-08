@@ -17,6 +17,7 @@ import Fortran95Lexer;
 C                : [cC] ;
 
 // Object-Oriented Programming (NEW in F2003)
+ABSTRACT_INTERFACE : A B S T R A C T WS+ I N T E R F A C E ;
 ABSTRACT         : A B S T R A C T ;
 EXTENDS          : E X T E N D S ;
 FINAL            : F I N A L ;
@@ -70,6 +71,7 @@ PROTECTED        : P R O T E C T E D ;
 
 // Generic type-bound procedures (NEW in F2003)
 GENERIC          : G E N E R I C ;
+NON_OVERRIDABLE  : N O N '_' O V E R R I D A B L E ;
 
 // C Interoperability types (NEW in F2003) - use explicit [cC]
 C_INT            : [cC] '_' I N T ;
