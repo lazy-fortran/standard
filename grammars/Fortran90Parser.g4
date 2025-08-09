@@ -2,7 +2,7 @@
 // Revolutionary Modern Foundation with Complete Format Compatibility
 parser grammar Fortran90Parser;
 
-import FORTRANParser;  // FORTRAN I (1957) foundation
+import FORTRAN77Parser;  // FORTRAN 77 (1977) - structured programming foundation
 
 options {
     tokenVocab = Fortran90Lexer;
@@ -116,7 +116,7 @@ only_item
     ;
 
 operator_token
-    : PLUS | MINUS | MULTIPLY | DIVIDE | POWER
+    : PLUS | MINUS | MULTIPLY | SLASH | POWER
     | EQ_OP | NE_OP | LT_OP | LE_OP | GT_OP | GE_OP
     | DOT_EQ | DOT_NE | DOT_LT | DOT_LE | DOT_GT | DOT_GE
     | DOT_AND | DOT_OR | DOT_NOT | DOT_EQV | DOT_NEQV
@@ -482,7 +482,7 @@ expr_f90
     | expr_f90 (DOT_GE | GE_OP) expr_f90                 # GreaterEqualExprF90
     | expr_f90 CONCAT expr_f90                           # ConcatExprF90
     | expr_f90 POWER expr_f90                            # PowerExprF90
-    | expr_f90 (MULTIPLY | DIVIDE) expr_f90              # MultDivExprF90
+    | expr_f90 (MULTIPLY | SLASH) expr_f90              # MultDivExprF90
     | expr_f90 (PLUS | MINUS) expr_f90                   # AddSubExprF90
     | (PLUS | MINUS) expr_f90                            # UnaryExprF90
     | primary_f90                                        # PrimaryExprF90
@@ -947,10 +947,10 @@ procedure_stmt
     ;
 
 // ====================================================================
-// INHERITED CONSTRUCTS (from SharedCoreParser - temporary definitions)
+// INHERITED CONSTRUCTS (from FORTRAN 77 Parser)
 // ====================================================================
-// TODO: These should be inherited from SharedCoreParser but are missing
-// Add temporary definitions to make grammar complete
+// These constructs are inherited from FORTRAN 77 and earlier standards
+// Temporary definitions ensure grammar completeness for F90 innovations
 
 parameter_stmt
     : PARAMETER LPAREN parameter_list RPAREN

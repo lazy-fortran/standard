@@ -625,7 +625,7 @@ class TestFortran90Foundation:
         """Test compatibility with SharedCore inheritance."""
         # Test that SharedCore constructs are still available
         required_shared_constructs = [
-            'ASSIGN', 'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE', 'POWER',
+            'ASSIGN', 'PLUS', 'MINUS', 'MULTIPLY', 'SLASH', 'POWER',
             'INTEGER_LITERAL', 'REAL_LITERAL', 'IDENTIFIER', 'IF', 'DO', 'END'
         ]
         

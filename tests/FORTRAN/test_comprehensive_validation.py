@@ -152,7 +152,7 @@ class TestComprehensiveValidation(unittest.TestCase):
             
             # Operators  
             ("=", "EQUALS"), ("+", "PLUS"), ("-", "MINUS"), ("*", "MULTIPLY"), 
-            ("/", "DIVIDE"), ("**", "POWER"),
+            ("/", "SLASH"), ("**", "POWER"),
             
             # Relational operators
             (".EQ.", "EQ"), (".NE.", "NE"), (".LT.", "LT"), 

@@ -1097,7 +1097,7 @@ expr_f2003
     | expr_f2003 (NE | NE_OP) expr_f2003      // Not equal
     | expr_f2003 CONCAT expr_f2003            // String concatenation (//)
     | expr_f2003 POWER expr_f2003             // Exponentiation (highest precedence)
-    | expr_f2003 (MULTIPLY | DIVIDE) expr_f2003  // Multiplication/division
+    | expr_f2003 (MULTIPLY | SLASH) expr_f2003  // Multiplication/division
     | expr_f2003 (PLUS | MINUS) expr_f2003    // Addition/subtraction
     | MINUS expr_f2003                        // Unary minus
     | PLUS expr_f2003                         // Unary plus

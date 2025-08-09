@@ -36,6 +36,9 @@ PRECISION       : P R E C I S I O N ;
 // Complex numbers (added in FORTRAN IV, 1962)
 COMPLEX         : C O M P L E X ;
 
+// Double precision exponent marker (added in FORTRAN IV, 1962)
+D               : [Dd] ;
+
 // ====================================================================
 // FORTRAN IV (1962) LOGICAL LITERALS AND OPERATORS
 // ====================================================================

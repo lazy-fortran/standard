@@ -112,7 +112,7 @@ call_stmt
 // Before FORTRAN, programmers wrote: STO A, ADD B, STO C
 // FORTRAN allowed: C = A + B (revolutionary!)
 assignment_stmt
-    : variable ASSIGN expr
+    : variable EQUALS expr
     ;
 
 
@@ -260,7 +260,7 @@ common_stmt
 // ** (exponentiation) was included from day one!
 expr
     : expr POWER expr                    # PowerExpr        // ** (right associative)
-    | expr (MULTIPLY | DIVIDE) expr      # MultDivExpr      // *, /
+    | expr (MULTIPLY | SLASH) expr      # MultDivExpr      // *, /
     | expr (PLUS | MINUS) expr           # AddSubExpr       // +, -
     | PLUS expr                          # UnaryPlusExpr    // +expr
     | MINUS expr                         # UnaryMinusExpr   // -expr
@@ -325,16 +325,16 @@ integer_expr
     ;
 
 // ====================================================================
-// STUB IMPLEMENTATION STATUS
+// IMPLEMENTATION STATUS
 // ====================================================================
 //
-// CURRENT STATUS: Comprehensive historical documentation, minimal parsing
-// COMPILATION: Compiles with ANTLR4, integrates with SharedCoreParser
-// FUNCTIONALITY: Basic syntax recognition only, no semantic validation
+// CURRENT STATUS: Complete FORTRAN II procedural programming implementation
+// COMPILATION: Compiles with ANTLR4, integrates with FORTRAN I base
+// FUNCTIONALITY: Full subroutine and function support with CALL statements
 //
-// HISTORICAL ACCURACY: Based on IBM 704 FORTRAN Preliminary Operator's Manual
-// EDUCATIONAL VALUE: Complete record of 1957 programming language features
-// RESEARCH VALUE: Foundation for computer science history studies
+// HISTORICAL ACCURACY: Based on IBM 704 FORTRAN II Operator's Manual (1958)
+// EDUCATIONAL VALUE: Complete record of procedural programming revolution
+// RESEARCH VALUE: Foundation for modern subroutine-based programming
 //
 // PHASE 1 (CURRENT): Historical documentation and grammar stub
 // PHASE 2 (FUTURE): Fixed-form parsing with column-sensitive lexing

@@ -199,7 +199,7 @@ expr_f95
     | expr_f95 (DOT_GE | GE_OP) expr_f95                 # GreaterEqualExprF95
     | expr_f95 CONCAT expr_f95                           # ConcatExprF95
     | expr_f95 POWER expr_f95                            # PowerExprF95
-    | expr_f95 (MULTIPLY | DIVIDE) expr_f95              # MultDivExprF95
+    | expr_f95 (MULTIPLY | SLASH) expr_f95              # MultDivExprF95
     | expr_f95 (PLUS | MINUS) expr_f95                   # AddSubExprF95
     | (PLUS | MINUS) expr_f95                            # UnaryExprF95
     | primary_f95                                        # PrimaryExprF95
