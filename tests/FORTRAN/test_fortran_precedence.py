@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-REAL precedence tests - TDD GREEN phase
-These tests validate actual parse tree structure, not just assertIsNotNone
-Updated to work with the new precedence grammar structure
+FORTRAN I precedence tests
+These tests validate actual parse tree structure for operator precedence
 """
 
 import sys
@@ -10,25 +9,23 @@ import os
 import unittest
 from pathlib import Path
 
-# Add build directory to path for imports
-project_root = Path(__file__).parent.parent.parent
-build_dir = project_root / "build" / "shared_core"
-sys.path.insert(0, str(build_dir))
+# Add grammars directory to path for imports
+sys.path.insert(0, 'grammars')
 
 from antlr4 import InputStream, CommonTokenStream
-from SharedCoreLexer import SharedCoreLexer
-from SharedCoreParser import SharedCoreParser
+from FORTRANLexer import FORTRANLexer
+from FORTRANParser import FORTRANParser
 
 
-class TestRealPrecedence(unittest.TestCase):
-    """Test ACTUAL operator precedence and associativity"""
+class TestFORTRANPrecedence(unittest.TestCase):
+    """Test FORTRAN I operator precedence and associativity"""
     
     def parse(self, text, rule_name='expr'):
         """Helper to parse expressions"""
         input_stream = InputStream(text)
-        lexer = SharedCoreLexer(input_stream)
+        lexer = FORTRANLexer(input_stream)
         token_stream = CommonTokenStream(lexer)
-        parser = SharedCoreParser(token_stream)
+        parser = FORTRANParser(token_stream)
         
         rule_method = getattr(parser, rule_name)
         return rule_method()
