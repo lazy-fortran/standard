@@ -217,11 +217,6 @@ class TestFORTRANParser(unittest.TestCase):
                 tree = self.parse(text, rule)
                 self.assertIsNotNone(tree)
     
-    def test_call_statements(self):
-        """Test CALL statements (universal since FORTRAN II, ~1958)"""
-        # CALL statement not yet implemented in FORTRAN I parser
-        # Skip for now until FORTRAN II implementation
-        self.skipTest("CALL statement not implemented in FORTRAN I")
     
     def test_program_unit_simple(self):
         """Test simple program unit parsing"""
