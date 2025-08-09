@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Test suite for SharedCoreLexer - TDD RED phase
-Tests for universal FORTRAN tokens present from 1957 to 2023
+Test suite for FORTRANLexer - FORTRAN I (1957)
+Tests for universal FORTRAN tokens present from 1957 onwards
 """
 
 import sys
@@ -9,31 +9,29 @@ import os
 import unittest
 from pathlib import Path
 
-# Add build directory to path for imports
-project_root = Path(__file__).parent.parent.parent
-build_dir = project_root / "build" / "shared_core"
-sys.path.insert(0, str(build_dir))
+# Add grammars directory to path for imports
+sys.path.insert(0, 'grammars')
 
 try:
     from antlr4 import InputStream, CommonTokenStream
-    from SharedCoreLexer import SharedCoreLexer
+    from FORTRANLexer import FORTRANLexer
 except ImportError as e:
-    print(f"Import error (expected in RED phase): {e}")
-    SharedCoreLexer = None
+    print(f"Import error: {e}")
+    FORTRANLexer = None
 
 
-class TestSharedCoreLexer(unittest.TestCase):
-    """Test universal FORTRAN tokens (1957-2023)"""
+class TestFORTRANLexer(unittest.TestCase):
+    """Test FORTRAN I (1957) tokens"""
     
     def setUp(self):
         """Set up test fixtures"""
-        if SharedCoreLexer is None:
-            self.skipTest("SharedCoreLexer not yet implemented (RED phase)")
+        if FORTRANLexer is None:
+            self.skipTest("FORTRANLexer not available")
     
     def create_lexer(self, text):
         """Helper to create lexer from text"""
         input_stream = InputStream(text)
-        return SharedCoreLexer(input_stream)
+        return FORTRANLexer(input_stream)
     
     def get_tokens(self, text):
         """Helper to get all tokens from text"""
@@ -88,7 +86,7 @@ class TestSharedCoreLexer(unittest.TestCase):
     def test_operators_arithmetic(self):
         """Test arithmetic operators (1957-present)"""
         test_cases = [
-            ("=", "ASSIGN"),
+            ("=", "EQUALS"),
             ("+", "PLUS"),
             ("-", "MINUS"),
             ("*", "MULTIPLY"),
@@ -269,7 +267,7 @@ class TestSharedCoreLexer(unittest.TestCase):
         
         expected_types = [
             "IDENTIFIER",  # A
-            "ASSIGN",      # =
+            "EQUALS",      # =
             "IDENTIFIER",  # B
             "PLUS",        # +
             "IDENTIFIER",  # C
