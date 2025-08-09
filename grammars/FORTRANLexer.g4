@@ -74,7 +74,7 @@ EQUALS       : '=' ;  // Assignment operator
 PLUS         : '+' ;
 MINUS        : '-' ;
 MULTIPLY     : '*' ;
-DIVIDE       : '/' ;
+SLASH        : '/' ;    // Division AND DATA delimiters (context-dependent)
 POWER        : '**' ;
 
 // ============================================================================
