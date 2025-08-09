@@ -39,8 +39,8 @@ import FORTRANIVLexer;  // Import FORTRAN IV (1962) constructs
 // - Removed machine-dependent features from FORTRAN IV implementations
 
 // Standard program unit keywords (formalized in FORTRAN 66)
+BLOCK           : B L O C K ;          // BLOCK keyword
 BLOCKDATA       : B L O C K D A T A ;  // BLOCK DATA program unit
-DATA            : D A T A ;            // Data initialization statement
 
 // Standard procedure specifications (formalized in FORTRAN 66)
 EXTERNAL        : E X T E R N A L ;    // External procedure declaration

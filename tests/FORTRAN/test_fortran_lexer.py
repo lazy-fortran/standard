@@ -90,7 +90,7 @@ class TestFORTRANLexer(unittest.TestCase):
             ("+", "PLUS"),
             ("-", "MINUS"),
             ("*", "MULTIPLY"),
-            ("/", "DIVIDE"),
+            ("/", "SLASH"),
             ("**", "POWER")
         ]
         
@@ -277,7 +277,7 @@ class TestFORTRANLexer(unittest.TestCase):
             "INTEGER_LITERAL",  # 2
             "MINUS",       # -
             "IDENTIFIER",  # E
-            "DIVIDE",      # /
+            "SLASH",      # /
             "IDENTIFIER"   # F
         ]
         
