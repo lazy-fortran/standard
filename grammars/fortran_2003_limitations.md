@@ -84,8 +84,9 @@ These features are tracked in separate GitHub issues for future implementation:
 - ✅ LOGICAL declarations for exception flags
 
 **Recent Fix:**
-- ✅ **FIXED**: Missing logical operators (.AND., .OR., .NOT.) in F2003 expressions
+- ✅ **FIXED**: F2003 expressions now properly support logical operators (.AND., .OR., .NOT.) 
 - ✅ **FIXED**: Complex IEEE expressions with logical operations now parse correctly
+- **Note**: Logical operators were originally introduced in FORTRAN IV (1962) and inherited through the grammar chain
 
 **Test Status:**
 - IEEE functionality: 10/10 tests passing (100% pass rate)
