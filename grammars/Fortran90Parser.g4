@@ -2,7 +2,7 @@
 // Revolutionary Modern Foundation with Complete Format Compatibility
 parser grammar Fortran90Parser;
 
-import FORTRANParser;  // FORTRAN I (1957) foundation
+import FORTRANIVParser;  // FORTRAN IV (1962) - last parser before F90
 
 options {
     tokenVocab = Fortran90Lexer;
