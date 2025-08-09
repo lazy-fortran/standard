@@ -9,7 +9,7 @@ import os
 import pytest
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).parent.parent.parent / "build" / "Fortran2003"))
+sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
 
 from antlr4 import *
 
