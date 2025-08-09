@@ -9,7 +9,7 @@ TEST_DIR = tests
 PYTEST = python -m pytest
 
 # Grammar inheritance chain (build order matters!)
-GRAMMARS = FORTRAN FORTRANII FORTRANIV FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018
+GRAMMARS = FORTRAN FORTRANII FORTRANIV FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023
 
 # Default target
 .PHONY: all clean test help
@@ -31,6 +31,7 @@ Fortran95: $(GRAMMAR_DIR)/Fortran95Lexer.py
 Fortran2003: $(GRAMMAR_DIR)/Fortran2003Lexer.py
 Fortran2008: $(GRAMMAR_DIR)/Fortran2008Lexer.py
 Fortran2018: $(GRAMMAR_DIR)/Fortran2018Lexer.py
+Fortran2023: $(GRAMMAR_DIR)/Fortran2023Lexer.py
 
 # FORTRAN I (1957) - Foundation
 $(GRAMMAR_DIR)/FORTRANLexer.py: $(GRAMMAR_DIR)/FORTRANLexer.g4 $(GRAMMAR_DIR)/FORTRANParser.g4
@@ -102,6 +103,13 @@ $(GRAMMAR_DIR)/Fortran2018Lexer.py: $(GRAMMAR_DIR)/Fortran2018Lexer.g4 $(GRAMMAR
 	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2018Lexer.g4 && \
 	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2018Parser.g4
 
+# Fortran 2023 (2023) - Latest ISO Standard
+$(GRAMMAR_DIR)/Fortran2023Lexer.py: $(GRAMMAR_DIR)/Fortran2023Lexer.g4 $(GRAMMAR_DIR)/Fortran2023Parser.g4 Fortran2018
+	@echo "Building Fortran 2023 (2023)..."
+	cd $(GRAMMAR_DIR) && \
+	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2023Lexer.g4 && \
+	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2023Parser.g4
+
 # ====================================================================
 # TEST TARGETS - Run tests for individual standards or all
 # ====================================================================
@@ -111,7 +119,7 @@ test: all
 	@echo "=========================================="
 	@echo "Running ALL Tests - Full Grammar Suite"
 	@echo "=========================================="
-	@echo "Standards Chain: FORTRAN(1957) → F2018 → LazyFortran2025"
+	@echo "Standards Chain: FORTRAN(1957) → F2023 → LazyFortran2025"
 	$(PYTEST) $(TEST_DIR)/ -v --tb=short
 	@echo ""
 	@echo "✅ All tests completed!"
