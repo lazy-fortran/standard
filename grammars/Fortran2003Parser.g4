@@ -1086,7 +1086,10 @@ assignment_stmt
 
 // Enhanced F2003 expression that includes intrinsic functions  
 expr_f2003
-    : expr_f2003 (GT | GT_OP) expr_f2003      // Greater than
+    : expr_f2003 DOT_OR expr_f2003            // Logical OR (.or.) - lowest precedence
+    | expr_f2003 DOT_AND expr_f2003           // Logical AND (.and.)
+    | DOT_NOT expr_f2003                      // Logical NOT (.not.)
+    | expr_f2003 (GT | GT_OP) expr_f2003      // Greater than
     | expr_f2003 (LT | LT_OP) expr_f2003      // Less than  
     | expr_f2003 (GE | GE_OP) expr_f2003      // Greater than or equal
     | expr_f2003 (LE | LE_OP) expr_f2003      // Less than or equal

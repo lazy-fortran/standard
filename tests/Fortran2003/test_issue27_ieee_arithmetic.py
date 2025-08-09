@@ -80,8 +80,27 @@ end module test"""
         tree, errors = self.parse_code(code)
         assert errors == 0, f"IEEE arithmetic ONLY import failed: {errors} errors"
     
+    def test_ieee_logical_operators_fix(self):
+        """Test that logical operators work in IEEE expressions (specific fix validation)"""
+        code = """program test_logical_ops
+    use, intrinsic :: ieee_arithmetic
+    implicit none
+    real :: x, y
+    logical :: result1, result2, result3
     
-    @pytest.mark.xfail(reason="PROGRAM unit parsing issue - line 10:8 'if' construct not recognized in program context")
+    x = 1.0
+    y = 2.0
+    
+    ! Test all three logical operators in IEEE context
+    result1 = ieee_is_finite(x) .and. ieee_is_finite(y)
+    result2 = ieee_is_nan(x) .or. ieee_is_nan(y)  
+    result3 = .not. ieee_is_infinite(x)
+end program test_logical_ops"""
+        
+        tree, errors = self.parse_code(code)
+        assert errors == 0, f"IEEE logical operators test failed: {errors} errors"
+    
+    
     def test_ieee_exception_handling_basic(self):
         """Basic IEEE exception handling should parse"""
         code = """program test
@@ -100,7 +119,6 @@ end program test"""
         tree, errors = self.parse_code(code)
         assert errors == 0, f"IEEE exception handling failed: {errors} errors"
     
-    @pytest.mark.xfail(reason="PROGRAM unit parsing issue - line 9:4 execution part not properly parsed in program context")
     def test_ieee_special_values(self):
         """IEEE special value detection should parse"""
         code = """program test
@@ -142,7 +160,6 @@ end program test"""
         tree, errors = self.parse_code(code)
         assert errors == 0, f"IEEE rounding modes failed: {errors} errors"
     
-    @pytest.mark.xfail(reason="MODULE parsing issue - line 28:8 execution statements not properly parsed in module context")
     def test_ieee_comprehensive_example(self):
         """Comprehensive IEEE usage pattern should parse"""
         code = """module ieee_demo
