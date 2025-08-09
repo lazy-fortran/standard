@@ -150,8 +150,14 @@ WHILE           : ('w'|'W') ('h'|'H') ('i'|'I') ('l'|'L') ('e'|'E') ;
 DOUBLE_COLON    : '::' ;
 POINTER_ASSIGN  : '=>' ;
 PERCENT         : '%' ;
-LBRACKET        : '[' ;
-RBRACKET        : ']' ;
+SLASH           : '/' ;    // For array constructors (/ ... /)
+// Note: Square brackets [...] were introduced in Fortran 2003, NOT F90!
+// F90 only uses (/ ... /) syntax for array constructors
+
+// F90 array intrinsic keywords
+LBOUND          : L B O U N D ;
+UBOUND          : U B O U N D ;
+ALLOCATED       : A L L O C A T E D ;
 
 // Enhanced relational operators (both styles supported)
 EQ_OP           : '==' ;
