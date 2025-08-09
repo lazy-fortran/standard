@@ -1105,9 +1105,11 @@ expr_f2003
 // Left-hand side expression (variable, array element, component)
 lhs_expression
     : identifier_or_keyword                                          // Simple variable
-    | identifier_or_keyword LPAREN actual_arg_list RPAREN          // Array element
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN         // Array element (args optional for empty calls)
     | identifier_or_keyword PERCENT identifier_or_keyword          // Component
-    | identifier_or_keyword PERCENT identifier_or_keyword LPAREN actual_arg_list RPAREN  // Component array
+    | identifier_or_keyword PERCENT identifier_or_keyword LPAREN actual_arg_list? RPAREN  // Component array/method
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN PERCENT identifier_or_keyword  // Array element's component: shapes(i)%draw
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN PERCENT identifier_or_keyword LPAREN actual_arg_list? RPAREN  // Array element's component method: shapes(i)%draw()
     ;
 
 call_stmt
