@@ -33,7 +33,9 @@ options {
 // FORTRAN IV (1962) - ENHANCED TYPE SYSTEM
 // ====================================================================
 
-// Override type specification to include FORTRAN IV data types
+// FORTRAN IV type specification with new data types
+// Unfortunately ANTLR4 doesn't support true rule extension,
+// so we must redefine with all inherited types  
 type_spec
     : INTEGER
     | REAL
