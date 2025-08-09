@@ -249,9 +249,10 @@ frequency_stmt
 
 // COMMON statement (global variable storage)
 // Example: COMMON A, B, C
+// Example: COMMON /BLOCK1/ X, Y, Z
 // Shared variables between main program and subprograms
 common_stmt
-    : COMMON variable_list
+    : COMMON (SLASH IDENTIFIER SLASH)? variable_list
     ;
 
 
@@ -293,7 +294,7 @@ subscript_list
     ;
 
 // Function references (1957 - built-in mathematical functions only)
-// User-defined functions used statement function syntax (not covered in stub)
+// User-defined functions used statement function syntax
 function_reference
     : IDENTIFIER LPAREN expr_list RPAREN
     ;
@@ -335,12 +336,4 @@ integer_expr
 // HISTORICAL ACCURACY: Based on IBM 704 FORTRAN II Operator's Manual (1958)
 // EDUCATIONAL VALUE: Complete record of procedural programming revolution
 // RESEARCH VALUE: Foundation for modern subroutine-based programming
-//
-// PHASE 1 (CURRENT): Historical documentation and grammar stub
-// PHASE 2 (FUTURE): Fixed-form parsing with column-sensitive lexing
-// PHASE 3 (FUTURE): Semantic validation and historical code compatibility
-//
-// This stub provides the complete grammatical structure for FORTRAN II
-// extension and serves as an educational resource for understanding the
-// revolutionary impact of the world's first high-level programming language.
 // ====================================================================

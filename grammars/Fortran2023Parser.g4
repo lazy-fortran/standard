@@ -113,7 +113,8 @@ primary_f2023
     | LPAREN expr_f2023 RPAREN
     ;
 
-// F2023 conditional expression (ternary operator) - separate from primary to avoid recursion
+// F2023 conditional expression (ternary operator) 
+// separate from primary to avoid recursion
 conditional_expr_f2023
     : expr_f2023 QUESTION expr_f2023 COLON expr_f2023
     ;
