@@ -1,10 +1,18 @@
 # Free-Form Source Format for Modern Fortran (F90+)
 
-## Overview
+## DEPRECATED - Free-form is now integrated directly in Fortran90
 
-This directory contains the **Free-Form Source Format** implementation that serves as the foundation for all modern Fortran standards (F90-F2023 and LazyFortran2025).
+This directory contains obsolete free-form grammar files that are no longer used.
 
-Free-form source format was introduced in Fortran 90 (1990) as a revolutionary departure from the rigid 80-column fixed-format inherited from the punch card era.
+Free-form source format was introduced in Fortran 90 (1990) and is now properly implemented directly in the Fortran90 grammar files, not as a separate module.
+
+## Current Architecture
+
+The actual implementation follows this inheritance chain:
+- FORTRAN (1957) - Base fixed-form grammar
+- FORTRAN_II, FORTRAN_IV, etc. - Classical extensions
+- Fortran90 - Introduces free-form format directly
+- Fortran95+ - Inherits free-form from Fortran90
 
 ## Revolutionary Changes from Fixed-Form
 
