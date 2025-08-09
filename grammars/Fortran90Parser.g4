@@ -947,10 +947,10 @@ procedure_stmt
     ;
 
 // ====================================================================
-// INHERITED CONSTRUCTS (from SharedCoreParser - temporary definitions)
+// INHERITED CONSTRUCTS (from FORTRAN 77 Parser)
 // ====================================================================
-// TODO: These should be inherited from SharedCoreParser but are missing
-// Add temporary definitions to make grammar complete
+// These constructs are inherited from FORTRAN 77 and earlier standards
+// Temporary definitions ensure grammar completeness for F90 innovations
 
 parameter_stmt
     : PARAMETER LPAREN parameter_list RPAREN
