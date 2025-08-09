@@ -17,8 +17,8 @@ import sys
 import os
 import pytest
 
-# Add build directory to Python path for generated parsers
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../build/free_form'))
+# Add grammars directory to Python path for generated parsers
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../grammars/free_form'))
 
 try:
     from antlr4 import InputStream, CommonTokenStream

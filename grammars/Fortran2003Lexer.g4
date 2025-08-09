@@ -10,6 +10,23 @@ lexer grammar Fortran2003Lexer;
 import Fortran95Lexer;
 
 // ============================================================================
+// COMMENTS - MUST BE FIRST TO HAVE PRECEDENCE OVER KEYWORDS
+// ============================================================================
+
+// Fixed-form comments - only after newlines (more restrictive to avoid conflicts)
+FIXED_FORM_COMMENT  
+    : [\r\n][ \t]* [cC] [ \t] ~[\r\n]*  -> channel(HIDDEN)
+    ;
+    
+FIXED_FORM_COMMENT_STAR
+    : [\r\n][ \t]* [cC] [*!] ~[\r\n]*  -> channel(HIDDEN) 
+    ;
+
+STAR_COMMENT
+    : [\r\n][ \t]* '*' ~[\r\n]* -> channel(HIDDEN)
+    ;
+
+// ============================================================================
 // FORTRAN 2003 NEW FEATURES - Object-Oriented Programming
 // ============================================================================
 
@@ -17,6 +34,7 @@ import Fortran95Lexer;
 C                : [cC] ;
 
 // Object-Oriented Programming (NEW in F2003)
+ABSTRACT_INTERFACE : A B S T R A C T WS+ I N T E R F A C E ;
 ABSTRACT         : A B S T R A C T ;
 EXTENDS          : E X T E N D S ;
 FINAL            : F I N A L ;
@@ -48,6 +66,19 @@ PENDING          : P E N D I N G ;
 WAIT             : W A I T ;
 FLUSH            : F L U S H ;
 
+// Additional I/O keywords (some from earlier standards, exposed in F2003)
+FILE             : F I L E ;
+ACCESS           : A C C E S S ;
+FORM             : F O R M ;
+STATUS           : S T A T U S ;
+BLANK            : B L A N K ;
+POSITION         : P O S I T I O N ;
+ACTION           : A C T I O N ;
+DELIM            : D E L I M ;
+PAD              : P A D ;
+RECL             : R E C L ;
+IOMSG            : I O M S G ;
+
 // ASSOCIATE construct (NEW in F2003)
 ASSOCIATE        : A S S O C I A T E ;
 ENDASSOCIATE     : E N D A S S O C I A T E ;
@@ -70,6 +101,7 @@ PROTECTED        : P R O T E C T E D ;
 
 // Generic type-bound procedures (NEW in F2003)
 GENERIC          : G E N E R I C ;
+NON_OVERRIDABLE  : N O N '_' O V E R R I D A B L E ;
 
 // C Interoperability types (NEW in F2003) - use explicit [cC]
 C_INT            : [cC] '_' I N T ;
@@ -150,17 +182,9 @@ IEEE_ROUNDING    : I E E E '_' R O U N D I N G ;
 IEEE_SQRT        : I E E E '_' S Q R T ;
 IEEE_UNDERFLOW_FLAG : I E E E '_' U N D E R F L O W '_' F L A G ;
 
-// Override F90 keywords that conflict with FIXED_FORM_COMMENT
-CONTAINS         : [cC] O N T A I N S ;
+// Override F90 keywords to ensure they take precedence
+CONTAINS         : C O N T A I N S ;
 
-// Override FIXED_FORM_COMMENT to be extremely restrictive for C interop compatibility
-FIXED_FORM_COMMENT  
-    : [cC] ~[\r\n),=_:]+ ~[\r\n]*  -> channel(HIDDEN)  // 'c' followed by content but not ), = _ or :
-    ;
-
-STAR_COMMENT
-    : '*' ~[\r\n]* -> channel(HIDDEN)              // Star comments
-    ;
 
 // ============================================================================
 // CASE-INSENSITIVE FRAGMENTS
@@ -192,3 +216,22 @@ fragment W : [wW] ;
 fragment X : [xX] ;
 fragment Y : [yY] ;
 fragment Z : [zZ] ;
+
+// ============================================================================
+// FREE-FORM LINE CONTINUATION
+// ============================================================================
+
+// Enhanced continuation handling - hide both & and following newline+whitespace
+CONTINUATION
+    : '&' [ \t]* ('\r'? '\n') [ \t]* -> channel(HIDDEN)
+    ;
+
+// Override inherited NEWLINE to work properly with continuations
+NEWLINE : [\r\n]+ ;
+
+// Array constructor brackets (F90+ feature)
+LSQUARE : '[' ;
+RSQUARE : ']' ;
+
+// Whitespace handling - MUST skip spaces and tabs
+WHITESPACE : [ \t]+ -> skip ;
