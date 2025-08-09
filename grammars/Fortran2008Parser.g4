@@ -137,7 +137,7 @@ executable_construct_f2008
     | do_construct_f2008              // Enhanced in F2008
     | select_case_construct           // Inherit from F95
     | type_declaration_stmt_f2008     // F2008 allows mixed declarations
-    | executable_construct_f2003      // Inherit F2003 constructs
+    | executable_construct             // Inherit F2003 constructs
     ;
 
 // ============================================================================
