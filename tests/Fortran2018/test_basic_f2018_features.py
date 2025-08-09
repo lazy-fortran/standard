@@ -9,8 +9,11 @@ These are REAL tests that:
 """
 
 import sys
+import os
 import pytest
-sys.path.insert(0, 'grammars')
+
+# Add grammars directory to Python path for generated parsers
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../grammars'))
 
 from antlr4 import *
 from Fortran2018Lexer import Fortran2018Lexer  
