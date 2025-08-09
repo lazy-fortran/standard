@@ -1,8 +1,9 @@
-// Free-Form Source Format Lexer for Modern Fortran (F90+)
-// Revolutionary departure from fixed-form punch card format
+// OBSOLETE - Free-form is now implemented directly in Fortran90Lexer.g4
+// This file is kept for historical reference only
+// DO NOT USE - Use Fortran90Lexer instead
 lexer grammar FreeFormSourceLexer;
 
-import SharedCoreLexer;  // Inherit universal constructs (1957-present)
+import FORTRANLexer;  // Would inherit from FORTRAN base if this were active
 
 // ====================================================================
 // FREE-FORM SOURCE FORMAT OVERVIEW
