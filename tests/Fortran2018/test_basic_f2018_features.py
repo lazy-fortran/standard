@@ -94,7 +94,7 @@ end module"""
         
         # Test with F2008 parser for comparison
         try:
-            sys.path.insert(0, 'build/Fortran2008')
+            sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../grammars'))
             from Fortran2008Lexer import Fortran2008Lexer
             from Fortran2008Parser import Fortran2008Parser
             
