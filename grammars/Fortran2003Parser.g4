@@ -1211,12 +1211,11 @@ ieee_constant
     | ieee_feature_name
     ;
 
-// Handle intrinsic function calls
+// Handle intrinsic function calls (F2003 additions to F90 base)
 intrinsic_function_call
     : SELECTED_REAL_KIND LPAREN actual_arg_list RPAREN
     | SELECTED_INT_KIND LPAREN actual_arg_list RPAREN
     | KIND LPAREN actual_arg_list RPAREN
-    | SIZE LPAREN actual_arg_list RPAREN        // SIZE intrinsic function
     | REAL LPAREN actual_arg_list RPAREN        // REAL type conversion
     | INTEGER LPAREN actual_arg_list RPAREN     // INTEGER type conversion
     | LOGICAL LPAREN actual_arg_list RPAREN     // LOGICAL type conversion

@@ -493,9 +493,24 @@ primary_f90
     : literal_f90
     | variable_f90
     | function_reference_f90
+    | intrinsic_function_f90        // F90 array intrinsics
     | array_constructor_f90         // F90 innovation
     | structure_constructor         // F90 innovation
     | LPAREN expr_f90 RPAREN
+    ;
+
+// F90 intrinsic functions (SIZE, SHAPE, etc.)
+intrinsic_function_f90
+    : SIZE LPAREN actual_arg_spec_list RPAREN         // SIZE array intrinsic
+    | SHAPE_INTRINSIC LPAREN actual_arg_spec_list RPAREN     // SHAPE array intrinsic  
+    | LBOUND LPAREN actual_arg_spec_list RPAREN       // LBOUND array intrinsic
+    | UBOUND LPAREN actual_arg_spec_list RPAREN       // UBOUND array intrinsic
+    | ALLOCATED LPAREN variable_f90 RPAREN            // ALLOCATED status
+    | PRESENT LPAREN IDENTIFIER RPAREN                // PRESENT argument check
+    | SELECTED_REAL_KIND LPAREN actual_arg_spec_list RPAREN
+    | SELECTED_INT_KIND LPAREN actual_arg_spec_list RPAREN
+    | KIND LPAREN expr_f90 RPAREN
+    | LEN LPAREN expr_f90 RPAREN
     ;
 
 // F90 variables (enhanced with derived type components and array sections)
@@ -529,10 +544,9 @@ substring_range
 // ARRAY OPERATIONS (F90 MAJOR INNOVATION)
 // ====================================================================
 
-// Array constructor (F90 revolutionary feature)
+// Array constructor (F90 revolutionary feature)  
 array_constructor_f90
-    : LBRACKET ac_spec RBRACKET
-    | LPAREN SLASH ac_spec SLASH RPAREN     // F90 alternative syntax
+    : LPAREN SLASH ac_spec SLASH RPAREN     // F90 syntax: (/ ... /)
     ;
 
 // Array constructor specification
