@@ -7,7 +7,7 @@ You are working on the LazyFortran2025 standard grammar implementation, a compre
 
 ### Modular Grammar Hierarchy
 ```
-SharedCore → FORTRAN → FORTRAN_II → FORTRAN_IV → FORTRAN66 → FORTRAN77 → Fortran90 → ... → LazyFortran2025
+FORTRAN (1957) → FORTRAN_II → FORTRAN_IV → FORTRAN66 → FORTRAN77 → Fortran90 → ... → LazyFortran2025
 ```
 
 Each grammar:
@@ -17,9 +17,9 @@ Each grammar:
 
 ### Directory Structure
 - `grammars/` - Source .g4 files (commit these)
-- `build/` - Generated files (never commit)
+- `grammars/*.py` - Generated files (never commit, git-ignored)
 - `tests/` - Test suites (comprehensive validation)
-- `scripts/` - Build automation
+- `Makefile` - Build automation
 
 ## Development Principles
 
@@ -31,7 +31,7 @@ Each grammar:
 5. **Historical accuracy**: Respect each standard's era
 
 ### Grammar Rules
-- SharedCore contains ONLY universal constructs (1957-2025+)
+- FORTRAN (1957) contains the foundational constructs
 - Each standard grammar imports and extends its predecessor
 - Use ANTLR4 import mechanism for inheritance
 - Maintain correct operator precedence
@@ -81,22 +81,20 @@ Available targets:
 
 ```bash
 # Build grammars in dependency order
-./scripts/build_grammar.sh shared_core
-./scripts/build_grammar.sh FORTRAN
-./scripts/build_grammar.sh FORTRAN_II  # When implemented
+make FORTRAN
+make FORTRANII
+make Fortran2003
 ```
 
 ### Build Output
 
-All generated files are placed in the `build/` directory (git-ignored):
+All generated files are placed in the `grammars/` directory (git-ignored):
 ```
-build/
-├── FORTRAN/
-│   ├── FORTRANLexer.py
-│   └── FORTRANParser.py
-├── Fortran2003/
-│   ├── Fortran2003Lexer.py
-│   └── Fortran2003Parser.py
+grammars/
+├── FORTRANLexer.py
+├── FORTRANParser.py
+├── Fortran2003Lexer.py
+├── Fortran2003Parser.py
 └── ...
 ```
 
@@ -120,15 +118,15 @@ python tests/shared_core/test_comprehensive_validation.py
 ## Current Status
 
 ### Completed
-- ✅ SharedCore grammar (universal constructs)
-- ✅ FORTRAN (1957) grammar
+- ✅ FORTRAN (1957) grammar (foundational constructs)
+- ✅ FORTRAN_II, Fortran2003, F2008, F2018 grammars  
 - ✅ Modular inheritance architecture
-- ✅ Comprehensive test suite
-- ✅ Build automation
+- ✅ Comprehensive test suite (198 tests passing)
+- ✅ Build automation with Makefile
 
 ### In Progress
-- 🔄 FORTRAN_II implementation
-- 🔄 Additional historical standards
+- 🔄 FORTRAN_IV, FORTRAN66, FORTRAN77 implementations
+- 🔄 Free-form format integration in Fortran90
 
 ### Future Work
 - Fortran90 free-form revolution
@@ -143,7 +141,7 @@ python tests/shared_core/test_comprehensive_validation.py
 ## Important Notes
 
 ### DO NOT
-- Commit generated files (build/ directory)
+- Commit generated files (grammars/*.py files)
 - Duplicate rules between grammars
 - Take shortcuts or create stubs
 - Mix concerns between standards
@@ -158,8 +156,8 @@ python tests/shared_core/test_comprehensive_validation.py
 
 ### Issues
 Update issues with progress, maintain accurate status:
-- Issue #6: SharedCore (Complete)
-- Issue #10: FORTRAN 1957 (Complete)
+- Issue #41: F2018 build system (Complete)
+- Issue #10: FORTRAN 1957 (Complete)  
 - Issue #2: LazyFortran2025 (Future)
 
 ### Pull Requests
