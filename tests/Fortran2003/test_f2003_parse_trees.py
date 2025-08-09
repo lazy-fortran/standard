@@ -88,7 +88,7 @@ class TestFortran2003ParseTrees:
     
     def test_procedure_pointer_semantics(self):
         """NON-SHALLOW: Validate procedure pointer creates semantically correct parse tree."""
-        code = "procedure(interface), pointer :: proc_ptr"
+        code = "procedure(interface), pointer :: proc_ptr\n"
         
         try:
             tree, errors, parser = self.parse_and_validate(code, 'procedure_declaration_stmt')
@@ -109,7 +109,7 @@ class TestFortran2003ParseTrees:
     
     def test_associate_construct_structure(self):
         """NON-SHALLOW: Validate ASSOCIATE construct parse tree semantics."""
-        code = "associate (x => y); end associate"
+        code = "associate (x => y)\nend associate\n"
         
         try:
             tree, errors, parser = self.parse_and_validate(code, 'associate_construct')
@@ -141,7 +141,7 @@ class TestFortran2003ParseTrees:
     
     def test_block_construct_validation(self):
         """NON-SHALLOW: Validate BLOCK construct creates proper scoped parse tree.""" 
-        code = "block; integer :: local_var; end block"
+        code = "block\ninteger :: local_var\nend block\n"
         
         try:
             tree, errors, parser = self.parse_and_validate(code, 'block_construct')
@@ -163,7 +163,7 @@ class TestFortran2003ParseTrees:
     
     def test_enhanced_allocate_semantics(self):
         """NON-SHALLOW: Validate enhanced ALLOCATE with SOURCE/MOLD semantics."""
-        code = "allocate(array, source=source_array)"
+        code = "allocate(array, source=source_array)\n"
         
         try:
             tree, errors, parser = self.parse_and_validate(code, 'allocate_stmt_f2003')
@@ -186,7 +186,7 @@ class TestFortran2003ParseTrees:
     
     def test_oop_type_definition_structure(self):
         """NON-SHALLOW: Validate object-oriented TYPE definition parse tree."""
-        code = "type, extends(parent_type) :: child_type; end type"
+        code = "type, extends(parent_type) :: child_type\nend type\n"
         
         try:
             tree, errors, parser = self.parse_and_validate(code, 'derived_type_def_f2003')
@@ -211,10 +211,10 @@ class TestFortran2003ParseTrees:
     
     def test_abstract_interface_semantics(self):
         """NON-SHALLOW: Validate ABSTRACT INTERFACE creates correct parse tree."""
-        code = "abstract interface; subroutine abstract_sub(); end subroutine; end interface"
+        code = "abstract interface\nsubroutine abstract_sub()\nend subroutine\nend interface\n"
         
         try:
-            tree, errors, parser = self.parse_and_validate(code, 'interface_block_f2003')
+            tree, errors, parser = self.parse_and_validate(code, 'interface_block')
             
             assert errors == 0, f"Expected no parse errors, got {errors}"
             
