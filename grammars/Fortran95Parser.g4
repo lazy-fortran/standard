@@ -60,7 +60,8 @@ forall_triplet_spec_list
     ;
 
 forall_triplet_spec
-    : IDENTIFIER ASSIGN expr_f95 COLON expr_f95 (COLON expr_f95)?    // index=start:end:stride
+    : IDENTIFIER ASSIGN expr_f95 COLON expr_f95 (COLON expr_f95)?    
+        // index=start:end:stride
     ;
 
 scalar_mask_expr
@@ -136,7 +137,8 @@ type_declaration_stmt_f95
 
 // Enhanced entity declaration (F95 default initialization)
 entity_decl_f95
-    : IDENTIFIER (LPAREN array_spec_f95 RPAREN)? (MULTIPLY char_length)? (ASSIGN initialization_expr)?
+    : IDENTIFIER (LPAREN array_spec_f95 RPAREN)? (MULTIPLY char_length)? 
+      (ASSIGN initialization_expr)?
     ;
 
 entity_decl_list_f95
@@ -164,7 +166,8 @@ component_def_stmt_f95
 
 // Enhanced PURE procedures (F95 clarifications)
 pure_function_stmt
-    : PURE (prefix_spec)* FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN (suffix)?
+    : PURE (prefix_spec)* FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN 
+      (suffix)?
     ;
 
 pure_subroutine_stmt
@@ -173,11 +176,13 @@ pure_subroutine_stmt
 
 // Enhanced ELEMENTAL procedures (F95 clarifications)
 elemental_function_stmt
-    : ELEMENTAL (prefix_spec)* FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN (suffix)?
+    : ELEMENTAL (prefix_spec)* FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? 
+      RPAREN (suffix)?
     ;
 
 elemental_subroutine_stmt
-    : ELEMENTAL (prefix_spec)* SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)?
+    : ELEMENTAL (prefix_spec)* SUBROUTINE IDENTIFIER 
+      (LPAREN dummy_arg_name_list? RPAREN)?
     ;
 
 // ====================================================================
@@ -290,7 +295,8 @@ ac_value_f95
     ;
 
 ac_implied_do_f95
-    : LPAREN ac_value_list_f95 COMMA do_variable ASSIGN expr_f95 COMMA expr_f95 (COMMA expr_f95)? RPAREN
+    : LPAREN ac_value_list_f95 COMMA do_variable ASSIGN expr_f95 COMMA expr_f95 
+      (COMMA expr_f95)? RPAREN
     ;
 
 // Enhanced structure constructor (F95 default initialization)
@@ -515,7 +521,8 @@ output_item_f95
     ;
 
 io_implied_do_f95
-    : LPAREN output_item_list_f95 COMMA do_variable ASSIGN expr_f95 COMMA expr_f95 (COMMA expr_f95)? RPAREN
+    : LPAREN output_item_list_f95 COMMA do_variable ASSIGN expr_f95 COMMA expr_f95 
+      (COMMA expr_f95)? RPAREN
     ;
 
 // Function reference (enhanced for F95)

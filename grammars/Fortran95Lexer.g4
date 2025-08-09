@@ -34,7 +34,8 @@ import Fortran90Lexer;  // F90 unified format support
 
 // FORALL construct (F95 major addition - advanced array operations)
 FORALL          : ('f'|'F') ('o'|'O') ('r'|'R') ('a'|'A') ('l'|'L') ('l'|'L') ;
-END_FORALL      : ('e'|'E') ('n'|'N') ('d'|'D') WS+ ('f'|'F') ('o'|'O') ('r'|'R') ('a'|'A') ('l'|'L') ('l'|'L') ;
+END_FORALL      : ('e'|'E') ('n'|'N') ('d'|'D') WS+ 
+                  ('f'|'F') ('o'|'O') ('r'|'R') ('a'|'A') ('l'|'L') ('l'|'L') ;
 
 // Enhanced WHERE support (F95 improvements)
 // WHERE and END_WHERE are inherited from F90
@@ -52,12 +53,14 @@ END_FORALL      : ('e'|'E') ('n'|'N') ('d'|'D') WS+ ('f'|'F') ('o'|'O') ('r'|'R'
 // ====================================================================
 
 // Additional array functions (F95 enhancements)
-CEILING_INTRINSIC     : ('c'|'C') ('e'|'E') ('i'|'I') ('l'|'L') ('i'|'I') ('n'|'N') ('g'|'G') ;
+CEILING_INTRINSIC     : ('c'|'C') ('e'|'E') ('i'|'I') ('l'|'L') 
+                        ('i'|'I') ('n'|'N') ('g'|'G') ;
 FLOOR_INTRINSIC       : ('f'|'F') ('l'|'L') ('o'|'O') ('o'|'O') ('r'|'R') ;
 MODULO_INTRINSIC      : ('m'|'M') ('o'|'O') ('d'|'D') ('u'|'U') ('l'|'L') ('o'|'O') ;
 
 // Bit manipulation functions (F95 additions)
-BIT_SIZE_INTRINSIC    : ('b'|'B') ('i'|'I') ('t'|'T') '_' ('s'|'S') ('i'|'I') ('z'|'Z') ('e'|'E') ;
+BIT_SIZE_INTRINSIC    : ('b'|'B') ('i'|'I') ('t'|'T') '_' 
+                        ('s'|'S') ('i'|'I') ('z'|'Z') ('e'|'E') ;
 BTEST_INTRINSIC       : ('b'|'B') ('t'|'T') ('e'|'E') ('s'|'S') ('t'|'T') ;
 IAND_INTRINSIC        : ('i'|'I') ('a'|'A') ('n'|'N') ('d'|'D') ;
 IBCLR_INTRINSIC       : ('i'|'I') ('b'|'B') ('c'|'C') ('l'|'L') ('r'|'R') ;
@@ -70,11 +73,14 @@ ISHFTC_INTRINSIC      : ('i'|'I') ('s'|'S') ('h'|'H') ('f'|'F') ('t'|'T') ('c'|'
 NOT_INTRINSIC         : ('n'|'N') ('o'|'O') ('t'|'T') ;
 
 // Transfer function (F95 addition)
-TRANSFER_INTRINSIC    : ('t'|'T') ('r'|'R') ('a'|'A') ('n'|'N') ('s'|'S') ('f'|'F') ('e'|'E') ('r'|'R') ;
+TRANSFER_INTRINSIC    : ('t'|'T') ('r'|'R') ('a'|'A') ('n'|'N') 
+                        ('s'|'S') ('f'|'F') ('e'|'E') ('r'|'R') ;
 
 // CPU timing function (F95 addition)
-CPU_TIME_INTRINSIC    : ('c'|'C') ('p'|'P') ('u'|'U') '_' ('t'|'T') ('i'|'I') ('m'|'M') ('e'|'E') ;
-SYSTEM_CLOCK_INTRINSIC : ('s'|'S') ('y'|'Y') ('s'|'S') ('t'|'T') ('e'|'E') ('m'|'M') '_' ('c'|'C') ('l'|'L') ('o'|'O') ('c'|'C') ('k'|'K') ;
+CPU_TIME_INTRINSIC    : ('c'|'C') ('p'|'P') ('u'|'U') '_' 
+                        ('t'|'T') ('i'|'I') ('m'|'M') ('e'|'E') ;
+SYSTEM_CLOCK_INTRINSIC : ('s'|'S') ('y'|'Y') ('s'|'S') ('t'|'T') ('e'|'E') ('m'|'M') 
+                         '_' ('c'|'C') ('l'|'L') ('o'|'O') ('c'|'C') ('k'|'K') ;
 
 // ====================================================================
 // FORTRAN 95 LEXER STATUS

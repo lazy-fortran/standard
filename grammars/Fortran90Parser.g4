@@ -46,7 +46,8 @@ program_unit_f90
 
 // Main program structure (enhanced with F90 features)
 main_program
-    : program_stmt specification_part? execution_part? internal_subprogram_part? end_program_stmt
+    : program_stmt specification_part? execution_part? 
+      internal_subprogram_part? end_program_stmt
     ;
 
 program_stmt
@@ -310,7 +311,8 @@ entity_decl_list_f90
     ;
 
 entity_decl_f90
-    : IDENTIFIER (LPAREN array_spec_f90 RPAREN)? (MULTIPLY char_length)? (ASSIGN expr_f90)?
+    : IDENTIFIER (LPAREN array_spec_f90 RPAREN)? (MULTIPLY char_length)? 
+      (ASSIGN expr_f90)?
     ;
 
 char_length
@@ -417,7 +419,8 @@ end_select_stmt
 
 // WHERE construct (F90 array-oriented conditional)
 where_construct
-    : where_construct_stmt execution_part? (elsewhere_stmt execution_part?)* end_where_stmt
+    : where_construct_stmt execution_part? 
+      (elsewhere_stmt execution_part?)* end_where_stmt
     ;
 
 where_construct_stmt
@@ -446,8 +449,10 @@ do_stmt_f90
     ;
 
 loop_control
-    : (COMMA)? variable_f90 ASSIGN expr_f90 COMMA expr_f90 (COMMA expr_f90)?    // Counted loop
-    | (COMMA)? WHILE LPAREN logical_expr_f90 RPAREN                           // WHILE loop
+    : (COMMA)? variable_f90 ASSIGN expr_f90 COMMA expr_f90 (COMMA expr_f90)?    
+        // Counted loop
+    | (COMMA)? WHILE LPAREN logical_expr_f90 RPAREN                           
+        // WHILE loop
     ;
 
 end_do_stmt
@@ -516,9 +521,11 @@ intrinsic_function_f90
 // F90 variables (enhanced with derived type components and array sections)
 variable_f90
     : IDENTIFIER (substring_range)?                             // Simple variable
-    | IDENTIFIER LPAREN section_subscript_list RPAREN (substring_range)?    // Array element/section
+    | IDENTIFIER LPAREN section_subscript_list RPAREN (substring_range)?    
+        // Array element/section
     | variable_f90 PERCENT IDENTIFIER (substring_range)?       // Derived type component
-    | variable_f90 LPAREN section_subscript_list RPAREN (substring_range)?  // Component array element
+    | variable_f90 LPAREN section_subscript_list RPAREN (substring_range)?  
+        // Component array element
     ;
 
 // Array section subscripting (F90 enhancement)
@@ -565,7 +572,8 @@ ac_value
 
 // Implied DO in array constructor (F90 feature)
 ac_implied_do
-    : LPAREN ac_value_list COMMA do_variable ASSIGN expr_f90 COMMA expr_f90 (COMMA expr_f90)? RPAREN
+    : LPAREN ac_value_list COMMA do_variable ASSIGN expr_f90 COMMA expr_f90 
+      (COMMA expr_f90)? RPAREN
     ;
 
 do_variable
@@ -884,11 +892,13 @@ external_subprogram
     ;
 
 function_subprogram
-    : function_stmt specification_part? execution_part? internal_subprogram_part? end_function_stmt
+    : function_stmt specification_part? execution_part? 
+      internal_subprogram_part? end_function_stmt
     ;
 
 subroutine_subprogram
-    : subroutine_stmt specification_part? execution_part? internal_subprogram_part? end_subroutine_stmt
+    : subroutine_stmt specification_part? execution_part? 
+      internal_subprogram_part? end_subroutine_stmt
     ;
 
 end_function_stmt
@@ -938,7 +948,8 @@ output_item
     ;
 
 io_implied_do
-    : LPAREN output_item_list COMMA do_variable ASSIGN expr_f90 COMMA expr_f90 (COMMA expr_f90)? RPAREN
+    : LPAREN output_item_list COMMA do_variable ASSIGN expr_f90 COMMA expr_f90 
+      (COMMA expr_f90)? RPAREN
     ;
 
 // Procedure statement
@@ -989,7 +1000,8 @@ data_stmt_value
     ;
 
 common_stmt
-    : COMMON (common_block_name)? common_block_object_list (COMMA common_block_name common_block_object_list)*
+    : COMMON (common_block_name)? common_block_object_list 
+      (COMMA common_block_name common_block_object_list)*
     ;
 
 common_block_name
@@ -1091,7 +1103,8 @@ goto_stmt
     ;
 
 if_construct
-    : if_then_stmt execution_part? (else_if_stmt execution_part?)* (else_stmt execution_part?)? end_if_stmt
+    : if_then_stmt execution_part? (else_if_stmt execution_part?)* 
+      (else_stmt execution_part?)? end_if_stmt
     ;
 
 if_then_stmt

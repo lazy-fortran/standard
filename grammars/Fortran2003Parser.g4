@@ -82,7 +82,8 @@ main_program
 
 // Enhanced module for F2003
 module_f2003
-    : module_stmt NEWLINE* specification_part_f2003? NEWLINE* module_subprogram_part? NEWLINE* end_module_stmt
+    : module_stmt NEWLINE* specification_part_f2003? NEWLINE* 
+      module_subprogram_part? NEWLINE* end_module_stmt
     ;
 
 // Override F90 specification_part to use F2003 enhanced version
@@ -139,7 +140,8 @@ function_stmt_f2003
 
 // Enhanced subroutine statement for F2003
 subroutine_stmt_f2003
-    : prefix? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? binding_spec? NEWLINE
+    : prefix? SUBROUTINE IDENTIFIER 
+      (LPAREN dummy_arg_name_list? RPAREN)? binding_spec? NEWLINE
     ;
 
 // Enhanced internal subprogram part for F2003
@@ -161,7 +163,8 @@ interface_body
 
 // Interface-specific statement overrides with NEWLINE support
 subroutine_stmt_interface
-    : (prefix)? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? binding_spec? NEWLINE
+    : (prefix)? SUBROUTINE IDENTIFIER 
+      (LPAREN dummy_arg_name_list? RPAREN)? binding_spec? NEWLINE
     ;
 
 function_stmt_interface
@@ -201,13 +204,17 @@ interface_block
     : interface_stmt (NEWLINE* interface_specification)* NEWLINE* end_interface_stmt
     ;
 
-// Enhanced specification part for F2003 - non-greedy to avoid consuming module-level contains
+// Enhanced specification part for F2003 - non-greedy to avoid consuming
+// module-level contains
 specification_part_f2003
     : specification_element_f2003*
     ;
 
 specification_element_f2003
-    : NEWLINE* (use_stmt | import_stmt | implicit_stmt | declaration_construct_f2003) NEWLINE?
+    : NEWLINE* (use_stmt 
+    | import_stmt 
+    | implicit_stmt 
+    | declaration_construct_f2003) NEWLINE?
     ;
 
 // Enhanced declaration construct for F2003  
@@ -251,7 +258,8 @@ executable_construct_f2003_inner
     | if_construct
     | do_construct
     | select_case_construct
-    | type_declaration_stmt   // F2003 allows mixed declarations and executable statements
+    | type_declaration_stmt   
+        // F2003 allows mixed declarations and executable statements
     | executable_construct    // Inherit F95 constructs
     ;
 
@@ -339,7 +347,8 @@ type_bound_procedure_stmt
     : PROCEDURE DOUBLE_COLON type_bound_proc_decl_list
     | PROCEDURE COMMA binding_attr_list DOUBLE_COLON type_bound_proc_decl_list
     | PROCEDURE LPAREN IDENTIFIER RPAREN DOUBLE_COLON type_bound_proc_decl_list
-    | PROCEDURE LPAREN IDENTIFIER RPAREN COMMA binding_attr_list DOUBLE_COLON type_bound_proc_decl_list
+    | PROCEDURE LPAREN IDENTIFIER RPAREN COMMA binding_attr_list 
+      DOUBLE_COLON type_bound_proc_decl_list
     ;
 
 binding_attr_list
@@ -518,7 +527,8 @@ proc_target
 proc_component_def_stmt
     : PROCEDURE LPAREN (IDENTIFIER | INTERFACE) RPAREN COMMA
       proc_component_attr_spec_list DOUBLE_COLON proc_decl_list NEWLINE
-    | PROCEDURE LPAREN (IDENTIFIER | INTERFACE) RPAREN DOUBLE_COLON proc_decl_list NEWLINE
+    | PROCEDURE LPAREN (IDENTIFIER | INTERFACE) RPAREN 
+      DOUBLE_COLON proc_decl_list NEWLINE
     ;
 
 proc_component_attr_spec_list
@@ -552,7 +562,8 @@ class_declaration_stmt
     ;
 
 type_spec_or_star
-    : SHAPE_INTRINSIC      // CLASS(SHAPE) - derived type named SHAPE (most specific first)
+    : SHAPE_INTRINSIC      
+        // CLASS(SHAPE) - derived type named SHAPE (most specific first)
     | '*'                  // CLASS(*) - unlimited polymorphic
     | type_spec            // CLASS(INTEGER) - intrinsic types
     | IDENTIFIER           // CLASS(type_name) - derived types
@@ -566,7 +577,8 @@ select_type_construct
     ;
 
 select_type_stmt
-    : (IDENTIFIER COLON)? SELECT_TYPE LPAREN (IDENTIFIER POINTER_ASSIGN)? selector_expr RPAREN
+    : (IDENTIFIER COLON)? SELECT_TYPE LPAREN 
+      (IDENTIFIER POINTER_ASSIGN)? selector_expr RPAREN
     ;
 
 selector_expr
@@ -728,7 +740,8 @@ f2003_io_spec_list
     ;
 
 f2003_io_spec
-    : IDENTIFIER EQUALS primary                  // Regular identifier = value (file='test.dat')
+    : IDENTIFIER EQUALS primary                  
+        // Regular identifier = value (file='test.dat')
     | UNIT EQUALS primary                        // unit=10, unit=*
     | FILE EQUALS primary                        // file='filename'
     | ACCESS EQUALS primary                      // access='stream'
@@ -983,7 +996,8 @@ char_length_spec
 derived_type_spec
     : IDENTIFIER                                          // Basic type name
     | IDENTIFIER LPAREN type_param_spec_list RPAREN      // Parameterized type
-    | c_interop_type                                      // C interop types like c_int, c_ptr
+    | c_interop_type                                      
+        // C interop types like c_int, c_ptr
     ;
 
 // Type parameter specification list for instantiation
@@ -1032,7 +1046,8 @@ entity_decl_list
 
 entity_decl
     : identifier_or_keyword (LPAREN array_spec RPAREN)? (EQUALS expr_f2003)?
-        // F2003 entity declaration with initialization - use F2003 expressions for array constructors
+        // F2003 entity declaration with initialization - use F2003 expressions
+        // for array constructors
     ;
 
 // Override F90 entity declaration to support keywords as identifiers
@@ -1102,22 +1117,30 @@ expr_f2003
     | MINUS expr_f2003                        // Unary minus
     | PLUS expr_f2003                         // Unary plus
     | expr_f90                                // Inherit F90 expressions  
-    | primary                                 // Use F2003 primary (includes intrinsic_function_call)
+    | primary                                 
+        // Use F2003 primary (includes intrinsic_function_call)
     ;
 
 // Left-hand side expression (variable, array element, component)
 lhs_expression
     : identifier_or_keyword                                          // Simple variable
-    | identifier_or_keyword LPAREN actual_arg_list? RPAREN         // Array element (args optional for empty calls)
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN         
+        // Array element (args optional for empty calls)
     | identifier_or_keyword PERCENT identifier_or_keyword          // Component
-    | identifier_or_keyword PERCENT identifier_or_keyword LPAREN actual_arg_list? RPAREN  // Component array/method
-    | identifier_or_keyword LPAREN actual_arg_list? RPAREN PERCENT identifier_or_keyword  // Array element's component: shapes(i)%draw
-    | identifier_or_keyword LPAREN actual_arg_list? RPAREN PERCENT identifier_or_keyword LPAREN actual_arg_list? RPAREN  // Array element's component method: shapes(i)%draw()
+    | identifier_or_keyword PERCENT identifier_or_keyword 
+      LPAREN actual_arg_list? RPAREN  // Component array/method
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN PERCENT 
+      identifier_or_keyword  // Array element's component: shapes(i)%draw
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN PERCENT 
+      identifier_or_keyword LPAREN actual_arg_list? RPAREN  
+        // Array element's component method: shapes(i)%draw()
     ;
 
 call_stmt
-    : CALL lhs_expression                                            // Enhanced for F2003 - support component calls
-    | CALL identifier_or_keyword (LPAREN actual_arg_list? RPAREN)?  // Traditional procedure calls
+    : CALL lhs_expression                                            
+        // Enhanced for F2003 - support component calls
+    | CALL identifier_or_keyword (LPAREN actual_arg_list? RPAREN)?  
+        // Traditional procedure calls
     ;
 
 actual_arg_list
@@ -1145,13 +1168,22 @@ do_construct
     : DO NEWLINE
       execution_part_f2003?
       END DO NEWLINE?
-    | DO identifier_or_keyword EQUALS expr_f2003 COMMA expr_f2003 (COMMA expr_f2003)? NEWLINE
+    | DO identifier_or_keyword EQUALS expr_f2003 COMMA expr_f2003 
+      (COMMA expr_f2003)? NEWLINE
       do_body_f2003
       END DO NEWLINE?
     ;
 
 do_body_f2003
-    : (NEWLINE | assignment_stmt | call_stmt | print_stmt | allocate_stmt_f2003 | deallocate_stmt | if_construct | do_construct | block_construct)*
+    : (NEWLINE 
+    | assignment_stmt 
+    | call_stmt 
+    | print_stmt 
+    | allocate_stmt_f2003 
+    | deallocate_stmt 
+    | if_construct 
+    | do_construct 
+    | block_construct)*
     ;
 
 select_case_construct
@@ -1203,7 +1235,8 @@ array_constructor_elements
 
 array_constructor_element
     : expr_f2003                           // Regular expression
-    | identifier_or_keyword LPAREN actual_arg_list? RPAREN  // Constructor call: type_name(args)
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN  
+        // Constructor call: type_name(args)
     ;
 
 // IEEE constants that can appear in expressions
@@ -1269,7 +1302,8 @@ literal_f90
 // BIND(C) specification for C interoperability (simplified like external grammar)
 binding_spec
     : BIND LPAREN C RPAREN                                               // BIND(C)
-    | BIND LPAREN C COMMA NAME EQUALS string_literal RPAREN             // BIND(C, NAME="func")
+    | BIND LPAREN C COMMA NAME EQUALS string_literal RPAREN             
+        // BIND(C, NAME="func")
     ;
 
 // String literal for BIND(C) name

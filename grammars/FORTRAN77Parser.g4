@@ -32,7 +32,9 @@ options {
 // FORTRAN 77 (1977) - ENHANCED TYPE SYSTEM
 // ====================================================================
 
-// Override type specification to include CHARACTER
+// FORTRAN 77 type specification with CHARACTER addition
+// Unfortunately ANTLR4 doesn't support true rule extension,
+// so we must redefine with all inherited types
 type_spec
     : INTEGER
     | REAL
@@ -178,7 +180,8 @@ output_item
 
 // Implied DO (enhanced in FORTRAN 77)
 implied_do
-    : LPAREN dlist COMMA integer_variable EQUALS integer_expr COMMA integer_expr (COMMA integer_expr)? RPAREN
+    : LPAREN dlist COMMA integer_variable EQUALS integer_expr COMMA integer_expr 
+      (COMMA integer_expr)? RPAREN
     ;
 
 dlist

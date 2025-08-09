@@ -196,6 +196,50 @@ END IF"""
                 pass
 
 
+    def test_proper_inheritance(self):
+        """Test that FORTRAN77 properly inherits from FORTRAN66"""
+        # Read the grammar file
+        import os
+        grammar_path = os.path.join('grammars', 'FORTRAN77Parser.g4')
+        with open(grammar_path, 'r') as f:
+            content = f.read()
+        
+        # Check for proper import
+        self.assertIn('import FORTRAN66Parser', content,
+                     "FORTRAN77 should import FORTRAN66")
+        
+        # Check that type_spec rule includes comment about ANTLR4 limitation
+        # Count occurrences of type definitions in type_spec rule
+        import re
+        type_spec_match = re.search(
+            r'type_spec\s*:(.*?)(?=\n\w|\nfragment|\Z)', 
+            content, re.DOTALL
+        )
+        if type_spec_match:
+            type_spec_content = type_spec_match.group(1)
+            # Due to ANTLR4 limitations, must redefine all types
+            # But should have comment explaining this
+            self.assertIn('ANTLR4', content[:type_spec_match.start() + 500],
+                         "Should document ANTLR4 limitation")
+            self.assertIn('CHARACTER', type_spec_content,
+                         "type_spec should define CHARACTER")
+        
+        # Test that inherited types still work
+        test_cases = [
+            ("INTEGER I", "INTEGER"),    # Inherited from FORTRAN I
+            ("REAL X", "REAL"),          # Inherited from FORTRAN I
+            ("LOGICAL FLAG", "LOGICAL"), # Inherited from FORTRAN IV
+            ("COMPLEX Z", "COMPLEX"),    # Inherited from FORTRAN IV
+            ("CHARACTER NAME", "CHARACTER") # New in FORTRAN 77
+        ]
+        
+        for text, expected_type in test_cases:
+            with self.subTest(declaration=text):
+                tree = self.parse(text, 'type_declaration')
+                self.assertIsNotNone(tree)
+                self.assertIn(expected_type, tree.getText())
+
+
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail
     unittest.main(verbosity=2)
