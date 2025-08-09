@@ -260,7 +260,7 @@ common_stmt
 // ** (exponentiation) was included from day one!
 expr
     : expr POWER expr                    # PowerExpr        // ** (right associative)
-    | expr (MULTIPLY | DIVIDE) expr      # MultDivExpr      // *, /
+    | expr (MULTIPLY | SLASH) expr      # MultDivExpr      // *, /
     | expr (PLUS | MINUS) expr           # AddSubExpr       // +, -
     | PLUS expr                          # UnaryPlusExpr    // +expr
     | MINUS expr                         # UnaryMinusExpr   // -expr

@@ -133,7 +133,7 @@ expr
     ;
 
 term
-    : factor ((MULTIPLY | DIVIDE) factor)*
+    : factor ((MULTIPLY | SLASH) factor)*
     ;
 
 factor

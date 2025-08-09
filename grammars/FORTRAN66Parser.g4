@@ -49,7 +49,7 @@ subprogram
 // BLOCK DATA subprogram (NEW standardized unit in FORTRAN 66)
 // Used to initialize variables in named COMMON blocks
 block_data_subprogram
-    : BLOCK DATA block_data_name? NEWLINE
+    : BLOCKDATA block_data_name? NEWLINE
       data_initialization_part?
       END
     ;
@@ -73,28 +73,9 @@ data_initialization_body
     : common_stmt           // COMMON variable declarations
     | dimension_stmt       // Array dimension declarations  
     | equivalence_stmt     // Variable equivalences
-    | data_stmt           // DATA statement for initialization
     | type_declaration    // Type declarations
     ;
 
-// DATA statement (standardized initialization)
-data_stmt
-    : DATA data_stmt_set (COMMA data_stmt_set)*
-    ;
-
-data_stmt_set
-    : variable_list SLASH data_constant_list SLASH
-    ;
-
-data_constant_list
-    : data_constant (COMMA data_constant)*
-    ;
-
-data_constant
-    : literal
-    | PLUS literal
-    | MINUS literal
-    ;
 
 // Type declarations (standardized from FORTRAN IV)
 type_declaration
@@ -136,7 +117,6 @@ statement_body
     | dimension_stmt     // Array dimension declarations
     | equivalence_stmt   // Variable memory overlay
     | common_stmt        // Global variable declarations
-    | data_stmt         // Variable initialization
     | type_declaration  // Variable type declarations
     | end_stmt          // End of program
     | return_stmt       // Return from subprogram

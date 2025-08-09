@@ -81,6 +81,7 @@ statement_body
     | save_stmt         // NEW: SAVE statement
     | intrinsic_stmt    // NEW: INTRINSIC statement
     | external_stmt     // NEW: EXTERNAL statement
+    | data_stmt         // NEW: DATA statement
     ;
 
 // Block IF construct (NEW in FORTRAN 77)
@@ -251,6 +252,33 @@ external_stmt
 
 external_name_list
     : IDENTIFIER (COMMA IDENTIFIER)*
+    ;
+
+// ====================================================================
+// FORTRAN 77 (1977) - DATA STATEMENT
+// ====================================================================
+
+// DATA statement (NEW in FORTRAN 77)
+data_stmt
+    : DATA data_stmt_set (COMMA data_stmt_set)*
+    ;
+
+data_stmt_set
+    : variable_list SLASH data_constant_list SLASH
+    ;
+
+data_constant_list
+    : data_constant (COMMA data_constant)*
+    ;
+
+data_constant
+    : literal
+    | PLUS literal
+    | MINUS literal
+    ;
+
+variable_list
+    : variable (COMMA variable)*
     ;
 
 // ====================================================================
