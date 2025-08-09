@@ -42,9 +42,16 @@ external_subprogram_f2023
 // FORTRAN 2023 SPECIFICATION PART (Enhanced)
 // ============================================================================
 
-// Inherit F2018 specification part with F2023 enhancements
+// F2023 specification part with enhancements
 specification_part_f2023
-    : specification_part_f2018
+    : (specification_item_f2023)*
+    ;
+
+// F2023 specification items
+specification_item_f2023
+    : enum_def_f2023               // NEW in F2023
+    | type_declaration_stmt_f2023
+    | NEWLINE
     ;
 
 // ============================================================================
@@ -60,8 +67,8 @@ enum_def_f2023
 
 // Enhanced ENUM definition statement (F2023)
 enum_def_stmt_f2023
-    : ENUM COMMA BIND LPAREN C RPAREN (DOUBLE_COLON type_spec)? NEWLINE
-    | ENUM (DOUBLE_COLON type_spec)? NEWLINE    // F2023 typed enumerators
+    : ENUM COMMA BIND LPAREN C RPAREN NEWLINE
+    | ENUM (DOUBLE_COLON IDENTIFIER)? NEWLINE    // F2023 typed enumerators
     ;
 
 // Enhanced enumerator definition (F2023)
@@ -94,26 +101,69 @@ end_enum_stmt_f2023
 
 // Enhanced expression for F2023 with conditional expressions
 expr_f2023
-    : IDENTIFIER QUESTION IDENTIFIER COLON IDENTIFIER  // NEW: conditional expression
-    | IDENTIFIER
+    : primary_f2023 (binary_op_f2023 primary_f2023)*
+    ;
+
+// F2023 primary expression
+primary_f2023
+    : IDENTIFIER
     | INTEGER_LITERAL
     | REAL_LITERAL
     | STRING_LITERAL
     | LPAREN expr_f2023 RPAREN
     ;
 
-// F2023 conditional expression (ternary operator) - non-recursive
+// F2023 conditional expression (ternary operator) - separate from primary to avoid recursion
 conditional_expr_f2023
-    : IDENTIFIER QUESTION IDENTIFIER COLON IDENTIFIER
+    : expr_f2023 QUESTION expr_f2023 COLON expr_f2023
+    ;
+
+// Binary operators for F2023
+binary_op_f2023
+    : PLUS | MINUS | MULTIPLY | SLASH | POWER
+    | EQ | NE | LT | LE | GT | GE
+    | AND | OR
     ;
 
 // ============================================================================
 // EXECUTION PART (Enhanced for F2023)
 // ============================================================================
 
-// Inherit F2018 execution part for F2023
+// F2023 execution part with enhancements
 execution_part_f2023
-    : execution_part_f2018
+    : (executable_stmt_f2023)*
+    ;
+
+// F2023 executable statements
+executable_stmt_f2023
+    : assignment_stmt_f2023
+    | call_stmt_f2023
+    | if_stmt_f2023
+    | print_stmt_f2023
+    | random_init_stmt_f2023
+    | system_clock_stmt_f2023
+    | NEWLINE
+    ;
+
+// F2023 assignment with conditional expressions
+assignment_stmt_f2023
+    : IDENTIFIER EQUALS expr_f2023 NEWLINE
+    | IDENTIFIER EQUALS conditional_expr_f2023 NEWLINE
+    ;
+
+// F2023 call statement
+call_stmt_f2023
+    : CALL IDENTIFIER LPAREN (expr_f2023 (COMMA expr_f2023)*)? RPAREN NEWLINE
+    ;
+
+// F2023 if statement  
+if_stmt_f2023
+    : IF LPAREN expr_f2023 RPAREN THEN NEWLINE
+    ;
+
+// F2023 print statement
+print_stmt_f2023
+    : PRINT MULTIPLY COMMA expr_f2023 NEWLINE
     ;
 
 // ============================================================================
@@ -132,9 +182,30 @@ random_init_stmt_f2023
 // TYPE DECLARATIONS (Enhanced in F2023)
 // ============================================================================
 
-// Simplified F2023 type declarations (inherit from F2018)
+// F2023 type declarations with enhancements
 type_declaration_stmt_f2023
-    : IDENTIFIER COLON COLON IDENTIFIER NEWLINE
+    : type_spec_f2023 DOUBLE_COLON entity_decl_list_f2023 NEWLINE
+    ;
+
+// F2023 type specification
+type_spec_f2023
+    : INTEGER
+    | REAL
+    | COMPLEX
+    | LOGICAL
+    | CHARACTER
+    | DOUBLE PRECISION
+    | TYPE LPAREN IDENTIFIER RPAREN
+    ;
+
+// Entity declaration list
+entity_decl_list_f2023
+    : entity_decl_f2023 (COMMA entity_decl_f2023)*
+    ;
+
+// Entity declaration
+entity_decl_f2023
+    : IDENTIFIER (EQUALS expr_f2023)?
     ;
 
 // ============================================================================
