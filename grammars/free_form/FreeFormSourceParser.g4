@@ -1,8 +1,9 @@
-// Free-Form Source Format Parser for Modern Fortran (F90+)
-// Flexible parsing rules for modern source layout
+// OBSOLETE - Free-form is now implemented directly in Fortran90Parser.g4
+// This file is kept for historical reference only
+// DO NOT USE - Use Fortran90Parser instead
 parser grammar FreeFormSourceParser;
 
-import SharedCoreParser;  // Inherit universal parsing rules
+import FORTRANParser;  // Would inherit from FORTRAN base if this were active
 
 options {
     tokenVocab = FreeFormSourceLexer;
