@@ -69,6 +69,9 @@ REWIND          : R E W I N D ;
 // String concatenation operator (FORTRAN 77 innovation)
 CONCAT          : '//' ;
 
+// String literals (FORTRAN 77 innovation)
+STRING_LITERAL  : '\'' (~'\'' | '\'\'')* '\'' ;  // 'text' with '' for embedded quotes
+
 // ====================================================================  
 // FORTRAN 77 (1977) HISTORICAL SIGNIFICANCE
 // ====================================================================

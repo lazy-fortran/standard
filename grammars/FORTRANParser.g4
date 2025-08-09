@@ -118,7 +118,7 @@ multiplicative_expr
     ;
 
 multiplicative_op
-    : MULTIPLY | DIVIDE
+    : MULTIPLY | SLASH
     ;
 
 unary_expr
