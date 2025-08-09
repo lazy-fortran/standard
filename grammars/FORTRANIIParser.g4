@@ -112,7 +112,7 @@ call_stmt
 // Before FORTRAN, programmers wrote: STO A, ADD B, STO C
 // FORTRAN allowed: C = A + B (revolutionary!)
 assignment_stmt
-    : variable ASSIGN expr
+    : variable EQUALS expr
     ;
 
 

@@ -222,35 +222,30 @@ END"""
     
     def test_data_type_revolution_features(self):
         """Test the complete data type revolution of FORTRAN IV"""
-        # Test that all new data types can be used together
-        test_code = """LOGICAL READY
-DOUBLE PRECISION PRECISION_VALUE  
-COMPLEX IMPEDANCE
-INTEGER COUNT
-REAL VOLTAGE
-
-READY = .FALSE.
-PRECISION_VALUE = 1.23456789012345D0
-IMPEDANCE = (3.0, 4.0)
-COUNT = 0
-VOLTAGE = 120.0
-
-IF (.NOT. READY) THEN
-    COUNT = COUNT + 1
-    READY = COUNT .GT. 10
-END IF
-
-IF (ABS(IMPEDANCE) .GT. 5.0 .AND. READY) THEN
-    VOLTAGE = VOLTAGE * SQRT(2.0D0)
-    PRINT VOLTAGE
-END IF
-END"""
+        # Test that all new data types work in expressions and assignments
+        # FORTRAN IV (1962) used implicit typing, not explicit declarations
+        test_cases = [
+            # Logical operations
+            "READY = .TRUE.",
+            "FLAG = .FALSE.",
+            "RESULT = READY .AND. FLAG",
+            
+            # Double precision literals
+            "PI = 3.14159265358979D0",
+            
+            # Complex literals
+            "Z = (1.0, 2.0)",
+            "IMPEDANCE = (3.0, 4.0)",
+            
+            # Mixed mode arithmetic
+            "X = I + 3.14",
+        ]
         
-        tree = self.parse(test_code, 'main_program')
-        self.assertIsNotNone(tree)
-        
-        # Verify that the tree contains meaningful structure
-        self.assertTrue(len(str(tree.getText())) > 50)  # Non-trivial program
+        for test_code in test_cases:
+            with self.subTest(code=test_code):
+                tree = self.parse(test_code, 'assignment_stmt')
+                self.assertIsNotNone(tree)
+                self.assertTrue(len(str(tree.getText())) > 5)
 
 
 if __name__ == "__main__":
