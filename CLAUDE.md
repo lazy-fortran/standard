@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-LazyFortran2025 is a comprehensive ANTLR4-based grammar implementation covering all FORTRAN/Fortran standards from 1957 to 2023+. The project uses a revolutionary modular inheritance architecture where each standard only defines NEW features and imports from its predecessor.
+This is a comprehensive ANTLR4-based grammar implementation covering all FORTRAN/Fortran standards from 1957 to 2023. The project uses a revolutionary modular inheritance architecture where each standard only defines NEW features and imports from its predecessor.
 
 ## Essential Build Commands
 
@@ -32,7 +32,7 @@ make help
 
 ### Grammar Inheritance Chain
 ```
-FORTRAN(1957) → FORTRAN_II → FORTRAN_IV → FORTRAN66 → FORTRAN77 → Fortran90 → F95 → F2003 → F2008 → F2018 → F2023 → LazyFortran2025
+FORTRAN(1957) → FORTRAN_II → FORTRAN_IV → FORTRAN66 → FORTRAN77 → Fortran90 → F95 → F2003 → F2008 → F2018 → F2023
 ```
 
 ### Critical Implementation Details
@@ -86,35 +86,7 @@ ANTLR4 builds must follow strict inheritance order:
 
 **Project Status: PRODUCTION READY** - Complete FORTRAN/Fortran coverage 1957-2023
 
-## LazyFortran2025 Extension
-
-LazyFortran2025 extends Fortran2023 with syntactic relaxations for more concise, modern code:
-
-### Key Features:
-
-1. **Optional Program/Module Blocks**: Top-level code can omit explicit `program` or `module` blocks. The compiler pipeline determines context.
-
-2. **Implicit None Default**: `implicit none` is the default behavior (compiler-enforced, not parser-relevant).
-
-3. **Optional Contains**: The `contains` keyword becomes optional when procedures follow the main code section.
-
-4. **Type Inference**: Variables can be used without prior type declarations if the compiler can infer types from context (similar to Julia/Python). No `auto` keyword needed.
-
-### Grammar Impact:
-
-Most LazyFortran2025 features are semantic/compiler-level rather than syntactic:
-- Parser accepts more flexible structures (optional blocks)
-- Type checking deferred to semantic analysis phase
-- Backward compatibility maintained through inheritance from Fortran2023
-
 ## Development Workflows
-
-### Implementing LazyFortran2025
-
-1. **Grammar Extension**: Create `LazyFortran2025.g4` importing from `Fortran2023.g4`
-2. **Relaxed Rules**: Make `program`, `module`, and `contains` optional in appropriate contexts
-3. **Test Coverage**: Write tests demonstrating all four key features
-4. **Validation**: Ensure standard Fortran2023 code still parses correctly
 
 ### Debugging Parser Issues
 
