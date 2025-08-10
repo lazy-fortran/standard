@@ -1,5 +1,5 @@
 /**
- * FORTRAN 77 (1977) - Inherits from FORTRAN 66 (1966) and adds CHARACTER type, block IF
+ * FORTRAN 77 (1977) - Inherits from FORTRAN 66 and adds CHARACTER type, block IF constructs
  */
 
 const FORTRAN66 = require('../FORTRAN66/grammar.js');
