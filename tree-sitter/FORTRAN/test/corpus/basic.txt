@@ -1,0 +1,21 @@
+================================================================================
+Simple assignment statement
+================================================================================
+
+      X = 3.14
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (arithmetic_statement
+      (assignment_statement
+        (variable
+          (simple_variable))
+        (expression
+          (arithmetic_expression
+            (term
+              (factor
+                (primary
+                  (constant
+                    (real_constant)))))))))))

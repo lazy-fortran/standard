@@ -1,0 +1,25 @@
+================================================================================
+FORTRAN 66 basic program
+================================================================================
+
+      X = 3.14
+      END
+
+--------------------------------------------------------------------------------
+
+(program
+  (program_unit
+    (main_program
+      (statement_without_end
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (simple_variable))
+            (expression
+              (arithmetic_expression
+                (term
+                  (factor
+                    (primary
+                      (constant
+                        (real_constant))))))))))
+      (end_statement))))

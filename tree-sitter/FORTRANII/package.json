@@ -1,0 +1,21 @@
+{
+  "name": "tree-sitter-fortran-ii",
+  "version": "1.0.0",
+  "description": "FORTRAN II (1958) grammar for tree-sitter",
+  "main": "grammar.js",
+  "scripts": {
+    "test": "tree-sitter test"
+  },
+  "dependencies": {
+    "nan": "^2.17.0"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.20.8"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.fortran2",
+      "file-types": ["f", "for"]
+    }
+  ]
+}

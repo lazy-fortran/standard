@@ -9,7 +9,7 @@ TEST_DIR = tests
 PYTEST = python -m pytest
 
 # Grammar inheritance chain (build order matters!)
-GRAMMARS = FORTRAN FORTRANII FORTRANIV FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023
+GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023 LazyFortran2025
 
 # Default target
 .PHONY: all clean test help
@@ -23,7 +23,6 @@ all: $(GRAMMARS)
 # Individual grammar targets
 FORTRAN: $(GRAMMAR_DIR)/FORTRANLexer.py
 FORTRANII: $(GRAMMAR_DIR)/FORTRANIILexer.py
-FORTRANIV: $(GRAMMAR_DIR)/FORTRANIVLexer.py
 FORTRAN66: $(GRAMMAR_DIR)/FORTRAN66Lexer.py
 FORTRAN77: $(GRAMMAR_DIR)/FORTRAN77Lexer.py
 Fortran90: $(GRAMMAR_DIR)/Fortran90Lexer.py
@@ -32,6 +31,7 @@ Fortran2003: $(GRAMMAR_DIR)/Fortran2003Lexer.py
 Fortran2008: $(GRAMMAR_DIR)/Fortran2008Lexer.py
 Fortran2018: $(GRAMMAR_DIR)/Fortran2018Lexer.py
 Fortran2023: $(GRAMMAR_DIR)/Fortran2023Lexer.py
+LazyFortran2025: $(GRAMMAR_DIR)/LazyFortran2025Lexer.py
 
 # FORTRAN I (1957) - Foundation
 $(GRAMMAR_DIR)/FORTRANLexer.py: $(GRAMMAR_DIR)/FORTRANLexer.g4 $(GRAMMAR_DIR)/FORTRANParser.g4
@@ -47,15 +47,8 @@ $(GRAMMAR_DIR)/FORTRANIILexer.py: $(GRAMMAR_DIR)/FORTRANIILexer.g4 $(GRAMMAR_DIR
 	$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRANIILexer.g4 && \
 	$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRANIIParser.g4
 
-# FORTRAN IV (1962) - Data Type Revolution
-$(GRAMMAR_DIR)/FORTRANIVLexer.py: $(GRAMMAR_DIR)/FORTRANIVLexer.g4 $(GRAMMAR_DIR)/FORTRANIVParser.g4 FORTRANII
-	@echo "Building FORTRAN IV (1962)..."
-	cd $(GRAMMAR_DIR) && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRANIVLexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRANIVParser.g4
-
-# FORTRAN 66 (1966) - First FORTRAN Standard
-$(GRAMMAR_DIR)/FORTRAN66Lexer.py: $(GRAMMAR_DIR)/FORTRAN66Lexer.g4 $(GRAMMAR_DIR)/FORTRAN66Parser.g4 FORTRANIV
+# FORTRAN 66 (1966) - First FORTRAN Standard with merged FORTRAN IV features
+$(GRAMMAR_DIR)/FORTRAN66Lexer.py: $(GRAMMAR_DIR)/FORTRAN66Lexer.g4 $(GRAMMAR_DIR)/FORTRAN66Parser.g4 FORTRANII
 	@echo "Building FORTRAN 66 (1966)..."
 	cd $(GRAMMAR_DIR) && \
 	$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRAN66Lexer.g4 && \
@@ -110,6 +103,13 @@ $(GRAMMAR_DIR)/Fortran2023Lexer.py: $(GRAMMAR_DIR)/Fortran2023Lexer.g4 $(GRAMMAR
 	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2023Lexer.g4 && \
 	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2023Parser.g4
 
+# LazyFortran2025 - Syntactic Relaxations
+$(GRAMMAR_DIR)/LazyFortran2025Lexer.py: $(GRAMMAR_DIR)/LazyFortran2025Lexer.g4 $(GRAMMAR_DIR)/LazyFortran2025Parser.g4 Fortran2023
+	@echo "Building LazyFortran2025..."
+	cd $(GRAMMAR_DIR) && \
+	$(ANTLR4) $(ANTLR4_PYTHON) -lib . LazyFortran2025Lexer.g4 && \
+	$(ANTLR4) $(ANTLR4_PYTHON) -lib . LazyFortran2025Parser.g4
+
 # ====================================================================
 # TEST TARGETS - Run tests for individual standards or all
 # ====================================================================
@@ -133,9 +133,6 @@ test-fortran2: FORTRANII
 	@echo "Testing FORTRAN II (1958)..."
 	$(PYTEST) $(TEST_DIR)/FORTRANII/ -v --tb=short || echo "No tests for FORTRAN II yet"
 
-test-fortran4: FORTRANIV
-	@echo "Testing FORTRAN IV (1962)..."
-	$(PYTEST) $(TEST_DIR)/FORTRANIV/ -v --tb=short || echo "No tests for FORTRAN IV yet"
 
 test-fortran66: FORTRAN66
 	@echo "Testing FORTRAN 66 (1966)..."
@@ -164,6 +161,14 @@ test-fortran2008: Fortran2008
 test-fortran2018: Fortran2018
 	@echo "Testing Fortran 2018 (2018)..."
 	$(PYTEST) $(TEST_DIR)/Fortran2018/ -v --tb=short
+
+test-fortran2023: Fortran2023
+	@echo "Testing Fortran 2023 (2023)..."
+	$(PYTEST) $(TEST_DIR)/Fortran2023/ -v --tb=short || echo "No tests for Fortran 2023 yet"
+
+test-lazyfortran2025: LazyFortran2025
+	@echo "Testing LazyFortran2025..."
+	$(PYTEST) $(TEST_DIR)/LazyFortran2025/ -v --tb=short
 
 # Cross-validation against kaby76/fortran examples
 test-cross-validation: Fortran2018
@@ -201,7 +206,6 @@ help:
 	@echo "  all                    - Build all grammars (default)"
 	@echo "  FORTRAN                - Build FORTRAN I (1957)"
 	@echo "  FORTRANII              - Build FORTRAN II (1958)"
-	@echo "  FORTRANIV              - Build FORTRAN IV (1962)"
 	@echo "  FORTRAN66              - Build FORTRAN 66 (1966)"
 	@echo "  FORTRAN77              - Build FORTRAN 77 (1977)"
 	@echo "  Fortran90              - Build Fortran 90 (1990)"
