@@ -1,0 +1,68 @@
+================================================================================
+FORTRAN 77 SAVE statement
+================================================================================
+
+      SUBROUTINE COUNTER()
+      INTEGER COUNT
+      SAVE COUNT
+      DATA COUNT /0/
+      COUNT = COUNT + 1
+      PRINT *, 'COUNT =', COUNT
+      RETURN
+      END
+
+--------------------------------------------------------------------------------
+
+(program
+  (program_unit
+    (subroutine_subprogram
+      (subroutine_statement
+        (subroutine_name))
+      (statement
+        (specification_statement
+          (type_declaration
+            (type_spec)
+            (entity_list
+              (entity)))))
+      (statement
+        (specification_statement
+          (save_statement
+            (variable_list
+              (variable)))))
+      (statement
+        (specification_statement
+          (data_statement
+            (variable_list
+              (variable))
+            (data_value_list
+              (data_value
+                (constant
+                  (integer_constant)))))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (simple_variable))
+            (expression
+              (arithmetic_expression
+                (arithmetic_expression
+                  (term
+                    (factor
+                      (primary
+                        (variable
+                          (simple_variable))))))
+                (term
+                  (factor
+                    (primary
+                      (constant
+                        (integer_constant))))))))))
+      (statement
+        (io_statement
+          (print_statement
+            (io_list
+              (character_constant)
+              (variable
+                (simple_variable))))))
+      (statement
+        (return_statement))
+      (end_statement))))

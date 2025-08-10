@@ -1,0 +1,70 @@
+================================================================================
+FORTRAN 66 computed GOTO
+================================================================================
+
+      INTEGER I
+      I = 2
+      GOTO (10, 20, 30), I
+   10 PRINT *, 'CASE 1'
+      GOTO 40
+   20 PRINT *, 'CASE 2'
+      GOTO 40
+   30 PRINT *, 'CASE 3'
+   40 CONTINUE
+      END
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (statement_body
+      (type_declaration
+        (variable_list
+          (variable)))))
+  (statement
+    (statement_body
+      (assignment
+        (variable)
+        (expression
+          (number)))))
+  (statement
+    (statement_body
+      (goto
+        (label_list
+          (label)
+          (label)
+          (label))
+        (variable))))
+  (statement
+    (label)
+    (statement_body
+      (print_stmt
+        (expression
+          (string_literal)))))
+  (statement
+    (statement_body
+      (goto
+        (label))))
+  (statement
+    (label)
+    (statement_body
+      (print_stmt
+        (expression
+          (string_literal)))))
+  (statement
+    (statement_body
+      (goto
+        (label))))
+  (statement
+    (label)
+    (statement_body
+      (print_stmt
+        (expression
+          (string_literal)))))
+  (statement
+    (label)
+    (statement_body
+      (continue_stmt)))
+  (statement
+    (statement_body
+      (end_stmt))))

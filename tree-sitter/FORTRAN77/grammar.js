@@ -10,11 +10,14 @@ module.exports = grammar(FORTRAN66, {
   rules: {
     // Override program to handle both simple and full program structures  
     program: $ => choice(
-      // Simple structure - just statements (much higher precedence)
-      prec(10, repeat1($.statement)),
+      // Simple structure - just statements (for basic test)
+      prec(10, repeat1($.simple_statement)),
       // Full program structure (with END statement or leading spaces)
       prec(-10, $.program_unit)
     ),
+    
+    // Simple statement for basic test only
+    simple_statement: $ => seq($.statement_body),
 
     program_unit: $ => choice(
       $.main_program,
@@ -22,29 +25,19 @@ module.exports = grammar(FORTRAN66, {
       $.function_subprogram
     ),
 
-    main_program: $ => choice(
-      // With leading indentation (traditional FORTRAN style)
-      seq(
-        /[ \t]+/,
-        repeat1($.statement_without_end),
-        optional($.end_statement)
-      ),
-      // Without indentation but with END
-      seq(
-        repeat1($.statement_without_end),
-        $.end_statement
-      )
+    main_program: $ => seq(
+      optional(/[ \t]+/),
+      repeat1($.statement),
+      optional($.end_statement)
     ),
 
     // Unified statement that handles both simple and detailed structures
     statement: $ => choice(
-      // Detailed structures (higher precedence in full programs)
+      // Detailed structures only - no simple fallback here
       $.specification_statement,
       $.arithmetic_statement,
       $.control_statement,
-      $.io_statement,
-      // Simple structure with statement_body (fallback for simple programs)
-      seq($.statement_body)
+      $.io_statement
     ),
     
     // Simple statement body for basic tests
@@ -91,7 +84,28 @@ module.exports = grammar(FORTRAN66, {
 
     specification_statement: $ => choice(
       $.type_declaration,
-      $.character_declaration
+      $.character_declaration,
+      $.implicit_specification
+    ),
+    
+    // Add implicit specification for tests
+    implicit_specification: $ => seq(
+      'IMPLICIT',
+      choice(
+        'NONE',
+        seq(
+          $.type_spec,
+          '(',
+          $.letter_range,
+          repeat(seq(',', $.letter_range)),
+          ')'
+        )
+      )
+    ),
+    
+    letter_range: $ => choice(
+      /[A-Z]/,
+      seq(/[A-Z]/, '-', /[A-Z]/)
     ),
 
     // NEW: CHARACTER type support with proper structure
@@ -109,7 +123,7 @@ module.exports = grammar(FORTRAN66, {
     ),
 
     character_variable: $ => prec(1, seq(
-      /[A-Z][A-Z0-9]*/,
+      alias(/[A-Z][A-Z0-9]*/, $.variable_name),
       optional($.character_length)
     )),
 
@@ -144,11 +158,11 @@ module.exports = grammar(FORTRAN66, {
     substring_start: $ => $.arithmetic_expression,
     substring_end: $ => $.arithmetic_expression,
 
-    expression: $ => choice(
+    expression: $ => prec.dynamic(1, choice(
       $.arithmetic_expression,
       $.character_expression,
       $.logical_expression
-    ),
+    )),
 
     arithmetic_expression: $ => choice(
       $.term,
@@ -185,24 +199,23 @@ module.exports = grammar(FORTRAN66, {
 
     character_primary: $ => choice(
       $.character_constant,
-      $.character_variable
+      $.variable
     ),
 
     character_constant: $ => prec(-1, /'[^']*'/),
 
     logical_expression: $ => choice(
-      $.logical_primary,
       $.relational_expression,
-      $.logical_and_expression
+      $.logical_and_expression,
+      $.logical_primary
     ),
 
     logical_primary: $ => choice(
       $.logical_constant,
-      $.logical_variable
+      prec(-10, $.variable)  // Variables can be used as logical in logical contexts
     ),
 
     logical_constant: $ => choice('.TRUE.', '.FALSE.'),
-    logical_variable: $ => /[A-Z][A-Z0-9]*/,
 
     relational_expression: $ => seq(
       $.arithmetic_expression,
@@ -245,19 +258,12 @@ module.exports = grammar(FORTRAN66, {
 
     if_construct: $ => seq(
       $.if_then_statement,
-      repeat($.if_block_statement),
-      repeat(seq($.elseif_then_statement, repeat($.if_block_statement))),
-      optional(seq($.else_statement, repeat($.if_block_statement))),
+      repeat($.statement),
+      repeat(seq($.elseif_then_statement, repeat($.statement))),
+      optional(seq($.else_statement, repeat($.statement))),
       $.endif_statement
     ),
     
-    // Statements inside if blocks - create statement wrapper
-    if_block_statement: $ => prec(2, seq(
-      choice(
-        $.arithmetic_statement,
-        $.io_statement
-      )
-    )),
 
     if_body_statement: $ => choice(
       $.arithmetic_statement,
@@ -276,23 +282,10 @@ module.exports = grammar(FORTRAN66, {
 
     endif_statement: $ => 'ENDIF',
 
-    statement_without_end: $ => prec(-1, choice(
-      $.arithmetic_statement,
-      $.io_statement,
-      $.control_statement,
-      $.specification_statement
-    )),
-    
-    // Also need to allow nesting control statements inside others
-    nested_statement: $ => choice(
-      $.arithmetic_statement,
-      $.io_statement,
-      $.control_statement
-    ),
 
     do_while_construct: $ => seq(
       $.do_while_statement,
-      repeat($.statement_without_end),
+      repeat($.statement),
       $.enddo_statement
     ),
 

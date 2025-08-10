@@ -1,0 +1,4 @@
+DIMENSION A(10), B(5)
+INTEGER X, Y
+A(1) = 42
+B(X) = A(Y)
