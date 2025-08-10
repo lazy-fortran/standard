@@ -833,9 +833,7 @@ executable_construct
     ;
 
 executable_stmt
-    : assignment_stmt_f90
-    | pointer_assignment_stmt       // F90 pointer assignment
-    | call_stmt_f90                 // Enhanced procedure calls
+    : call_stmt_f90                 // Enhanced procedure calls
     | return_stmt
     | stop_stmt
     | cycle_stmt                    // F90 enhanced loop control
@@ -849,6 +847,8 @@ executable_stmt
     | deallocate_stmt               // F90 memory management
     | nullify_stmt                  // F90 pointer nullification
     | where_stmt                    // F90 array conditional
+    | pointer_assignment_stmt       // F90 pointer assignment
+    | assignment_stmt_f90           // Last resort to avoid ENDIF conflict
     ;
 
 // Construct (F90 enhanced control structures)
@@ -1103,8 +1103,12 @@ goto_stmt
     ;
 
 if_construct
-    : if_then_stmt execution_part? (else_if_stmt execution_part?)* 
-      (else_stmt execution_part?)? end_if_stmt
+    : if_then_stmt ENDIF (IDENTIFIER)?                                          // Empty IF with ENDIF
+    | if_then_stmt END IF (IDENTIFIER)?                                         // Empty IF with END IF
+    | if_then_stmt execution_part (else_if_stmt execution_part?)* 
+      (else_stmt execution_part?)? end_if_stmt                                  // IF with body
+    | if_then_stmt (else_if_stmt execution_part?)* 
+      (else_stmt execution_part?)? end_if_stmt                                  // IF with else/elseif
     ;
 
 if_then_stmt
@@ -1121,6 +1125,7 @@ else_stmt
 
 end_if_stmt
     : END IF (IDENTIFIER)?
+    | ENDIF (IDENTIFIER)?
     ;
 
 // ====================================================================
