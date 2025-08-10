@@ -1,2 +1,0 @@
-INTEGER X
-X = 5
