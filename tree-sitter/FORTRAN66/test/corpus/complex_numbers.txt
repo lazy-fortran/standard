@@ -1,0 +1,49 @@
+================================================================================
+FORTRAN 66 COMPLEX numbers
+================================================================================
+
+      COMPLEX Z1, Z2, Z3
+      Z1 = (3.0, 4.0)
+      Z2 = (1.0, -2.0)
+      Z3 = Z1 + Z2
+      PRINT *, Z3
+      END
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (statement_body
+      (type_declaration
+        (variable_list
+          (variable)
+          (variable)
+          (variable)))))
+  (statement
+    (statement_body
+      (assignment
+        (variable)
+        (expression
+          (complex_literal)))))
+  (statement
+    (statement_body
+      (assignment
+        (variable)
+        (expression
+          (complex_literal)))))
+  (statement
+    (statement_body
+      (assignment
+        (variable)
+        (expression
+          (arithmetic_expr
+            (variable)
+            (variable))))))
+  (statement
+    (statement_body
+      (print_stmt
+        (expression
+          (variable)))))
+  (statement
+    (statement_body
+      (end_stmt))))

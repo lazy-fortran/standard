@@ -12,17 +12,9 @@
  * maintaining full backward compatibility with standard Fortran.
  */
 
-const fortran2023 = require('../Fortran2023/grammar.js');
+const Fortran2023 = require('../Fortran2023/grammar.js');
 
-function grammar(base, config) {
-  if (!config) {
-    config = base;
-    base = undefined;
-  }
-  return config;
-}
-
-module.exports = grammar(fortran2023, {
+module.exports = grammar(Fortran2023, {
   name: 'LazyFortran2025',
 
   // Copy base configuration
@@ -185,8 +177,3 @@ module.exports = grammar(fortran2023, {
     // - All historical features from FORTRAN I through F2023
   }
 });
-
-// Helper function
-function sep1(rule, separator) {
-  return seq(rule, repeat(seq(separator, rule)));
-}

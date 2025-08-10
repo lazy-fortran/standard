@@ -1,0 +1,17 @@
+      PROGRAM MAIN
+      IMPLICIT NONE
+      REAL X(100), Y(100), SUM
+      INTEGER I, N
+      
+      N = 100
+      SUM = 0.0
+      
+      DO 10 I = 1, N
+      X(I) = FLOAT(I)
+      Y(I) = 2.0 * X(I)
+   10 SUM = SUM + Y(I)
+      
+      PRINT 20, SUM
+   20 FORMAT ('TOTAL SUM = ', F10.2)
+      
+      END

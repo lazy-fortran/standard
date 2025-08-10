@@ -1,0 +1,66 @@
+================================================================================
+Fortran 90 module functionality
+================================================================================
+
+MODULE MATH_UTILS
+  IMPLICIT NONE
+  REAL, PARAMETER :: PI = 3.14159
+  
+  CONTAINS
+  
+  FUNCTION CIRCLE_AREA(RADIUS) RESULT(AREA)
+    REAL, INTENT(IN) :: RADIUS
+    REAL :: AREA
+    AREA = PI * RADIUS**2
+  END FUNCTION CIRCLE_AREA
+  
+END MODULE MATH_UTILS
+
+--------------------------------------------------------------------------------
+
+(program
+  (program_unit
+    (module
+      (module_name)
+      (statement
+        (statement_body
+          (implicit_stmt)))
+      (statement
+        (statement_body
+          (type_declaration
+            (attr_spec_list
+              (attr_spec))
+            (entity_decl_list
+              (entity_decl
+                (variable)
+                (expression
+                  (number)))))))
+      (subroutine_subprogram
+        (function_name)
+        (parameter_list
+          (variable))
+        (variable)
+        (statement
+          (statement_body
+            (type_declaration
+              (attr_spec_list
+                (attr_spec))
+              (entity_decl_list
+                (entity_decl
+                  (variable))))))
+        (statement
+          (statement_body
+            (type_declaration
+              (entity_decl_list
+                (entity_decl
+                  (variable))))))
+        (statement
+          (statement_body
+            (assignment
+              (variable)
+              (expression
+                (arithmetic_expr
+                  (variable)
+                  (arithmetic_expr
+                    (variable)
+                    (number))))))))))))

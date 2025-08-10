@@ -1,0 +1,86 @@
+================================================================================
+Fortran 90 allocatable arrays
+================================================================================
+
+PROGRAM DYNAMIC_ARRAYS
+  INTEGER :: N = 100
+  REAL, ALLOCATABLE :: X(:), Y(:)
+  
+  ALLOCATE(X(N), Y(N))
+  
+  X = (/ (I, I=1,N) /)
+  Y = 2.0 * X
+  
+  DEALLOCATE(X, Y)
+END PROGRAM
+
+--------------------------------------------------------------------------------
+
+(program
+  (program_unit
+    (main_program
+      (program_name)
+      (statement
+        (statement_body
+          (type_declaration
+            (entity_decl_list
+              (entity_decl
+                (variable)
+                (expression
+                  (number)))))))
+      (statement
+        (statement_body
+          (type_declaration
+            (attr_spec_list
+              (attr_spec))
+            (entity_decl_list
+              (entity_decl
+                (variable
+                  (array_element
+                    (subscript_list
+                      (expression)))))
+              (entity_decl
+                (variable
+                  (array_element
+                    (subscript_list
+                      (expression)))))))))
+      (statement
+        (statement_body
+          (allocate_stmt
+            (allocate_list
+              (variable
+                (array_element
+                  (subscript_list
+                    (expression
+                      (variable)))))
+              (variable
+                (array_element
+                  (subscript_list
+                    (expression
+                      (variable)))))))))
+      (statement
+        (statement_body
+          (assignment
+            (variable)
+            (expression
+              (array_constructor
+                (expression
+                  (variable))
+                (expression
+                  (variable))
+                (expression
+                  (variable)))))))
+      (statement
+        (statement_body
+          (assignment
+            (variable)
+            (expression
+              (arithmetic_expr
+                (number)
+                (variable))))))
+      (statement
+        (statement_body
+          (deallocate_stmt
+            (allocate_list
+              (variable)
+              (variable)))))))))

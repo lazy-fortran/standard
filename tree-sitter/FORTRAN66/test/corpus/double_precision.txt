@@ -1,0 +1,49 @@
+================================================================================
+FORTRAN 66 DOUBLE PRECISION
+================================================================================
+
+      DOUBLE PRECISION X, Y, Z
+      X = 1.23456789012345D0
+      Y = 2.0D-10
+      Z = X * Y
+      PRINT *, Z
+      END
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (statement_body
+      (type_declaration
+        (variable_list
+          (variable)
+          (variable)
+          (variable)))))
+  (statement
+    (statement_body
+      (assignment
+        (variable)
+        (expression
+          (number)))))
+  (statement
+    (statement_body
+      (assignment
+        (variable)
+        (expression
+          (number)))))
+  (statement
+    (statement_body
+      (assignment
+        (variable)
+        (expression
+          (arithmetic_expr
+            (variable)
+            (variable))))))
+  (statement
+    (statement_body
+      (print_stmt
+        (expression
+          (variable)))))
+  (statement
+    (statement_body
+      (end_stmt))))

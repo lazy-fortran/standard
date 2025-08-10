@@ -6,6 +6,9 @@
   "keywords": ["parser", "fortran", "fortran2008", "tree-sitter"],
   "author": "LazyFortran2025 Project",
   "license": "MIT",
+  "scripts": {
+    "test": "tree-sitter test"
+  },
   "dependencies": {
     "node-addon-api": "^7.0.0",
     "node-gyp-build": "^4.6.0"
