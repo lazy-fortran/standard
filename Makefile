@@ -1,5 +1,5 @@
-# Makefile for LazyFortran2025 Standard Grammar Implementation
-# Historical FORTRAN/Fortran grammar inheritance chain: 1957 → 2025
+# Makefile for FORTRAN/Fortran Standard Grammar Implementation
+# Historical FORTRAN/Fortran grammar inheritance chain: 1957 → 2023
 
 # Configuration
 ANTLR4 = antlr4
@@ -9,7 +9,7 @@ TEST_DIR = tests
 PYTEST = python -m pytest
 
 # Grammar inheritance chain (build order matters!)
-GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023 LazyFortran2025
+GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023
 
 # Default target
 .PHONY: all clean test help
@@ -31,7 +31,6 @@ Fortran2003: $(GRAMMAR_DIR)/Fortran2003Lexer.py
 Fortran2008: $(GRAMMAR_DIR)/Fortran2008Lexer.py
 Fortran2018: $(GRAMMAR_DIR)/Fortran2018Lexer.py
 Fortran2023: $(GRAMMAR_DIR)/Fortran2023Lexer.py
-LazyFortran2025: $(GRAMMAR_DIR)/LazyFortran2025Lexer.py
 
 # FORTRAN I (1957) - Foundation
 $(GRAMMAR_DIR)/FORTRANLexer.py: $(GRAMMAR_DIR)/FORTRANLexer.g4 $(GRAMMAR_DIR)/FORTRANParser.g4
@@ -103,12 +102,6 @@ $(GRAMMAR_DIR)/Fortran2023Lexer.py: $(GRAMMAR_DIR)/Fortran2023Lexer.g4 $(GRAMMAR
 	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2023Lexer.g4 && \
 	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2023Parser.g4
 
-# LazyFortran2025 - Syntactic Relaxations
-$(GRAMMAR_DIR)/LazyFortran2025Lexer.py: $(GRAMMAR_DIR)/LazyFortran2025Lexer.g4 $(GRAMMAR_DIR)/LazyFortran2025Parser.g4 Fortran2023
-	@echo "Building LazyFortran2025..."
-	cd $(GRAMMAR_DIR) && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . LazyFortran2025Lexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . LazyFortran2025Parser.g4
 
 # ====================================================================
 # TEST TARGETS - Run tests for individual standards or all
@@ -119,7 +112,7 @@ test: all
 	@echo "=========================================="
 	@echo "Running ALL Tests - Full Grammar Suite"
 	@echo "=========================================="
-	@echo "Standards Chain: FORTRAN(1957) → F2023 → LazyFortran2025"
+	@echo "Standards Chain: FORTRAN(1957) → F2023"
 	$(PYTEST) $(TEST_DIR)/ -v --tb=short
 	@echo ""
 	@echo "✅ All tests completed!"
@@ -166,9 +159,6 @@ test-fortran2023: Fortran2023
 	@echo "Testing Fortran 2023 (2023)..."
 	$(PYTEST) $(TEST_DIR)/Fortran2023/ -v --tb=short || echo "No tests for Fortran 2023 yet"
 
-test-lazyfortran2025: LazyFortran2025
-	@echo "Testing LazyFortran2025..."
-	$(PYTEST) $(TEST_DIR)/LazyFortran2025/ -v --tb=short
 
 # Cross-validation against kaby76/fortran examples
 test-cross-validation: Fortran2018
@@ -193,14 +183,14 @@ clean-all: clean
 
 # Help target
 help:
-	@echo "LazyFortran2025 Standard Grammar Build System"
+	@echo "FORTRAN/Fortran Standard Grammar Build System"
 	@echo "============================================="
 	@echo ""
 	@echo "Historical FORTRAN/Fortran Standards Chain:"
 	@echo "  FORTRAN (1957) → FORTRAN II (1958) → FORTRAN IV (1962)"
 	@echo "  → FORTRAN 66 (1966) → FORTRAN 77 (1977) → Fortran 90 (1990)"
 	@echo "  → Fortran 95 (1995) → Fortran 2003 (2003) → Fortran 2008 (2008)"
-	@echo "  → Fortran 2018 (2018) → [Future: LazyFortran2025]"
+	@echo "  → Fortran 2018 (2018) → Fortran 2023 (2023)"
 	@echo ""
 	@echo "BUILD TARGETS:"
 	@echo "  all                    - Build all grammars (default)"
@@ -213,6 +203,7 @@ help:
 	@echo "  Fortran2003            - Build Fortran 2003 (2003)"
 	@echo "  Fortran2008            - Build Fortran 2008 (2008)"
 	@echo "  Fortran2018            - Build Fortran 2018 (2018)"
+	@echo "  Fortran2023            - Build Fortran 2023 (2023)"
 	@echo ""
 	@echo "TEST TARGETS:"
 	@echo "  test                   - Run all tests"
@@ -220,6 +211,7 @@ help:
 	@echo "  test-fortran90         - Test Fortran 90"
 	@echo "  test-fortran2003       - Test Fortran 2003"
 	@echo "  test-fortran2018       - Test Fortran 2018"
+	@echo "  test-fortran2023       - Test Fortran 2023"
 	@echo "  [etc. for all standards]"
 	@echo ""
 	@echo "UTILITY TARGETS:"
