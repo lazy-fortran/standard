@@ -1,20 +1,14 @@
 /**
- * FORTRAN (1957) - Simple working grammar
+ * FORTRAN 77 (1977) - Inherits from FORTRAN 66 (1966) and adds CHARACTER type, block IF
  */
 
-module.exports = grammar({
+const FORTRAN66 = require('../FORTRAN66/grammar.js');
+
+module.exports = grammar(FORTRAN66, {
   name: 'FORTRAN77',
 
-  extras: $ => [/\s+/, $.comment],
-
   rules: {
-    program: $ => repeat($.statement),
-
-    statement: $ => choice(
-      seq($.label, $.statement_body),
-      $.statement_body
-    ),
-
+    // Extend statement_body to include new FORTRAN 77 features
     statement_body: $ => choice(
       $.assignment,
       $.goto,
@@ -24,66 +18,37 @@ module.exports = grammar({
       $.end_stmt,
       $.dimension_stmt,
       $.format_stmt,
+      $.return_stmt,
+      $.call_stmt,
+      $.print_stmt,
+      $.logical_declaration,
       $.type_declaration,
+      // NEW in FORTRAN 77
       $.character_declaration,
-      $.if_then_construct,
-      $.print_stmt
+      $.if_then_construct
     ),
 
-    assignment: $ => seq($.variable, '=', $.expression),
-    variable: $ => /[A-Z][A-Z0-9]*/,
-    expression: $ => choice($.number, $.variable, $.string_literal, $.logical_expr, $.arithmetic_expr),
-    
-    string_literal: $ => /'[^']*'/,
-    
-    arithmetic_expr: $ => prec.left(seq(
-      choice($.variable, $.number),
-      choice('+', '-', '*', '/'),
-      choice($.variable, $.number)
-    )),
-    
-    logical_expr: $ => choice(
-      $.logical_constant,
-      $.logical_operation
+    // Extend expression to include string literals
+    expression: $ => choice(
+      $.number,
+      $.variable,
+      $.arithmetic_expr,
+      $.function_call,
+      $.logical_expr,
+      // NEW in FORTRAN 77
+      $.string_literal
     ),
-    
-    logical_constant: $ => choice('.TRUE.', '.FALSE.'),
-    
-    logical_operation: $ => choice(
-      prec.left(1, seq($.expression, '.AND.', $.expression)),
-      prec.left(1, seq($.expression, '.OR.', $.expression)), 
-      prec(2, seq('.NOT.', $.expression)),
-      prec.left(1, seq($.expression, '.GT.', $.expression)),
-      prec.left(1, seq($.expression, '.LT.', $.expression)),
-      prec.left(1, seq($.expression, '.EQ.', $.expression)),
-      prec.left(1, seq($.expression, '.NE.', $.expression))
-    ),
-    number: $ => /[0-9]+(\.[0-9]+)?/,
 
-    goto: $ => seq('GO', 'TO', $.label),
-    if_stmt: $ => seq('IF', '(', $.expression, ')', $.label, ',', $.label, ',', $.label),
-    do_stmt: $ => seq('DO', $.label, $.variable, '=', $.expression, ',', $.expression),
-    continue_stmt: $ => 'CONTINUE',
-    end_stmt: $ => 'END',
-
-    print_stmt: $ => seq('PRINT', '*', ',', $.expression),
-    
-    dimension_stmt: $ => seq('DIMENSION', /[A-Z][A-Z0-9]*/, '(', /[0-9]+/, ')'),
-    format_stmt: $ => seq('FORMAT', '(', /[^)]*/, ')'),
-
-    type_declaration: $ => seq(
-      choice('LOGICAL', 'INTEGER', 'REAL'),
-      $.variable_list
-    ),
-    
+    // NEW: CHARACTER type support
     character_declaration: $ => seq(
       'CHARACTER',
       optional(seq('*', $.number)),
       $.variable_list
     ),
     
-    variable_list: $ => seq($.variable, repeat(seq(',', $.variable))),
-    
+    string_literal: $ => /'[^']*'/,
+
+    // NEW: Block IF constructs (structured programming!)
     if_then_construct: $ => seq(
       'IF', '(', $.expression, ')', 'THEN',
       repeat($.statement),
@@ -92,7 +57,20 @@ module.exports = grammar({
       'ENDIF'
     ),
 
-    label: $ => /[0-9]+/,
-    comment: $ => seq(/[Cc*]/, /.*/),
+    // Enhanced type declaration (LOGICAL handled by inherited logical_declaration)
+    type_declaration: $ => seq(
+      choice('INTEGER', 'REAL'),
+      $.variable_list
+    ),
+
+    // Enhanced print statement
+    print_stmt: $ => seq('PRINT', '*', ',', $.expression),
+
+    // Enhanced arithmetic expressions for string operations
+    arithmetic_expr: $ => prec.left(seq(
+      choice($.variable, $.number, $.string_literal, $.function_call),
+      choice('+', '-', '*', '/'),
+      choice($.variable, $.number, $.string_literal, $.function_call)
+    )),
   }
 });
