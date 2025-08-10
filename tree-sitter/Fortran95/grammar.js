@@ -2,16 +2,27 @@
  * Fortran 95 (1995) - Enhanced Array Processing and FORALL
  * Inheriting from Fortran90 with focused enhancements
  * 
- * KEY F95 ENHANCEMENTS:
+ * KEY F95 ENHANCEMENTS per ISO/IEC 1539-1:1997:
  * - FORALL construct for array operations (enhanced from F90)
- * - WHERE construct improvements
+ * - WHERE construct improvements with ELSEWHERE
  * - Enhanced intrinsic procedures
- * - Pure and elemental procedure enhancements
+ * - PURE and ELEMENTAL procedure capabilities  
  * - Improved array handling
  * - Default initialization for derived types
+ * - NULL intrinsic for pointer initialization
+ * - Alternative array constructor syntax [...]
+ * - Minor corrections and clarifications to F90
  */
 
 const fortran90 = require('../Fortran90/grammar.js');
+
+function grammar(base, config) {
+  if (!config) {
+    config = base;
+    base = undefined;
+  }
+  return config;
+}
 
 module.exports = grammar(fortran90, {
   name: 'Fortran95',
@@ -272,7 +283,7 @@ module.exports = grammar(fortran90, {
 
     // Enhanced array constructor with F95 syntax improvements
     array_constructor: $ => choice(
-      seq('(/', $.ac_spec, '/'),'),       // F90 syntax
+      seq('(/', $.ac_spec, '/)'),         // F90 syntax
       seq('[', $.ac_spec, ']')            // F95 alternative syntax
     ),
 

@@ -2,18 +2,28 @@
  * Fortran 2003 (2003) - Object-Oriented Programming Revolution
  * Inheriting from Fortran95 with major OOP and C interoperability features
  * 
- * REVOLUTIONARY F2003 FEATURES:
- * - Object-oriented programming (classes, inheritance, polymorphism)
- * - Parameterized derived types (PDTs)
- * - C interoperability (ISO_C_BINDING)
- * - Enhanced array features and allocatable components
- * - IEEE arithmetic support
- * - Enhanced I/O features (STREAM, ASYNCHRONOUS)
+ * REVOLUTIONARY F2003 FEATURES per ISO/IEC 1539-1:2004:
+ * - Object-oriented programming (TYPE...EXTENDS, CLASS, inheritance)
+ * - Polymorphic entities and SELECT TYPE construct
+ * - Type-bound procedures and abstract types
+ * - Parameterized derived types (PDTs) with KIND/LEN parameters
+ * - C interoperability (ISO_C_BINDING module)
+ * - Enhanced allocatable features (allocatable components, SOURCE=)
  * - Abstract interfaces and procedure pointers
- * - User-defined derived type I/O
+ * - Enhanced I/O (STREAM access, ASYNCHRONOUS, user-defined I/O)
+ * - IEEE arithmetic support
+ * - ASSOCIATE construct and enhanced array features
  */
 
 const fortran95 = require('../Fortran95/grammar.js');
+
+function grammar(base, config) {
+  if (!config) {
+    config = base;
+    base = undefined;
+  }
+  return config;
+}
 
 module.exports = grammar(fortran95, {
   name: 'Fortran2003',

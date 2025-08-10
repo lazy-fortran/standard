@@ -15,6 +15,14 @@
 
 const fortran77 = require('../FORTRAN77/grammar.js');
 
+function grammar(base, config) {
+  if (!config) {
+    config = base;
+    base = undefined;
+  }
+  return config;
+}
+
 module.exports = grammar(fortran77, {
   name: 'Fortran90',
 

@@ -15,6 +15,14 @@
 
 const fortran2018 = require('../Fortran2018/grammar.js');
 
+function grammar(base, config) {
+  if (!config) {
+    config = base;
+    base = undefined;
+  }
+  return config;
+}
+
 module.exports = grammar(fortran2018, {
   name: 'Fortran2023',
 

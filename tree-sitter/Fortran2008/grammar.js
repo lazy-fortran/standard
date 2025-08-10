@@ -2,17 +2,28 @@
  * Fortran 2008 (2008) - Coarrays and Parallel Programming
  * Inheriting from Fortran2003 with coarray and parallel features
  * 
- * KEY F2008 ENHANCEMENTS:
- * - Coarrays for parallel programming
- * - Submodules for large module organization
+ * KEY F2008 ENHANCEMENTS per ISO/IEC 1539-1:2010:
+ * - Coarrays for parallel programming (REAL :: x[*])
+ * - Submodules for enhanced module organization
  * - DO CONCURRENT construct for parallelizable loops
- * - Enhanced allocatable features
  * - BLOCK construct for local scoping
- * - Abstract derived types and procedure pointers
- * - Enhanced C interoperability
+ * - CRITICAL construct and synchronization (SYNC ALL, SYNC IMAGES, SYNC MEMORY)
+ * - LOCK and UNLOCK statements for mutual exclusion
+ * - Enhanced ALLOCATE with MOLD keyword
+ * - NEWUNIT for automatic unit number assignment
+ * - Enhanced bit intrinsics and mathematical functions
+ * - Implied-shape arrays and contiguous attribute
  */
 
 const fortran2003 = require('../Fortran2003/grammar.js');
+
+function grammar(base, config) {
+  if (!config) {
+    config = base;
+    base = undefined;
+  }
+  return config;
+}
 
 module.exports = grammar(fortran2003, {
   name: 'Fortran2008',
