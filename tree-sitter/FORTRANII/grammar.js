@@ -27,8 +27,8 @@ module.exports = grammar({
     function_statement: $ => seq('FUNCTION', $.function_name, '(', optional($.parameter_list), ')'),
     subroutine_statement: $ => seq('SUBROUTINE', $.subroutine_name, '(', optional($.parameter_list), ')'),
     
-    function_name: $ => /[A-Z][A-Z0-9]*/,
-    subroutine_name: $ => /[A-Z][A-Z0-9]*/,
+    function_name: $ => /[A-Z][A-Z0-9_]*/,
+    subroutine_name: $ => /[A-Z][A-Z0-9_]*/,
     parameter_list: $ => seq($.variable, repeat(seq(',', $.variable))),
 
     statement: $ => choice(
@@ -46,11 +46,12 @@ module.exports = grammar({
       $.call_stmt,
       $.end_statement,
       $.dimension_stmt,
-      $.format_stmt
+      $.format_stmt,
+      $.print_stmt
     ),
 
     assignment: $ => seq($.variable, '=', $.expression),
-    variable: $ => /[A-Z][A-Z0-9]*/,
+    variable: $ => /[A-Z][A-Z0-9_]*/,
     
     expression: $ => choice(
       $.arithmetic_expr,
@@ -71,6 +72,7 @@ module.exports = grammar({
     argument_list: $ => seq($.expression, repeat(seq(',', $.expression))),
 
     call_stmt: $ => seq('CALL', $.subroutine_name, '(', optional($.argument_list), ')'),
+    print_stmt: $ => seq('PRINT', '*', ',', $.expression),
 
     goto: $ => seq('GO', 'TO', $.label),
     if_stmt: $ => seq('IF', '(', $.expression, ')', $.label, ',', $.label, ',', $.label),

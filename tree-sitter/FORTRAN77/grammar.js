@@ -26,7 +26,8 @@ module.exports = grammar({
       $.format_stmt,
       $.type_declaration,
       $.character_declaration,
-      $.if_then_construct
+      $.if_then_construct,
+      $.print_stmt
     ),
 
     assignment: $ => seq($.variable, '=', $.expression),
@@ -65,6 +66,8 @@ module.exports = grammar({
     continue_stmt: $ => 'CONTINUE',
     end_stmt: $ => 'END',
 
+    print_stmt: $ => seq('PRINT', '*', ',', $.expression),
+    
     dimension_stmt: $ => seq('DIMENSION', /[A-Z][A-Z0-9]*/, '(', /[0-9]+/, ')'),
     format_stmt: $ => seq('FORMAT', '(', /[^)]*/, ')'),
 
@@ -84,6 +87,7 @@ module.exports = grammar({
     if_then_construct: $ => seq(
       'IF', '(', $.expression, ')', 'THEN',
       repeat($.statement),
+      repeat(seq('ELSEIF', '(', $.expression, ')', 'THEN', repeat($.statement))),
       optional(seq('ELSE', repeat($.statement))),
       'ENDIF'
     ),

@@ -28,7 +28,20 @@ module.exports = grammar({
     ),
 
     assignment: $ => seq($.variable, '=', $.expression),
-    variable: $ => /[A-Z][A-Z0-9]*/,
+    
+    variable: $ => choice(
+      $.array_element,
+      /[A-Z][A-Z0-9]*/
+    ),
+    
+    array_element: $ => seq(
+      /[A-Z][A-Z0-9]*/,
+      '(',
+      $.subscript_list,
+      ')'
+    ),
+    
+    subscript_list: $ => seq($.expression, repeat(seq(',', $.expression))),
     expression: $ => choice($.number, $.variable, $.logical_expr, $.arithmetic_expr),
     
     arithmetic_expr: $ => prec.left(seq(
@@ -61,7 +74,19 @@ module.exports = grammar({
     continue_stmt: $ => 'CONTINUE',
     end_stmt: $ => 'END',
 
-    dimension_stmt: $ => seq('DIMENSION', /[A-Z][A-Z0-9]*/, '(', /[0-9]+/, ')'),
+    dimension_stmt: $ => seq('DIMENSION', $.array_declarator_list),
+    
+    array_declarator_list: $ => seq($.array_declarator, repeat(seq(',', $.array_declarator))),
+    
+    array_declarator: $ => seq(
+      /[A-Z][A-Z0-9]*/,
+      '(',
+      $.dimension_list,
+      ')'
+    ),
+    
+    dimension_list: $ => seq($.dimension_bound, repeat(seq(',', $.dimension_bound))),
+    dimension_bound: $ => $.number,
     format_stmt: $ => seq('FORMAT', '(', /[^)]*/, ')'),
 
     type_declaration: $ => seq(

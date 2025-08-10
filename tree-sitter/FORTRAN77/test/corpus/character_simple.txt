@@ -4,9 +4,7 @@ FORTRAN77 simple CHARACTER operations
 
 CHARACTER*10 NAME
 NAME = 'HELLO'
-IF (NAME .EQ. 'HELLO') THEN
-    PRINT *, 'FOUND'
-ENDIF
+PRINT *, NAME
 
 --------------------------------------------------------------------------------
 
@@ -25,17 +23,6 @@ ENDIF
           (string_literal)))))
   (statement
     (statement_body
-      (if_then_construct
+      (print_stmt
         (expression
-          (logical_expr
-            (logical_operation
-              (expression
-                (variable))
-              (expression
-                (string_literal)))))
-        (statement
-          (statement_body
-            (assignment
-              (variable)
-              (expression
-                (string_literal)))))))))
+          (variable))))))
