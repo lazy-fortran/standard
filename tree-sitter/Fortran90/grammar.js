@@ -14,7 +14,12 @@ module.exports = grammar({
   ],
 
   rules: {
-    program: $ => repeat($.program_unit),
+    program: $ => choice(
+      // Full program with program units
+      repeat1($.program_unit),
+      // Simple statements (for compatibility)
+      repeat1($.statement)
+    ),
     
     program_unit: $ => choice(
       $.main_program,
