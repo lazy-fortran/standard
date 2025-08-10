@@ -10,10 +10,10 @@ module.exports = grammar(FORTRAN66, {
   rules: {
     // Override program to handle both simple and full program structures  
     program: $ => choice(
+      // Simple structure - just statements (much higher precedence)
+      prec(10, repeat1($.statement)),
       // Full program structure (with END statement or leading spaces)
-      prec(-1, $.program_unit),
-      // Simple structure - just statements
-      repeat1($.statement)
+      prec(-10, $.program_unit)
     ),
 
     program_unit: $ => choice(
@@ -22,22 +22,20 @@ module.exports = grammar(FORTRAN66, {
       $.function_subprogram
     ),
 
-    main_program: $ => seq(
-      choice(
-        seq(/\s+/, repeat1($.statement)),  // With indentation
-        seq(repeat1($.statement), $.end_statement)  // With END
-      )
+    main_program: $ => choice(
+      seq(/\s+/, repeat1($.statement)),  // With indentation
+      seq(repeat1($.statement), $.end_statement)  // With END
     ),
 
     // Unified statement that handles both simple and detailed structures
     statement: $ => choice(
-      // Simple structure with statement_body (higher precedence for simple cases)
-      prec(1, seq($.statement_body)),
-      // Detailed structures
+      // Detailed structures (higher precedence in full programs)
       $.specification_statement,
       $.arithmetic_statement,
       $.control_statement,
-      $.io_statement
+      $.io_statement,
+      // Simple structure with statement_body (fallback for simple programs)
+      seq($.statement_body)
     ),
     
     // Simple statement body for basic tests
@@ -104,7 +102,7 @@ module.exports = grammar(FORTRAN66, {
       optional($.character_length)
     )),
 
-    arithmetic_statement: $ => $.assignment_statement,
+    arithmetic_statement: $ => prec(2, $.assignment_statement),
 
     assignment_statement: $ => seq(
       $.variable,
