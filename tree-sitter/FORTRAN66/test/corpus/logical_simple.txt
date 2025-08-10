@@ -1,0 +1,36 @@
+================================================================================
+FORTRAN66 simple logical operations
+================================================================================
+
+LOGICAL A, B
+A = .TRUE.
+B = A .AND. .FALSE.
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (statement_body
+      (type_declaration
+        (variable_list
+          (variable)
+          (variable)))))
+  (statement
+    (statement_body
+      (assignment
+        (variable)
+        (expression
+          (logical_expr
+            (logical_constant))))))
+  (statement
+    (statement_body
+      (assignment
+        (variable)
+        (expression
+          (logical_expr
+            (logical_operation
+              (expression
+                (variable))
+              (expression
+                (logical_expr
+                  (logical_constant))))))))))
