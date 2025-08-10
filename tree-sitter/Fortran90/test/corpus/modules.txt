@@ -1,0 +1,200 @@
+================================================================================
+Fortran 90 modules
+================================================================================
+
+module math_utils
+    implicit none
+    private
+    public :: pi, circle_area, sphere_volume
+    
+    real, parameter :: pi = 3.14159265359
+    
+contains
+    
+    function circle_area(radius) result(area)
+        real, intent(in) :: radius
+        real :: area
+        area = pi * radius**2
+    end function circle_area
+    
+    function sphere_volume(radius) result(volume)
+        real, intent(in) :: radius
+        real :: volume
+        volume = (4.0/3.0) * pi * radius**3
+    end function sphere_volume
+    
+end module math_utils
+
+--------------------------------------------------------------------------------
+
+(program
+  (program_unit
+    (module
+      (module_stmt
+        (module_name))
+      (specification_part
+        (implicit_part
+          (implicit_stmt))
+        (declaration_construct
+          (access_stmt))
+        (declaration_construct
+          (access_stmt
+            (access_id_list
+              (access_id)
+              (access_id)
+              (access_id))))
+        (declaration_construct
+          (type_declaration_stmt
+            (declaration_type_spec
+              (intrinsic_type_spec))
+            (attr_spec_list
+              (attr_spec))
+            (entity_decl_list
+              (entity_decl
+                (object_name)
+                (initialization
+                  (constant_expr
+                    (level_2_expr
+                      (level_1_expr
+                        (mult_operand
+                          (add_operand
+                            (primary
+                              (constant
+                                (real_literal_constant)))))))))))))
+      (module_subprogram_part
+        (contains_stmt)
+        (module_subprogram
+          (function_subprogram
+            (function_stmt
+              (function_name)
+              (dummy_arg_name_list
+                (dummy_arg_name))
+              (suffix
+                (result_name)))
+            (specification_part
+              (declaration_construct
+                (type_declaration_stmt
+                  (declaration_type_spec
+                    (intrinsic_type_spec))
+                  (attr_spec_list
+                    (intent_spec))
+                  (entity_decl_list
+                    (entity_decl
+                      (object_name)))))
+              (declaration_construct
+                (type_declaration_stmt
+                  (declaration_type_spec
+                    (intrinsic_type_spec))
+                  (entity_decl_list
+                    (entity_decl
+                      (object_name))))))
+            (execution_part
+              (executable_construct
+                (action_stmt
+                  (assignment_stmt
+                    (variable
+                      (designator
+                        (data_ref
+                          (part_ref
+                            (part_name)))))
+                    (expr
+                      (level_2_expr
+                        (level_1_expr
+                          (mult_operand
+                            (add_operand
+                              (primary
+                                (designator
+                                  (data_ref
+                                    (part_ref
+                                      (part_name)))))))
+                          (mult_operand
+                            (add_operand
+                              (primary
+                                (power_op
+                                  (primary
+                                    (designator
+                                      (data_ref
+                                        (part_ref
+                                          (part_name)))))
+                                  (primary
+                                    (constant
+                                      (int_literal_constant)))))))))))))))
+            (end_function_stmt
+              (function_name))))
+        (module_subprogram
+          (function_subprogram
+            (function_stmt
+              (function_name)
+              (dummy_arg_name_list
+                (dummy_arg_name))
+              (suffix
+                (result_name)))
+            (specification_part
+              (declaration_construct
+                (type_declaration_stmt
+                  (declaration_type_spec
+                    (intrinsic_type_spec))
+                  (attr_spec_list
+                    (intent_spec))
+                  (entity_decl_list
+                    (entity_decl
+                      (object_name)))))
+              (declaration_construct
+                (type_declaration_stmt
+                  (declaration_type_spec
+                    (intrinsic_type_spec))
+                  (entity_decl_list
+                    (entity_decl
+                      (object_name))))))
+            (execution_part
+              (executable_construct
+                (action_stmt
+                  (assignment_stmt
+                    (variable
+                      (designator
+                        (data_ref
+                          (part_ref
+                            (part_name)))))
+                    (expr
+                      (level_2_expr
+                        (level_1_expr
+                          (mult_operand
+                            (add_operand
+                              (primary
+                                (parenthesized_expr
+                                  (expr
+                                    (level_2_expr
+                                      (level_1_expr
+                                        (mult_operand
+                                          (add_operand
+                                            (primary
+                                              (constant
+                                                (real_literal_constant)))))
+                                        (mult_operand
+                                          (add_operand
+                                            (primary
+                                              (constant
+                                                (real_literal_constant)))))))))))
+                          (mult_operand
+                            (add_operand
+                              (primary
+                                (designator
+                                  (data_ref
+                                    (part_ref
+                                      (part_name)))))))
+                          (mult_operand
+                            (add_operand
+                              (primary
+                                (power_op
+                                  (primary
+                                    (designator
+                                      (data_ref
+                                        (part_ref
+                                          (part_name)))))
+                                  (primary
+                                    (constant
+                                      (int_literal_constant))))))))))))))
+            (end_function_stmt
+              (function_name)))))
+      (end_module_stmt
+        (module_name)))))
