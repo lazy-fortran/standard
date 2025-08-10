@@ -89,3 +89,4 @@ build/
 validation/external/
 validation/auto-generated/
 validation_cache/
+test_output/
