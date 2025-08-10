@@ -11,7 +11,24 @@ module.exports = grammar({
   name: 'FORTRAN',
 
   extras: $ => [
-    /\s/,  // Whitespace
+    /\s+/,
+    $.comment
+  ],
+
+  conflicts: $ => [
+    [$.simple_variable, $.function_name],
+    [$.variable, $.constant]
+  ],
+
+  precedences: $ => [
+    ['power', 'mult', 'add', 'relop']
+  ],
+
+  word: $ => $.simple_variable,
+
+  inline: $ => [
+    $.label,
+    $.subscript
   ],
 
   rules: {
@@ -23,17 +40,26 @@ module.exports = grammar({
 
     statement: $ => seq(
       optional($.label),
-      choice(
-        $.arithmetic_statement,
-        $.control_statement,
-        $.io_statement,
-        $.specification_statement,
-        $.format_statement,
-        $.end_statement
-      )
+      $.statement_body
+    ),
+
+    // Base hooks for extension by descendants
+    statement_body: $ => choice(
+      $.arithmetic_statement,
+      $.control_statement,
+      $.io_statement,
+      $.specification_statement,
+      $.format_statement,
+      $.end_statement
     ),
 
     label: $ => /[1-9][0-9]{0,4}/,
+
+    // Comments (fixed-form style for FORTRAN I)
+    comment: $ => seq(
+      choice('C', 'c', '*'),
+      /.*/
+    ),
 
     // ============================================================================
     // ARITHMETIC STATEMENTS (1957)
@@ -66,17 +92,25 @@ module.exports = grammar({
     subscript: $ => $.expression,
 
     // ============================================================================
-    // EXPRESSIONS (1957)
+    // EXPRESSIONS (1957) - Base hooks for extension
     // ============================================================================
 
-    expression: $ => choice(
-      $.arithmetic_expression,
-      $.logical_expression
+    // Base expression hook - descendants can extend this
+    expression_base: $ => $.arithmetic_expression,
+    
+    expression: $ => $.expression_base,
+
+    // Base primary hook - descendants can extend this 
+    primary_base: $ => choice(
+      $.constant,
+      $.variable,
+      $.function_call,
+      seq('(', $.arithmetic_expression, ')')
     ),
 
     arithmetic_expression: $ => choice(
       $.term,
-      prec.left(1, seq(
+      prec.left('add', seq(
         $.arithmetic_expression,
         choice('+', '-'),
         $.term
@@ -85,7 +119,7 @@ module.exports = grammar({
 
     term: $ => choice(
       $.factor,
-      prec.left(2, seq(
+      prec.left('mult', seq(
         $.term,
         choice('*', '/'),
         $.factor
@@ -94,31 +128,34 @@ module.exports = grammar({
 
     factor: $ => choice(
       $.primary,
-      prec.right(3, seq(
+      prec.right('power', seq(
         $.primary,
         '**',
         $.factor
       ))
     ),
 
-    primary: $ => choice(
-      $.constant,
-      $.variable,
-      $.function_call,
-      seq('(', $.arithmetic_expression, ')')
-    ),
+    primary: $ => $.primary_base,
 
-    constant: $ => choice(
+    // Base constant hook - descendants can extend this
+    constant_base: $ => choice(
       $.integer_constant,
       $.real_constant
     ),
+    
+    constant: $ => $.constant_base,
 
     integer_constant: $ => /[0-9]+/,
     
     real_constant: $ => /[0-9]+\.[0-9]+([E][+-]?[0-9]+)?/,
 
+    // Base function name hook - descendants can override
+    function_name_base: $ => /[A-Z]+F/,  // Functions end with F in FORTRAN I
+    
+    function_name: $ => $.function_name_base,
+
     function_call: $ => seq(
-      /[A-Z]+F/,  // Functions end with F in FORTRAN I
+      $.function_name,
       '(',
       $.argument_list,
       ')'
@@ -127,10 +164,11 @@ module.exports = grammar({
     argument_list: $ => sep1($.expression, ','),
 
     // ============================================================================
-    // CONTROL STATEMENTS (1957)
+    // CONTROL STATEMENTS (1957) - Base hooks for extension
     // ============================================================================
 
-    control_statement: $ => choice(
+    // Base control statement hook - descendants can extend this
+    control_statement_base: $ => choice(
       $.goto_statement,
       $.if_statement,
       $.do_statement,
@@ -138,6 +176,8 @@ module.exports = grammar({
       $.stop_statement,
       $.pause_statement
     ),
+    
+    control_statement: $ => $.control_statement_base,
 
     goto_statement: $ => seq(
       'GO', 'TO',
@@ -148,13 +188,13 @@ module.exports = grammar({
     if_statement: $ => seq(
       'IF',
       '(',
-      $.expression,
+      field('condition', $.expression),
       ')',
-      $.label,  // negative
+      field('negative_label', $.label),
       ',',
-      $.label,  // zero
+      field('zero_label', $.label),
       ',',
-      $.label   // positive
+      field('positive_label', $.label)
     ),
 
     do_statement: $ => seq(
@@ -175,16 +215,19 @@ module.exports = grammar({
     pause_statement: $ => seq('PAUSE', optional($.integer_constant)),
 
     // ============================================================================
-    // I/O STATEMENTS (1957)
+    // I/O STATEMENTS (1957) - Base hooks for extension  
     // ============================================================================
 
-    io_statement: $ => choice(
+    // Base I/O statement hook - descendants can extend this
+    io_statement_base: $ => choice(
       $.read_statement,
       $.print_statement,
       $.punch_statement,
       $.read_tape_statement,
       $.write_tape_statement
     ),
+    
+    io_statement: $ => $.io_statement_base,
 
     read_statement: $ => seq(
       'READ',
@@ -207,31 +250,35 @@ module.exports = grammar({
       $.io_list
     ),
 
-    read_tape_statement: $ => seq(
+    // Order specific before general for proper precedence
+    read_tape_statement: $ => prec(1, seq(
       'READ', 'TAPE',
       $.integer_constant,
       ',',
       $.io_list
-    ),
+    )),
 
-    write_tape_statement: $ => seq(
+    write_tape_statement: $ => prec(1, seq(
       'WRITE', 'TAPE',
       $.integer_constant,
       ',',
       $.io_list
-    ),
+    )),
 
     io_list: $ => sep1($.variable, ','),
 
     // ============================================================================
-    // SPECIFICATION STATEMENTS (1957)
+    // SPECIFICATION STATEMENTS (1957) - Base hooks for extension
     // ============================================================================
 
-    specification_statement: $ => choice(
+    // Base specification statement hook - descendants can extend this
+    specification_statement_base: $ => choice(
       $.dimension_statement,
       $.equivalence_statement,
       $.frequency_statement
     ),
+    
+    specification_statement: $ => $.specification_statement_base,
 
     dimension_statement: $ => seq(
       'DIMENSION',
@@ -277,16 +324,29 @@ module.exports = grammar({
     end_statement: $ => 'END',
 
     // ============================================================================
-    // LOGICAL EXPRESSIONS (limited in 1957)
+    // LOGICAL EXPRESSIONS (limited in 1957) - Base hooks for extension
     // ============================================================================
 
-    logical_expression: $ => $.relational_expression,
+    // Base logical expression hook - descendants can extend this
+    logical_expression_base: $ => $.relational_expression,
+    
+    logical_expression: $ => $.logical_expression_base,
 
-    relational_expression: $ => seq(
-      $.arithmetic_expression,
-      choice('.GT.', '.GE.', '.LT.', '.LE.', '.EQ.', '.NE.'),
-      $.arithmetic_expression
-    )
+    // Tokenized relational operators to avoid splitting on '.'
+    relop: $ => choice(
+      token('.GT.'),
+      token('.GE.'),
+      token('.LT.'),
+      token('.LE.'),
+      token('.EQ.'),
+      token('.NE.')
+    ),
+
+    relational_expression: $ => prec.left('relop', seq(
+      field('left', $.arithmetic_expression),
+      field('operator', $.relop),
+      field('right', $.arithmetic_expression)
+    ))
   }
 });
 

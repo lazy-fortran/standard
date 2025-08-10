@@ -1,0 +1,25 @@
+{
+  "name": "tree-sitter-fortran2023",
+  "version": "1.0.0", 
+  "description": "Fortran 2023 grammar for tree-sitter",
+  "main": "bindings/node",
+  "keywords": ["parser", "fortran", "fortran2023", "tree-sitter"],
+  "author": "LazyFortran2025 Project",
+  "license": "MIT",
+  "dependencies": {
+    "node-addon-api": "^7.0.0",
+    "node-gyp-build": "^4.6.0"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.20.8"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.f23",
+      "file-types": ["f23"],
+      "highlights": "queries/highlights.scm",
+      "injections": "queries/injections.scm",
+      "locals": "queries/locals.scm"
+    }
+  ]
+}
