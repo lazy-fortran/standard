@@ -349,6 +349,18 @@ const TEST_CASES = {
         ENUMERATOR :: ERROR_FILE_NOT_FOUND = 1
         ENUMERATOR :: ERROR_PERMISSION = 2
       END ENUM`
+    },
+    // Conditional expressions - NEW in F2023!
+    {
+      name: 'conditional_expressions',
+      code: `REAL :: a = 5.0, b = -3.0, result
+      
+      ! F2023 conditional expression (ternary operator)
+      result = (a > 0.0 ? a : 0.0)
+      
+      ! More complex conditional expression
+      INTEGER :: max_val
+      max_val = (a > b ? INT(a) : INT(b))`
     }
   ]
 };
@@ -471,7 +483,8 @@ class TreeSitterTester {
           break;
         case 'Fortran2023':
           hasValidConstructs = code.includes('ENUM') ||   // Enumerated types
-                              code.includes('ENUMERATOR');
+                              code.includes('ENUMERATOR') ||
+                              code.includes('?');         // Conditional expressions
           break;
         default:
           hasValidConstructs = true;

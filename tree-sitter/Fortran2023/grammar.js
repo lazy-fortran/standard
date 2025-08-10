@@ -118,16 +118,51 @@ module.exports = grammar(fortran2018, {
     end_enum_stmt: $ => seq('END', 'ENUM', optional($.enum_name)),
 
     // ========================================================================
-    // F2023 MINOR ENHANCEMENTS - Corrections and clarifications only
+    // F2023 CONDITIONAL EXPRESSIONS - New ternary operator
     // ========================================================================
 
-    // F2023 is primarily corrections - expression handling unchanged from F2018
-    // No conditional expressions or major syntax changes were added
+    // F2023: Conditional expression (ternary operator)
+    // Syntax: (condition ? true_expr : false_expr)
+    conditional_expression: $ => seq(
+      '(',
+      $.logical_expression,
+      '?',
+      $.expression,
+      ':',
+      $.expression,
+      ')'
+    ),
 
-    // F2023 maintains F2018 type system - no new intrinsic types added
+    logical_expression: $ => $.expression,
 
-    // F2023 adds minimal intrinsic enhancements - primarily corrections
-    // Most functionality remains from F2018
+    // Enhanced primary base to include conditional expressions
+    primary_base: $ => choice(
+      $.constant,
+      $.designator,
+      $.array_constructor,
+      $.structure_constructor,
+      $.function_reference,
+      $.null_expr,
+      $.conditional_expression,           // F2023: Conditional expressions
+      seq('(', $.expression, ')')
+    ),
+
+    // ========================================================================
+    // F2023 ENHANCED INTRINSIC PROCEDURES
+    // ========================================================================
+
+    // F2023 intrinsic procedures (primarily corrections and small additions)
+    f2023_intrinsic_name: $ => choice(
+      // Enhanced IEEE functions
+      'IEEE_MAX',
+      'IEEE_MIN', 
+      'IEEE_MAX_MAG',
+      'IEEE_MIN_MAG',
+      // Enhanced system functions
+      'SYSTEM_CLOCK',
+      // Other minor additions
+      'RANDOM_INIT'
+    )
   }
 });
 
