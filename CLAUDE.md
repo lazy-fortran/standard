@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-LazyFortran2025 is a comprehensive grammar implementation covering all FORTRAN/Fortran standards from 1957 to 2023+. The project uses a revolutionary modular inheritance architecture where each standard only defines NEW features and imports from its predecessor. Both ANTLR4 and tree-sitter implementations are provided.
+LazyFortran2025 is a comprehensive ANTLR4-based grammar implementation covering all FORTRAN/Fortran standards from 1957 to 2023+. The project uses a revolutionary modular inheritance architecture where each standard only defines NEW features and imports from its predecessor.
 
 ## Essential Build Commands
 
@@ -35,7 +35,7 @@ make help
 FORTRAN(1957) → FORTRAN_II → FORTRAN66 → FORTRAN77 → Fortran90 → F95 → F2003 → F2008 → F2018 → F2023 → LazyFortran2025
 ```
 
-**Note**: FORTRAN IV (1962) and FORTRAN 66 (1966) have been merged since FORTRAN 66 was just the ANSI standardization of FORTRAN IV features. The tree-sitter grammars combine both under FORTRAN66.
+**Note**: FORTRAN IV (1962) and FORTRAN 66 (1966) have been merged since FORTRAN 66 was just the ANSI standardization of FORTRAN IV features.
 
 ### Critical Implementation Details
 
