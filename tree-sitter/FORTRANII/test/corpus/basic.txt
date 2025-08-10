@@ -1,65 +1,30 @@
 ================================================================================
-Simple FORTRAN II program with subroutine
+Simple function
 ================================================================================
 
-      X = 3.14
-      CALL MYSUB(X)
-      END
-
-      SUBROUTINE MYSUB(A)
-      PRINT 10, A
-   10 FORMAT(F10.2)
-      RETURN
-      END
+FUNCTION ADD(X)
+ADD = X + 1
+RETURN
+END
 
 --------------------------------------------------------------------------------
 
 (program
   (program_unit
-    (main_program
-      (statement_without_end
-        (arithmetic_statement
-          (assignment_statement
-            (variable
-              (simple_variable))
+    (function_subprogram
+      (function_statement
+        (function_name)
+        (parameter_list
+          (variable)))
+      (statement
+        (statement_body
+          (assignment
+            (variable)
             (expression
-              (arithmetic_expression
-                (term
-                  (factor
-                    (primary
-                      (constant
-                        (real_constant))))))))))
-      (statement_without_end
-        (control_statement
-          (call_statement
-            (subroutine_name)
-            (actual_argument_list
-              (expression
-                (arithmetic_expression
-                  (term
-                    (factor
-                      (primary
-                        (variable
-                          (simple_variable)))))))))))
-      (end_statement)))
-  (program_unit
-    (subroutine_subprogram
-      (subroutine_statement
-        (subroutine_name)
-        (dummy_argument_list
-          (simple_variable)))
-      (statement_without_end
-        (io_statement
-          (print_statement
-            (integer_constant)
-            (io_list
-              (variable
-                (simple_variable))))))
-      (statement_without_end
-        (label)
-        (format_statement
-          (format_specification)))
-      (statement_without_end
-        (control_statement
-          (return_statement)))
+              (arithmetic_expr
+                (variable)
+                (number))))))
+      (statement
+        (statement_body
+          (return_stmt)))
       (end_statement))))

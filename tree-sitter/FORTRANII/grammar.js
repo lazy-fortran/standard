@@ -12,17 +12,17 @@ module.exports = grammar({
 
     program_unit: $ => choice($.function_subprogram, $.subroutine_subprogram),
 
-    function_subprogram: $ => seq(
+    function_subprogram: $ => prec(1, seq(
       $.function_statement,
       repeat($.statement),
       $.end_statement
-    ),
+    )),
 
-    subroutine_subprogram: $ => seq(
+    subroutine_subprogram: $ => prec(1, seq(
       $.subroutine_statement, 
       repeat($.statement),
       $.end_statement
-    ),
+    )),
 
     function_statement: $ => seq('FUNCTION', $.function_name, '(', optional($.parameter_list), ')'),
     subroutine_statement: $ => seq('SUBROUTINE', $.subroutine_name, '(', optional($.parameter_list), ')'),
@@ -51,7 +51,20 @@ module.exports = grammar({
 
     assignment: $ => seq($.variable, '=', $.expression),
     variable: $ => /[A-Z][A-Z0-9]*/,
-    expression: $ => choice($.number, $.variable, $.function_call),
+    
+    expression: $ => choice(
+      $.arithmetic_expr,
+      $.number, 
+      $.variable, 
+      $.function_call
+    ),
+    
+    arithmetic_expr: $ => prec.left(seq(
+      choice($.variable, $.number, $.function_call),
+      choice('+', '-', '*', '/'),
+      choice($.variable, $.number, $.function_call)
+    )),
+    
     number: $ => /[0-9]+(\.[0-9]+)?/,
 
     function_call: $ => seq($.function_name, '(', optional($.argument_list), ')'),

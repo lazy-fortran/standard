@@ -23,12 +23,36 @@ module.exports = grammar({
       $.continue_stmt,
       $.end_stmt,
       $.dimension_stmt,
-      $.format_stmt
+      $.format_stmt,
+      $.type_declaration
     ),
 
     assignment: $ => seq($.variable, '=', $.expression),
     variable: $ => /[A-Z][A-Z0-9]*/,
-    expression: $ => choice($.number, $.variable),
+    expression: $ => choice($.number, $.variable, $.logical_expr, $.arithmetic_expr),
+    
+    arithmetic_expr: $ => prec.left(seq(
+      choice($.variable, $.number),
+      choice('+', '-', '*', '/'),
+      choice($.variable, $.number)
+    )),
+    
+    logical_expr: $ => choice(
+      $.logical_constant,
+      $.logical_operation
+    ),
+    
+    logical_constant: $ => choice('.TRUE.', '.FALSE.'),
+    
+    logical_operation: $ => choice(
+      prec.left(1, seq($.expression, '.AND.', $.expression)),
+      prec.left(1, seq($.expression, '.OR.', $.expression)), 
+      prec(2, seq('.NOT.', $.expression)),
+      prec.left(1, seq($.expression, '.GT.', $.expression)),
+      prec.left(1, seq($.expression, '.LT.', $.expression)),
+      prec.left(1, seq($.expression, '.EQ.', $.expression)),
+      prec.left(1, seq($.expression, '.NE.', $.expression))
+    ),
     number: $ => /[0-9]+(\.[0-9]+)?/,
 
     goto: $ => seq('GO', 'TO', $.label),
@@ -39,6 +63,13 @@ module.exports = grammar({
 
     dimension_stmt: $ => seq('DIMENSION', /[A-Z][A-Z0-9]*/, '(', /[0-9]+/, ')'),
     format_stmt: $ => seq('FORMAT', '(', /[^)]*/, ')'),
+
+    type_declaration: $ => seq(
+      choice('LOGICAL', 'INTEGER', 'REAL'),
+      $.variable_list
+    ),
+    
+    variable_list: $ => seq($.variable, repeat(seq(',', $.variable))),
 
     label: $ => /[0-9]+/,
     comment: $ => seq(/[Cc*]/, /.*/),

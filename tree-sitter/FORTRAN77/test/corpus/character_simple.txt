@@ -1,0 +1,41 @@
+================================================================================
+FORTRAN77 simple CHARACTER operations
+================================================================================
+
+CHARACTER*10 NAME
+NAME = 'HELLO'
+IF (NAME .EQ. 'HELLO') THEN
+    PRINT *, 'FOUND'
+ENDIF
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (statement_body
+      (character_declaration
+        (number)
+        (variable_list
+          (variable)))))
+  (statement
+    (statement_body
+      (assignment
+        (variable)
+        (expression
+          (string_literal)))))
+  (statement
+    (statement_body
+      (if_then_construct
+        (expression
+          (logical_expr
+            (logical_operation
+              (expression
+                (variable))
+              (expression
+                (string_literal)))))
+        (statement
+          (statement_body
+            (assignment
+              (variable)
+              (expression
+                (string_literal)))))))))
