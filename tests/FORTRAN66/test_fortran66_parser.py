@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Test suite for FORTRAN 66 Parser - FORTRAN 66 (1966)
-Tests for FORTRAN 66 standardization features: BLOCK DATA, standardized structure
+Tests for FORTRAN 66 standardization features PLUS FORTRAN IV (1962) data types
+Includes: BLOCK DATA, standardized structure, LOGICAL, DOUBLE PRECISION, COMPLEX
 """
 
 import sys
@@ -211,6 +212,135 @@ END"""
                     main_lines.append(line)
                 else:
                     current_lines.append(line)
+
+    # ====================================================================
+    # FORTRAN IV (1962) FEATURES - merged into FORTRAN 66
+    # ====================================================================
+    
+    def test_logical_data_type(self):
+        """Test LOGICAL data type (merged from FORTRAN IV, 1962)"""
+        test_cases = [
+            "LOGICAL FLAG",
+            "LOGICAL BOOL1, BOOL2", 
+            "LOGICAL ARRAY(10)"
+        ]
+        
+        for text in test_cases:
+            with self.subTest(logical_declaration=text):
+                # Test as a type specification
+                tree = self.parse(text, 'type_spec')
+                self.assertIsNotNone(tree)
+    
+    def test_double_precision_data_type(self):
+        """Test DOUBLE PRECISION data type (merged from FORTRAN IV, 1962)"""
+        test_cases = [
+            "DOUBLE PRECISION X",
+            "DOUBLE PRECISION A, B, C",
+            "DOUBLE PRECISION MATRIX(5,5)"
+        ]
+        
+        for text in test_cases:
+            with self.subTest(double_precision=text):
+                # Test as a type specification
+                tree = self.parse(text, 'type_spec')
+                self.assertIsNotNone(tree)
+    
+    def test_complex_data_type(self):
+        """Test COMPLEX data type (merged from FORTRAN IV, 1962)"""
+        test_cases = [
+            "COMPLEX Z",
+            "COMPLEX C1, C2",
+            "COMPLEX IMPEDANCE(100)"
+        ]
+        
+        for text in test_cases:
+            with self.subTest(complex_declaration=text):
+                # Test as a type specification
+                tree = self.parse(text, 'type_spec')
+                self.assertIsNotNone(tree)
+    
+    def test_logical_literals(self):
+        """Test logical literals .TRUE. and .FALSE. (merged from FORTRAN IV, 1962)"""
+        test_cases = [
+            ".TRUE.",
+            ".FALSE."
+        ]
+        
+        for text in test_cases:
+            with self.subTest(logical_literal=text):
+                tree = self.parse(text, 'logical_literal')
+                self.assertIsNotNone(tree)
+    
+    def test_logical_operators(self):
+        """Test logical operators .AND., .OR., .NOT. (merged from FORTRAN IV, 1962)"""
+        test_cases = [
+            ".TRUE. .AND. .FALSE.",
+            ".TRUE. .OR. .FALSE.", 
+            ".NOT. .TRUE.",
+            "A .EQ. B .AND. C .GT. D",
+            ".NOT. (X .LT. Y)"
+        ]
+        
+        for text in test_cases:
+            with self.subTest(logical_expression=text):
+                tree = self.parse(text, 'logical_expr')
+                self.assertIsNotNone(tree)
+    
+    def test_relational_operators(self):
+        """Test enhanced relational operators (merged from FORTRAN IV, 1962)"""
+        test_cases = [
+            "A .EQ. B",
+            "X .NE. Y",
+            "I .LT. J",
+            "P .LE. Q", 
+            "R .GT. S",
+            "U .GE. V"
+        ]
+        
+        for text in test_cases:
+            with self.subTest(relational=text):
+                tree = self.parse(text, 'relational_expr')
+                self.assertIsNotNone(tree)
+    
+    def test_logical_if_statement(self):
+        """Test logical IF statement (merged from FORTRAN IV, 1962)"""
+        test_cases = [
+            "IF (.TRUE.) GOTO 100",
+            "IF (A .GT. B) X = Y",
+            "IF (.NOT. FLAG) STOP",
+            "IF (A .EQ. B .AND. C .NE. D) PRINT X"
+        ]
+        
+        for text in test_cases:
+            with self.subTest(logical_if=text):
+                tree = self.parse(text, 'logical_if_stmt')
+                self.assertIsNotNone(tree)
+    
+    def test_data_type_revolution_features(self):
+        """Test the complete data type revolution merged from FORTRAN IV"""
+        # Test that all new data types work in expressions and assignments
+        test_cases = [
+            # Logical operations
+            "READY = .TRUE.",
+            "FLAG = .FALSE.",
+            "RESULT = READY .AND. FLAG",
+            
+            # Double precision literals
+            "PI = 3.14159265358979D0",
+            
+            # Complex literals
+            "Z = (1.0, 2.0)",
+            "IMPEDANCE = (3.0, 4.0)",
+            
+            # Mixed mode arithmetic
+            "X = I + 3.14",
+        ]
+        
+        for test_code in test_cases:
+            with self.subTest(code=test_code):
+                tree = self.parse(test_code, 'assignment_stmt')
+                self.assertIsNotNone(tree)
+                self.assertTrue(len(str(tree.getText())) > 5)
 
 
 if __name__ == "__main__":

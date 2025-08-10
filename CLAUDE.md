@@ -32,7 +32,7 @@ make help
 
 ### Grammar Inheritance Chain
 ```
-FORTRAN(1957) → FORTRAN_II → FORTRAN_IV → FORTRAN66 → FORTRAN77 → Fortran90 → F95 → F2003 → F2008 → F2018 → F2023
+FORTRAN(1957) → FORTRAN_II → FORTRAN_IV → FORTRAN66 → FORTRAN77 → Fortran90 → F95 → F2003 → F2008 → F2018 → F2023 → LazyFortran2025
 ```
 
 ### Critical Implementation Details
@@ -86,18 +86,35 @@ ANTLR4 builds must follow strict inheritance order:
 
 **Project Status: PRODUCTION READY** - Complete FORTRAN/Fortran coverage 1957-2023
 
+## LazyFortran2025 Extension
+
+LazyFortran2025 extends Fortran2023 with syntactic relaxations for more concise, modern code:
+
+### Key Features:
+
+1. **Optional Program/Module Blocks**: Top-level code can omit explicit `program` or `module` blocks. The compiler pipeline determines context.
+
+2. **Implicit None Default**: `implicit none` is the default behavior (compiler-enforced, not parser-relevant).
+
+3. **Optional Contains**: The `contains` keyword becomes optional when procedures follow the main code section.
+
+4. **Type Inference**: Variables can be used without prior type declarations if the compiler can infer types from context (similar to Julia/Python). No `auto` keyword needed.
+
+### Grammar Impact:
+
+Most LazyFortran2025 features are semantic/compiler-level rather than syntactic:
+- Parser accepts more flexible structures (optional blocks)
+- Type checking deferred to semantic analysis phase
+- Backward compatibility maintained through inheritance from Fortran2023
+
 ## Development Workflows
 
-### Adding New Language Features (Future Extensions)
+### Implementing LazyFortran2025
 
-**Note: All standards 1957-2023 are complete. Future development focuses on LazyFortran2025.**
-
-1. **Research**: Study type inference and modern language features
-2. **Plan**: Use TodoWrite tool for multi-step LazyFortran2025 features
-3. **Test First**: Write failing tests for new type inference constructs
-4. **Implement**: Add minimal grammar extensions to F2023 base
-5. **Validate**: Ensure full backward compatibility maintained
-6. **Document**: Update for LazyFortran2025 capabilities
+1. **Grammar Extension**: Create `LazyFortran2025.g4` importing from `Fortran2023.g4`
+2. **Relaxed Rules**: Make `program`, `module`, and `contains` optional in appropriate contexts
+3. **Test Coverage**: Write tests demonstrating all four key features
+4. **Validation**: Ensure standard Fortran2023 code still parses correctly
 
 ### Debugging Parser Issues
 
