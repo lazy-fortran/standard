@@ -1,226 +1,75 @@
 /**
- * FORTRAN II (1958) - Revolutionary Advances  
- * Inheriting from FORTRAN (1957) with Tree-sitter composition
- * 
- * REVOLUTIONARY additions in FORTRAN II:
- * - Independent compilation (modular programming)
- * - SUBROUTINE and FUNCTION subprograms
- * - COMMON blocks for data sharing
- * - Enhanced I/O with READ and WRITE statements
- * - EXTERNAL declaration for user-defined functions
+ * FORTRAN II (1958) - Adds FUNCTION and SUBROUTINE
  */
 
-const fortran = require('../FORTRAN/grammar.js');
-
-function grammar(base, config) {
-  if (!config) {
-    config = base;
-    base = undefined;
-  }
-  return config;
-}
-
-module.exports = grammar(fortran, {
+module.exports = grammar({
   name: 'FORTRANII',
 
-  // Copy base extras and maintain them
-  extras: $ => [
-    /\s+/,
-    $.comment
-  ],
-
-  conflicts: $ => [
-    [$.simple_variable, $.function_name],
-    [$.simple_variable, $.subroutine_name],
-    [$.variable, $.constant]
-  ],
-
-  // Copy base precedences
-  precedences: $ => [
-    ['power', 'mult', 'add', 'relop']
-  ],
+  extras: $ => [/\s+/, $.comment],
 
   rules: {
-    // ============================================================================
-    // OVERRIDE: Program structure to support multiple program units
-    // ============================================================================
-    
-    // Override program to support multiple compilation units (revolutionary!)
-    program: $ => repeat1($.program_unit),
+    program: $ => repeat(choice($.program_unit, $.statement)),
 
-    // NEW: Program units enable independent compilation
-    program_unit: $ => choice(
-      $.main_program,           // From FORTRAN (1957)  
-      $.subroutine_subprogram,  // NEW in FORTRAN II!
-      $.function_subprogram     // NEW in FORTRAN II!
-    ),
+    program_unit: $ => choice($.function_subprogram, $.subroutine_subprogram),
 
-    // Main program is just the statements that aren't in subroutines/functions
-    // We need to be careful here - a main program should be a sequence of statements
-    // that ends with END and isn't part of a subroutine or function
-    main_program: $ => seq(
-      repeat($.statement_without_end),
-      $.end_statement
-    ),
-
-    // Statement without END (to avoid ambiguity in main programs)
-    statement_without_end: $ => seq(
-      optional($.label),
-      choice(
-        $.arithmetic_statement,
-        $.control_statement,
-        $.io_statement,
-        $.specification_statement,
-        $.format_statement
-      )
-    ),
-
-    // ============================================================================
-    // NEW: SUBROUTINE SUBPROGRAM 
-    // ============================================================================
-    
-    subroutine_subprogram: $ => prec(1, seq(
-      $.subroutine_statement,
-      repeat($.statement_without_end),
-      $.end_statement
-    )),
-
-    subroutine_statement: $ => seq(
-      'SUBROUTINE',
-      $.subroutine_name,
-      optional(seq('(', $.dummy_argument_list, ')'))
-    ),
-
-    subroutine_name: $ => /[A-Z][A-Z0-9]*/,
-
-    // ============================================================================
-    // NEW: FUNCTION SUBPROGRAM
-    // ============================================================================
-    
-    function_subprogram: $ => prec(1, seq(
+    function_subprogram: $ => seq(
       $.function_statement,
-      repeat($.statement_without_end),
+      repeat($.statement),
       $.end_statement
-    )),
-
-    function_statement: $ => seq(
-      'FUNCTION',
-      $.function_name,
-      '(',
-      $.dummy_argument_list,
-      ')'
     ),
 
-    // Override function name base to handle user-defined functions
-    function_name_base: $ => choice(
-      $.intrinsic_function,
-      $.user_function  
+    subroutine_subprogram: $ => seq(
+      $.subroutine_statement, 
+      repeat($.statement),
+      $.end_statement
     ),
 
-    // Intrinsic functions (built-in) - still end with F
-    intrinsic_function: $ => /[A-Z]+F/,
+    function_statement: $ => seq('FUNCTION', $.function_name, '(', optional($.parameter_list), ')'),
+    subroutine_statement: $ => seq('SUBROUTINE', $.subroutine_name, '(', optional($.parameter_list), ')'),
+    
+    function_name: $ => /[A-Z][A-Z0-9]*/,
+    subroutine_name: $ => /[A-Z][A-Z0-9]*/,
+    parameter_list: $ => seq($.variable, repeat(seq(',', $.variable))),
 
-    // User-defined functions (declared with FUNCTION or EXTERNAL)
-    user_function: $ => $.simple_variable,
-
-    dummy_argument_list: $ => sep1($.simple_variable, ','),
-
-    // ============================================================================
-    // EXTEND: Control statements with new FORTRAN II features
-    // ============================================================================
-
-    // Extend control statement base to include FORTRAN II additions
-    control_statement_base: $ => choice(
-      // All FORTRAN (1957) control statements
-      $.goto_statement,
-      $.if_statement,
-      $.do_statement,
-      $.continue_statement,
-      $.stop_statement,
-      $.pause_statement,
-      // NEW in FORTRAN II
-      $.call_statement,
-      $.return_statement
+    statement: $ => choice(
+      seq($.label, $.statement_body),
+      $.statement_body
     ),
 
-    // NEW: CALL statement for invoking subroutines
-    call_statement: $ => seq(
-      'CALL',
-      $.subroutine_name,
-      optional(seq('(', $.actual_argument_list, ')'))
+    statement_body: $ => choice(
+      $.assignment,
+      $.goto,
+      $.if_stmt,
+      $.do_stmt,
+      $.continue_stmt,
+      $.return_stmt,
+      $.call_stmt,
+      $.end_statement,
+      $.dimension_stmt,
+      $.format_stmt
     ),
 
-    actual_argument_list: $ => sep1($.expression, ','),
+    assignment: $ => seq($.variable, '=', $.expression),
+    variable: $ => /[A-Z][A-Z0-9]*/,
+    expression: $ => choice($.number, $.variable, $.function_call),
+    number: $ => /[0-9]+(\.[0-9]+)?/,
 
-    // NEW: RETURN statement for subroutines/functions
-    return_statement: $ => 'RETURN',
+    function_call: $ => seq($.function_name, '(', optional($.argument_list), ')'),
+    argument_list: $ => seq($.expression, repeat(seq(',', $.expression))),
 
-    // ============================================================================
-    // EXTEND: Specification statements with COMMON blocks
-    // ============================================================================
+    call_stmt: $ => seq('CALL', $.subroutine_name, '(', optional($.argument_list), ')'),
 
-    // Extend specification statement base to include FORTRAN II additions  
-    specification_statement_base: $ => choice(
-      // All FORTRAN (1957) specification statements
-      $.dimension_statement,
-      $.equivalence_statement,
-      $.frequency_statement,
-      // NEW in FORTRAN II
-      $.common_statement,
-      $.external_statement
-    ),
+    goto: $ => seq('GO', 'TO', $.label),
+    if_stmt: $ => seq('IF', '(', $.expression, ')', $.label, ',', $.label, ',', $.label),
+    do_stmt: $ => seq('DO', $.label, $.variable, '=', $.expression, ',', $.expression),
+    continue_stmt: $ => 'CONTINUE',
+    return_stmt: $ => 'RETURN',
+    end_statement: $ => 'END',
 
-    // NEW: COMMON blocks for sharing data between program units
-    common_statement: $ => seq(
-      'COMMON',
-      prec.left(repeat1($.common_block))
-    ),
+    dimension_stmt: $ => seq('DIMENSION', /[A-Z][A-Z0-9]*/, '(', /[0-9]+/, ')'),
+    format_stmt: $ => seq('FORMAT', '(', /[^)]*/, ')'),
 
-    common_block: $ => seq(
-      optional(seq('/', $.common_block_name, '/')),
-      $.common_item_list
-    ),
-
-    common_block_name: $ => /[A-Z][A-Z0-9]*/,
-
-    common_item_list: $ => sep1($.common_item, ','),
-
-    common_item: $ => choice(
-      $.simple_variable,
-      $.array_declarator
-    ),
-
-    // NEW: EXTERNAL statement for external functions
-    external_statement: $ => seq(
-      'EXTERNAL',
-      sep1($.external_name, ',')
-    ),
-
-    external_name: $ => /[A-Z][A-Z0-9]*/,
-
-    // ============================================================================
-    // OVERRIDE: Function calls now support user-defined functions
-    // ============================================================================
-
-    // Override function_call to handle user-defined functions (not just intrinsic)
-    function_call: $ => seq(
-      $.function_name,
-      '(',
-      $.argument_list,
-      ')'
-    ),
-
-    // ============================================================================ 
-    // OVERRIDE: Fix format specification to not be greedy
-    // ============================================================================
-
-    format_specification: $ => /[^)]*/  // Match everything except closing paren
-
-    // All other rules inherited from FORTRAN (1957)!
+    label: $ => /[0-9]+/,
+    comment: $ => seq(/[Cc*]/, /.*/),
   }
 });
-
-// Helper function
-function sep1(rule, separator) {
-  return seq(rule, repeat(seq(separator, rule)));
-}

@@ -1,0 +1,217 @@
+================================================================================
+FORTRAN 66 ANSI standard features
+================================================================================
+
+      PROGRAM MAIN
+      IMPLICIT NONE
+      REAL X(100), Y(100), SUM
+      INTEGER I, N
+      
+      N = 100
+      SUM = 0.0
+      
+      DO 10 I = 1, N
+      X(I) = FLOAT(I)
+      Y(I) = 2.0 * X(I)
+   10 SUM = SUM + Y(I)
+      
+      PRINT 20, SUM
+   20 FORMAT ('TOTAL SUM = ', F10.2)
+      
+      END
+
+--------------------------------------------------------------------------------
+
+(program
+  (program_unit
+    (main_program
+      (program_statement
+        (program_name))
+      (statement
+        (specification_statement
+          (implicit_statement)))
+      (statement
+        (specification_statement
+          (type_declaration
+            (type_spec)
+            (entity_list
+              (entity
+                (array_spec
+                  (explicit_shape_spec
+                    (upper_bound
+                      (arithmetic_expression
+                        (term
+                          (factor
+                            (primary
+                              (constant
+                                (integer_constant))))))))))
+              (entity
+                (array_spec
+                  (explicit_shape_spec
+                    (upper_bound
+                      (arithmetic_expression
+                        (term
+                          (factor
+                            (primary
+                              (constant
+                                (integer_constant))))))))))
+              (entity)))))
+      (statement
+        (specification_statement
+          (type_declaration
+            (type_spec)
+            (entity_list
+              (entity)
+              (entity)))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (simple_variable))
+            (expression
+              (arithmetic_expression
+                (term
+                  (factor
+                    (primary
+                      (constant
+                        (integer_constant))))))))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (simple_variable))
+            (expression
+              (arithmetic_expression
+                (term
+                  (factor
+                    (primary
+                      (constant
+                        (real_constant))))))))))
+      (statement
+        (control_statement
+          (do_statement
+            (label)
+            (do_variable)
+            (initial_value
+              (arithmetic_expression
+                (term
+                  (factor
+                    (primary
+                      (constant
+                        (integer_constant)))))))
+            (final_value
+              (arithmetic_expression
+                (term
+                  (factor
+                    (primary
+                      (variable
+                        (simple_variable))))))))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (array_element
+                (variable_name)
+                (subscript_list
+                  (subscript
+                    (arithmetic_expression
+                      (term
+                        (factor
+                          (primary
+                            (variable
+                              (simple_variable))))))))))
+            (expression
+              (arithmetic_expression
+                (term
+                  (factor
+                    (primary
+                      (function_reference
+                        (function_name)
+                        (actual_argument_list
+                          (actual_argument
+                            (arithmetic_expression
+                              (term
+                                (factor
+                                  (primary
+                                    (variable
+                                      (simple_variable)))))))))))))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (array_element
+                (variable_name)
+                (subscript_list
+                  (subscript
+                    (arithmetic_expression
+                      (term
+                        (factor
+                          (primary
+                            (variable
+                              (simple_variable))))))))))
+            (expression
+              (arithmetic_expression
+                (term
+                  (factor
+                    (primary
+                      (constant
+                        (real_constant))))
+                  (factor
+                    (primary
+                      (variable
+                        (array_element
+                          (variable_name)
+                          (subscript_list
+                            (subscript
+                              (arithmetic_expression
+                                (term
+                                  (factor
+                                    (primary
+                                      (variable
+                                        (simple_variable)))))))))))))))))))
+      (labeled_statement
+        (label)
+        (statement
+          (arithmetic_statement
+            (assignment_statement
+              (variable
+                (simple_variable))
+              (expression
+                (arithmetic_expression
+                  (arithmetic_expression
+                    (term
+                      (factor
+                        (primary
+                          (variable
+                            (simple_variable))))))
+                  (term
+                    (factor
+                      (primary
+                        (variable
+                          (array_element
+                            (variable_name)
+                            (subscript_list
+                              (subscript
+                                (arithmetic_expression
+                                  (term
+                                    (factor
+                                      (primary
+                                        (variable
+                                          (simple_variable)))))))))))))))))))
+      (statement
+        (io_statement
+          (print_statement
+            (format_label)
+            (io_list
+              (variable
+                (simple_variable))))))
+      (labeled_statement
+        (label)
+        (statement
+          (format_statement
+            (format_spec
+              (format_item
+                (character_string_edit_descriptor))
+              (format_item
+                (format_descriptor))))))
+      (end_statement))))

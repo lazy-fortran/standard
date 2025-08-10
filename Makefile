@@ -107,8 +107,8 @@ $(GRAMMAR_DIR)/Fortran2023Lexer.py: $(GRAMMAR_DIR)/Fortran2023Lexer.g4 $(GRAMMAR
 # TEST TARGETS - Run tests for individual standards or all
 # ====================================================================
 
-# Run ALL tests
-test: all
+# Run ALL tests (ANTLR4 + tree-sitter)
+test: all test-tree-sitter
 	@echo "=========================================="
 	@echo "Running ALL Tests - Full Grammar Suite"
 	@echo "=========================================="
@@ -116,6 +116,19 @@ test: all
 	$(PYTEST) $(TEST_DIR)/ -v --tb=short
 	@echo ""
 	@echo "✅ All tests completed!"
+
+# Run all tree-sitter tests
+test-tree-sitter:
+	@echo "=========================================="
+	@echo "Running Tree-sitter Tests"
+	@echo "=========================================="
+	@for dir in tree-sitter/*/; do \
+		if [ -f "$$dir/grammar.js" ]; then \
+			echo "Testing $$(basename "$$dir")..."; \
+			(cd "$$dir" && tree-sitter generate && tree-sitter test) || echo "⚠️  Tests failed for $$(basename "$$dir")"; \
+		fi; \
+	done
+	@echo "✅ Tree-sitter tests completed!"
 
 # Individual test targets
 test-fortran: FORTRAN

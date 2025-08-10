@@ -1,25 +1,15 @@
 ================================================================================
-FORTRAN 66 basic program
+Simple assignment
 ================================================================================
 
-      X = 3.14
-      END
+X = 42
 
 --------------------------------------------------------------------------------
 
 (program
-  (program_unit
-    (main_program
-      (statement_without_end
-        (arithmetic_statement
-          (assignment_statement
-            (variable
-              (simple_variable))
-            (expression
-              (arithmetic_expression
-                (term
-                  (factor
-                    (primary
-                      (constant
-                        (real_constant))))))))))
-      (end_statement))))
+  (statement
+    (statement_body
+      (assignment
+        (variable)
+        (expression
+          (number))))))

@@ -1,0 +1,145 @@
+================================================================================
+FORTRAN 66 with FORTRAN IV features - LOGICAL operations
+================================================================================
+
+      LOGICAL A, B, C, FLAG
+      INTEGER I, J
+      
+      A = .TRUE.
+      B = .FALSE.
+      C = A .AND. B
+      FLAG = .NOT. C
+      
+      I = 10
+      J = 5
+      
+      IF (I .GT. J .OR. FLAG) THEN
+          PRINT *, 'CONDITION TRUE'
+      ELSE
+          PRINT *, 'CONDITION FALSE'
+      ENDIF
+
+--------------------------------------------------------------------------------
+
+(program
+  (program_unit
+    (main_program
+      (statement
+        (specification_statement
+          (type_declaration
+            (type_spec)
+            (entity_list
+              (entity)
+              (entity)
+              (entity)
+              (entity)))))
+      (statement
+        (specification_statement
+          (type_declaration
+            (type_spec)
+            (entity_list
+              (entity)
+              (entity)))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (simple_variable))
+            (expression
+              (logical_expression
+                (logical_primary
+                  (logical_constant)))))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (simple_variable))
+            (expression
+              (logical_expression
+                (logical_primary
+                  (logical_constant)))))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (simple_variable))
+            (expression
+              (logical_expression
+                (logical_and_expression
+                  (logical_expression
+                    (logical_primary
+                      (logical_variable)))
+                  (logical_expression
+                    (logical_primary
+                      (logical_variable)))))))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (simple_variable))
+            (expression
+              (logical_expression
+                (logical_not_expression
+                  (logical_expression
+                    (logical_primary
+                      (logical_variable)))))))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (simple_variable))
+            (expression
+              (arithmetic_expression
+                (term
+                  (factor
+                    (primary
+                      (constant
+                        (integer_constant))))))))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (simple_variable))
+            (expression
+              (arithmetic_expression
+                (term
+                  (factor
+                    (primary
+                      (constant
+                        (integer_constant))))))))))
+      (statement
+        (control_statement
+          (if_construct
+            (if_then_statement
+              (logical_expression
+                (logical_or_expression
+                  (logical_expression
+                    (relational_expression
+                      (arithmetic_expression
+                        (term
+                          (factor
+                            (primary
+                              (variable
+                                (simple_variable))))))
+                      (relational_operator)
+                      (arithmetic_expression
+                        (term
+                          (factor
+                            (primary
+                              (variable
+                                (simple_variable))))))))
+                  (logical_expression
+                    (logical_primary
+                      (logical_variable))))))
+            (statement
+              (io_statement
+                (print_statement
+                  (io_list
+                    (character_constant)))))
+            (else_statement)
+            (statement
+              (io_statement
+                (print_statement
+                  (io_list
+                    (character_constant)))))
+            (endif_statement))))

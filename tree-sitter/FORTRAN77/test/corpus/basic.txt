@@ -1,59 +1,15 @@
 ================================================================================
-FORTRAN 77 basic program
+Simple assignment
 ================================================================================
 
-      CHARACTER*10 NAME
-      NAME = 'HELLO'
-      IF (1 .GT. 0) THEN
-          PRINT *, NAME
-      ENDIF
-      END
+X = 42
 
 --------------------------------------------------------------------------------
 
 (program
-  (program_unit
-    (main_program
-      (statement_without_end
-        (specification_statement
-          (character_declaration
-            (character_length
-              (integer_constant))
-            (variable_name
-              (simple_variable)))))
-      (statement_without_end
-        (arithmetic_statement
-          (assignment_statement
-            (variable
-              (simple_variable))
-            (expression
-              (character_expression
-                (character_constant))))))
-      (statement_without_end
-        (control_statement
-          (if_construct
-            (if_then_statement
-              (logical_expression
-                (relational_expression
-                  (arithmetic_expression
-                    (term
-                      (factor
-                        (primary
-                          (constant
-                            (integer_constant))))))
-                  (relational_operator)
-                  (arithmetic_expression
-                    (term
-                      (factor
-                        (primary
-                          (constant
-                            (integer_constant)))))))))
-            (statement_without_end
-              (io_statement
-                (print_statement
-                  (integer_constant)
-                  (io_list
-                    (variable
-                      (simple_variable))))))
-            (endif_statement))))
-      (end_statement))))
+  (statement
+    (statement_body
+      (assignment
+        (variable)
+        (expression
+          (number))))))

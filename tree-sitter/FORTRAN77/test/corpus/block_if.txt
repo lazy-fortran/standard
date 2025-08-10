@@ -1,0 +1,180 @@
+================================================================================
+FORTRAN 77 block IF with ELSEIF
+================================================================================
+
+      INTEGER X, Y, Z
+      X = 10
+      Y = 20
+      Z = 30
+      
+      IF (X .GT. Y) THEN
+          PRINT *, 'X IS GREATER'
+          Z = X
+      ELSEIF (Y .GT. Z) THEN
+          PRINT *, 'Y IS GREATER'
+          Z = Y
+      ELSEIF (X .EQ. Y) THEN
+          PRINT *, 'X EQUALS Y'
+          Z = 0
+      ELSE
+          PRINT *, 'Z IS GREATEST'
+      ENDIF
+
+--------------------------------------------------------------------------------
+
+(program
+  (program_unit
+    (main_program
+      (statement
+        (specification_statement
+          (type_declaration
+            (type_spec)
+            (entity_list
+              (entity)
+              (entity)
+              (entity)))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (simple_variable))
+            (expression
+              (arithmetic_expression
+                (term
+                  (factor
+                    (primary
+                      (constant
+                        (integer_constant))))))))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (simple_variable))
+            (expression
+              (arithmetic_expression
+                (term
+                  (factor
+                    (primary
+                      (constant
+                        (integer_constant))))))))))
+      (statement
+        (arithmetic_statement
+          (assignment_statement
+            (variable
+              (simple_variable))
+            (expression
+              (arithmetic_expression
+                (term
+                  (factor
+                    (primary
+                      (constant
+                        (integer_constant))))))))))
+      (statement
+        (control_statement
+          (if_construct
+            (if_then_statement
+              (logical_expression
+                (relational_expression
+                  (arithmetic_expression
+                    (term
+                      (factor
+                        (primary
+                          (variable
+                            (simple_variable))))))
+                  (relational_operator)
+                  (arithmetic_expression
+                    (term
+                      (factor
+                        (primary
+                          (variable
+                            (simple_variable)))))))))
+            (statement
+              (io_statement
+                (print_statement
+                  (io_list
+                    (character_constant)))))
+            (statement
+              (arithmetic_statement
+                (assignment_statement
+                  (variable
+                    (simple_variable))
+                  (expression
+                    (arithmetic_expression
+                      (term
+                        (factor
+                          (primary
+                            (variable
+                              (simple_variable))))))))))
+            (elseif_then_statement
+              (logical_expression
+                (relational_expression
+                  (arithmetic_expression
+                    (term
+                      (factor
+                        (primary
+                          (variable
+                            (simple_variable))))))
+                  (relational_operator)
+                  (arithmetic_expression
+                    (term
+                      (factor
+                        (primary
+                          (variable
+                            (simple_variable)))))))))
+            (statement
+              (io_statement
+                (print_statement
+                  (io_list
+                    (character_constant)))))
+            (statement
+              (arithmetic_statement
+                (assignment_statement
+                  (variable
+                    (simple_variable))
+                  (expression
+                    (arithmetic_expression
+                      (term
+                        (factor
+                          (primary
+                            (variable
+                              (simple_variable))))))))))
+            (elseif_then_statement
+              (logical_expression
+                (relational_expression
+                  (arithmetic_expression
+                    (term
+                      (factor
+                        (primary
+                          (variable
+                            (simple_variable))))))
+                  (relational_operator)
+                  (arithmetic_expression
+                    (term
+                      (factor
+                        (primary
+                          (variable
+                            (simple_variable)))))))))
+            (statement
+              (io_statement
+                (print_statement
+                  (io_list
+                    (character_constant)))))
+            (statement
+              (arithmetic_statement
+                (assignment_statement
+                  (variable
+                    (simple_variable))
+                  (expression
+                    (arithmetic_expression
+                      (term
+                        (factor
+                          (primary
+                            (constant
+                              (integer_constant))))))))))
+            (else_statement)
+            (statement
+              (io_statement
+                (print_statement
+                  (io_list
+                    (character_constant)))))
+            (endif_statement))))
