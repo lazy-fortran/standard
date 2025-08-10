@@ -454,7 +454,9 @@ class TreeSitterTester {
         case 'Fortran2003':
           hasValidConstructs = code.includes('EXTENDS') ||
                               code.includes('PROCEDURE') ||
-                              code.includes('CLASS');
+                              code.includes('CLASS') ||
+                              code.includes('KIND') ||
+                              code.includes('LEN');
           break;
         case 'Fortran2008':
           hasValidConstructs = code.includes('COARRAY') ||

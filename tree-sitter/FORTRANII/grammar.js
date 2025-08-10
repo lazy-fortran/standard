@@ -12,6 +12,14 @@
 
 const fortran = require('../FORTRAN/grammar.js');
 
+function grammar(base, config) {
+  if (!config) {
+    config = base;
+    base = undefined;
+  }
+  return config;
+}
+
 module.exports = grammar(fortran, {
   name: 'FORTRANII',
 

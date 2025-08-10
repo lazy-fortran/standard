@@ -7,6 +7,14 @@
  * Target: IBM 704 mainframe
  */
 
+function grammar(base, config) {
+  if (!config) {
+    config = base;
+    base = undefined;
+  }
+  return config;
+}
+
 module.exports = grammar({
   name: 'FORTRAN',
 

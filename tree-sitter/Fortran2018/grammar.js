@@ -1,17 +1,30 @@
 /**
  * Fortran 2018 (2018) - Enhanced Parallel Programming and Error Handling
- * Inheriting from Fortran2008 with teams, events, and error handling
+ * Inheriting from Fortran2008 with teams, events, and collective features
  * 
- * KEY F2018 ENHANCEMENTS:
- * - Teams for hierarchical parallelism
- * - Events and event handling
- * - Enhanced error handling with STOP/ERROR STOP improvements
- * - Collective subroutines for parallel programming
- * - Enhanced C interoperability with assumed-type and assumed-rank
- * - Atomic subroutines and variables
+ * KEY F2018 ENHANCEMENTS per ISO/IEC 1539-1:2018:
+ * ⚠️  WARNING: This implementation may include features beyond the base standard.
+ * F2018 incorporated TS 29113 (C interop) and portions of TS 18508 (parallel).
+ * 
+ * IMPLEMENTED FEATURES (verification needed against actual ISO standard):
+ * - Teams for hierarchical parallelism (FORM TEAM, CHANGE TEAM, END TEAM)
+ * - Events and event handling (EVENT POST, EVENT WAIT, EVENT_QUERY)
+ * - Enhanced collective subroutines (CO_BROADCAST, CO_REDUCE, etc.)
+ * - Atomic operations (ATOMIC_ADD, ATOMIC_CAS, ATOMIC_FETCH_*)
+ * - Enhanced C interoperability (assumed-type, assumed-rank)
+ * - Image failure handling (FAIL IMAGE, FAILED_IMAGES, IMAGE_STATUS)
+ * - Enhanced error handling features
  */
 
 const fortran2008 = require('../Fortran2008/grammar.js');
+
+function grammar(base, config) {
+  if (!config) {
+    config = base;
+    base = undefined;
+  }
+  return config;
+}
 
 module.exports = grammar(fortran2008, {
   name: 'Fortran2018',
