@@ -23,7 +23,8 @@ const GRAMMAR_DIRS = [
   'Fortran2003',
   'Fortran2008',
   'Fortran2018',
-  'Fortran2023'
+  'Fortran2023',
+  'LazyFortran2025'
 ];
 
 // Test cases by standard
@@ -362,6 +363,69 @@ const TEST_CASES = {
       INTEGER :: max_val
       max_val = (a > b ? INT(a) : INT(b))`
     }
+  ],
+
+  LazyFortran2025: [
+    // Relaxation #1: Optional program/module blocks
+    {
+      name: 'no_program_wrapper',
+      code: `! LazyFortran2025: Direct code without PROGRAM wrapper
+      x = 5.0
+      y = x * 2.0
+      print *, 'Result:', y
+      
+      ! Can define procedures without program block
+      function square(n)
+        real :: n, square
+        square = n * n
+      end function`
+    },
+    // Relaxation #3: Optional CONTAINS keyword
+    {
+      name: 'no_contains_keyword',
+      code: `! LazyFortran2025: Procedures without CONTAINS
+      x = 10.0
+      y = compute_double(x)
+      
+      ! No CONTAINS needed before this function
+      function compute_double(val) result(res)
+        real :: val, res
+        res = val * 2.0
+      end function compute_double`
+    },
+    // Relaxation #4: Type inference
+    {
+      name: 'type_inference',
+      code: `! LazyFortran2025: Variables without declarations
+      ! No need to declare these - types are inferred
+      pi = 3.14159
+      radius = 5.0
+      area = pi * radius**2
+      
+      name = "LazyFortran"
+      count = 42
+      
+      print *, 'Area =', area
+      print *, name, 'count =', count`
+    },
+    // Combined relaxations
+    {
+      name: 'combined_lazy_features',
+      code: `! LazyFortran2025: All relaxations combined
+      ! No program wrapper, no declarations, no contains
+      
+      data = [1.0, 2.0, 3.0, 4.0, 5.0]
+      total = sum_array(data)
+      average = total / size(data)
+      
+      print *, 'Average:', average
+      
+      ! Direct function definition without CONTAINS
+      function sum_array(arr) result(total)
+        real :: arr(:), total
+        total = sum(arr)
+      end function sum_array`
+    }
   ]
 };
 
@@ -485,6 +549,12 @@ class TreeSitterTester {
           hasValidConstructs = code.includes('ENUM') ||   // Enumerated types
                               code.includes('ENUMERATOR') ||
                               code.includes('?');         // Conditional expressions
+          break;
+        case 'LazyFortran2025':
+          hasValidConstructs = code.includes('=') ||      // Direct assignments
+                              code.includes('FUNCTION') ||
+                              code.includes('PRINT') ||
+                              !code.includes('PROGRAM');  // No program wrapper
           break;
         default:
           hasValidConstructs = true;
