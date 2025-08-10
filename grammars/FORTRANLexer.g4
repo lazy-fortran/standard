@@ -101,7 +101,8 @@ COLON        : ':' ;
 // LITERALS: Numbers and identifiers (Universal patterns)
 // ============================================================================
 INTEGER_LITERAL : DIGIT+ ;
-REAL_LITERAL    : DIGIT+ '.' DIGIT* (EXPONENT)?  // 123.456, 123.456E10
+REAL_LITERAL    : DIGIT+ '.' DIGIT+ (EXPONENT)?  // 123.456, 123.456E10
+                | '.' DIGIT+ (EXPONENT)?         // .456, .456E10
                 | DIGIT+ EXPONENT               // 123E10
                 ;
 

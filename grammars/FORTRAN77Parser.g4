@@ -119,6 +119,7 @@ else_stmt
 
 end_if_stmt
     : END IF
+    | ENDIF
     ;
 
 execution_part_construct

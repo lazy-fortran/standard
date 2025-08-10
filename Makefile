@@ -165,6 +165,11 @@ test-fortran2018: Fortran2018
 	@echo "Testing Fortran 2018 (2018)..."
 	$(PYTEST) $(TEST_DIR)/Fortran2018/ -v --tb=short
 
+# Cross-validation against kaby76/fortran examples
+test-cross-validation: Fortran2018
+	@echo "Cross-validating Fortran2018 against kaby76/fortran examples..."
+	python test_cross_validation.py
+
 # ====================================================================
 # UTILITY TARGETS
 # ====================================================================
