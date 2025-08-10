@@ -1,30 +1,99 @@
-// FORTRAN 66 (1966) - First Official FORTRAN Standard
-// Standardized FORTRAN IV with machine-independent features
+// FORTRAN 66 (1966) - First Official FORTRAN Standard with FORTRAN IV Features
+// Merges FORTRAN IV (1962) data types with FORTRAN 66 standardization
 parser grammar FORTRAN66Parser;
 
-import FORTRANIVParser;  // Import FORTRAN IV (1962) constructs
+import FORTRANIIParser;  // Import FORTRAN II (1958) constructs
 
 options {
     tokenVocab = FORTRAN66Lexer;
 }
 
 // ====================================================================
-// FORTRAN 66 (1966) NEW PARSER RULES
+// FORTRAN 66 (1966) WITH MERGED FORTRAN IV FEATURES
 // ====================================================================
 //
-// FORTRAN 66 (1966) HISTORICAL SIGNIFICANCE:
-// - First programming language standard (ANSI X3.9-1966)
-// - Based on FORTRAN IV but removed machine dependencies  
-// - Established foundation for portable FORTRAN programming
-// - Defined main program structure and BLOCK DATA unit
+// FORTRAN 66 (1966) merges FORTRAN IV (1962) innovations with standardization:
+// - LOGICAL data type with .TRUE./.FALSE. literals (from FORTRAN IV)
+// - DOUBLE PRECISION and COMPLEX data types (from FORTRAN IV) 
+// - Logical expressions with .AND., .OR., .NOT. (from FORTRAN IV)
+// - Logical IF statement (from FORTRAN IV)
+// - Standardized program unit structure and BLOCK DATA
 //
-// Historical Context (1966):
-// - American Standards Association committee work (1962-1966)
-// - Addressed compatibility issues between vendors
-// - Created two standards: FORTRAN and Basic FORTRAN
-// - Became first high-level language (HLL) standard worldwide
+// Historical Context (1962-1966):
+// - FORTRAN IV (1962) added data types and logical operations
+// - FORTRAN 66 (1966) standardized and made machine-independent
+// - Combined innovations create foundation for portable FORTRAN
 //
 // ====================================================================
+
+// ====================================================================
+// FORTRAN IV (1962) TYPE SYSTEM - merged into FORTRAN 66
+// ====================================================================
+
+// FORTRAN 66 type specification with FORTRAN IV data types
+type_spec
+    : INTEGER
+    | REAL
+    | LOGICAL                    // NEW in FORTRAN IV (1962)
+    | DOUBLE PRECISION           // NEW in FORTRAN IV (1962)
+    | COMPLEX                    // NEW in FORTRAN IV (1962)
+    ;
+
+// ====================================================================
+// FORTRAN IV (1962) LOGICAL EXPRESSIONS - merged into FORTRAN 66
+// ====================================================================
+
+// Logical expressions (NEW in FORTRAN IV, 1962)
+logical_expr
+    : logical_term (DOT_OR logical_term)*
+    ;
+
+logical_term
+    : logical_factor (DOT_AND logical_factor)*
+    ;
+
+logical_factor
+    : DOT_NOT logical_primary
+    | logical_primary
+    ;
+
+logical_primary
+    : logical_literal
+    | relational_expr
+    | logical_variable
+    | LPAREN logical_expr RPAREN
+    ;
+
+// Logical literals (NEW in FORTRAN IV, 1962)
+logical_literal
+    : DOT_TRUE
+    | DOT_FALSE
+    ;
+
+// Logical variable reference
+logical_variable
+    : IDENTIFIER
+    | IDENTIFIER LPAREN expr_list RPAREN  // Array element
+    ;
+
+// Relational expressions (enhanced in FORTRAN IV, 1962)
+relational_expr
+    : expr relational_op expr
+    ;
+
+relational_op
+    : DOT_EQ
+    | DOT_NE  
+    | DOT_LT
+    | DOT_LE
+    | DOT_GT
+    | DOT_GE
+    ;
+
+// Logical IF statement (NEW in FORTRAN IV, 1962)
+logical_if_stmt
+    : IF LPAREN logical_expr RPAREN statement_body
+    ;
 
 // ====================================================================
 // FORTRAN 66 (1966) - STANDARDIZED PROGRAM STRUCTURE

@@ -17,6 +17,20 @@ grammars/*Listener.py
 grammars/*Visitor.py
 grammars/grammars/  # Prevent nested directory
 
+# Generated Tree-sitter files - DO NOT COMMIT
+tree-sitter/*/src/            # Generated C parser code (entire directory)
+tree-sitter/*/node-types.json # Generated node type definitions
+tree-sitter/*/binding.gyp     # Generated build files
+tree-sitter/*/bindings/       # Generated language bindings  
+tree-sitter/*/build/          # Build artifacts
+tree-sitter/*/grammar.json    # Generated grammar files
+
+# Specific Tree-sitter generated files
+**/src/node-types.json
+**/src/parser.c
+**/src/tree_sitter/
+**/src/grammar.json
+
 # Debug and temporary files
 debug_*.py
 *.tmp

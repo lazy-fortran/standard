@@ -1,8 +1,8 @@
-// FORTRAN 66 (X3.9-1966) - First FORTRAN Standard
-// Formal standardization of FORTRAN IV with removed machine dependencies
+// FORTRAN 66 (X3.9-1966) - First FORTRAN Standard with FORTRAN IV Features
+// Merges FORTRAN IV (1962) data types with FORTRAN 66 standardization
 lexer grammar FORTRAN66Lexer;
 
-import FORTRANIVLexer;  // Import FORTRAN IV (1962) constructs
+import FORTRANIILexer;  // Import FORTRAN II (1958) constructs
 
 // ====================================================================
 // FORTRAN 66 (X3.9-1966) HISTORICAL OVERVIEW
@@ -27,16 +27,48 @@ import FORTRANIVLexer;  // Import FORTRAN IV (1962) constructs
 //
 
 // ====================================================================
-// FORTRAN 66 STANDARDIZATION FEATURES
+// FORTRAN IV (1962) DATA TYPES - merged into FORTRAN 66
 // ====================================================================
 
-// FORTRAN 66 (X3.9-1966) standardized and formalized:
-// - Program unit structure (MAIN, SUBROUTINE, FUNCTION, BLOCK DATA)
-// - Data types (INTEGER, REAL, DOUBLE PRECISION, COMPLEX, LOGICAL)
-// - Control flow (standardized GOTO, IF, DO semantics)
-// - I/O operations (standardized READ, WRITE, FORMAT)
-// - Subprogram linkage (CALL, RETURN, COMMON, EXTERNAL)
-// - Removed machine-dependent features from FORTRAN IV implementations
+// LOGICAL data type (added in FORTRAN IV, 1962)
+LOGICAL         : L O G I C A L ;
+
+// Double precision (added in FORTRAN IV, 1962)  
+DOUBLE          : D O U B L E ;
+PRECISION       : P R E C I S I O N ;
+
+// Complex numbers (added in FORTRAN IV, 1962)
+COMPLEX         : C O M P L E X ;
+
+// Double precision exponent marker (added in FORTRAN IV, 1962)
+D               : [Dd] ;
+
+// ====================================================================
+// FORTRAN IV (1962) LOGICAL LITERALS AND OPERATORS - merged into FORTRAN 66
+// ====================================================================
+
+// Logical literals (FORTRAN IV innovation)
+DOT_TRUE        : '.' T R U E '.' ;
+DOT_FALSE       : '.' F A L S E '.' ;
+
+// Logical operators (FORTRAN IV innovation)
+DOT_AND         : '.' A N D '.' ;
+DOT_OR          : '.' O R '.' ;  
+DOT_NOT         : '.' N O T '.' ;
+DOT_EQV         : '.' E Q V '.' ;
+DOT_NEQV        : '.' N E Q V '.' ;
+
+// Relational operators (enhanced in FORTRAN IV)
+DOT_EQ          : '.' E Q '.' ;
+DOT_NE          : '.' N E '.' ;
+DOT_LT          : '.' L T '.' ;
+DOT_LE          : '.' L E '.' ;
+DOT_GT          : '.' G T '.' ;
+DOT_GE          : '.' G E '.' ;
+
+// ====================================================================
+// FORTRAN 66 STANDARDIZATION FEATURES
+// ====================================================================
 
 // Standard program unit keywords (formalized in FORTRAN 66)
 BLOCK           : B L O C K ;          // BLOCK keyword
