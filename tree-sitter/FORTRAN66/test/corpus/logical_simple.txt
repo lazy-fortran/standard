@@ -1,5 +1,5 @@
 ================================================================================
-FORTRAN66 simple logical operations
+FORTRAN IV LOGICAL data type
 ================================================================================
 
 LOGICAL A, B
@@ -11,7 +11,7 @@ B = A .AND. .FALSE.
 (program
   (statement
     (statement_body
-      (type_declaration
+      (logical_declaration
         (variable_list
           (variable)
           (variable)))))

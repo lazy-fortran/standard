@@ -1,27 +1,39 @@
 ================================================================================
-FORTRAN IV LOGICAL data type
+FORTRAN IV arithmetic and logical combined
 ================================================================================
 
-LOGICAL A, B
-A = .TRUE.
-B = A .AND. .FALSE.
+REAL X, Y
+LOGICAL FLAG
+X = 10
+Y = 20
+FLAG = X .GT. Y
 
 --------------------------------------------------------------------------------
 
 (program
   (statement
     (statement_body
-      (logical_declaration
+      (type_declaration
         (variable_list
           (variable)
+          (variable)))))
+  (statement
+    (statement_body
+      (logical_declaration
+        (variable_list
           (variable)))))
   (statement
     (statement_body
       (assignment
         (variable)
         (expression
-          (logical_expr
-            (logical_constant))))))
+          (number)))))
+  (statement
+    (statement_body
+      (assignment
+        (variable)
+        (expression
+          (number)))))
   (statement
     (statement_body
       (assignment
@@ -32,5 +44,4 @@ B = A .AND. .FALSE.
               (expression
                 (variable))
               (expression
-                (logical_expr
-                  (logical_constant))))))))))
+                (variable)))))))))
