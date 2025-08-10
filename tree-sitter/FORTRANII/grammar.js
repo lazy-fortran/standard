@@ -1,11 +1,13 @@
 /**
- * FORTRAN II (1958) - Independent Compilation
- * Properly inheriting from FORTRAN (1957) with Tree-sitter composition
+ * FORTRAN II (1958) - Revolutionary Advances  
+ * Inheriting from FORTRAN (1957) with Tree-sitter composition
  * 
- * Tree-sitter DOES support inheritance through:
- * 1. Requiring base grammar
- * 2. Using grammar() composition 
- * 3. Extending/overriding specific rules
+ * REVOLUTIONARY additions in FORTRAN II:
+ * - Independent compilation (modular programming)
+ * - SUBROUTINE and FUNCTION subprograms
+ * - COMMON blocks for data sharing
+ * - Enhanced I/O with READ and WRITE statements
+ * - EXTERNAL declaration for user-defined functions
  */
 
 const fortran = require('../FORTRAN/grammar.js');
@@ -13,9 +15,21 @@ const fortran = require('../FORTRAN/grammar.js');
 module.exports = grammar(fortran, {
   name: 'FORTRANII',
 
+  // Copy base extras and maintain them
+  extras: $ => [
+    /\s+/,
+    $.comment
+  ],
+
   conflicts: $ => [
     [$.simple_variable, $.function_name],
-    [$.simple_variable, $.subroutine_name]
+    [$.simple_variable, $.subroutine_name],
+    [$.variable, $.constant]
+  ],
+
+  // Copy base precedences
+  precedences: $ => [
+    ['power', 'mult', 'add', 'relop']
   ],
 
   rules: {
@@ -89,7 +103,17 @@ module.exports = grammar(fortran, {
       ')'
     ),
 
-    function_name: $ => /[A-Z][A-Z0-9]*/,
+    // Override function name base to handle user-defined functions
+    function_name_base: $ => choice(
+      $.intrinsic_function,
+      $.user_function  
+    ),
+
+    // Intrinsic functions (built-in) - still end with F
+    intrinsic_function: $ => /[A-Z]+F/,
+
+    // User-defined functions (declared with FUNCTION or EXTERNAL)
+    user_function: $ => $.simple_variable,
 
     dummy_argument_list: $ => sep1($.simple_variable, ','),
 
@@ -97,8 +121,8 @@ module.exports = grammar(fortran, {
     // EXTEND: Control statements with new FORTRAN II features
     // ============================================================================
 
-    // Extend control_statement from base FORTRAN to include new ones
-    control_statement: $ => choice(
+    // Extend control statement base to include FORTRAN II additions
+    control_statement_base: $ => choice(
       // All FORTRAN (1957) control statements
       $.goto_statement,
       $.if_statement,
@@ -127,8 +151,8 @@ module.exports = grammar(fortran, {
     // EXTEND: Specification statements with COMMON blocks
     // ============================================================================
 
-    // Extend specification_statement to include FORTRAN II additions
-    specification_statement: $ => choice(
+    // Extend specification statement base to include FORTRAN II additions  
+    specification_statement_base: $ => choice(
       // All FORTRAN (1957) specification statements
       $.dimension_statement,
       $.equivalence_statement,
