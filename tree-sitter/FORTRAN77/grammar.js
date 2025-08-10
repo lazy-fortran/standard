@@ -245,17 +245,19 @@ module.exports = grammar(FORTRAN66, {
 
     if_construct: $ => seq(
       $.if_then_statement,
-      repeat($.if_statement),
-      repeat(seq($.elseif_then_statement, repeat($.if_statement))),
-      optional(seq($.else_statement, repeat($.if_statement))),
+      repeat($.if_block_statement),
+      repeat(seq($.elseif_then_statement, repeat($.if_block_statement))),
+      optional(seq($.else_statement, repeat($.if_block_statement))),
       $.endif_statement
     ),
     
-    // Statements inside if constructs
-    if_statement: $ => choice(
-      $.arithmetic_statement,
-      $.io_statement
-    ),
+    // Statements inside if blocks - create statement wrapper
+    if_block_statement: $ => prec(2, seq(
+      choice(
+        $.arithmetic_statement,
+        $.io_statement
+      )
+    )),
 
     if_body_statement: $ => choice(
       $.arithmetic_statement,
