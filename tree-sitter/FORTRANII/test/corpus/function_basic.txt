@@ -1,0 +1,37 @@
+================================================================================
+FORTRAN II basic function with arithmetic
+================================================================================
+
+FUNCTION SQUARE(X)
+Y = X * X
+SQUARE = Y
+RETURN
+END
+
+--------------------------------------------------------------------------------
+
+(program
+  (program_unit
+    (function_subprogram
+      (function_statement
+        (function_name)
+        (parameter_list
+          (variable)))
+      (statement
+        (statement_body
+          (assignment
+            (variable)
+            (expression
+              (arithmetic_expr
+                (variable)
+                (variable))))))
+      (statement
+        (statement_body
+          (assignment
+            (variable)
+            (expression
+              (variable)))))
+      (statement
+        (statement_body
+          (return_stmt)))
+      (end_statement))))
