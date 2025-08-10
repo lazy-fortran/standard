@@ -1,0 +1,37 @@
+! LazyFortran2025 test file - NO PROGRAM BLOCK NEEDED!
+! This file uses the .lf extension
+
+! Direct variable assignments (type inference)
+x = 5.0
+y = 10.0
+z = x + y
+
+! Direct print statement
+print *, 'Sum is:', z
+
+! Array without declaration
+data = [1.0, 2.0, 3.0, 4.0, 5.0]
+
+! Direct function definition - NO CONTAINS!
+function compute_average(arr) result(avg)
+    real :: arr(:), avg
+    avg = sum(arr) / size(arr)
+end function
+
+! Use the function
+average = compute_average(data)
+print *, 'Average:', average
+
+! Direct subroutine - NO CONTAINS!
+subroutine show_info(name, value)
+    character(*) :: name
+    real :: value
+    print *, name, '=', value
+end subroutine
+
+! Call the subroutine
+call show_info('Result', average)
+
+! Conditional expression (F2023 feature)
+max_val = (x > y ? x : y)
+print *, 'Max:', max_val
