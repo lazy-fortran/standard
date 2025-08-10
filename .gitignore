@@ -88,3 +88,4 @@ Thumbs.db
 build/
 validation/external/
 validation/auto-generated/
+validation_cache/
