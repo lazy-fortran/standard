@@ -23,8 +23,17 @@ module.exports = grammar(FORTRAN66, {
     ),
 
     main_program: $ => choice(
-      seq(/\s+/, repeat1($.statement)),  // With indentation
-      seq(repeat1($.statement), $.end_statement)  // With END
+      // With leading indentation (traditional FORTRAN style)
+      seq(
+        /[ \t]+/,
+        repeat1($.statement_without_end),
+        optional($.end_statement)
+      ),
+      // Without indentation but with END
+      seq(
+        repeat1($.statement_without_end),
+        $.end_statement
+      )
     ),
 
     // Unified statement that handles both simple and detailed structures
@@ -75,8 +84,10 @@ module.exports = grammar(FORTRAN66, {
       'PRINT',
       '*',
       ',',
-      alias(/[A-Z][A-Z0-9]*/, $.variable)
+      alias($.print_expr, $.expression)
     ),
+    
+    print_expr: $ => alias(/[A-Z][A-Z0-9]*/, $.variable),
 
     specification_statement: $ => choice(
       $.type_declaration,
@@ -234,15 +245,21 @@ module.exports = grammar(FORTRAN66, {
 
     if_construct: $ => seq(
       $.if_then_statement,
-      repeat($.if_body_statement),
-      repeat(seq($.elseif_then_statement, repeat($.if_body_statement))),
-      optional(seq($.else_statement, repeat($.if_body_statement))),
+      repeat($.if_statement),
+      repeat(seq($.elseif_then_statement, repeat($.if_statement))),
+      optional(seq($.else_statement, repeat($.if_statement))),
       $.endif_statement
+    ),
+    
+    // Statements inside if constructs
+    if_statement: $ => choice(
+      $.arithmetic_statement,
+      $.io_statement
     ),
 
     if_body_statement: $ => choice(
-      seq($.arithmetic_statement),
-      seq($.io_statement)
+      $.arithmetic_statement,
+      $.io_statement
     ),
 
     if_then_statement: $ => seq(
@@ -257,11 +274,12 @@ module.exports = grammar(FORTRAN66, {
 
     endif_statement: $ => 'ENDIF',
 
-    statement_without_end: $ => choice(
+    statement_without_end: $ => prec(-1, choice(
       $.arithmetic_statement,
       $.io_statement,
-      $.control_statement
-    ),
+      $.control_statement,
+      $.specification_statement
+    )),
     
     // Also need to allow nesting control statements inside others
     nested_statement: $ => choice(
