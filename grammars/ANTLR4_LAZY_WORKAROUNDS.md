@@ -61,10 +61,10 @@ traditional_program_unit
 **Usage:**
 ```java
 // Parser can choose entry point based on file extension or content
-if (isLazyFortran) {
-    parser.lazy_program();  // Use relaxed entry point
+if (filename.endsWith(".lf")) {
+    parser.lazy_program();  // Use relaxed entry point for .lf files
 } else {
-    parser.program_unit_core();  // Use traditional entry point
+    parser.program_unit_core();  // Use traditional entry point for .f90, .f95, etc.
 }
 ```
 
@@ -299,7 +299,7 @@ PROGRAM TEST
 END PROGRAM TEST
 ```
 
-**lazy.f2025:**
+**lazy.lf:**
 ```fortran
 x = 42
 print *, x
