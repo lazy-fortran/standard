@@ -5,6 +5,8 @@
  * This implementation works around ANTLR4's inability to disable inherited rules
  * 
  * KEY INNOVATION: Dual entry points for traditional vs lazy syntax
+ * - Use lazy_fortran entry point for .lf files
+ * - Use traditional_fortran entry point for .f90, .f95, etc.
  * 
  * RELAXATIONS:
  * 1. Optional program/module blocks - use lazy_fortran entry point

@@ -110,13 +110,13 @@ FORTRAN(1957) → FORTRAN_II → FORTRAN_IV → FORTRAN66 → FORTRAN77
 ## Migration Path
 
 ### For New Projects
-- Use `.f2025` extension for lazy syntax
+- Use `.lf` extension for lazy syntax
 - Compiler detects and uses appropriate parser entry point
 - Full access to all Fortran 2023 features plus relaxations
 
 ### For Existing Projects
 - Gradual adoption possible
-- Mix traditional `.f90` and lazy `.f2025` files
+- Mix traditional `.f90` and lazy `.lf` files
 - Compiler handles both transparently
 
 ## Benefits
