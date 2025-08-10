@@ -1,178 +1,133 @@
-# Claude Development Guidelines for LazyFortran2025 Standard
+# CLAUDE.md
 
-## Project Context
-You are working on the LazyFortran2025 standard grammar implementation, a comprehensive ANTLR4-based parser for all FORTRAN/Fortran standards from 1957 to LazyFortran2025.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Architecture Overview
+## Project Overview
 
-### Modular Grammar Hierarchy
-```
-FORTRAN (1957) → FORTRAN_II → FORTRAN_IV → FORTRAN66 → FORTRAN77 → Fortran90 → ... → LazyFortran2025
-```
+LazyFortran2025 is a comprehensive ANTLR4-based grammar implementation covering all FORTRAN/Fortran standards from 1957 to 2023+. The project uses a revolutionary modular inheritance architecture where each standard only defines NEW features and imports from its predecessor.
 
-Each grammar:
-- Only defines NEW features (no duplication)
-- Imports from its predecessor
-- Maintains historical accuracy
-
-### Directory Structure
-- `grammars/` - Source .g4 files (commit these)
-- `grammars/*.py` - Generated files (never commit, git-ignored)
-- `tests/` - Test suites (comprehensive validation)
-- `Makefile` - Build automation
-
-## Development Principles
-
-### Strict Requirements
-1. **Test-Driven Development (TDD)**: RED → GREEN → REFACTOR
-2. **No shortcuts**: Full implementation, no stubs
-3. **Clean code**: Self-documenting, no unnecessary comments
-4. **Small commits**: Incremental, well-documented changes
-5. **Historical accuracy**: Respect each standard's era
-
-### Grammar Rules
-- FORTRAN (1957) contains the foundational constructs
-- Each standard grammar imports and extends its predecessor
-- Use ANTLR4 import mechanism for inheritance
-- Maintain correct operator precedence
-
-### Naming Conventions
-- Classic standards: All caps (FORTRAN, FORTRAN_II, FORTRAN77)
-- Modern standards: Mixed case (Fortran90, Fortran2003)
-- Latest extension: LazyFortran2025
-
-## Build Process
-
-### Using Makefile (Recommended)
-
-The project includes a comprehensive Makefile that handles all grammar builds with proper dependency management:
+## Essential Build Commands
 
 ```bash
 # Build all grammars in dependency order
 make all
 
-# Build specific standard (automatically builds dependencies)
+# Build specific standard (builds dependencies automatically)
 make Fortran2003
 
 # Clean all generated files
 make clean
 
-# Run tests after building
+# Run comprehensive test suite
 make test
 
-# Show available targets and timeline
+# Run specific standard tests
+make test-fortran2003
+
+# Show all available targets
 make help
-
-# Force rebuild everything
-make force-rebuild
 ```
 
-Available targets:
-- `FORTRAN` - Build FORTRAN I (1957)
-- `FORTRANII` - Build FORTRAN II (1958)
-- `FORTRANIV` - Build FORTRAN IV (1962)
-- `FORTRAN66` - Build FORTRAN 66 (1966)
-- `FORTRAN77` - Build FORTRAN 77 (1977)
-- `Fortran90` - Build Fortran 90 (1990)
-- `Fortran95` - Build Fortran 95 (1995)
-- `Fortran2003` - Build Fortran 2003 (2003)
+## Architecture Deep Dive
 
-### Manual Build (Alternative)
+### Grammar Inheritance Chain
+```
+FORTRAN(1957) → FORTRAN_II → FORTRAN_IV → FORTRAN66 → FORTRAN77 → Fortran90 → F95 → F2003 → F2008 → F2018 → F2023
+```
+
+### Critical Implementation Details
+
+**File Structure:**
+- `grammars/*.g4` - Source grammars (version controlled)
+- `grammars/*.py` - Generated files (git-ignored, never commit)
+- `tests/` - Comprehensive test suites by standard
+- `Makefile` - Dependency-aware build system
+
+**Unified Format Architecture:**
+- Each F90+ parser handles BOTH fixed-form (.f) and free-form (.f90) in a single grammar
+- Format detection via file extension and content analysis
+- Dual comment handling: `!` (free-form) and `C/*` (fixed-form)
+
+### Build Dependencies
+
+ANTLR4 builds must follow strict inheritance order:
+1. FORTRAN (foundation) must build first
+2. Each subsequent standard imports its predecessor
+3. Missing dependencies cause cascading build failures
+4. Use `make force-rebuild` for clean slate
+
+## Testing Philosophy
+
+**TDD Requirements:**
+- RED: Write failing test first
+- GREEN: Implement minimal code to pass
+- REFACTOR: Clean up while keeping tests green
+
+**Test Validation:**
+- Tests must actually parse real Fortran code
+- Verify semantic content, not just "PASS" messages
+- Parse tree analysis for correctness
+- Historical code examples for accuracy
+
+## Current Implementation Status
+
+**Production Ready:**
+- FORTRAN (1957): Complete foundational constructs
+- Fortran2003: 45% complete - basic OOP, modules, inheritance working
+- F2008/F2018: Advanced features implemented
+
+**In Development:**
+- FORTRAN_IV through FORTRAN77: Historical middle standards
+- Type-bound procedures (Issue #22)
+- ASSOCIATE/BLOCK constructs (Issue #25)
+
+## Development Workflows
+
+### Adding New Language Features
+
+1. **Research**: Study historical documentation and standards
+2. **Plan**: Use TodoWrite tool for multi-step features
+3. **Test First**: Write failing tests for new constructs
+4. **Implement**: Add minimal grammar rules
+5. **Validate**: Ensure inheritance chain intact
+6. **Document**: Update limitations files if needed
+
+### Debugging Parser Issues
 
 ```bash
-# Build grammars in dependency order
-make FORTRAN
-make FORTRANII
-make Fortran2003
+# Test specific parsing
+python debug_parsing.py <fortran_code>
+
+# Examine token stream  
+python debug_tokens.py <fortran_code>
+
+# Run targeted test suite
+python -m pytest tests/Fortran2003/ -v
 ```
 
-### Build Output
+### Common Pitfalls
 
-All generated files are placed in the `grammars/` directory (git-ignored):
-```
-grammars/
-├── FORTRANLexer.py
-├── FORTRANParser.py
-├── Fortran2003Lexer.py
-├── Fortran2003Parser.py
-└── ...
-```
+- **Never commit generated .py files** - they're git-ignored for a reason
+- **Build order matters** - dependencies cascade through inheritance
+- **Test semantically** - verify actual parsing, not just absence of errors
+- **Historical accuracy** - each standard reflects its era's capabilities
 
-## Testing Strategy
+## Key Architecture Principles
 
-### Required Test Coverage
-- Operator precedence validation
-- Parse tree semantic analysis
-- Historical code examples
-- Edge cases and error conditions
+**Inheritance Not Duplication:**
+- Each grammar defines only NEW features
+- Shared constructs live in parent grammars
+- ANTLR4 import mechanism handles inheritance
 
-### Test Execution
-```bash
-# Run all tests
-python -m pytest tests/ -v
+**Format Unification:**
+- Single parser per standard handles both fixed/free form
+- Eliminates dual-parser complexity
+- Maintains backward compatibility
 
-# Run specific suite
-python tests/shared_core/test_comprehensive_validation.py
-```
-
-## Current Status
-
-### Completed
-- ✅ FORTRAN (1957) grammar (foundational constructs)
-- ✅ FORTRAN_II, Fortran2003, F2008, F2018 grammars  
-- ✅ Modular inheritance architecture
-- ✅ Comprehensive test suite (198 tests passing)
-- ✅ Build automation with Makefile
-
-### In Progress
-- 🔄 FORTRAN_IV, FORTRAN66, FORTRAN77 implementations
-- 🔄 Free-form format integration in Fortran90
-
-### Future Work
-- Fortran90 free-form revolution
-- Modern Fortran features (2003-2023)
-- LazyFortran2025 type inference
-
-## Resources
-- Fortran standards: https://gcc.gnu.org/wiki/GFortranStandards
-- ANTLR4 documentation: https://www.antlr.org/
-- Historical FORTRAN manuals: IBM archives
-
-## Important Notes
-
-### DO NOT
-- Commit generated files (grammars/*.py files)
-- Duplicate rules between grammars
-- Take shortcuts or create stubs
-- Mix concerns between standards
-
-### ALWAYS
-- Follow TDD methodology
-- Maintain backward compatibility
-- Document historical context
-- Test comprehensively
-
-## GitHub Integration
-
-### Issues
-Update issues with progress, maintain accurate status:
-- Issue #41: F2018 build system (Complete)
-- Issue #10: FORTRAN 1957 (Complete)  
-- Issue #2: LazyFortran2025 (Future)
-
-### Pull Requests
-- Small, focused changes
-- Comprehensive commit messages
-- Address review feedback promptly
-- Include test coverage
-
-## LazyFortran2025 Vision
-
-The ultimate goal is LazyFortran2025:
-- Full type inference
-- Modern syntax extensions
-- Backward compatible with all FORTRAN/Fortran
-- Performance optimizations
-- Seamless C/Python interop
+**Standards Accuracy:**
+- FORTRAN (1957): Punch card era, arithmetic IF, computed GOTO
+- Fortran90: Revolutionary free-form, modules, dynamic arrays  
+- Fortran2003: Object-oriented programming, C interoperability
+- Modern standards: Parallel features, generics, type safety
 
 Remember: We're building the future of Fortran by understanding and respecting its past.
