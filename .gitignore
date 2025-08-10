@@ -86,3 +86,5 @@ Thumbs.db
 *.dwo
 
 build/
+validation/external/
+validation/auto-generated/
