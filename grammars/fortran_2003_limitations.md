@@ -67,7 +67,7 @@ These features are tracked in separate GitHub issues for future implementation:
 - ✅ **Working**: Multiple procedure pointer declarations
 - ✅ **Working**: Component procedure pointer assignment (`obj%ptr => procedure`)
 
-### 5. Advanced OOP Features (Issue #26)
+### 5. Advanced OOP Features (Issue #26 / Issue #59)
 - **Missing**: Complex polymorphic operations
 - **Missing**: Advanced abstract interface features with IMPORT
 
@@ -95,7 +95,7 @@ These features are tracked in separate GitHub issues for future implementation:
 
 **Note**: General F2003 program/module parsing limitations may still exist in other contexts, but IEEE-specific functionality is complete.
 
-### 7. C Interoperability (Issue #24 - PARTIALLY COMPLETE)
+### 7. C Interoperability (Issue #24 / Issue #59 - PARTIALLY COMPLETE)
 **Working Features:**
 - ✅ All 34 C interop type tokens recognized (C_INT, C_FLOAT, C_PTR, etc.)
 - ✅ Basic BIND(C) syntax without NAME clause (`subroutine name() bind(c)`)
@@ -107,9 +107,17 @@ These features are tracked in separate GitHub issues for future implementation:
 
 **Known Limitations (Not Yet Implemented):**
 - ❌ BIND(C, NAME="...") syntax fails parsing
-- ❌ BIND(C) for functions may have issues
-- ❌ BIND(C) for derived types untested
-- ❌ Complex IMPORT statements untested
+- ❌ SELECT TYPE / TYPE IS / CLASS IS / CLASS DEFAULT constructs are present
+      in the grammar, but **not** wired to the exact `SELECT TYPE` spelling
+      and are therefore not yet validated with realistic code examples.
+      Tests only exercise simpler CLASS(*) declarations.
+- ❌ Advanced polymorphic usage (nested SELECT TYPE, complex CLASS(*) flows)
+      remains untested and should be considered outside the supported subset.
+- ❌ BIND(C) for functions and derived types is now covered by tests in
+      `tests/Fortran2003/test_f2003_polymorphism_and_c_interop.py`, but
+      C interoperability beyond those examples is not guaranteed.
+- ❌ Complex IMPORT statements involving mixtures of C interop types and
+      other entities remain largely untested.
 
 **Test Status:**
 - Semantic validation: 10/10 tests passing
