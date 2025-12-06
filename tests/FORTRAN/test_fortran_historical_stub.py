@@ -144,10 +144,13 @@ class TestFORTRANHistoricalStub:
         """
         
         parser = self.create_parser(test_input)
-        
+
         try:
             tree = parser.program_unit_core()
             assert tree is not None
+            # Now that computed GOTO has an explicit grammar rule,
+            # ensure the input parses without syntax errors.
+            assert parser.getNumberOfSyntaxErrors() == 0
         except Exception as e:
             pytest.fail(f"Computed GOTO parsing failed: {e}")
 
@@ -211,10 +214,13 @@ class TestFORTRANHistoricalStub:
         """
         
         parser = self.create_parser(test_input)
-        
+
         try:
             tree = parser.program_unit_core()
             assert tree is not None
+            # FREQUENCY is explicitly modelled in the stub grammar,
+            # so this should parse with zero syntax errors.
+            assert parser.getNumberOfSyntaxErrors() == 0
         except Exception as e:
             pytest.fail(f"FREQUENCY statement parsing failed: {e}")
 

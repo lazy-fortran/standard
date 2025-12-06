@@ -23,11 +23,7 @@ options {
 
 // Core program unit - can be extended by format-specific parsers
 program_unit_core
-    : statement_list EOF
-    ;
-
-statement_list
-    : statement*
+    : (NEWLINE* statement)* NEWLINE* EOF
     ;
 
 // ============================================================================
