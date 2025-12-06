@@ -36,6 +36,33 @@ def parse_f2003(code: str):
 class TestF2003Polymorphism:
     """Advanced polymorphism tests using existing F2003 grammar rules."""
 
+    def test_select_type_with_integer_and_default(self):
+        """
+        Standard SELECT TYPE construct with TYPE IS and CLASS DEFAULT.
+
+        This exercises the real Fortran 2003 spelling:
+        - select type (obj)
+        - type is (integer)
+        - class default
+        - end select
+        """
+        code = """program poly_test
+  implicit none
+  class(*), allocatable :: obj
+
+  select type (obj)
+  type is (integer)
+    print *, 'int'
+  class default
+    print *, 'other'
+  end select
+
+end program poly_test
+"""
+        tree, errors, parser = parse_f2003(code)
+        assert errors == 0, f"SELECT TYPE construct failed with {errors} errors"
+        assert tree is not None
+
     def test_class_star_declaration(self):
         """
         CLASS(*) declarations without SELECT TYPE.
