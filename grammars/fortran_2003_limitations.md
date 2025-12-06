@@ -224,6 +224,8 @@ Despite limitations, the F2003 grammar can parse:
 **Keyword Conflicts**: Some F2003 keywords like `RESULT` require special handling as identifiers in variable contexts. The grammar includes `identifier_or_keyword` rules to handle this automatically.
 
 For practical use, many important F2003 features are available and
-tested here, especially core OOP functionality and procedure pointers.
-Some advanced constructs described in the standard remain unimplemented
-or untested; these should be tracked as individual GitHub issues.
+tested here, especially core OOP functionality, PDTs, C interoperability
+and procedure pointers. Some advanced constructs described in the
+standard (for example, fully general PDT structure constructors) remain
+unimplemented or untested; these should be tracked as individual GitHub
+issues.
