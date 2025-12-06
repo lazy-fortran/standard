@@ -349,6 +349,22 @@ contiguous_stmt
     : CONTIGUOUS DOUBLE_COLON object_name_list NEWLINE
     ;
 
+// Extend F2003 attr_spec to include CONTIGUOUS as a valid attribute
+attr_spec
+    : PUBLIC
+    | PRIVATE
+    | ALLOCATABLE
+    | POINTER
+    | INTENT LPAREN intent_spec RPAREN
+    | OPTIONAL
+    | TARGET
+    | VOLATILE
+    | PROTECTED
+    | PARAMETER
+    | VALUE
+    | CONTIGUOUS
+    ;
+
 // ============================================================================
 // ENHANCED ALLOCATE STATEMENT (F2008)
 // ============================================================================
