@@ -1,0 +1,18 @@
+C     F2003 features in fixed-form format
+      MODULE FIXEDF2003
+      IMPLICIT NONE
+
+      TYPE :: SHAPE
+          REAL :: AREA
+      CONTAINS
+          PROCEDURE :: PRINT_AREA
+      END TYPE SHAPE
+
+      CONTAINS
+
+      SUBROUTINE PRINT_AREA(THIS)
+          CLASS(SHAPE), INTENT(IN) :: THIS
+          WRITE(*,*) 'AREA:', THIS%AREA
+      END SUBROUTINE PRINT_AREA
+
+      END MODULE FIXEDF2003
