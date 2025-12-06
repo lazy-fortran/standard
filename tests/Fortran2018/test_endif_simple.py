@@ -19,7 +19,7 @@ class TestErrorListener(ErrorListener):
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         self.errors.append(f"Line {line}:{column}: {msg}")
 
-def test_program(code, description):
+def run_program_case(code, description):
     print(f"Testing: {description}")
     print(f"Code:\n{code}")
     
@@ -48,13 +48,11 @@ if __name__ == "__main__":
    if (mydummy > 90.and.gggg > 0) then
    endif
 end program test"""
-    
-    test_program(missing_spaces_wrapped, "Missing-spaces wrapped in program")
+    run_program_case(missing_spaces_wrapped, "Missing-spaces wrapped in program")
     
     # Test simpler case
     simple_endif = """program test
 if (x > 0) then
 endif
 end program test"""
-    
-    test_program(simple_endif, "Simple ENDIF in program")
+    run_program_case(simple_endif, "Simple ENDIF in program")

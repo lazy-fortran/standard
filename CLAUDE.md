@@ -73,20 +73,9 @@ ANTLR4 builds must follow strict inheritance order:
 
 ## Current Implementation Status
 
-**✅ ALL STANDARDS COMPLETE (254/254 tests passing):**
-- FORTRAN (1957): 65 tests ✅ - Complete IBM 704 original language
-- FORTRAN II (1958): 5 tests ✅ - Independent compilation, FUNCTION/SUBROUTINE
-- FORTRAN IV (1962): 13 tests ✅ - LOGICAL data type, enhanced operators  
-- FORTRAN 66 (1966): 6 tests ✅ - First ANSI standard, machine independence
-- FORTRAN 77 (1977): 11 tests ✅ - CHARACTER type, IF-THEN-ELSE structures
-- Fortran 90 (1990): 20 tests ✅ - Free-form, modules, dynamic arrays
-- Fortran 95 (1995): 26 tests ✅ - FORALL constructs, enhanced intrinsics
-- Fortran 2003 (2003): 64 tests ✅ - Complete OOP, C interoperability
-- Fortran 2008 (2008): 20 tests ✅ - Coarrays, submodules, DO CONCURRENT
-- Fortran 2018 (2018): 8 tests ✅ - Teams, events, enhanced error handling
-- Fortran 2023 (2023): 16 tests ✅ - Generics, conditional expressions
+Grammars exist for FORTRAN (1957), FORTRAN II, FORTRAN 66, FORTRAN 77 and for the modern standards Fortran 90, 95, 2003, 2008, 2018 and 2023. Test coverage is uneven and several limitation documents (for example `grammars/fortran_2003_limitations.md`, `grammars/fortran_2008_limitations.md`, `grammars/fortran_2018_limitations.md`) describe known gaps.
 
-**Project Status: PRODUCTION READY** - Complete FORTRAN/Fortran coverage 1957-2023
+As of this branch the test suite contains roughly 270 passing tests across all standards. The implementation is suitable for experimentation and research, but it should not be treated as a complete, production‑quality implementation of every feature from each Fortran standard.
 
 ## Development Workflows
 
