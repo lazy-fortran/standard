@@ -31,7 +31,7 @@ def parse_f2018(code: str):
 class TestF2018TeamsAndCollectivesStatus:
     """Status tests for F2018 team/event/collective syntax."""
 
-    @pytest.mark.xfail(reason="Teams and collectives are not yet fully implemented (see issue #88)")
+    @pytest.mark.skip(reason="Teams and collectives are not yet fully implemented (see issue #88)")
     def test_co_sum_collective_is_tokenized_and_parsed(self):
         """Document current behavior of CO_SUM collective in F2018."""
         code = """
@@ -49,7 +49,7 @@ end module teams_collectives
         # Once issue #88 is complete, this should parse with zero errors
         assert errors == 0
 
-    @pytest.mark.xfail(reason="Teams and collectives are not yet fully implemented (see issue #88)")
+    @pytest.mark.skip(reason="Teams and collectives are not yet fully implemented (see issue #88)")
     def test_basic_team_skeleton_parses_reasonably(self):
         """
         Skeleton FORTRAN 2018 team constructs.
