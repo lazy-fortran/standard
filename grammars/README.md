@@ -7,8 +7,8 @@ This directory contains a **HISTORICAL STUB** implementation of the original 195
 ## Implementation Status: HISTORICAL STUB
 
 ### Current Phase: Documentation and Compilation Stub
-- ✅ **Comprehensive historical documentation**: Complete record of 1957 FORTRAN features
-- ✅ **ANTLR4 compilation**: Grammar compiles and integrates with SharedCoreLexer/Parser
+- ✅ **Comprehensive historical documentation**: Overview of early FORTRAN features and context
+- ✅ **ANTLR4 compilation**: Grammar compiles and can be used as a base for later standards
 - ✅ **Basic syntax recognition**: Minimal parsing functionality for grammar validation
 - ✅ **Educational resource**: Detailed explanations of revolutionary 1957 features
 
@@ -78,10 +78,10 @@ C     FORTRAN 1957 EXAMPLE - QUADRATIC EQUATION SOLVER
 - **PUNCH**: Card punch output (data storage method!)
 - **FORMAT**: Precise I/O formatting `100 FORMAT (I5, F10.2, 5HHELLO)`
 
-### Unique 1957 Features
+### Unique Early FORTRAN Features
 - **PAUSE statement**: Operator intervention `PAUSE 1234`
 - **FREQUENCY statement**: Optimization hints `FREQUENCY 10 (25, 3, 1)`
-- **Hollerith constants**: String literals `5HHELLO`
+- **Hollerith constants**: String literals such as `5HHELLO` (introduced in early FORTRAN after the original 1957 release and widely used in historical code)
 - **EQUIVALENCE**: Memory overlay `EQUIVALENCE (A, B(1))`
 
 ## Punch Card Format (Fixed-Form)
@@ -104,29 +104,22 @@ Example: 100   C     THIS IS A COMMENT                              001234
 ## File Structure
 
 ```
-grammars/FORTRAN/
+grammars/
 ├── FORTRANLexer.g4      # Historical token definitions
 ├── FORTRANParser.g4     # Historical grammar rules  
-└── README.md           # This file
+└── README.md            # This file
 ```
 
-### Generated Files (build/FORTRAN/)
-- `FORTRANLexer.py` - Generated lexer (do not edit manually)
-- `FORTRANParser.py` - Generated parser (do not edit manually)
-- `*.tokens` - Token definitions (generated)
+### Generated Files
+- `grammars/FORTRANLexer.py` - Generated lexer (do not edit manually)
+- `grammars/FORTRANParser.py` - Generated parser (do not edit manually)
+- `grammars/*.tokens` - Token definitions (generated)
 
 ## Usage
 
 ### Building the Grammar
 ```bash
-./scripts/build_grammar.sh FORTRAN
-```
-
-### Integration with Shared Core
-The FORTRAN grammar imports universal constructs:
-```antlr
-import SharedCoreLexer;   // Basic tokens and operators
-import SharedCoreParser;  // Expression parsing and universal rules
+make FORTRAN
 ```
 
 ## Historical Context

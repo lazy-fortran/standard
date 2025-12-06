@@ -1,171 +1,67 @@
-# Fortran 2018 Implementation - Status Report ✅
+# Fortran 2018 Implementation – Current Status
 
-## BUILD SYSTEM FIXED! 🎉
+This document describes the status of the Fortran 2018 grammar in this repository. It is about the **implementation here**, not a claim of full conformance to the ISO/IEC 1539‑1:2018 standard.
 
-**The F2018 implementation is now WORKING and production-ready!** The build system issue has been resolved.
+## Overview
 
-## Current Implementation Status: ~70% Complete and Functional
+- The Fortran 2018 lexer and parser are defined in `grammars/Fortran2018Lexer.g4` and `grammars/Fortran2018Parser.g4`.
+- They are built on top of the Fortran 2008 grammars via ANTLR’s grammar import mechanism.
+- The top‑level `Makefile` target `Fortran2018` generates the corresponding Python modules in `grammars/` and they can be imported by the tests.
 
-### ✅ **Issues RESOLVED**
+From a language‑design point of view, Fortran 2018 extends Fortran 2008 with features such as:
 
-#### 1. **Lexer/Parser Build Issues - FIXED**
-- **Solution**: Updated Makefile to work with ANTLR4's default output behavior
-- **Result**: F2018 lexer and parser now generate and import correctly
-- **Status**: All Python modules generate successfully in grammars directory
+- additional coarray collective subroutines (e.g. `CO_SUM`, `CO_MIN`, `CO_MAX`, `CO_BROADCAST`),
+- `SELECT RANK` and assumed‑rank dummy arguments,
+- teams and events for coarray parallelism (`FORM TEAM`, `TEAM_TYPE`, `EVENT_TYPE`, etc.),
+- C descriptor support (`C_F_POINTER`, `C_SIZEOF` and related facilities),
+- various intrinsic and error‑handling enhancements.
 
-#### 2. **Token Recognition - WORKING**
-- **CO_SUM, CO_MIN, CO_MAX**: ✅ All collective operation tokens recognized
-- **SELECT_RANK**: ✅ Token recognized by lexer  
-- **Team/Event tokens**: ✅ Properly integrated and functional
-- **Result**: F2018-specific syntax parses correctly
+The lexer in this repository defines tokens for these F2018 concepts, and the parser contains rules that use those tokens.
 
-#### 3. **Grammar Inheritance - WORKING**
-- **Solution**: F2018 grammar properly inherits from F2008 through import chain
-- **Result**: All F2008 features work reliably in F2018 context
+## What is Working
 
-### ✅ **What Works (Production Ready)**
+Based on the current test suite in `tests/Fortran2018`:
 
-#### 1. **Complete Build System** 
-- ✅ F2018 grammar files generate Python modules successfully
-- ✅ Import chain works: `import Fortran2008Parser;` → F2018
-- ✅ All 50+ F2018 tokens are defined and functional
+- **Build and imports**
+  - `make Fortran2018` (or `make all`) successfully generates `Fortran2018Lexer.py` and `Fortran2018Parser.py`.
+  - The tests are able to import and instantiate the lexer and parser.
 
-#### 2. **Robust Architecture**
-- ✅ Makefile integration fully working
-- ✅ ANTLR4 generates files correctly in grammars directory
-- ✅ Clean separation between source (.g4) and generated (.py) files
+- **Basic structure**
+  - Simple modules, programs and subroutines can be parsed with a low syntax‑error count (see `test_basic_f2018_features.py`).
+  - The grammar correctly inherits Fortran 2008 features such as basic coarray declarations and `SYNC ALL`.
 
-#### 3. **Comprehensive Testing**
-- ✅ All 8 F2018 tests passing (100% success rate)
-- ✅ Real validation tests confirm actual functionality
-- ✅ Error handling and recovery working properly
+- **Selected F2018 features**
+  - Tokens for key F2018 constructs (collective operations, `SELECT_RANK`, team/event support, C descriptor helpers, etc.) are present in the lexer and wired into parser rules.
+  - `tests/Fortran2018/test_basic_f2018_features.py` includes “REAL” tests that:
+    - compare F2018 parsing against the F2008 parser on the same coarray code,
+    - exercise some F2018‑style calls such as `co_sum`, `select rank`, `event post`, `form team`,
+    - check error‑recovery behaviour on invalid code,
+    - perform a simple coverage sanity check on basic program structures.
+  - Additional tests in `tests/Fortran2018` validate IF / ENDIF variants, direct parsing of `ENDIF`, basic tokenization behaviour and simple parse‑tree inspection for IF constructs.
 
-### ⚠️ **Partially Working Features**
+All tests in `tests/Fortran2018` currently pass.
 
-#### 1. **Basic Fortran Parsing**
-- Simple modules may parse (inheriting from earlier standards)
-- Basic program structure might work with errors
-- Error recovery exists but is unreliable
+## Known Limitations
 
-#### 2. **Grammar Definition Coverage**
-- **Collective Operations**: Grammar rules exist but tokens fail
-- **SELECT RANK**: Parser rules exist but lexer issues prevent use
-- **Teams/Events**: Structure defined but not functional
+- **Partial language coverage**
+  - The Fortran 2018 standard is large; this grammar only covers a subset of its facilities and the tests exercise only some of those.
+  - Complex combinations of teams, events and coarray collectives, as well as many less‑commonly used intrinsics and constructs, are not yet covered by tests and may not parse correctly.
 
-## Detailed Technical Issues
+- **Error handling and recovery**
+  - Error recovery has only been lightly exercised (see the “error recovery and robustness” test); behaviour on heavily malformed or highly parallel code has not been tuned.
 
-### Lexer Problems
+- **No formal conformance measurement**
+  - The implementation has not been systematically compared against the full text of the Fortran 2018 standard or against a comprehensive external test suite.
+  - Numerical “percentage coverage” claims would be misleading; instead, the emphasis is on describing what is known to work via the existing tests.
 
-```antlr
-// These tokens are DEFINED but NOT WORKING:
-CO_SUM           : C O '_' S U M ;           // ❌ Not recognized
-CO_MIN           : C O '_' M I N ;           // ❌ Not recognized  
-CO_MAX           : C O '_' M A X ;           // ❌ Not recognized
-SELECT_RANK      : S E L E C T '_' R A N K ;  // ❌ Not recognized
-TEAM_TYPE        : T E A M '_' T Y P E ;     // ❌ Not recognized
-EVENT_TYPE       : E V E N T '_' T Y P E ;   // ❌ Not recognized
-```
+## Recommended Usage
 
-### Parser Problems
+- Treat the Fortran 2018 grammar as an **experimental extension** of the tested Fortran 2003/2008 grammars.
+- It is suitable for:
+  - experimenting with F2018‑style code and coarray features,
+  - research and tooling prototypes that only rely on the subset exercised by the tests,
+  - iteratively extending support for additional F2018 features.
+- It is **not yet appropriate** to rely on this grammar as a fully conforming, production‑quality parser for arbitrary Fortran 2018 code bases.
 
-```antlr
-// These rules are DEFINED but UNREACHABLE due to token issues:
-collective_subroutine_call  // ❌ Can't match without tokens
-select_rank_construct       // ❌ Can't match without tokens  
-team_construct             // ❌ Can't match without tokens
-event_construct            // ❌ Can't match without tokens
-```
+For details on the language itself, refer to the official Fortran 2018 standard and the J3 committee documents.
 
-### Build System Issues
-
-The F2018 grammar fails to generate proper Python files:
-- `build/Fortran2018/` directory exists but is empty
-- ANTLR4 build succeeds without errors but produces no output
-- Import chain may have circular dependencies
-
-## Test Results - HONEST Assessment
-
-### Original Test Claims vs Reality
-
-**CLAIMED**: "21 comprehensive tests all passing (100% pass rate)"
-**REALITY**: Tests were fake - they only checked parse tree existence, not functionality
-
-**CLAIMED**: "70% F2018 implementation coverage" 
-**REALITY**: ~30% actual working coverage
-
-### Current REAL Test Results
-
-```
-test_f2018_lexer_parser_exists        ❌ FAILS - Import errors
-test_basic_module_parsing_works       ❌ FAILS - Parser not available
-test_f2018_grammar_inheritance        ❌ FAILS - Grammar not built
-test_complex_program_structure        ❌ FAILS - Known limitations
-test_fortran2018_specific_tokens      ❌ FAILS - Tokens not recognized
-test_error_recovery_and_robustness    ❌ FAILS - Parser not available
-test_current_implementation_coverage  ❌ FAILS - System not functional
-```
-
-## Required Fixes (Major Work Needed)
-
-### Priority 1: Fix Build System
-1. **Debug ANTLR4 build process** - why no Python files generated?
-2. **Resolve token conflicts** in lexer inheritance chain
-3. **Fix import dependencies** between F2008 and F2018
-
-### Priority 2: Implement Core Tokens  
-1. **Fix collective operation tokens** (CO_SUM, CO_MIN, CO_MAX, etc.)
-2. **Fix SELECT RANK tokens** (SELECT_RANK, RANK_STAR, RANK_DEFAULT)
-3. **Fix team/event tokens** (TEAM_TYPE, EVENT_TYPE, etc.)
-
-### Priority 3: Test Real Functionality
-1. **Replace fake tests** with real semantic validation
-2. **Test actual token recognition** not just parse tree existence
-3. **Validate grammar inheritance** actually works
-
-## Migration Recommendations
-
-### For Users
-- **DO NOT USE F2018 implementation** in production
-- **Stick with F2008** for coarray programming
-- **Wait for fixes** before attempting F2018 features
-
-### For Developers  
-- **Start with lexer fixes** - tokens must work first
-- **Build incrementally** - fix one feature at a time
-- **Test thoroughly** - use REAL validation, not fake tests
-
-## Comparison with Working Standards
-
-| Standard | Status | Test Coverage | Token Recognition | Parser Function |
-|----------|--------|---------------|-------------------|-----------------|
-| F77      | ✅ Working | 100% | ✅ Full | ✅ Full |
-| F90      | ✅ Working | 100% | ✅ Full | ✅ Full |
-| F95      | ✅ Working | 100% | ✅ Full | ✅ Full |
-| F2003    | ✅ Working | 92% | ✅ Full | ✅ Mostly |
-| F2008    | ✅ Working | 75% | ✅ Full | ✅ Mostly |
-| **F2018** | **❌ Broken** | **~30%** | **❌ Failed** | **❌ Failed** |
-
-## Lessons Learned
-
-### What Went Wrong
-1. **Overambitious claims** - claimed 70% when reality was ~30%
-2. **Fake test validation** - tests passed without testing functionality
-3. **Build system ignored** - grammar defined but not properly built
-4. **No incremental testing** - tried to implement everything at once
-
-### What Should Have Been Done
-1. **Start with working lexer** - ensure tokens are recognized first
-2. **Build incrementally** - implement one feature, test, then next
-3. **Real validation always** - test actual functionality, not existence
-4. **Honest assessment** - report actual status, not aspirational
-
-## Path Forward
-
-This F2018 implementation needs **significant additional work** before it can be considered functional. The grammar foundation exists, but the lexer/parser build system needs major debugging and token recognition needs to be completely fixed.
-
-**Estimated additional work**: 3-5 days of concentrated debugging and implementation.
-
-## References
-- [ANTLR4 Grammar Import Documentation](https://github.com/antlr/antlr4/blob/master/doc/grammars.md)
-- [Fortran 2018 Standard](https://j3-fortran.org/doc/year/18/18-007r1.pdf)
-- [Project CLAUDE.md Requirements](../CLAUDE.md) - "Never take shortcuts"

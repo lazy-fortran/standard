@@ -1,6 +1,6 @@
 # Fortran 2003 Implementation - Current Status
 
-## Overall Implementation: ~92% Complete ✅
+## Overall Implementation: substantial subset implemented and tested ✅
 
 ### Quick Summary
 - **Basic OOP**: ✅ Working (types, inheritance, CLASS)
@@ -12,8 +12,8 @@
 - **IEEE Arithmetic**: ✅ Working (tokens, modules, constants - Issue #27)
 
 ## Current Status (December 2024)
-- **Test Coverage**: Advanced OOP tests passing, comprehensive suite ~75% pass rate
-- **Lexer**: ✅ **100% COMPLETE** - All F2003 tokens recognized
+- **Test Coverage**: Advanced OOP tests in `tests/Fortran2003` are passing
+- **Lexer**: ✅ Implements tokens for all F2003 features exercised in the current tests (OOP, IEEE arithmetic, C interoperability, etc.)
 - **Parser Infrastructure**: ✅ **WORKING** - Core framework operational
 - **Basic F2003 Features**: ✅ **WORKING** - Essential OOP features functional
 - **Advanced Features**: ✅ **WORKING** - Most complex constructs implemented
@@ -21,8 +21,8 @@
 
 ## Verified Working Features
 
-### ✅ **Lexer (100% Functional)**
-All F2003 tokens correctly recognized:
+### ✅ **Lexer**
+Tokens required for the implemented F2003 features are recognized and tested:
 - **OOP Tokens**: `ABSTRACT`, `EXTENDS`, `CLASS`, `FINAL`, `DEFERRED`, `GENERIC`
 - **Procedure Tokens**: `PROCEDURE`, `NOPASS`, `PASS`
 - **Interop Tokens**: `BIND`, `VALUE`
@@ -89,9 +89,9 @@ These features are tracked in separate GitHub issues for future implementation:
 - **Note**: Logical operators were originally introduced in FORTRAN IV (1962) and inherited through the grammar chain
 
 **Test Status:**
-- IEEE functionality: 10/10 tests passing (100% pass rate)
-- All IEEE tokens, module imports, and logical operator expressions work correctly
-- **Status**: IEEE arithmetic parsing fully complete and production-ready
+- IEEE functionality tests in this repository pass
+- All IEEE tokens, module imports, and logical-operator expressions used in the tests work correctly
+- **Status**: IEEE arithmetic support is implemented for the scenarios covered by the current tests
 
 **Note**: General F2003 program/module parsing limitations may still exist in other contexts, but IEEE-specific functionality is complete.
 
@@ -137,33 +137,11 @@ These features are tracked in separate GitHub issues for future implementation:
 - C interop tokens (BIND, VALUE)
 - Enhanced I/O tokens (ASYNCHRONOUS, STREAM, etc.)
 
-## Architecture Success
+## Architecture Notes
 
-The unified grammar architecture is **complete and proven**:
-- Clean inheritance chain: F77 → F90 → F95 → F2003
-- Both fixed-form and free-form support
-- No duplication of rules
-- Proper separation of concerns
-
-## Implementation Roadmap
-
-### ✅ Completed in This PR
-1. Fix VALUE keyword conflict - can now be used as identifier
-2. Fix NEWLINE handling in module subprograms
-3. Basic OOP type definitions with inheritance
-4. CLASS declarations and SELECT TYPE
-5. VOLATILE/PROTECTED/PARAMETER attributes
-6. INTERFACE blocks with IMPORT statements
-7. Module CONTAINS sections
-8. Basic PRINT statement support
-
-### 📋 Future Work (Separate PRs)
-See GitHub Issues #23-#27 for detailed tracking:
-- Type-bound procedures and DEFERRED methods
-- ASSOCIATE and BLOCK constructs  
-- PROGRAM unit fixes
-- Advanced polymorphism
-- Full C interoperability
+The Fortran 2003 grammar builds on the earlier standards in this
+repository (F77 → F90 → F95 → F2003), supporting both fixed‑form and
+free‑form code and reusing common rules via ANTLR grammar imports.
 
 ## Usage
 
@@ -180,4 +158,7 @@ Despite limitations, the F2003 grammar can parse:
 
 **Keyword Conflicts**: Some F2003 keywords like `RESULT` require special handling as identifiers in variable contexts. The grammar includes `identifier_or_keyword` rules to handle this automatically.
 
-For production use, most F2003 features are now available and tested. Core OOP functionality and procedure pointers are complete and production-ready.
+For practical use, many important F2003 features are available and
+tested here, especially core OOP functionality and procedure pointers.
+Some advanced constructs described in the standard remain unimplemented
+or untested; these should be tracked as individual GitHub issues.

@@ -4,40 +4,41 @@ A comprehensive, modular ANTLR4-based implementation of FORTRAN/Fortran language
 
 ## Project Overview
 
-This repository implements a complete grammar hierarchy for all FORTRAN/Fortran standards, designed with:
+This repository implements an ANTLR4 grammar hierarchy for many FORTRAN/Fortran standards, designed with:
 - **Modular inheritance** - Each standard builds upon its predecessor
-- **No duplication** - Shared constructs defined once in SharedCore
-- **Historical accuracy** - Each grammar reflects its era's capabilities
+- **Reuse** - Later grammars import and extend earlier ones
+- **Historical orientation** - Grammars are organized by language standard
 - **Clean architecture** - Source/build separation, proper dependencies
 
 ## Grammar Inheritance Chain
 
 ```
-SharedCore (Universal constructs 1957-2025+)
-    ↓
-FORTRAN (1957) → FORTRAN_II (1958) → FORTRAN_IV (1962) → FORTRAN66 → FORTRAN77
-                                                                         ↓
-                                                                    Fortran90
-                                                                         ↓
-                                                    Fortran95 → 2003 → 2008 → 2018 → 2023
-                                                                                      ↓
-                                                                              LazyFortran2025
+FORTRAN (1957) → FORTRAN II (1958) → FORTRAN 66 (1966) → FORTRAN 77 (1977)
+                                                                      ↓
+                                                                 Fortran 90 (1990)
+                                                                      ↓
+                                          Fortran 95 → 2003 → 2008 → 2018 → 2023
 ```
+
+This repository currently implements grammars for:
+
+- FORTRAN (1957, IBM 704)
+- FORTRAN II (1958)
+- FORTRAN 66 (ANSI X3.9‑1966)
+- FORTRAN 77 (1977)
+- Fortran 90, 95, 2003, 2008, 2018 and 2023
+
+FORTRAN IV (1962) is not implemented as a separate grammar; its functionality is represented in the FORTRAN 66 grammar, reflecting the fact that FORTRAN 66 largely standardized the then‑current FORTRAN IV practice.
 
 ## Directory Structure
 
 ```
 standard/
 ├── grammars/           # Grammar source files (.g4)
-│   ├── shared_core/    # Universal constructs
-│   ├── FORTRAN/        # Original 1957 FORTRAN
-│   └── ...             # Other standards
-├── tests/              # Test suites
-│   └── shared_core/    # Comprehensive validation tests
-├── scripts/            # Build and utility scripts
-│   └── build_grammar.sh
-├── build/              # Generated parser/lexer files (git-ignored)
-└── validation/         # Reference grammars and validation tools
+├── tests/              # Test suites grouped by standard
+├── scripts/            # Helper / validation scripts
+├── tools/              # Extra utilities
+└── validation/         # External grammar validation tools
 ```
 
 ## Quick Start
@@ -82,76 +83,45 @@ make help
 make test
 ```
 
-Alternative manual build (if needed):
-```bash
-# Build SharedCore (foundation)
-./scripts/build_grammar.sh shared_core
-
-# Build FORTRAN (1957)
-./scripts/build_grammar.sh FORTRAN
-
-# Generated files appear in build/
-```
-
 ### Running Tests
 
 ```bash
 # Run all tests
 python -m pytest tests/ -v
-
-# Run specific test suite
-python tests/shared_core/test_comprehensive_validation.py
 ```
 
 ## Implementation Status
 
-| Standard | Status | Tests | Description |
-|----------|--------|-------|-------------|
-| FORTRAN (1957) | ✅ Complete | 65/65 ✅ | Original IBM 704 language - foundational constructs |
-| FORTRAN II (1958) | ✅ Complete | 5/5 ✅ | Independent compilation, FUNCTION/SUBROUTINE |
-| FORTRAN IV (1962) | ✅ Complete | 13/13 ✅ | LOGICAL data type, enhanced operators |
-| FORTRAN 66 (1966) | ✅ Complete | 6/6 ✅ | First ANSI standard - machine independence |
-| FORTRAN 77 (1977) | ✅ Complete | 11/11 ✅ | CHARACTER type, IF-THEN-ELSE, structured programming |
-| Fortran 90 (1990) | ✅ Complete | 20/20 ✅ | Free-form, modules, dynamic arrays, WHERE constructs |
-| Fortran 95 (1995) | ✅ Complete | 26/26 ✅ | FORALL constructs, enhanced intrinsics |
-| Fortran 2003 (2003) | ✅ Complete | 64/64 ✅ | Object-oriented programming, C interoperability |
-| Fortran 2008 (2008) | ✅ Complete | 20/20 ✅ | Coarrays, submodules, DO CONCURRENT |
-| Fortran 2018 (2018) | ✅ Complete | 8/8 ✅ | Teams, events, ERROR STOP enhancements |
-| Fortran 2023 (2023) | ✅ Complete | 16/16 ✅ | Generics, conditional expressions, enhanced parallel features |
-| **Total** | **✅ ALL COMPLETE** | **254/254 ✅** | **Complete FORTRAN/Fortran grammar hierarchy** |
+This project provides grammars and tests for many Fortran standards, but it does **not** implement every feature from each ISO standard and does **not** contain a separate FORTRAN IV grammar. The table below describes the state of the implementation in this repository (not the full language specifications):
+
+| Standard | Implemented here? | Tests present? | Notes |
+|----------|-------------------|----------------|-------|
+| FORTRAN (1957, IBM 704) | Yes (historical core subset) | Yes (`tests/FORTRAN`) | Fixed‑form syntax; arithmetic IF; DO loops; GOTO; I/O. Grammar is an explicitly documented historical stub rather than a full reconstruction of the original compiler. |
+| FORTRAN II (1958) | Yes | Yes (`tests/FORTRANII`) | Adds user‑written subroutines and functions (`SUBROUTINE`, `FUNCTION`, `CALL`, `RETURN`) and `COMMON` blocks, matching the historical FORTRAN II enhancements. |
+| FORTRAN 66 (1966) | Yes | Yes (`tests/FORTRAN66`) | Represents the first ANSI Fortran standard, incorporating the FORTRAN IV features such as LOGICAL, DOUBLE PRECISION and COMPLEX into a machine‑independent standard. |
+| FORTRAN 77 (1977) | Yes | Yes (`tests/FORTRAN77`) | Adds the CHARACTER type, block `IF ... THEN ... ELSE ... ENDIF`, PARAMETER, SAVE and other features; coverage is representative but not exhaustive. |
+| Fortran 90 (1990) | Yes | Extensive (`tests/Fortran90`) | Modern foundation: free‑form source, modules, derived types, array operations, dynamic arrays, enhanced control constructs (`SELECT CASE`, `WHERE`), etc. |
+| Fortran 95 (1995) | Yes | No dedicated suite yet | Grammar extends F90 with FORALL, enhancements to WHERE and additional intrinsics; tests are still to be written. |
+| Fortran 2003 (2003) | Yes | Extensive (`tests/Fortran2003`) | Adds object‑oriented features, C interoperability, procedure pointers, IEEE arithmetic support, etc. See `grammars/fortran_2003_limitations.md` for known gaps. |
+| Fortran 2008 (2008) | Yes | Present (`tests/Fortran2008`) | Introduces coarrays, submodules, `DO CONCURRENT`, new intrinsics and kinds. See `grammars/fortran_2008_limitations.md`. |
+| Fortran 2018 (2018) | Yes | Present (`tests/Fortran2018`) | Extends coarray parallelism with teams, events and related features. See `grammars/fortran_2018_limitations.md` for current coverage. |
+| Fortran 2023 (2023) | Yes | Present (`tests/Fortran2023`) | Adds features such as improved enumerations, conditional expressions and further intrinsic enhancements. Current support is intentionally minimal and evolving. |
+
+At the moment the test suite consists of roughly 270 tests across these standards, and all of them pass after generating the grammars with ANTLR.
 
 ## Key Features
 
-### SharedCore
-- Arithmetic operators (+, -, *, /, **)
-- Relational operators (.EQ., .NE., .LT., .LE., .GT., .GE.)
-- Control flow (IF, GOTO, DO, CONTINUE, STOP, END)
-- I/O operations (READ, WRITE)
-- Correct operator precedence and associativity
-
 ### FORTRAN (1957)
-- Fixed-form source (punch cards)
-- Arithmetic IF (three-way branch)
-- Computed GOTO
-- FORMAT statements
-- Hollerith constants (nHtext)
-- DIMENSION, EQUIVALENCE, COMMON
-- FREQUENCY optimization hints
 
-### Complete Implementation Status
-**✅ ALL STANDARDS FULLY IMPLEMENTED:**
-- **FORTRAN (1957)**: Punch card era constructs, arithmetic IF, computed GOTO
-- **FORTRAN II-IV**: Enhanced data types, independent compilation 
-- **FORTRAN 66-77**: Standardization, structured programming, CHARACTER type
-- **Fortran 90**: Revolutionary free-form syntax, modules, dynamic arrays
-- **Fortran 95**: FORALL constructs, enhanced WHERE statements
-- **Fortran 2003**: Complete object-oriented programming, C interoperability
-- **Fortran 2008**: Coarrays, submodules, DO CONCURRENT parallelism
-- **Fortran 2018**: Teams, events, enhanced error handling
-- **Fortran 2023**: Generics, conditional expressions, latest ISO standard
+Historically, the original IBM 704 FORTRAN provided fixed‑form source code, arithmetic expressions, DO loops, conditional branching with arithmetic IF, computed GOTOs, FORMAT‑driven I/O and related features. In this repository the FORTRAN grammar focuses on that core statement set and serves as the base of the inheritance chain.
 
-**Production Ready For:**
-All FORTRAN/Fortran code from 1957 to 2023 - complete historical coverage
+### FORTRAN II (1958)
+
+FORTRAN II added user‑written subprograms and shared storage:
+
+- `SUBROUTINE` / `FUNCTION` / `CALL` / `RETURN` statements for separately compiled procedures
+- `COMMON` blocks for sharing storage between program units
+- Hollerith constants (`nHtext`) for representing character data
 
 ## Development
 
@@ -173,14 +143,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## Comprehensive Validation
 
-The project includes complete test coverage:
-- **254 unit tests** covering all standards (ALL PASSING ✅)
-- **65 FORTRAN (1957) tests** - foundational constructs validated
-- **64 Fortran 2003 tests** - complete OOP and modern features 
-- **Historical accuracy testing** - real code from each era
-- **Operator precedence validation** across all standards
-- **Parse tree semantic analysis** for correctness
-- **Cross-standard compatibility** testing
+The project includes a growing test suite:
+- On the order of 270 unit tests across the implemented standards (all currently passing)
+- Historical code examples from different eras
+- Operator‑precedence validation in the older dialects
+- Parse‑tree checks for selected modern constructs
+- Cross‑standard compatibility testing where inheritance is involved
 
 ## License
 

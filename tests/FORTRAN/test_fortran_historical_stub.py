@@ -7,14 +7,15 @@ This is a MINIMAL test suite for the stub - full testing deferred to Phase 2.
 
 Test Philosophy:
 - Verify compilation and basic token recognition
-- Ensure integration with SharedCoreLexer/Parser works
-- Validate that stub can parse basic 1957 FORTRAN constructs
-- Document historical accuracy (not full validation)
+- Ensure the shared core of tokens and rules can be exercised through
+  the FORTRAN 1957 grammar
+- Validate that the stub can parse basic 1957-style FORTRAN constructs
+- Document historical context (not full validation)
 
 Historical Context:
-The 1957 FORTRAN was the world's first high-level programming language.
-These tests preserve examples from the original IBM 704 era for educational
-and historical research purposes.
+The 1957 FORTRAN system for the IBM 704 was one of the earliest widely
+used high-level programming languages. These tests preserve examples
+from that era for educational and historical research purposes.
 """
 
 import sys
@@ -280,7 +281,7 @@ class TestFORTRANHistoricalAccuracy:
         assert FORTRANParser is not None
 
     def test_shared_core_integration(self):
-        """Verify integration with SharedCoreLexer/Parser."""
+        """Verify integration with the shared core token set."""
         # Test that inherited tokens work
         test_input = "A = B + C * D"
         
