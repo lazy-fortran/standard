@@ -36,6 +36,40 @@ def parse_f2003(code: str):
 class TestF2003Polymorphism:
     """Advanced polymorphism tests using existing F2003 grammar rules."""
 
+    def test_nested_select_type_with_class_and_default(self):
+        """
+        Nested SELECT TYPE with TYPE IS, CLASS IS and CLASS DEFAULT.
+
+        This exercises:
+        - CLASS(*) selector in the outer SELECT TYPE
+        - TYPE IS and CLASS IS guards
+        - Nested SELECT TYPE inside a CLASS IS branch
+        """
+        code = """program poly_nested
+  implicit none
+  class(*), allocatable :: obj
+
+  select type (obj)
+  type is (integer)
+    print *, 'integer'
+  class is (circle_t)
+    print *, 'circle'
+    select type (obj2 => obj)
+    class is (circle_t)
+      print *, 'nested circle'
+    class default
+      print *, 'nested default'
+    end select
+  class default
+    print *, 'outer default'
+  end select
+
+end program poly_nested
+"""
+        tree, errors, parser = parse_f2003(code)
+        assert errors == 0, f"Nested SELECT TYPE construct failed with {errors} errors"
+        assert tree is not None
+
     def test_select_type_with_integer_and_default(self):
         """
         Standard SELECT TYPE construct with TYPE IS and CLASS DEFAULT.
