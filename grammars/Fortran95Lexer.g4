@@ -52,16 +52,28 @@ END_FORALL      : ('e'|'E') ('n'|'N') ('d'|'D') WS+
 // Uses existing ASSIGN token - no new token needed
 
 // ====================================================================
-// FORTRAN 95 INTRINSIC FUNCTIONS (ADDITIONS)
+// FORTRAN 90/95 INTRINSIC FUNCTIONS (MODERN INTRINSICS)
 // ====================================================================
-
-// Additional array functions (F95 enhancements)
+//
+// NOTE ON HISTORY:
+// - CEILING, FLOOR, MODULO and the bit intrinsics below were
+//   introduced as intrinsic procedures in Fortran 90 and remain
+//   available in Fortran 95 and later.
+// - Fortran 95 extends some of these (for example CEILING/FLOOR
+//   with a KIND keyword argument) and adds new procedures such
+//   as CPU_TIME and NULL().
+//
+// In this lexer we group these together as the “modern intrinsic”
+// set that becomes part of the common core for F90/F95 and later
+// standards.
+//
+// Additional array-related functions (Fortran 90, extended in F95)
 CEILING_INTRINSIC     : ('c'|'C') ('e'|'E') ('i'|'I') ('l'|'L') 
                         ('i'|'I') ('n'|'N') ('g'|'G') ;
 FLOOR_INTRINSIC       : ('f'|'F') ('l'|'L') ('o'|'O') ('o'|'O') ('r'|'R') ;
 MODULO_INTRINSIC      : ('m'|'M') ('o'|'O') ('d'|'D') ('u'|'U') ('l'|'L') ('o'|'O') ;
 
-// Bit manipulation functions (F95 additions)
+// Bit manipulation functions (introduced in Fortran 90, used in F95)
 BIT_SIZE_INTRINSIC    : ('b'|'B') ('i'|'I') ('t'|'T') '_' 
                         ('s'|'S') ('i'|'I') ('z'|'Z') ('e'|'E') ;
 BTEST_INTRINSIC       : ('b'|'B') ('t'|'T') ('e'|'E') ('s'|'S') ('t'|'T') ;
@@ -75,13 +87,15 @@ ISHFT_INTRINSIC       : ('i'|'I') ('s'|'S') ('h'|'H') ('f'|'F') ('t'|'T') ;
 ISHFTC_INTRINSIC      : ('i'|'I') ('s'|'S') ('h'|'H') ('f'|'F') ('t'|'T') ('c'|'C') ;
 NOT_INTRINSIC         : ('n'|'N') ('o'|'O') ('t'|'T') ;
 
-// Transfer function (F95 addition)
+// Transfer function (introduced in Fortran 90)
 TRANSFER_INTRINSIC    : ('t'|'T') ('r'|'R') ('a'|'A') ('n'|'N') 
                         ('s'|'S') ('f'|'F') ('e'|'E') ('r'|'R') ;
 
-// CPU timing function (F95 addition)
+// CPU timing function (new in Fortran 95)
 CPU_TIME_INTRINSIC    : ('c'|'C') ('p'|'P') ('u'|'U') '_' 
                         ('t'|'T') ('i'|'I') ('m'|'M') ('e'|'E') ;
+// System clock (intrinsic available since Fortran 90, kept here as
+// part of the shared F90/F95+ “modern” intrinsic set)
 SYSTEM_CLOCK_INTRINSIC : ('s'|'S') ('y'|'Y') ('s'|'S') ('t'|'T') ('e'|'E') ('m'|'M') 
                          '_' ('c'|'C') ('l'|'L') ('o'|'O') ('c'|'C') ('k'|'K') ;
 
@@ -96,14 +110,13 @@ SYSTEM_CLOCK_INTRINSIC : ('s'|'S') ('y'|'Y') ('s'|'S') ('t'|'T') ('e'|'E') ('m'|
 // The list below describes the intended coverage; it is not a formal
 // statement of complete ISO/IEC 1539-1:1997 conformance.
 //
-// MAJOR F95 FEATURES TARGETED:
-// ✅ FORALL constructs and statements
-// ✅ Enhanced WHERE/ELSEWHERE constructs
-// ✅ Enhanced PURE/ELEMENTAL procedures
-// ✅ New intrinsic functions (CEILING, FLOOR, MODULO, etc.)
-// ✅ Bit manipulation functions
-// ✅ System timing functions
-// ✅ Transfer function for type conversion
+// MAJOR F95 FEATURES TARGETED (IN THIS LEXER):
+// ✅ FORALL constructs and statements (added in F95)
+// ✅ Enhanced WHERE/ELSEWHERE constructs and nesting (F95 refinements)
+// ✅ Enhanced PURE/ELEMENTAL user procedures (F95 additions)
+// ✅ Modern intrinsic functions from the F90/F95 core
+//    (CEILING, FLOOR, MODULO, bit intrinsics, TRANSFER, etc.)
+// ✅ CPU_TIME intrinsic (new in F95) and related timing intrinsics
 //
 // BACKWARD COMPATIBILITY:
 // ✅ Complete F90 compatibility through inheritance
