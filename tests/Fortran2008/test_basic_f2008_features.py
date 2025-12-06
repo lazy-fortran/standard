@@ -90,18 +90,29 @@ end module test"""
         assert tree is not None, "DO CONCURRENT failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for DO CONCURRENT, got {errors}"
 
-    @pytest.mark.skip(reason="Fortran 2008 intrinsic procedure call syntax not yet fully implemented (see issue #86)")
     def test_enhanced_intrinsic_tokens(self):
-        """Test that F2008 intrinsic function tokens are recognized (future strict test)"""
+        """Test that F2008 intrinsic function tokens are recognized"""
         code = """module test_intrinsics
     implicit none
+    integer :: n, int_result
     contains
     subroutine test_functions()
         real :: x, result_val
         x = 1.0
         result_val = bessel_j0(x)
+        result_val = bessel_j1(x)
+        result_val = bessel_jn(n, x)
+        result_val = bessel_y0(x)
+        result_val = bessel_y1(x)
+        result_val = bessel_yn(n, x)
         result_val = erf(x)
+        result_val = erfc(x)
         result_val = gamma(x)
+        result_val = log_gamma(x)
+        result_val = norm2((/ x, 2.0*x /))
+        int_result = findloc((/ x, 2.0*x /), x)
+        int_result = storage_size(x)
+        int_result = parity((/ .true., .false., .true. /))
     end subroutine test_functions
 end module test_intrinsics"""
 
