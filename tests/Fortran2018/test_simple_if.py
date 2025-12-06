@@ -10,7 +10,7 @@ from antlr4 import *
 from Fortran2018Lexer import Fortran2018Lexer  
 from Fortran2018Parser import Fortran2018Parser
 
-def test_parser_method(code, method_name):
+def run_parser_method(code, method_name):
     print(f"Testing method: {method_name}")
     input_stream = InputStream(code)
     lexer = Fortran2018Lexer(input_stream)
@@ -40,12 +40,12 @@ endif"""
     
     for method in test_methods:
         if hasattr(Fortran2018Parser, method):
-            test_parser_method(simple_if, method)
+            run_parser_method(simple_if, method)
         else:
             print(f"Method {method} not found")
     
     print("\nTesting execution part:")
-    test_parser_method(simple_if, 'execution_part')
+    run_parser_method(simple_if, 'execution_part')
     
     print("\nTesting executable construct:")
-    test_parser_method(simple_if, 'executable_construct_f2018')
+    run_parser_method(simple_if, 'executable_construct_f2018')

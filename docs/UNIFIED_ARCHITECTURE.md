@@ -4,6 +4,8 @@
 
 The LazyFortran2025 standard implements a **revolutionary unified grammar architecture** that supports both fixed-form and free-form Fortran syntax within a single lexer/parser per standard. This eliminates the complexity of maintaining separate format-specific implementations while providing complete backward compatibility.
 
+> **Note:** This document describes the *intended* architecture. In the current repository there is no separate `SharedCoreLexer` / `SharedCoreParser` grammar; instead the existing grammars (starting from `FORTRANLexer.g4` and continuing through Fortran 90 and later) play that role in practice. The inheritance diagrams below should therefore be read as design guidance rather than a literal description of the files on disk.
+
 ## Architecture Principles
 
 ### 1. Unified Format Support
