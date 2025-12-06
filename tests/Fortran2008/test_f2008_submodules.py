@@ -16,7 +16,6 @@ from antlr4 import *
 from Fortran2008Lexer import Fortran2008Lexer
 from Fortran2008Parser import Fortran2008Parser
 
-@pytest.mark.skip(reason="Fortran 2008 submodule grammar is not yet fully implemented (see issue #85)")
 class TestF2008Submodules:
     """Test F2008 submodule functionality"""
     
@@ -34,7 +33,8 @@ class TestF2008Submodules:
         """Test basic submodule declaration syntax"""
         code = """submodule (parent_mod) child_sub
     implicit none
-end submodule child_sub"""
+end submodule child_sub
+"""
         tree, errors = self.parse_code(code)
         assert tree is not None, "Basic submodule failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for basic submodule, got {errors}"
@@ -43,7 +43,8 @@ end submodule child_sub"""
         """Test submodule with parent submodule reference"""
         code = """submodule (parent_mod:parent_sub) child_sub
     implicit none
-end submodule child_sub"""
+end submodule child_sub
+"""
         tree, errors = self.parse_code(code)
         assert tree is not None, "Parent hierarchy failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for parent hierarchy, got {errors}"
@@ -54,14 +55,15 @@ end submodule child_sub"""
     implicit none
 contains
     module subroutine calculate_result()
-        print *, 'Calculation performed in submodule'  
+        print *, 'Calculation performed in submodule'
     end subroutine calculate_result
-    
+
     module function compute_value() result(val)
         real :: val
         val = 42.0
     end function compute_value
-end submodule implementation_sub"""
+end submodule implementation_sub
+"""
         tree, errors = self.parse_code(code)
         assert tree is not None, "Procedure submodule failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for procedure submodule, got {errors}"
@@ -70,7 +72,8 @@ end submodule implementation_sub"""
         """Test deeply nested submodule references"""
         code = """submodule (grandparent_mod:parent_sub:child_sub) grandchild_sub
     implicit none
-end submodule grandchild_sub"""
+end submodule grandchild_sub
+"""
         tree, errors = self.parse_code(code)
         assert tree is not None, "Nested submodule failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for nested submodule, got {errors}"

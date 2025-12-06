@@ -30,7 +30,7 @@ MEMORY           : M E M O R Y ;
 
 // Submodules (NEW in F2008)
 SUBMODULE        : S U B M O D U L E ;
-END_SUBMODULE    : E N D '_' S U B M O D U L E ;
+END_SUBMODULE    : E N D WS+ S U B M O D U L E ;
 
 // Enhanced DO Constructs (NEW in F2008)
 DO_CONCURRENT    : D O '_' C O N C U R R E N T ;

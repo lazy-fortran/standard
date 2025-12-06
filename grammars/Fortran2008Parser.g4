@@ -83,7 +83,8 @@ end_submodule_stmt
     ;
 
 parent_identifier
-    : IDENTIFIER (COLON IDENTIFIER)?  // parent_module_name[:parent_submodule_name]
+    : IDENTIFIER (COLON IDENTIFIER)*
+      // parent_module_name[:parent_submodule_name[:...]]
     ;
 
 submodule_identifier
@@ -242,10 +243,39 @@ lhs_expression
 
 // Override the F2003 module_subprogram rule so that module-contained
 // procedures use the F2008-aware subprogram rules and therefore can
-// contain coarray and SYNC constructs.
+// contain coarray and SYNC constructs.  For F2008 submodules we also
+// need to support "separate module procedure" definitions that start
+// with MODULE SUBROUTINE / MODULE FUNCTION.
 module_subprogram
     : function_subprogram_f2008
     | subroutine_subprogram_f2008
+    | module_subroutine_subprogram_f2008
+    | module_function_subprogram_f2008
+    ;
+
+// Separate module subroutine definition inside a submodule
+module_subroutine_subprogram_f2008
+    : module_subroutine_stmt_f2008 specification_part_f2008?
+      execution_part_f2008? internal_subprogram_part? end_subroutine_stmt
+    ;
+
+// Separate module function definition inside a submodule
+module_function_subprogram_f2008
+    : module_function_stmt_f2008 specification_part_f2008?
+      execution_part_f2008? internal_subprogram_part? end_function_stmt
+    ;
+
+// MODULE SUBROUTINE statement (F2008 submodules)
+module_subroutine_stmt_f2008
+    : MODULE SUBROUTINE IDENTIFIER
+      (LPAREN dummy_arg_name_list? RPAREN)?
+      binding_spec? NEWLINE
+    ;
+
+// MODULE FUNCTION statement (F2008 submodules)
+module_function_stmt_f2008
+    : MODULE FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN
+      suffix? binding_spec? NEWLINE
     ;
 
 // ============================================================================
