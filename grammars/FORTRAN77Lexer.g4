@@ -51,8 +51,9 @@ DATA            : D A T A ;
 EXTERNAL        : E X T E R N A L ;
 INTRINSIC       : I N T R I N S I C ;
 
-// Enhanced loop control (FORTRAN 77 improvements)
-// DO loops with modern END DO (though labels still supported)
+// Enhanced loop control (common extension)
+// Standard FORTRAN 77 terminated DO loops using labeled statements.
+// ENDDO is a widely used extension and is included here for convenience.
 ENDDO           : E N D D O ;
 
 // I/O enhancements

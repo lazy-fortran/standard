@@ -19,7 +19,7 @@ class TestErrorListener(ErrorListener):
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         self.errors.append(f"Line {line}:{column}: {msg}")
 
-def test_if_construct(code, description):
+def run_if_construct_case(code, description):
     print(f"Testing: {description}")
     print(f"Code: {code}")
     
@@ -63,6 +63,6 @@ end program test"""
     print("-" * 50)
 
 if __name__ == "__main__":
-    test_if_construct("if (x > 0) then\nendif", "Simple IF-ENDIF")
-    test_if_construct("if (x > 0) then\nend if", "Simple IF-END IF")
-    test_if_construct("   if (mydummy > 90.and.gggg > 0) then\n   endif\n   end", "Missing-spaces fragment")
+    run_if_construct_case("if (x > 0) then\nendif", "Simple IF-ENDIF")
+    run_if_construct_case("if (x > 0) then\nend if", "Simple IF-END IF")
+    run_if_construct_case("   if (mydummy > 90.and.gggg > 0) then\n   endif\n   end", "Missing-spaces fragment")

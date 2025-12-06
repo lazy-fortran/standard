@@ -26,8 +26,11 @@ import FORTRAN77Lexer;  // Inherit F77 (1977) constructs
 // - Enhanced control flow (SELECT CASE, WHERE)
 // - Modern I/O (NAMELIST, non-advancing)
 //
-// INHERITANCE ARCHITECTURE:
-// SharedCoreLexer → Fortran90Lexer → Fortran95Lexer → F2003+ standards
+// INHERITANCE ARCHITECTURE (IN THIS REPO):
+// FORTRAN / FORTRANII / FORTRAN66 / FORTRAN77
+//   → Fortran90Lexer
+//   → Fortran95Lexer
+//   → F2003+ standards
 //
 // ====================================================================
 
@@ -289,24 +292,17 @@ NEWLINE    : [\r\n]+ ;
 fragment WS : [ \t]+ ;
 
 // ====================================================================
-// FORTRAN 90 LEXER STATUS  
+// FORTRAN 90 LEXER NOTES
 // ====================================================================
 //
-// IMPLEMENTATION STATUS: Complete unified F90 lexer
-// FORMAT SUPPORT: Both fixed-form (.f) and free-form (.f90) in one grammar
-// ARCHITECTURE: Clean single inheritance from SharedCoreLexer
-// INNOVATIONS: All major F90 language features tokenized
+// This lexer is intended to support both fixed-form (.f, .for) and
+// free-form (.f90+) Fortran 90 source in a single grammar, and to
+// provide tokens for the major F90 language features exercised by the
+// tests in this repository.
 //
-// BACKWARD COMPATIBILITY:
-// - Supports all F77 constructs through SharedCoreLexer inheritance
-// - Fixed-form comment and continuation detection
-// - Column-sensitive parsing (when activated by parser)
-//
-// FORWARD COMPATIBILITY: 
-// - Foundation for F95, F2003, F2008, F2018, F2023, LazyFortran2025
-// - Clean extension points for new features
-//
-// This unified lexer solves the dual-format requirement elegantly
-// while maintaining clean modular architecture for future standards.
+// It is not a formally validated, complete implementation of every
+// detail of ISO/IEC 1539-1:1991, but it provides a practical basis for
+// experimenting with and testing F90+, and for serving as a base lexer
+// for later standards.
 //
 // ====================================================================

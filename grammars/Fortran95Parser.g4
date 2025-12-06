@@ -27,8 +27,11 @@ options {
 // - Pointer association enhancements
 // - Extended intrinsic functions
 //
-// INHERITANCE ARCHITECTURE:
-// SharedCoreParser → Fortran90Parser → Fortran95Parser → F2003+ standards
+// INHERITANCE ARCHITECTURE (IN THIS REPO):
+// FORTRAN / FORTRANII / FORTRAN66 / FORTRAN77
+//   → Fortran90Parser
+//   → Fortran95Parser
+//   → F2003+ standards
 //
 // ====================================================================
 
@@ -531,15 +534,17 @@ function_reference_f95
     ;
 
 // ====================================================================
-// FORTRAN 95 PARSER STATUS
+// FORTRAN 95 PARSER NOTES
 // ====================================================================
 //
-// IMPLEMENTATION STATUS: Complete F95 language implementation
-// FORMAT SUPPORT: Inherits unified fixed/free format from Fortran90Parser
-// ARCHITECTURE: Clean single inheritance from Fortran90Parser
-// INNOVATIONS: All F95 enhancements implemented
+// This parser extends the Fortran 90 parser with additional rules for
+// the F95 features modelled here (FORALL, WHERE enhancements and
+// related intrinsic procedures).
 //
-// MAJOR F95 FEATURES IMPLEMENTED:
+// The list below outlines the intended coverage of this grammar, based
+// on the implementation rather than a formal conformance audit.
+//
+// MAJOR F95 FEATURES TARGETED:
 // ✅ FORALL constructs and statements (advanced array operations)
 // ✅ Enhanced WHERE constructs with multiple ELSEWHERE
 // ✅ Enhanced PURE and ELEMENTAL procedure support

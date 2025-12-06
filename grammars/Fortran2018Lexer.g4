@@ -95,5 +95,6 @@ KIND             : K I N D ;
 // ============================================================================
 // F2018 Fragment Helpers (inherit all from F2008)
 // ============================================================================
-// All fragment rules are inherited from F2008, F2003, F95, F90, F77, 
-// FORTRAN_II, FORTRAN, and SharedCoreLexer
+// All fragment rules are inherited from the earlier lexers in this
+// repository (FORTRAN, FORTRANII, FORTRAN66, FORTRAN77, Fortran90,
+// Fortran95, Fortran2003 and Fortran2008).
