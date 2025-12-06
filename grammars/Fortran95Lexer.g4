@@ -91,11 +91,10 @@ SYSTEM_CLOCK_INTRINSIC : ('s'|'S') ('y'|'Y') ('s'|'S') ('t'|'T') ('e'|'E') ('m'|
 //
 // This lexer inherits the unified fixed/free-format support from
 // Fortran90Lexer and adds tokens for the F95 features that are
-// explicitly modelled in this repository.
+// explicitly modelled and tested in this repository.
 //
-// The comments below describe the intended coverage; they should not be
-// interpreted as a formal claim of complete ISO/IEC 1539-1:1997
-// conformance.
+// The list below describes the intended coverage; it is not a formal
+// statement of complete ISO/IEC 1539-1:1997 conformance.
 //
 // MAJOR F95 FEATURES TARGETED:
 // ✅ FORALL constructs and statements
@@ -116,7 +115,7 @@ SYSTEM_CLOCK_INTRINSIC : ('s'|'S') ('y'|'Y') ('s'|'S') ('t'|'T') ('e'|'E') ('m'|
 // ✅ Clean extension points for parameterized types
 // ✅ Ready for C interoperability enhancements
 //
-// This lexer provides complete F95 language support while maintaining
-// the unified format architecture from F90.
+// This lexer provides practical F95 language support for the features
+// above while maintaining the unified format architecture from F90.
 //
 // ====================================================================
