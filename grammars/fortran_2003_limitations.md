@@ -130,6 +130,44 @@ These features are tracked in separate GitHub issues for future implementation:
 - Tests explicitly verify and document known limitations
 - **Status**: Basic C interoperability works; advanced features pending
 
+### 8. Defined Derived-Type I/O (Issue #68 - PARTIALLY COMPLETE)
+
+**Working Features:**
+- ✅ Generic specifications for defined I/O procedures:
+  - `INTERFACE READ(FORMATTED) / WRITE(FORMATTED|UNFORMATTED)`
+  - Type-bound `GENERIC :: READ(...) / WRITE(...) => proc` inside derived types
+- ✅ I/O statements that invoke these procedures via:
+  - Regular `READ` / `WRITE` statements with derived-type objects
+  - Explicit format strings that contain DT edit descriptors, e.g.
+    character literals of the form `'(DT\"name\"(10,2))'`
+    (treated as opaque strings by the grammar).
+
+**Known Limitations:**
+- ⚠️ The DT edit descriptor syntax itself is **not** parsed structurally.
+  It appears only inside character-literal format strings, which this
+  grammar models as single string tokens rather than a full sub-grammar
+  of edit descriptors.
+- ⚠️ The grammar intentionally does **not** attempt to enforce the full
+  Fortran 2003 semantics for defined derived-type I/O (such as the
+  required dummy argument lists of the defined I/O procedures).
+- ⚠️ Vendor-specific or non-standard I/O control specifiers remain
+  accepted through the generic `IDENTIFIER = primary` alternative in
+  `f2003_io_spec`; syntactic acceptance here does not imply standard
+  conformance.
+
+**Test Status:**
+- Positive tests in `tests/Fortran2003/test_issue68_defined_io.py` cover:
+  - Type-bound generics with `WRITE(FORMATTED)`
+  - Interface-based generics with `WRITE(FORMATTED)` / `WRITE(UNFORMATTED)`
+  - `WRITE` statements using format strings that contain DT edit descriptors
+    as character literals.
+- Negative tests confirm that malformed generic-spec forms such as
+  `WRITE(DT=...)` are rejected by the grammar.
+
+**Status:** Core generic syntax for defined derived-type I/O is implemented
+and tested; detailed DT edit-descriptor parsing and full semantic coverage
+remain out of scope for this grammar.
+
 ## Working Features
 
 ✅ **Fully Functional:**
