@@ -181,6 +181,32 @@ These features are tracked in separate GitHub issues for future implementation:
 and tested; detailed DT edit-descriptor parsing and full semantic coverage
 remain out of scope for this grammar.
 
+### 9. Fixed-form F2003 Features (Issue #72 - SUBSTANTIAL COVERAGE)
+
+**Working Features:**
+- ✅ Fixed-form modules using F2003 features parse correctly, including:
+  - Type-bound procedures inside derived types.
+  - `CLASS(type_name)` and `CLASS(*)` dummy arguments.
+  - `SELECT TYPE` with TYPE IS and CLASS DEFAULT guards.
+  - ASSOCIATE constructs and BLOCK-like structured code.
+  - BIND(C) procedures and `type, bind(c)` derived types.
+- ✅ Fixed-form comments beginning with `C` or `*` and free-form comments
+  beginning with `!` coexist as expected under the unified lexer.
+- ✅ Tests exercise F2003 features written in upper-case, fixed-form style
+  to ensure they follow the same code paths as free-form input.
+
+**Test Status:**
+- Positive tests for fixed-form F2003 code live in:
+  - `tests/Fortran2003/test_fortran_2003_comprehensive.py`
+    (`test_fixed_form_compatibility`)
+  - `tests/Fortran2003/test_issue72_fixed_form_f2003.py`
+
+**Remaining Notes:**
+- ⚠️ Full emulation of historical column semantics (exact column-6
+  continuation, sequence fields 73–80, etc.) is intentionally not modeled.
+  The fixed-form support is aimed at “typical” fixed-layout Fortran that
+  appears in modern code bases rather than archival reconstruction.
+
 ## Working Features
 
 ✅ **Fully Functional:**
