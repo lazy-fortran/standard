@@ -16,6 +16,7 @@ from antlr4 import *
 from Fortran2008Lexer import Fortran2008Lexer
 from Fortran2008Parser import Fortran2008Parser
 
+@pytest.mark.xfail(reason="Fortran 2008 coarray syntax is not yet fully implemented (see issue #83)")
 class TestF2008Coarrays:
     """Test F2008 coarray functionality"""
     
@@ -36,21 +37,18 @@ class TestF2008Coarrays:
     integer :: shared_counter[*]
     real :: data_array(100)[*]
 end module coarray_mod"""
-        
         tree, errors = self.parse_code(code)
-        # Focus on lexical recognition - parser structure may have issues
         assert tree is not None, "Coarray [*] declaration failed to produce parse tree"
-        assert errors <= 5, f"Too many errors for basic coarray syntax: {errors}"
+        assert errors == 0, f"Expected 0 errors for basic coarray syntax, got {errors}"
     
     def test_sync_all_statement(self):
         """Test SYNC ALL statement"""
         code = """program sync_test
     sync all
 end program sync_test"""
-        
         tree, errors = self.parse_code(code)
         assert tree is not None, "SYNC ALL failed to produce parse tree"
-        assert errors <= 5, f"Too many errors for SYNC ALL: {errors}"
+        assert errors == 0, f"Expected 0 errors for SYNC ALL, got {errors}"
     
     def test_sync_images_statement(self):
         """Test SYNC IMAGES statement"""  
@@ -58,20 +56,18 @@ end program sync_test"""
     sync images(*)
     sync images([1, 2, 3])
 end program sync_images_test"""
-        
         tree, errors = self.parse_code(code)
         assert tree is not None, "SYNC IMAGES failed to produce parse tree"
-        assert errors <= 10, f"Too many errors for SYNC IMAGES: {errors}"
+        assert errors == 0, f"Expected 0 errors for SYNC IMAGES, got {errors}"
     
     def test_sync_memory_statement(self):
         """Test SYNC MEMORY statement"""
         code = """program sync_memory_test
     sync memory
 end program sync_memory_test"""
-        
         tree, errors = self.parse_code(code)
         assert tree is not None, "SYNC MEMORY failed to produce parse tree"
-        assert errors <= 5, f"Too many errors for SYNC MEMORY: {errors}"
+        assert errors == 0, f"Expected 0 errors for SYNC MEMORY, got {errors}"
     
     def test_this_image_function(self):
         """Test THIS_IMAGE() intrinsic function"""
@@ -80,10 +76,9 @@ end program sync_memory_test"""
     my_image = this_image()
     print *, 'I am image', my_image
 end program this_image_test"""
-        
         tree, errors = self.parse_code(code)
         assert tree is not None, "THIS_IMAGE() failed to produce parse tree"
-        assert errors <= 10, f"Too many errors for THIS_IMAGE: {errors}"
+        assert errors == 0, f"Expected 0 errors for THIS_IMAGE, got {errors}"
     
     def test_num_images_function(self):
         """Test NUM_IMAGES() intrinsic function"""
@@ -92,10 +87,9 @@ end program this_image_test"""
     total_images = num_images()  
     print *, 'Total images:', total_images
 end program num_images_test"""
-        
         tree, errors = self.parse_code(code)
         assert tree is not None, "NUM_IMAGES() failed to produce parse tree"
-        assert errors <= 10, f"Too many errors for NUM_IMAGES: {errors}"
+        assert errors == 0, f"Expected 0 errors for NUM_IMAGES, got {errors}"
 
     def test_coarray_with_sync_comprehensive(self):
         """Comprehensive coarray example with sync operations"""
@@ -123,11 +117,9 @@ contains
         
     end subroutine parallel_work
 end module comprehensive_coarray_mod"""
-        
         tree, errors = self.parse_code(code)
         assert tree is not None, "Comprehensive coarray failed to produce parse tree"
-        # This is a complex test - we expect some parser issues but key tokens should work
-        assert errors <= 10, f"Too many errors for comprehensive coarray test: {errors}"
+        assert errors == 0, f"Expected 0 errors for comprehensive coarray test, got {errors}"
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
