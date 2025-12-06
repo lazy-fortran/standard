@@ -16,12 +16,17 @@ import Fortran2003Lexer;
 // Coarray Support (NEW in F2008)
 LBRACKET         : '[' ;
 RBRACKET         : ']' ;
+
+// Image intrinsics and SYNC keyword
 THIS_IMAGE       : T H I S '_' I M A G E ;
 NUM_IMAGES       : N U M '_' I M A G E S ;
 SYNC             : S Y N C ;
-SYNC_ALL         : S Y N C '_' A L L ;
-SYNC_IMAGES      : S Y N C '_' I M A G E S ;
-SYNC_MEMORY      : S Y N C '_' M E M O R Y ;
+
+// SYNC image control statements use SYNC followed by a keyword-like specifier.
+// We introduce dedicated tokens for the specifiers to keep the parser simple.
+ALL              : A L L ;
+IMAGES           : I M A G E S ;
+MEMORY           : M E M O R Y ;
 
 // Submodules (NEW in F2008)
 SUBMODULE        : S U B M O D U L E ;

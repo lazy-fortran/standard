@@ -39,13 +39,25 @@ end module test_mod"""
         tree, errors = self.parse_code(code)
         assert errors == 0, f"Basic module inheritance failed: {errors} errors"
     
-    @pytest.mark.skip(reason="Fortran 2008 coarray declarations and sync statements not yet fully implemented (see issue #83)")
     def test_coarray_tokens_recognized(self):
         """Test that F2008 coarray tokens are recognized (future strict test)"""
         # Once issue #83 is fixed, this test should enforce zero syntax errors
         test_cases = [
-            ("module test; integer :: x[*]; end module test", "coarray declaration"),
-            ("program sync_test\n    sync all\nend program sync_test", "sync all statement"),
+            (
+                "module test\n"
+                "  implicit none\n"
+                "  integer :: x[*]\n"
+                "end module test",
+                "coarray declaration",
+            ),
+            (
+                "program sync_test\n"
+                "  implicit none\n"
+                "  integer :: x[*]\n"
+                "  sync all\n"
+                "end program sync_test",
+                "sync all statement",
+            ),
         ]
 
         for code, description in test_cases:
@@ -137,7 +149,6 @@ end module test_contiguous"""
         # Track remaining work in issue #87
         assert errors == 0, f"Expected 0 errors for CONTIGUOUS attribute, got {errors}"
 
-    @pytest.mark.skip(reason="Fortran 2008 image intrinsics rely on full coarray support (see issue #83)")
     def test_image_intrinsics(self):
         """Test coarray intrinsic functions"""
         code = """program coarray_test

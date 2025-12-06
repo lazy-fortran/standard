@@ -115,8 +115,14 @@ declaration_construct_f2008
 // ENHANCED EXECUTION PART (F2008)
 // ============================================================================
 
+// Mirror the F2003 structure: wrap executable constructs with explicit
+// NEWLINE handling so that statement sequencing works correctly.
 execution_part_f2008
-    : executable_construct_f2008*
+    : execution_construct_f2008*
+    ;
+
+execution_construct_f2008
+    : NEWLINE* executable_construct_f2008 NEWLINE*
     ;
 
 // Enhanced executable construct for F2008
@@ -137,7 +143,7 @@ executable_construct_f2008
     | do_construct_f2008              // Enhanced in F2008
     | select_case_construct           // Inherit from F95
     | type_declaration_stmt_f2008     // F2008 allows mixed declarations
-    | executable_construct             // Inherit F2003 constructs
+    | executable_construct            // Inherit F2003 constructs
     ;
 
 // ============================================================================
@@ -170,20 +176,22 @@ sync_construct
     ;
 
 sync_all_stmt
-    : SYNC_ALL (LPAREN sync_stat_list? RPAREN)? NEWLINE
+    : SYNC ALL (LPAREN sync_stat_list? RPAREN)? NEWLINE
     ;
 
 sync_images_stmt
-    : SYNC_IMAGES LPAREN image_set (COMMA sync_stat_list)? RPAREN NEWLINE
+    : SYNC IMAGES LPAREN image_set (COMMA sync_stat_list)? RPAREN NEWLINE
     ;
 
 sync_memory_stmt  
-    : SYNC_MEMORY (LPAREN sync_stat_list? RPAREN)? NEWLINE
+    : SYNC MEMORY (LPAREN sync_stat_list? RPAREN)? NEWLINE
     ;
 
 image_set
     : MULTIPLY                        // * (all images)
-    | expr_f90                        // Single image or array
+    | expr_f90                        // Single image or scalar expression
+    | LSQUARE expr_f90 (COMMA expr_f90)* RSQUARE  // Explicit image set [i1, i2, ...]
+    | LBRACKET expr_f90 (COMMA expr_f90)* RBRACKET
     ;
 
 sync_stat_list
@@ -193,6 +201,51 @@ sync_stat_list
 sync_stat
     : STAT EQUALS variable_f90
     | ERRMSG EQUALS variable_f90
+    ;
+
+// --------------------------------------------------------------------------
+// Override core F2003 variable and entity rules to add coarray awareness.
+// --------------------------------------------------------------------------
+
+// Enhanced entity declaration to support coarray codimensions in F2008.
+// This mirrors the F2003 entity_decl rule but adds an optional coarray_spec.
+entity_decl
+    : identifier_or_keyword
+      (LPAREN array_spec RPAREN)?
+      coarray_spec?
+      (EQUALS expr_f2003)?
+    ;
+
+// Enhanced left-hand side expression with optional coarray codimensions.
+// This mirrors the F2003 lhs_expression rule but adds a trailing coarray_spec.
+lhs_expression
+    : identifier_or_keyword                 // Simple variable
+      coarray_spec?
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN
+      coarray_spec?                         // Array element
+    | identifier_or_keyword PERCENT identifier_or_keyword
+      coarray_spec?                         // Component
+    | identifier_or_keyword PERCENT identifier_or_keyword
+      LPAREN actual_arg_list? RPAREN
+      coarray_spec?                         // Component array/method
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN
+      PERCENT identifier_or_keyword
+      coarray_spec?                         // Array element's component
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN
+      PERCENT identifier_or_keyword LPAREN actual_arg_list? RPAREN
+      coarray_spec?                         // Array element's component method
+    ;
+
+// ============================================================================  
+// MODULE SUBPROGRAM BINDING (F2008)
+// ============================================================================
+
+// Override the F2003 module_subprogram rule so that module-contained
+// procedures use the F2008-aware subprogram rules and therefore can
+// contain coarray and SYNC constructs.
+module_subprogram
+    : function_subprogram_f2008
+    | subroutine_subprogram_f2008
     ;
 
 // ============================================================================
@@ -340,10 +393,23 @@ image_function_call
 // ENHANCED PRIMARY EXPRESSIONS (F2008)
 // ============================================================================
 
-// Override primary to include F2008 enhancements
-primary_f2008
-    : primary                         // Inherit F2003 primary expressions
-    | intrinsic_function_call_f2008   // Enhanced intrinsic functions
+// Override the F2003 primary rule to include F2008 intrinsics via
+// intrinsic_function_call_f2008 (which itself wraps the F2003 set).
+primary
+    : identifier_or_keyword (PERCENT identifier_or_keyword)*
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN
+    | identifier_or_keyword DOUBLE_QUOTE_STRING
+    | identifier_or_keyword SINGLE_QUOTE_STRING
+    | intrinsic_function_call_f2008
+    | ieee_constant
+    | INTEGER_LITERAL
+    | LABEL
+    | REAL_LITERAL
+    | SINGLE_QUOTE_STRING
+    | DOUBLE_QUOTE_STRING
+    | '*'                // I/O format asterisk
+    | array_constructor
+    | LPAREN primary RPAREN
     ;
 
 // Enhanced variable reference with coarray support
