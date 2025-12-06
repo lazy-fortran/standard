@@ -23,8 +23,11 @@ import Fortran90Lexer;  // F90 unified format support
 // - Pointer improvements
 // - Minor I/O enhancements
 //
-// INHERITANCE ARCHITECTURE:
-// SharedCoreLexer → Fortran90Lexer → Fortran95Lexer → F2003+ standards
+// INHERITANCE ARCHITECTURE (IN THIS REPO):
+// FORTRAN / FORTRANII / FORTRAN66 / FORTRAN77
+//   → Fortran90Lexer
+//   → Fortran95Lexer
+//   → F2003+ standards
 //
 // ====================================================================
 
@@ -83,15 +86,18 @@ SYSTEM_CLOCK_INTRINSIC : ('s'|'S') ('y'|'Y') ('s'|'S') ('t'|'T') ('e'|'E') ('m'|
                          '_' ('c'|'C') ('l'|'L') ('o'|'O') ('c'|'C') ('k'|'K') ;
 
 // ====================================================================
-// FORTRAN 95 LEXER STATUS
+// FORTRAN 95 LEXER NOTES
 // ====================================================================
 //
-// IMPLEMENTATION STATUS: Complete F95 language feature coverage
-// FORMAT SUPPORT: Inherits unified fixed/free format from Fortran90Lexer
-// ARCHITECTURE: Clean single inheritance from Fortran90Lexer
-// INNOVATIONS: All F95 enhancements tokenized
+// This lexer inherits the unified fixed/free-format support from
+// Fortran90Lexer and adds tokens for the F95 features that are
+// explicitly modelled in this repository.
 //
-// MAJOR F95 FEATURES COVERED:
+// The comments below describe the intended coverage; they should not be
+// interpreted as a formal claim of complete ISO/IEC 1539-1:1997
+// conformance.
+//
+// MAJOR F95 FEATURES TARGETED:
 // ✅ FORALL constructs and statements
 // ✅ Enhanced WHERE/ELSEWHERE constructs
 // ✅ Enhanced PURE/ELEMENTAL procedures

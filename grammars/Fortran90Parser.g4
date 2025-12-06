@@ -28,8 +28,11 @@ options {
 // - Enhanced control flow and I/O
 // - Procedure enhancements (RECURSIVE, PURE, ELEMENTAL)
 //
-// INHERITANCE ARCHITECTURE:
-// SharedCoreParser → Fortran90Parser → Fortran95Parser → F2003+ standards
+// INHERITANCE ARCHITECTURE (IN THIS REPO):
+// FORTRAN / FORTRANII / FORTRAN66 / FORTRAN77
+//   → Fortran90Parser
+//   → Fortran95Parser
+//   → F2003+ standards
 //
 // ====================================================================
 
@@ -1103,12 +1106,12 @@ goto_stmt
     ;
 
 if_construct
-    : if_then_stmt ENDIF (IDENTIFIER)?                                          // Empty IF with ENDIF
-    | if_then_stmt END IF (IDENTIFIER)?                                         // Empty IF with END IF
-    | if_then_stmt execution_part (else_if_stmt execution_part?)* 
-      (else_stmt execution_part?)? end_if_stmt                                  // IF with body
-    | if_then_stmt (else_if_stmt execution_part?)* 
-      (else_stmt execution_part?)? end_if_stmt                                  // IF with else/elseif
+    : if_then_stmt ENDIF (IDENTIFIER)? // Empty IF with ENDIF
+    | if_then_stmt END IF (IDENTIFIER)? // Empty IF with END IF
+    | if_then_stmt execution_part (else_if_stmt execution_part?)*
+      (else_stmt execution_part?)? end_if_stmt // IF with body
+    | if_then_stmt (else_if_stmt execution_part?)*
+      (else_stmt execution_part?)? end_if_stmt // IF with else/elseif
     ;
 
 if_then_stmt
@@ -1132,12 +1135,13 @@ end_if_stmt
 // FORTRAN 90 UNIFIED PARSER STATUS
 // ====================================================================
 //
-// IMPLEMENTATION STATUS: Complete F90 language implementation
-// FORMAT SUPPORT: Both fixed-form (.f) and free-form (.f90) in one grammar
-// ARCHITECTURE: Clean single inheritance from SharedCoreParser
-// INNOVATIONS: All major F90 constructs implemented
+// The rules above implement the major F90 constructs exercised by the
+// tests in this repository, including:
 //
-// MAJOR F90 FEATURES IMPLEMENTED:
+// - Both fixed-form (.f) and free-form (.f90) source formats
+// - Inheritance from the earlier FORTRAN grammars
+//
+// MAJOR F90 FEATURES COVERED BY THIS GRAMMAR INCLUDE:
 // ✅ Module system (MODULE, USE, PUBLIC/PRIVATE visibility)
 // ✅ Interface blocks (explicit interfaces, generic procedures, operator overloading)
 // ✅ Derived types (TYPE definitions, structure constructors, component access)
