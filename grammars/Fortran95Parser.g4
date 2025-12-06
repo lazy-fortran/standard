@@ -63,7 +63,7 @@ forall_triplet_spec_list
     ;
 
 forall_triplet_spec
-    : IDENTIFIER ASSIGN expr_f95 COLON expr_f95 (COLON expr_f95)?    
+    : IDENTIFIER EQUALS expr_f95 COLON expr_f95 (COLON expr_f95)?    
         // index=start:end:stride
     ;
 
@@ -259,14 +259,15 @@ logical_expr_f95
 
 // F95 literals (same as F90 with possible extensions)
 literal_f95
-    : INTEGER_LITERAL_KIND
-    | INTEGER_LITERAL
-    | REAL_LITERAL_KIND
-    | REAL_LITERAL
-    | DOUBLE_QUOTE_STRING
-    | SINGLE_QUOTE_STRING
-    | logical_literal_f95
-    | boz_literal_constant
+    : INTEGER_LITERAL_KIND          // Integer with kind (123_int32)
+    | INTEGER_LITERAL               // Traditional integer literal
+    | LABEL                         // Accept LABEL as integer (token precedence issue)
+    | REAL_LITERAL_KIND             // Real with kind (3.14_real64)
+    | REAL_LITERAL                  // Traditional real literal
+    | DOUBLE_QUOTE_STRING           // Double-quoted string
+    | SINGLE_QUOTE_STRING           // Single-quoted string
+    | logical_literal_f95           // Enhanced logical literals
+    | boz_literal_constant          // Binary/octal/hex literals
     ;
 
 logical_literal_f95
@@ -285,7 +286,7 @@ array_constructor_f95
     ;
 
 ac_spec_f95
-    : ac_value_list_f95?
+    : ac_value_list_f95
     ;
 
 ac_value_list_f95
@@ -298,7 +299,7 @@ ac_value_f95
     ;
 
 ac_implied_do_f95
-    : LPAREN ac_value_list_f95 COMMA do_variable ASSIGN expr_f95 COMMA expr_f95 
+    : LPAREN ac_value_list_f95 COMMA do_variable EQUALS expr_f95 COMMA expr_f95 
       (COMMA expr_f95)? RPAREN
     ;
 
@@ -312,7 +313,7 @@ component_spec_list_f95
     ;
 
 component_spec_f95
-    : IDENTIFIER ASSIGN expr_f95
+    : IDENTIFIER EQUALS expr_f95
     | expr_f95
     ;
 
@@ -446,7 +447,7 @@ do_construct_f95
 
 // F95 assignment statements
 assignment_stmt_f95
-    : variable_f95 ASSIGN expr_f95
+    : variable_f95 EQUALS expr_f95
     ;
 
 // Enhanced procedure calls (F95)
@@ -464,7 +465,7 @@ actual_arg_spec_list_f95
     ;
 
 actual_arg_spec_f95
-    : IDENTIFIER ASSIGN expr_f95
+    : IDENTIFIER EQUALS expr_f95
     | expr_f95
     | MULTIPLY IDENTIFIER
     ;
@@ -486,15 +487,15 @@ io_control_spec_list_f95
     ;
 
 io_control_spec_f95
-    : UNIT ASSIGN expr_f95
-    | FMT ASSIGN format_spec_f95
-    | IOSTAT ASSIGN variable_f95
-    | ERR ASSIGN label
-    | END ASSIGN label
-    | EOR ASSIGN label
-    | ADVANCE ASSIGN expr_f95
-    | SIZE ASSIGN variable_f95
-    | REC ASSIGN expr_f95
+    : UNIT EQUALS expr_f95
+    | FMT EQUALS format_spec_f95
+    | IOSTAT EQUALS variable_f95
+    | ERR EQUALS label
+    | END EQUALS label
+    | EOR EQUALS label
+    | ADVANCE EQUALS expr_f95
+    | SIZE EQUALS variable_f95
+    | REC EQUALS expr_f95
     | expr_f95
     ;
 
@@ -524,7 +525,7 @@ output_item_f95
     ;
 
 io_implied_do_f95
-    : LPAREN output_item_list_f95 COMMA do_variable ASSIGN expr_f95 COMMA expr_f95 
+    : LPAREN output_item_list_f95 COMMA do_variable EQUALS expr_f95 COMMA expr_f95 
       (COMMA expr_f95)? RPAREN
     ;
 
@@ -564,14 +565,14 @@ function_reference_f95
 // ✅ Prepared for C interoperability
 // ✅ Extension points for IEEE arithmetic
 //
-// VALIDATION READINESS:
-// ✅ Ready for comprehensive testing with F95 code
-// ✅ Complete rule coverage for ISO 1539-1:1997 compliance
-// ✅ FORALL and WHERE construct validation
-// ✅ Default initialization testing
+// VALIDATION NOTES:
+// ✅ Ready for targeted testing with representative F95 code
+// ✅ FORALL and enhanced WHERE constructs are implemented
+// ✅ Default initialization and PURE/ELEMENTAL forms are supported
 //
-// This parser represents complete F95 language implementation,
-// serving as the bridge between F90 and the object-oriented
-// revolution of F2003 in the inheritance chain to LazyFortran2025.
+// This parser extends the F90 grammar with the F95 constructs listed
+// above and serves as the bridge between F90 and F2003 in the
+// inheritance chain. It is not a formal claim of complete
+// ISO/IEC 1539-1:1997 coverage.
 //
 // ====================================================================
