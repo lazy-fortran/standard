@@ -11,11 +11,15 @@ Test core F2008 functionality including:
 
 import sys
 import pytest
+from pathlib import Path
+
 sys.path.insert(0, 'grammars')
+sys.path.append(str(Path(__file__).parent.parent))
 
 from antlr4 import *
 from Fortran2008Lexer import Fortran2008Lexer
 from Fortran2008Parser import Fortran2008Parser
+from fixture_utils import load_fixture
 
 class TestBasicF2008Features:
     """Test basic F2008 functionality"""
@@ -32,10 +36,11 @@ class TestBasicF2008Features:
     
     def test_basic_module_inheritance(self):
         """F2008 should inherit basic module support from F2003"""
-        code = """module test_mod
-    implicit none
-end module test_mod"""
-        
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "basic_module.f90",
+        )
         tree, errors = self.parse_code(code)
         assert errors == 0, f"Basic module inheritance failed: {errors} errors"
     
@@ -44,23 +49,21 @@ end module test_mod"""
         # Once issue #83 is fixed, this test should enforce zero syntax errors
         test_cases = [
             (
-                "module test\n"
-                "  implicit none\n"
-                "  integer :: x[*]\n"
-                "end module test",
+                "coarray_declaration.f90",
                 "coarray declaration",
             ),
             (
-                "program sync_test\n"
-                "  implicit none\n"
-                "  integer :: x[*]\n"
-                "  sync all\n"
-                "end program sync_test",
+                "coarray_sync_all.f90",
                 "sync all statement",
             ),
         ]
 
-        for code, description in test_cases:
+        for fixture_name, description in test_cases:
+            code = load_fixture(
+                "Fortran2008",
+                "test_basic_f2008_features",
+                fixture_name,
+            )
             tree, errors = self.parse_code(code)
             assert tree is not None, f"{description} failed to produce parse tree"
             assert errors == 0, f"{description}: expected 0 errors, got {errors}"
@@ -78,79 +81,55 @@ end submodule child_sub"""
 
     def test_do_concurrent_tokens(self):
         """Test DO CONCURRENT token recognition (future strict test)"""
-        code = """module test
-    contains
-    subroutine test_proc()
-        do concurrent (i = 1:10)
-        end do
-    end subroutine test_proc
-end module test"""
-
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "do_concurrent.f90",
+        )
         tree, errors = self.parse_code(code)
         assert tree is not None, "DO CONCURRENT failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for DO CONCURRENT, got {errors}"
 
     def test_enhanced_intrinsic_tokens(self):
         """Test that F2008 intrinsic function tokens are recognized"""
-        code = """module test_intrinsics
-    implicit none
-    integer :: n, int_result
-    contains
-    subroutine test_functions()
-        real :: x, result_val
-        x = 1.0
-        result_val = bessel_j0(x)
-        result_val = bessel_j1(x)
-        result_val = bessel_jn(n, x)
-        result_val = bessel_y0(x)
-        result_val = bessel_y1(x)
-        result_val = bessel_yn(n, x)
-        result_val = erf(x)
-        result_val = erfc(x)
-        result_val = gamma(x)
-        result_val = log_gamma(x)
-        result_val = norm2((/ x, 2.0*x /))
-        int_result = findloc((/ x, 2.0*x /), x)
-        int_result = storage_size(x)
-        int_result = parity((/ .true., .false., .true. /))
-    end subroutine test_functions
-end module test_intrinsics"""
-
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "enhanced_intrinsics.f90",
+        )
         tree, errors = self.parse_code(code)
         assert tree is not None, "Enhanced intrinsics failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for intrinsics test, got {errors}"
     
     def test_new_integer_kinds(self):
         """Test F2008 enhanced integer kind tokens"""
-        code = """module test_kinds
-    implicit none
-    int8 :: small_int
-    int16 :: medium_int
-    int32 :: normal_int
-    int64 :: big_int
-end module test_kinds"""
-
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "integer_kinds.f90",
+        )
         tree, errors = self.parse_code(code)
         assert tree is not None, "Integer kinds failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for integer kinds, got {errors}"
 
     def test_error_stop_token(self):
         """Test ERROR STOP statement"""
-        code = """program test
-    error stop 'Critical error occurred'
-end program test"""
-
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "error_stop.f90",
+        )
         tree, errors = self.parse_code(code)
         assert tree is not None, "ERROR STOP failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for ERROR STOP, got {errors}"
     
     def test_contiguous_attribute_token(self):
         """Test CONTIGUOUS attribute"""
-        code = """module test_contiguous
-    implicit none
-    real, contiguous, pointer :: array_ptr(:)
-end module test_contiguous"""
-
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "contiguous_attribute.f90",
+        )
         tree, errors = self.parse_code(code)
         assert tree is not None, "CONTIGUOUS attribute failed to produce parse tree"
         # Track remaining work in issue #87
@@ -158,13 +137,11 @@ end module test_contiguous"""
 
     def test_image_intrinsics(self):
         """Test coarray intrinsic functions"""
-        code = """program coarray_test
-    integer :: my_img, total_imgs
-    my_img = this_image()
-    total_imgs = num_images()
-    print *, 'Image', my_img, 'of', total_imgs
-end program coarray_test"""
-
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "image_intrinsics.f90",
+        )
         tree, errors = self.parse_code(code)
         assert tree is not None, "Image intrinsics failed to produce parse tree"
         # Covered by the broader coarray work in issue #83
