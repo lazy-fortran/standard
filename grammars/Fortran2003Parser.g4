@@ -1229,7 +1229,8 @@ case_value_list
 // ============================================================================
 
 primary
-    : identifier_or_keyword (PERCENT identifier_or_keyword)*
+    : pdt_structure_constructor
+    | identifier_or_keyword (PERCENT identifier_or_keyword)*
     | identifier_or_keyword LPAREN actual_arg_list? RPAREN
     | identifier_or_keyword DOUBLE_QUOTE_STRING      // Prefixed string: c_char_"Hello"
     | identifier_or_keyword SINGLE_QUOTE_STRING      // Prefixed string: c_char_'Hello'
@@ -1243,6 +1244,23 @@ primary
     | '*'                // Asterisk for I/O format specifiers (*, list-directed)
     | array_constructor  // Array constructor [elem1, elem2, ...]
     | LPAREN primary RPAREN
+    ;
+
+// Parameterized derived type (PDT) structure constructor (F2003)
+// This follows the Fortran 2003 rule:
+//   structure-constructor => derived-type-spec ( [component-spec-list] )
+// where derived-type-spec may itself include type parameters.
+pdt_structure_constructor
+    : derived_type_spec LPAREN component_spec_list_f2003? RPAREN
+    ;
+
+component_spec_list_f2003
+    : component_spec_f2003 (COMMA component_spec_f2003)*
+    ;
+
+component_spec_f2003
+    : identifier_or_keyword EQUALS expr_f2003    // Named component
+    | expr_f2003                                 // Positional component
     ;
 
 // F90 Array constructor syntax
