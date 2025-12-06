@@ -40,7 +40,7 @@ CONCURRENT       : C O N C U R R E N T ;
 CONTIGUOUS       : C O N T I G U O U S ;
 
 // Enhanced Error Handling (NEW in F2008)
-ERROR_STOP       : E R R O R '_' S T O P ;
+ERROR_STOP       : E R R O R WS+ S T O P ;
 
 // Additional Intrinsic Procedures (NEW in F2008)
 BESSEL_J0        : B E S S E L '_' J '0' ;
