@@ -104,31 +104,44 @@ These features are tracked in separate GitHub issues for future implementation:
 
 **Note**: General F2003 program/module parsing limitations may still exist in other contexts, but IEEE-specific functionality is complete.
 
-### 7. C Interoperability (Issue #24 / Issue #59 - PARTIALLY COMPLETE)
+### 7. C Interoperability (Issue #24 / Issue #59 / Issue #70 - SUBSTANTIAL COVERAGE)
 **Working Features:**
-- ✅ All 34 C interop type tokens recognized (C_INT, C_FLOAT, C_PTR, etc.)
-- ✅ Basic BIND(C) syntax without NAME clause (`subroutine name() bind(c)`)
-- ✅ USE ISO_C_BINDING module support
-- ✅ USE ISO_C_BINDING with ONLY clause  
-- ✅ Kind selectors with C types (`integer(c_int)`, `real(c_float)`)
-- ✅ VALUE attribute for procedure arguments
-- ✅ C types in variable declarations
+- ✅ All 34 C interop type tokens recognized (`C_INT`, `C_FLOAT`, `C_PTR`, etc.).
+- ✅ BIND(C) on subroutines and functions, with and without `NAME="..."`:
+  - `subroutine s() bind(c)`
+  - `subroutine s() bind(c, name="c_name")`
+  - `integer(c_int) function f(...) bind(c, name="c_func")`
+- ✅ BIND(C) on derived types:
+  - `type, bind(c) :: t` with interoperable components, including other
+    `type, bind(c)` derived types and C pointer types such as `c_ptr`.
+- ✅ USE `iso_c_binding` and `USE ... ONLY` for C interop kinds.
+- ✅ C interop types in declarations:
+  - `integer(c_int)`, `real(c_double)`, `type(c_ptr)`, etc.
+- ✅ VALUE attribute for interoperable dummy arguments in C bindings.
+- ✅ IMPORT of C interop types in interface blocks:
+  - `import :: c_int, c_double` within `interface ... bind(c)` blocks.
 
-**Known Limitations (Not Yet Implemented):**
-- ⚠️ SELECT TYPE: while the standard spelling (`SELECT TYPE`, `TYPE is`,
-      `CLASS is`, `CLASS default`) is now recognized by the grammar,
-      only a limited set of patterns is covered by tests. More exotic
-      nesting and edge cases are not guaranteed.
-- ⚠️ BIND(C) for functions and derived types is covered by targeted tests in
-      `tests/Fortran2003/test_f2003_polymorphism_and_c_interop.py`, but
-      C interoperability beyond those examples is not guaranteed.
-- ⚠️ Complex IMPORT statements involving mixtures of C interop types and
-      other entities remain largely untested.
+**Known Limitations (Still Out of Scope):**
+- ⚠️ The grammar does not attempt to enforce the full semantic subset of
+  interoperable types and shapes described in the Fortran 2003 standard
+  (e.g. it does not reject non-interoperable CHARACTER or array forms
+  purely at the syntactic level).
+- ⚠️ Only `BIND(C)` is supported in `binding_spec`; other language binding
+  identifiers are intentionally rejected by the grammar and negative tests.
+- ⚠️ The exact mapping of OPTIONAL, POINTER and TARGET in dummy arguments to
+  the C interoperability rules is not validated semantically; tests only
+  exercise representative, spec-conforming patterns.
 
 **Test Status:**
-- Semantic validation: 10/10 tests passing
-- Tests explicitly verify and document known limitations
-- **Status**: Basic C interoperability works; advanced features pending
+- Positive tests:
+  - `tests/Fortran2003/test_issue24_semantic_c_interop.py`
+  - `tests/Fortran2003/test_f2003_polymorphism_and_c_interop.py`
+  - `tests/Fortran2003/test_issue70_c_interop_extended.py`
+- Negative tests cover:
+  - Invalid language identifiers in `BIND(...)` (e.g. `bind(fortran)`).
+  - Malformed `NAME=` clauses (e.g. missing string literal).
+- **Status**: C interoperability syntax is substantially covered for standard
+  BIND(C) usage; remaining gaps are primarily semantic rather than syntactic.
 
 ### 8. Defined Derived-Type I/O (Issue #68 - PARTIALLY COMPLETE)
 
