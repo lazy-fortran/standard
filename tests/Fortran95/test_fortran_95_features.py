@@ -52,7 +52,11 @@ class TestFortran95Lexer:
         assert any(t.type == Fortran95Lexer.END_FORALL for t in tokens)
 
     def test_f95_intrinsic_tokens(self):
-        """F95 intrinsic function tokens should be present."""
+        """
+        Modern intrinsic function tokens used by the F90/F95 core
+        should be present (CPU_TIME is new in Fortran 95; the others
+        originate in Fortran 90 but remain part of the F95 baseline).
+        """
         intrinsic_examples = {
             "CEILING": Fortran95Lexer.CEILING_INTRINSIC,
             "FLOOR": Fortran95Lexer.FLOOR_INTRINSIC,
