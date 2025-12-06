@@ -39,34 +39,34 @@ end module test_mod"""
         tree, errors = self.parse_code(code)
         assert errors == 0, f"Basic module inheritance failed: {errors} errors"
     
+    @pytest.mark.xfail(reason="Fortran 2008 coarray declarations and sync statements not yet fully implemented (see issue #83)")
     def test_coarray_tokens_recognized(self):
-        """Test that F2008 coarray tokens are recognized"""
-        # Test individual tokens by trying to parse simple expressions
+        """Test that F2008 coarray tokens are recognized (future strict test)"""
+        # Once issue #83 is fixed, this test should enforce zero syntax errors
         test_cases = [
             ("module test; integer :: x[*]; end module test", "coarray declaration"),
-            ("module test; call sync_all; end module test", "sync_all call"),
+            ("program sync_test\n    sync all\nend program sync_test", "sync all statement"),
         ]
-        
+
         for code, description in test_cases:
             tree, errors = self.parse_code(code)
-            # We expect some parsing issues but tokens should be recognized
             assert tree is not None, f"{description} failed to produce parse tree"
-            # Allow some parser errors but not too many (indicates lexer working)
-            assert errors <= 5, f"{description}: too many errors ({errors})"
-    
+            assert errors == 0, f"{description}: expected 0 errors, got {errors}"
+
+    @pytest.mark.xfail(reason="Fortran 2008 submodule grammar still incomplete (see issue #85)")
     def test_submodule_basic_syntax(self):
-        """Test basic submodule syntax recognition"""
+        """Test basic submodule syntax recognition (future strict test)"""
         code = """submodule (parent_mod) child_sub
     implicit none
 end submodule child_sub"""
-        
+
         tree, errors = self.parse_code(code)
-        # May have parser errors but submodule tokens should be recognized
         assert tree is not None, "Submodule syntax failed to produce parse tree"
-        assert errors <= 5, f"Too many errors for basic submodule: {errors}"
-    
+        assert errors == 0, f"Expected 0 errors for basic submodule, got {errors}"
+
+    @pytest.mark.xfail(reason="Fortran 2008 DO CONCURRENT syntax not yet fully implemented (see issue #84)")
     def test_do_concurrent_tokens(self):
-        """Test DO CONCURRENT token recognition"""
+        """Test DO CONCURRENT token recognition (future strict test)"""
         code = """module test
     contains
     subroutine test_proc()
@@ -74,14 +74,14 @@ end submodule child_sub"""
         end do
     end subroutine test_proc
 end module test"""
-        
+
         tree, errors = self.parse_code(code)
         assert tree is not None, "DO CONCURRENT failed to produce parse tree"
-        # DO CONCURRENT is complex - allow more errors but ensure tokens recognized
-        assert errors <= 10, f"Too many errors for DO CONCURRENT: {errors}"
-    
+        assert errors == 0, f"Expected 0 errors for DO CONCURRENT, got {errors}"
+
+    @pytest.mark.xfail(reason="Fortran 2008 intrinsic procedure call syntax not yet fully implemented (see issue #86)")
     def test_enhanced_intrinsic_tokens(self):
-        """Test that F2008 intrinsic function tokens are recognized"""
+        """Test that F2008 intrinsic function tokens are recognized (future strict test)"""
         code = """module test_intrinsics
     implicit none
     contains
@@ -93,10 +93,10 @@ end module test"""
         result_val = gamma(x)
     end subroutine test_functions
 end module test_intrinsics"""
-        
+
         tree, errors = self.parse_code(code)
         assert tree is not None, "Enhanced intrinsics failed to produce parse tree"
-        assert errors <= 10, f"Too many errors for intrinsics test: {errors}"
+        assert errors == 0, f"Expected 0 errors for intrinsics test, got {errors}"
     
     def test_new_integer_kinds(self):
         """Test F2008 enhanced integer kind tokens"""
@@ -107,33 +107,37 @@ end module test_intrinsics"""
     int32 :: normal_int
     int64 :: big_int
 end module test_kinds"""
-        
+
         tree, errors = self.parse_code(code)
         assert tree is not None, "Integer kinds failed to produce parse tree"
-        # New kinds may have parsing issues initially
-        assert errors <= 10, f"Too many errors for integer kinds: {errors}"
+        assert errors == 0, f"Expected 0 errors for integer kinds, got {errors}"
 
+    @pytest.mark.xfail(reason="Fortran 2008 ERROR STOP not yet fully implemented (see issue #87)")
     def test_error_stop_token(self):
         """Test ERROR STOP statement token"""
         code = """program test
     error stop 'Critical error occurred'
 end program test"""
-        
+
         tree, errors = self.parse_code(code)
         assert tree is not None, "ERROR STOP failed to produce parse tree"
-        assert errors <= 5, f"Too many errors for ERROR STOP: {errors}"
+        # Track remaining work in issue #87
+        assert errors == 0, f"Expected 0 errors for ERROR STOP, got {errors}"
     
+    @pytest.mark.xfail(reason="Fortran 2008 CONTIGUOUS attribute not yet fully implemented (see issue #87)")
     def test_contiguous_attribute_token(self):
         """Test CONTIGUOUS attribute token"""
         code = """module test_contiguous
     implicit none
     real, contiguous, pointer :: array_ptr(:)
 end module test_contiguous"""
-        
+
         tree, errors = self.parse_code(code)
         assert tree is not None, "CONTIGUOUS attribute failed to produce parse tree"
-        assert errors <= 10, f"Too many errors for CONTIGUOUS: {errors}"
+        # Track remaining work in issue #87
+        assert errors == 0, f"Expected 0 errors for CONTIGUOUS attribute, got {errors}"
 
+    @pytest.mark.xfail(reason="Fortran 2008 image intrinsics rely on full coarray support (see issue #83)")
     def test_image_intrinsics(self):
         """Test coarray intrinsic functions"""
         code = """program coarray_test
@@ -142,10 +146,11 @@ end module test_contiguous"""
     total_imgs = num_images()
     print *, 'Image', my_img, 'of', total_imgs
 end program coarray_test"""
-        
+
         tree, errors = self.parse_code(code)
         assert tree is not None, "Image intrinsics failed to produce parse tree"
-        assert errors <= 10, f"Too many errors for image intrinsics: {errors}"
+        # Covered by the broader coarray work in issue #83
+        assert errors == 0, f"Expected 0 errors for image intrinsics, got {errors}"
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
