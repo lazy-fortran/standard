@@ -10,11 +10,15 @@ Test F2008 coarray functionality including:
 
 import sys
 import pytest
+from pathlib import Path
+
 sys.path.insert(0, 'grammars')
+sys.path.append(str(Path(__file__).parent.parent))
 
 from antlr4 import *
 from Fortran2008Lexer import Fortran2008Lexer
 from Fortran2008Parser import Fortran2008Parser
+from fixture_utils import load_fixture
 
 class TestF2008Coarrays:
     """Test F2008 coarray functionality"""
@@ -31,91 +35,77 @@ class TestF2008Coarrays:
     
     def test_coarray_declaration_star(self):
         """Test coarray declaration with [*] - any image"""
-        code = """module coarray_mod
-    implicit none
-    integer :: shared_counter[*]
-    real :: data_array(100)[*]
-end module coarray_mod"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "coarray_declaration_star.f90",
+        )
         tree, errors = self.parse_code(code)
         assert tree is not None, "Coarray [*] declaration failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for basic coarray syntax, got {errors}"
     
     def test_sync_all_statement(self):
         """Test SYNC ALL statement"""
-        code = """program sync_test
-    sync all
-end program sync_test"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "sync_all.f90",
+        )
         tree, errors = self.parse_code(code)
         assert tree is not None, "SYNC ALL failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for SYNC ALL, got {errors}"
     
     def test_sync_images_statement(self):
         """Test SYNC IMAGES statement"""  
-        code = """program sync_images_test
-    sync images(*)
-    sync images([1, 2, 3])
-end program sync_images_test"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "sync_images.f90",
+        )
         tree, errors = self.parse_code(code)
         assert tree is not None, "SYNC IMAGES failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for SYNC IMAGES, got {errors}"
     
     def test_sync_memory_statement(self):
         """Test SYNC MEMORY statement"""
-        code = """program sync_memory_test
-    sync memory
-end program sync_memory_test"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "sync_memory.f90",
+        )
         tree, errors = self.parse_code(code)
         assert tree is not None, "SYNC MEMORY failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for SYNC MEMORY, got {errors}"
     
     def test_this_image_function(self):
         """Test THIS_IMAGE() intrinsic function"""
-        code = """program this_image_test
-    integer :: my_image
-    my_image = this_image()
-    print *, 'I am image', my_image
-end program this_image_test"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "this_image_test.f90",
+        )
         tree, errors = self.parse_code(code)
         assert tree is not None, "THIS_IMAGE() failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for THIS_IMAGE, got {errors}"
     
     def test_num_images_function(self):
         """Test NUM_IMAGES() intrinsic function"""
-        code = """program num_images_test
-    integer :: total_images
-    total_images = num_images()  
-    print *, 'Total images:', total_images
-end program num_images_test"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "num_images_test.f90",
+        )
         tree, errors = self.parse_code(code)
         assert tree is not None, "NUM_IMAGES() failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for NUM_IMAGES, got {errors}"
 
     def test_coarray_with_sync_comprehensive(self):
         """Comprehensive coarray example with sync operations"""
-        code = """module comprehensive_coarray_mod
-    implicit none
-    integer :: counter[*]
-    real :: results(100)[*]
-    
-contains
-    subroutine parallel_work()
-        integer :: my_img, total_imgs
-        
-        my_img = this_image()
-        total_imgs = num_images()
-        
-        counter[my_img] = my_img * 10
-        
-        sync all
-        
-        if (my_img == 1) then
-            print *, 'All images synchronized'
-        end if
-        
-        sync memory
-        
-    end subroutine parallel_work
-end module comprehensive_coarray_mod"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "comprehensive_coarray_mod.f90",
+        )
         tree, errors = self.parse_code(code)
         assert tree is not None, "Comprehensive coarray failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for comprehensive coarray test, got {errors}"
