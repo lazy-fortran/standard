@@ -76,7 +76,6 @@ end submodule child_sub"""
         assert tree is not None, "Submodule syntax failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for basic submodule, got {errors}"
 
-    @pytest.mark.skip(reason="Fortran 2008 DO CONCURRENT syntax not yet fully implemented (see issue #84)")
     def test_do_concurrent_tokens(self):
         """Test DO CONCURRENT token recognition (future strict test)"""
         code = """module test
