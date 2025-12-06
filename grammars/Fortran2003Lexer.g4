@@ -138,10 +138,10 @@ C_NULL_PTR       : [cC] '_' N U L L '_' P T R ;
 C_NULL_FUNPTR    : [cC] '_' N U L L '_' F U N P T R ;
 
 // Additional F2003 tokens
-SELECT_TYPE      : S E L E C T '_' T Y P E ;
-TYPE_IS          : T Y P E '_' I S ;
-CLASS_IS         : C L A S S '_' I S ;
-CLASS_DEFAULT    : C L A S S '_' D E F A U L T ;
+// NOTE: SELECT TYPE / TYPE IS / CLASS IS / CLASS DEFAULT are modelled
+// in the parser using existing SELECT, TYPE, CLASS and DEFAULT tokens.
+// The legacy underscored forms are not used for standard-conforming
+// code and have been removed from the public surface.
 ERRMSG           : E R R M S G ;
 ID               : I D ;
 

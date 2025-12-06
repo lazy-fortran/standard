@@ -67,9 +67,18 @@ These features are tracked in separate GitHub issues for future implementation:
 - ✅ **Working**: Multiple procedure pointer declarations
 - ✅ **Working**: Component procedure pointer assignment (`obj%ptr => procedure`)
 
-### 5. Advanced OOP Features (Issue #26)
-- **Missing**: Complex polymorphic operations
-- **Missing**: Advanced abstract interface features with IMPORT
+### 5. Advanced OOP Features (Issue #26 / Issue #59)
+- ✅ Basic polymorphic declarations: `CLASS(type_name)`, `CLASS(*)` declarations
+- ✅ Parameterized derived types (PDTs) for the scenarios covered by tests
+- ✅ Type-bound procedures and basic dynamic dispatch (see Issue #22/#26 tests)
+- ⚠️ SELECT TYPE / TYPE IS / CLASS IS / CLASS DEFAULT:
+  - The grammar now models the standard `SELECT TYPE (selector)` form using
+    `SELECT TYPE` and `TYPE is (type-spec)` / `CLASS is (type-spec)` /
+    `CLASS default` constructs.
+  - However, only limited patterns are exercised by tests (via simple
+    examples); deeply nested or highly complex polymorphic flows should
+    still be treated as outside the guaranteed subset.
+
 
 ### 6. IEEE Arithmetic Support (Issue #27 - COMPLETE)
 **Working Features:**
@@ -95,7 +104,7 @@ These features are tracked in separate GitHub issues for future implementation:
 
 **Note**: General F2003 program/module parsing limitations may still exist in other contexts, but IEEE-specific functionality is complete.
 
-### 7. C Interoperability (Issue #24 - PARTIALLY COMPLETE)
+### 7. C Interoperability (Issue #24 / Issue #59 - PARTIALLY COMPLETE)
 **Working Features:**
 - ✅ All 34 C interop type tokens recognized (C_INT, C_FLOAT, C_PTR, etc.)
 - ✅ Basic BIND(C) syntax without NAME clause (`subroutine name() bind(c)`)
@@ -106,10 +115,15 @@ These features are tracked in separate GitHub issues for future implementation:
 - ✅ C types in variable declarations
 
 **Known Limitations (Not Yet Implemented):**
-- ❌ BIND(C, NAME="...") syntax fails parsing
-- ❌ BIND(C) for functions may have issues
-- ❌ BIND(C) for derived types untested
-- ❌ Complex IMPORT statements untested
+- ⚠️ SELECT TYPE: while the standard spelling (`SELECT TYPE`, `TYPE is`,
+      `CLASS is`, `CLASS default`) is now recognized by the grammar,
+      only a limited set of patterns is covered by tests. More exotic
+      nesting and edge cases are not guaranteed.
+- ⚠️ BIND(C) for functions and derived types is covered by targeted tests in
+      `tests/Fortran2003/test_f2003_polymorphism_and_c_interop.py`, but
+      C interoperability beyond those examples is not guaranteed.
+- ⚠️ Complex IMPORT statements involving mixtures of C interop types and
+      other entities remain largely untested.
 
 **Test Status:**
 - Semantic validation: 10/10 tests passing

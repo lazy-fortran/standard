@@ -71,6 +71,31 @@ end module test"""
         tree, errors = self.parse_code(code)
         assert errors == 0, f"PDT instantiation failed: {errors} errors"
 
+    def test_pdt_as_component_and_procedure_arg(self):
+        """PDT used as component and procedure argument should parse"""
+        code = """module test
+    type :: matrix(k, n, m)
+        integer, kind :: k = 4
+        integer, len :: n, m
+        real(k) :: data(n, m)
+    end type matrix
+
+    type :: container_t
+        type(matrix(8, 3, 3)) :: mat
+    end type container_t
+
+contains
+
+    subroutine use_matrix(arg)
+        type(matrix(8, 3, 3)), intent(inout) :: arg
+        arg%data = 0.0
+    end subroutine use_matrix
+
+end module test"""
+
+        tree, errors = self.parse_code(code)
+        assert errors == 0, f"PDT as component/arg failed: {errors} errors"
+
     def test_kind_selectors_improved(self):
         """Kind selectors with integers and parameters should work"""
         code = """module test
