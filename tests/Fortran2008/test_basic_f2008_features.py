@@ -134,21 +134,18 @@ end module test_kinds"""
         assert tree is not None, "Integer kinds failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for integer kinds, got {errors}"
 
-    @pytest.mark.skip(reason="Fortran 2008 ERROR STOP not yet fully implemented (see issue #87)")
     def test_error_stop_token(self):
-        """Test ERROR STOP statement token"""
+        """Test ERROR STOP statement"""
         code = """program test
     error stop 'Critical error occurred'
 end program test"""
 
         tree, errors = self.parse_code(code)
         assert tree is not None, "ERROR STOP failed to produce parse tree"
-        # Track remaining work in issue #87
         assert errors == 0, f"Expected 0 errors for ERROR STOP, got {errors}"
     
-    @pytest.mark.skip(reason="Fortran 2008 CONTIGUOUS attribute not yet fully implemented (see issue #87)")
     def test_contiguous_attribute_token(self):
-        """Test CONTIGUOUS attribute token"""
+        """Test CONTIGUOUS attribute"""
         code = """module test_contiguous
     implicit none
     real, contiguous, pointer :: array_ptr(:)
