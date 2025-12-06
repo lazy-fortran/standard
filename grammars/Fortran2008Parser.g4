@@ -265,7 +265,7 @@ do_concurrent_construct
     ;
 
 do_concurrent_stmt
-    : (IDENTIFIER COLON)? DO_CONCURRENT concurrent_header NEWLINE
+    : (IDENTIFIER COLON)? DO CONCURRENT concurrent_header NEWLINE
     ;
 
 concurrent_header
