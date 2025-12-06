@@ -392,6 +392,17 @@ type_bound_generic_stmt
       POINTER_ASSIGN generic_binding_list NEWLINE
     ;
 
+// Override F90 generic_spec to support defined derived-type I/O
+// Fortran 2003 allows generic READ/WRITE with FORMATTED/UNFORMATTED
+// access specifiers, written as READ(FORMATTED) / WRITE(UNFORMATTED).
+generic_spec
+    : IDENTIFIER                            // Generic procedure name
+    | OPERATOR LPAREN operator_token RPAREN // Operator overloading
+    | ASSIGNMENT LPAREN ASSIGN RPAREN       // Assignment overloading
+    | READ LPAREN identifier_or_keyword RPAREN   // READ(FORMATTED) style generics
+    | WRITE LPAREN identifier_or_keyword RPAREN  // WRITE(UNFORMATTED) style generics
+    ;
+
 generic_binding_list
     : IDENTIFIER (COMMA IDENTIFIER)*
     ;
