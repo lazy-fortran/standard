@@ -68,8 +68,17 @@ These features are tracked in separate GitHub issues for future implementation:
 - ✅ **Working**: Component procedure pointer assignment (`obj%ptr => procedure`)
 
 ### 5. Advanced OOP Features (Issue #26 / Issue #59)
-- **Missing**: Complex polymorphic operations
-- **Missing**: Advanced abstract interface features with IMPORT
+- ✅ Basic polymorphic declarations: `CLASS(type_name)`, `CLASS(*)` declarations
+- ✅ Parameterized derived types (PDTs) for the scenarios covered by tests
+- ✅ Type-bound procedures and basic dynamic dispatch (see Issue #22/#26 tests)
+- ⚠️ SELECT TYPE / TYPE IS / CLASS IS / CLASS DEFAULT:
+  - The grammar now models the standard `SELECT TYPE (selector)` form using
+    `SELECT TYPE` and `TYPE is (type-spec)` / `CLASS is (type-spec)` /
+    `CLASS default` constructs.
+  - However, only limited patterns are exercised by tests (via simple
+    examples); deeply nested or highly complex polymorphic flows should
+    still be treated as outside the guaranteed subset.
+
 
 ### 6. IEEE Arithmetic Support (Issue #27 - COMPLETE)
 **Working Features:**
@@ -106,17 +115,14 @@ These features are tracked in separate GitHub issues for future implementation:
 - ✅ C types in variable declarations
 
 **Known Limitations (Not Yet Implemented):**
-- ❌ BIND(C, NAME="...") syntax fails parsing
-- ❌ SELECT TYPE / TYPE IS / CLASS IS / CLASS DEFAULT constructs are present
-      in the grammar, but **not** wired to the exact `SELECT TYPE` spelling
-      and are therefore not yet validated with realistic code examples.
-      Tests only exercise simpler CLASS(*) declarations.
-- ❌ Advanced polymorphic usage (nested SELECT TYPE, complex CLASS(*) flows)
-      remains untested and should be considered outside the supported subset.
-- ❌ BIND(C) for functions and derived types is now covered by tests in
+- ⚠️ SELECT TYPE: while the standard spelling (`SELECT TYPE`, `TYPE is`,
+      `CLASS is`, `CLASS default`) is now recognized by the grammar,
+      only a limited set of patterns is covered by tests. More exotic
+      nesting and edge cases are not guaranteed.
+- ⚠️ BIND(C) for functions and derived types is covered by targeted tests in
       `tests/Fortran2003/test_f2003_polymorphism_and_c_interop.py`, but
       C interoperability beyond those examples is not guaranteed.
-- ❌ Complex IMPORT statements involving mixtures of C interop types and
+- ⚠️ Complex IMPORT statements involving mixtures of C interop types and
       other entities remain largely untested.
 
 **Test Status:**

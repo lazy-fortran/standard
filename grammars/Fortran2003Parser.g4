@@ -570,14 +570,19 @@ type_spec_or_star
     ;
 
 // SELECT TYPE construct for runtime type selection
+// NOTE: This rule models the standard `SELECT TYPE (selector)` form
+// using the existing SELECT, TYPE and DEFAULT tokens imported from
+// earlier standards. The `IS` keyword in guards is treated as an
+// IDENTIFIER token (`is`) in this simplified grammar.
 select_type_construct
     : select_type_stmt NEWLINE*
       (type_guard_stmt execution_part_f2003?)*
       end_select_type_stmt
     ;
 
+// SELECT TYPE (selector [=> expr])
 select_type_stmt
-    : (IDENTIFIER COLON)? SELECT_TYPE LPAREN 
+    : (IDENTIFIER COLON)? SELECT TYPE LPAREN
       (IDENTIFIER POINTER_ASSIGN)? selector_expr RPAREN
     ;
 
@@ -585,10 +590,15 @@ selector_expr
     : primary
     ;
 
+// TYPE IS (type-spec) [, selector-name]
+// CLASS IS (type-spec-or-derived) [, selector-name]
+// CLASS DEFAULT [, selector-name]
+//
+// In this grammar, `IS` is tokenized as an IDENTIFIER with text "is".
 type_guard_stmt
-    : TYPE_IS LPAREN type_spec_or_derived RPAREN (IDENTIFIER)? NEWLINE
-    | CLASS_IS LPAREN type_spec_or_derived RPAREN (IDENTIFIER)? NEWLINE
-    | CLASS_DEFAULT (IDENTIFIER)? NEWLINE
+    : TYPE IDENTIFIER LPAREN type_spec_or_derived RPAREN (IDENTIFIER)? NEWLINE
+    | CLASS IDENTIFIER LPAREN type_spec_or_derived RPAREN (IDENTIFIER)? NEWLINE
+    | CLASS DEFAULT (IDENTIFIER)? NEWLINE
     ;
 
 type_spec_or_derived
@@ -1352,4 +1362,3 @@ c_interop_type
 type_name
     : identifier_or_keyword
     ;
-
