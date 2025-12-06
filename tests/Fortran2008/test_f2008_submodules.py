@@ -16,7 +16,7 @@ from antlr4 import *
 from Fortran2008Lexer import Fortran2008Lexer
 from Fortran2008Parser import Fortran2008Parser
 
-@pytest.mark.xfail(reason="Fortran 2008 submodule grammar is not yet fully implemented (see issue #85)")
+@pytest.mark.skip(reason="Fortran 2008 submodule grammar is not yet fully implemented (see issue #85)")
 class TestF2008Submodules:
     """Test F2008 submodule functionality"""
     

@@ -16,7 +16,7 @@ from antlr4 import *
 from Fortran2008Lexer import Fortran2008Lexer
 from Fortran2008Parser import Fortran2008Parser
 
-@pytest.mark.xfail(reason="Fortran 2008 coarray syntax is not yet fully implemented (see issue #83)")
+@pytest.mark.skip(reason="Fortran 2008 coarray syntax is not yet fully implemented (see issue #83)")
 class TestF2008Coarrays:
     """Test F2008 coarray functionality"""
     

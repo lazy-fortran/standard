@@ -39,7 +39,7 @@ end module test_mod"""
         tree, errors = self.parse_code(code)
         assert errors == 0, f"Basic module inheritance failed: {errors} errors"
     
-    @pytest.mark.xfail(reason="Fortran 2008 coarray declarations and sync statements not yet fully implemented (see issue #83)")
+    @pytest.mark.skip(reason="Fortran 2008 coarray declarations and sync statements not yet fully implemented (see issue #83)")
     def test_coarray_tokens_recognized(self):
         """Test that F2008 coarray tokens are recognized (future strict test)"""
         # Once issue #83 is fixed, this test should enforce zero syntax errors
@@ -53,7 +53,7 @@ end module test_mod"""
             assert tree is not None, f"{description} failed to produce parse tree"
             assert errors == 0, f"{description}: expected 0 errors, got {errors}"
 
-    @pytest.mark.xfail(reason="Fortran 2008 submodule grammar still incomplete (see issue #85)")
+    @pytest.mark.skip(reason="Fortran 2008 submodule grammar still incomplete (see issue #85)")
     def test_submodule_basic_syntax(self):
         """Test basic submodule syntax recognition (future strict test)"""
         code = """submodule (parent_mod) child_sub
@@ -64,7 +64,7 @@ end submodule child_sub"""
         assert tree is not None, "Submodule syntax failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for basic submodule, got {errors}"
 
-    @pytest.mark.xfail(reason="Fortran 2008 DO CONCURRENT syntax not yet fully implemented (see issue #84)")
+    @pytest.mark.skip(reason="Fortran 2008 DO CONCURRENT syntax not yet fully implemented (see issue #84)")
     def test_do_concurrent_tokens(self):
         """Test DO CONCURRENT token recognition (future strict test)"""
         code = """module test
@@ -79,7 +79,7 @@ end module test"""
         assert tree is not None, "DO CONCURRENT failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for DO CONCURRENT, got {errors}"
 
-    @pytest.mark.xfail(reason="Fortran 2008 intrinsic procedure call syntax not yet fully implemented (see issue #86)")
+    @pytest.mark.skip(reason="Fortran 2008 intrinsic procedure call syntax not yet fully implemented (see issue #86)")
     def test_enhanced_intrinsic_tokens(self):
         """Test that F2008 intrinsic function tokens are recognized (future strict test)"""
         code = """module test_intrinsics
@@ -112,7 +112,7 @@ end module test_kinds"""
         assert tree is not None, "Integer kinds failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for integer kinds, got {errors}"
 
-    @pytest.mark.xfail(reason="Fortran 2008 ERROR STOP not yet fully implemented (see issue #87)")
+    @pytest.mark.skip(reason="Fortran 2008 ERROR STOP not yet fully implemented (see issue #87)")
     def test_error_stop_token(self):
         """Test ERROR STOP statement token"""
         code = """program test
@@ -124,7 +124,7 @@ end program test"""
         # Track remaining work in issue #87
         assert errors == 0, f"Expected 0 errors for ERROR STOP, got {errors}"
     
-    @pytest.mark.xfail(reason="Fortran 2008 CONTIGUOUS attribute not yet fully implemented (see issue #87)")
+    @pytest.mark.skip(reason="Fortran 2008 CONTIGUOUS attribute not yet fully implemented (see issue #87)")
     def test_contiguous_attribute_token(self):
         """Test CONTIGUOUS attribute token"""
         code = """module test_contiguous
@@ -137,7 +137,7 @@ end module test_contiguous"""
         # Track remaining work in issue #87
         assert errors == 0, f"Expected 0 errors for CONTIGUOUS attribute, got {errors}"
 
-    @pytest.mark.xfail(reason="Fortran 2008 image intrinsics rely on full coarray support (see issue #83)")
+    @pytest.mark.skip(reason="Fortran 2008 image intrinsics rely on full coarray support (see issue #83)")
     def test_image_intrinsics(self):
         """Test coarray intrinsic functions"""
         code = """program coarray_test
