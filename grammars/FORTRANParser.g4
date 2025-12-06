@@ -1,11 +1,14 @@
 /*
  * FORTRANParser.g4
- * 
+ *
  * FORTRAN I (1957) - The Original IBM 704 FORTRAN Parser
- * The world's first high-level programming language
- * 
- * This parser defines the complete FORTRAN I language as released in 1957,
- * serving as the foundation for all subsequent FORTRAN/Fortran standards.
+ * The world's first high-level programming language.
+ *
+ * This parser defines a historically grounded core subset of the original
+ * 1957 IBM 704 FORTRAN, rather than a full reconstruction of the compiler.
+ * It focuses on arithmetic expressions, labels, DO loops, arithmetic IF,
+ * computed GOTO, FREQUENCY and basic I/O, and serves as the foundation for
+ * all subsequent FORTRAN/Fortran standards in this repository.
  */
 
 parser grammar FORTRANParser;
@@ -38,8 +41,10 @@ statement
 statement_body
     : assignment_stmt
     | goto_stmt
+    | computed_goto_stmt
     | if_stmt_arithmetic
     | do_stmt_basic
+    | frequency_stmt
     | read_stmt_basic
     | write_stmt_basic
     | CONTINUE
@@ -57,6 +62,16 @@ goto_stmt
     : GOTO label
     ;
 
+// Computed GOTO (1957 multi-way branch)
+// GO TO (label1, label2, ...), expression
+computed_goto_stmt
+    : GOTO LPAREN label_list RPAREN COMMA expr
+    ;
+
+label_list
+    : label (COMMA label)*
+    ;
+
 // Arithmetic IF statement (1957 original form)
 // IF (expression) label1, label2, label3
 // Goes to label1 if expr < 0, label2 if expr = 0, label3 if expr > 0
@@ -68,6 +83,12 @@ if_stmt_arithmetic
 // DO label variable = expr, expr [, expr]
 do_stmt_basic
     : DO label variable EQUALS expr COMMA expr (COMMA expr)?
+    ;
+
+// FREQUENCY statement (1957 optimization hint)
+// FREQUENCY label (n1, n2, ...)
+frequency_stmt
+    : FREQUENCY label LPAREN expr_list RPAREN
     ;
 
 // Basic I/O statements (simplified universal forms)
