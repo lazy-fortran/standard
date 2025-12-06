@@ -24,9 +24,13 @@ Serves as the foundation validation for LazyFortran2025 type inference.
 import sys
 import os
 import pytest
+from pathlib import Path
 
 # Add grammars directory to Python path for generated parsers
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../grammars'))
+sys.path.append(str(Path(__file__).parent.parent))
+
+from fixture_utils import load_fixture
 
 try:
     from antlr4 import InputStream, CommonTokenStream
@@ -174,13 +178,11 @@ class TestFortran2023Parser:
 
     def test_parser_compilation(self):
         """Test that F2023 parser compiles and can parse basic constructs."""
-        test_input = """
-        program test_f2023
-            integer :: x
-            x = 42
-        end program
-        """
-        
+        test_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "basic_program.f90",
+        )
         parser = self.create_parser(test_input)
         
         try:
@@ -191,18 +193,11 @@ class TestFortran2023Parser:
 
     def test_enhanced_enumeration_parsing(self):
         """Test F2023 enhanced enumeration parsing."""
-        enum_input = """
-        program test_enum
-            enum :: color_type
-                enumerator :: red = 1, green = 2, blue = 3
-            end enum
-            
-            enum :: status
-                enumerator :: success, failure, pending
-            end enum
-        end program
-        """
-        
+        enum_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "enum_program.f90",
+        )
         parser = self.create_parser(enum_input)
         
         try:
@@ -213,15 +208,11 @@ class TestFortran2023Parser:
 
     def test_conditional_expression_parsing(self):
         """Test F2023 conditional expression parsing."""
-        conditional_input = """
-        program test_conditional
-            integer :: x, y, result
-            x = 10
-            y = 20
-            result = x > y ? x : y
-        end program
-        """
-        
+        conditional_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "conditional_expression.f90",
+        )
         parser = self.create_parser(conditional_input)
         
         try:
@@ -232,16 +223,11 @@ class TestFortran2023Parser:
 
     def test_enhanced_ieee_parsing(self):
         """Test F2023 enhanced IEEE arithmetic function parsing."""
-        ieee_input = """
-        program test_ieee
-            use ieee_arithmetic
-            real :: a, b, result
-            a = 1.0
-            b = 2.0
-            result = ieee_max(a, b)
-        end program
-        """
-        
+        ieee_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "ieee_program.f90",
+        )
         parser = self.create_parser(ieee_input)
         
         try:
@@ -252,13 +238,11 @@ class TestFortran2023Parser:
 
     def test_enhanced_boz_array_constructor(self):
         """Test F2023 enhanced BOZ in array constructors."""
-        boz_input = """
-        program test_boz
-            real :: values(3)
-            values = [real :: b'10101010', o'377', z'FF']
-        end program
-        """
-        
+        boz_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "boz_array_constructor.f90",
+        )
         parser = self.create_parser(boz_input)
         
         try:
@@ -269,22 +253,11 @@ class TestFortran2023Parser:
 
     def test_f2018_compatibility_parsing(self):
         """Test that F2023 maintains F2018 parsing compatibility."""
-        f2018_input = """
-        program test_f2018_compat
-            integer :: images[*]
-            integer :: values(10)
-            
-            call co_sum(values, result_image=1)
-            
-            select rank (values)
-            rank (1)
-                print *, 'Rank 1 array'
-            rank default
-                print *, 'Other rank'
-            end select
-        end program
-        """
-        
+        f2018_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "f2018_compat_program.f90",
+        )
         parser = self.create_parser(f2018_input)
         
         try:
@@ -350,29 +323,12 @@ class TestFortran2023Foundation:
     def test_all_historical_compatibility(self):
         """Test compatibility across entire FORTRAN/Fortran history."""
         # Test that constructs from different eras coexist
-        mixed_era_input = """
-        program historical_test
-            ! F77 CHARACTER type
-            character*20 :: name
-            
-            ! F90 modules and allocation
-            use some_module, only: utility_func
-            integer, allocatable :: dynamic_array(:)
-            
-            ! F2003 OOP
-            class(base_type), allocatable :: obj
-            
-            ! F2008 coarrays
-            integer :: coarray[*]
-            
-            ! F2018 collective operations
-            call co_sum(coarray)
-            
-            ! F2023 conditional expressions
-            integer :: result = x > 0 ? x : 0
-        end program
-        """
-        
+        mixed_era_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "mixed_era_program.f90",
+        )
+
         lexer = Fortran2023Lexer(InputStream(mixed_era_input))
         tokens = []
         while True:
