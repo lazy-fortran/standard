@@ -86,6 +86,52 @@ contains
 end module shapes_mod
         """
         self.parse_fortran_code(oop_code)
+
+    def test_polymorphic_dispatch_with_select_type(self):
+        """Test polymorphic dummy arguments and SELECT TYPE dispatch."""
+        code = """
+module poly_mod
+  implicit none
+
+  type, abstract :: shape_t
+  contains
+    procedure(shape_draw), deferred :: draw
+  end type shape_t
+
+  type, extends(shape_t) :: circle_t
+    real :: radius
+  contains
+    procedure :: draw => draw_circle
+  end type circle_t
+
+  abstract interface
+    subroutine shape_draw(this)
+      import :: shape_t
+      class(shape_t), intent(in) :: this
+    end subroutine shape_draw
+  end interface
+
+contains
+
+  subroutine draw_circle(this)
+    class(circle_t), intent(in) :: this
+    print *, 'Circle radius', this%radius
+  end subroutine draw_circle
+
+  subroutine render(s)
+    class(shape_t), intent(in) :: s
+
+    select type (s)
+    type is (circle_t)
+      call s%draw()
+    class default
+      print *, 'Unknown shape'
+    end select
+  end subroutine render
+
+end module poly_mod
+"""
+        self.parse_fortran_code(code)
     
     def test_parameterized_derived_types(self):
         """Test F2003 parameterized derived types."""
