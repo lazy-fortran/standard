@@ -142,3 +142,31 @@ class TestLazyFortran2025Parser:
         parser = self.create_parser(fixture)
         tree = parser.traditional_entry()  # type: ignore[call-arg]
         assert tree is not None
+
+    def test_lazy_entry_allows_spec_and_exec_constructs(self) -> None:
+        """Top-level USE/IMPLICIT and statements are accepted."""
+        code = (
+            "implicit none\n"
+            "use iso_fortran_env, only: int32\n"
+            "integer(int32) :: x\n"
+            "x = 1_int32\n"
+            "print *, x\n"
+        )
+        parser = self.create_parser(code)
+        tree = parser.lazy_entry()  # type: ignore[call-arg]
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_lazy_entry_supports_procedure_only_library_files(self) -> None:
+        """Procedure-only .lf files parse as library-style units."""
+        code = (
+            "function square(x) result(r)\n"
+            "  real, intent(in) :: x\n"
+            "  real :: r\n"
+            "  r = x * x\n"
+            "end function square\n"
+        )
+        parser = self.create_parser(code)
+        tree = parser.lazy_entry()  # type: ignore[call-arg]
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
