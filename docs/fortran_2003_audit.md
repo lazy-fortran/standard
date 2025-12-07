@@ -82,9 +82,14 @@ supports for practical use, without claiming full ISO conformance.
     - PDTs with deferred (`:`) and assumed (`*`) parameters.
 
 - **Structure constructors for PDTs**
-  - **Status:** Partially implemented; lightly tested.
-  - **Notes:** Structure constructors are handled via general array/constructor
-    rules; PDT-specific constructor corner cases are not fully exercised.
+  - **Status:** Implemented and tested for representative PDT constructor patterns.
+  - **Notes:** Structure constructors are handled via dedicated PDT rules
+    (`pdt_structure_constructor`) layered on top of the general constructor
+    and array-constructor machinery. Tests now cover:
+    - Basic PDT constructors and array-valued components.
+    - Mixed positional/keyword type parameters and component values.
+    - Nested PDT constructors and usage in modules that also exercise
+      deferred (`:`) and assumed (`*`) type parameters.
 
 ---
 
