@@ -49,6 +49,21 @@ def test_format_inline_if_to_block_is_idempotent() -> None:
 
 
 @pytest.mark.skipif(not PARSER_AVAILABLE, reason="LazyFortran2025 parser not available")
+def test_format_inline_if_with_relational_operator() -> None:
+    """lfmt handles >= inside inline IF conditions."""
+    source = 'if(x>=0)print*,"ok"\n'
+    expected = (
+        "if (x >= 0) then\n"
+        '  print *, "ok"\n'
+        "end if\n"
+    )
+
+    formatted = format_lazy_code(source)
+    assert formatted == expected
+    assert format_lazy_code(formatted) == expected
+
+
+@pytest.mark.skipif(not PARSER_AVAILABLE, reason="LazyFortran2025 parser not available")
 def test_lint_reports_missing_implicit_none() -> None:
     """lflint reports missing IMPLICIT NONE."""
     code = (
@@ -127,4 +142,3 @@ def test_lflint_cli_reports_and_sets_exit_code(tmp_path: Path) -> None:
     assert result.returncode == 1
     assert "LF001" in result.stdout
     assert str(path) in result.stdout
-
