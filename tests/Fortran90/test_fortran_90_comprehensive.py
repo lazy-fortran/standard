@@ -623,11 +623,11 @@ class TestFortran90Historical:
         # This test ensures the grammar is prepared for both formats
         
         # Free-form style (F90 primary format)
-        free_form_input = """
-        module test
-            integer :: x = 42  ! Modern comment
-        end module
-        """
+        free_form_input = load_fixture(
+            "Fortran90",
+            "test_fortran_90_dual_format",
+            "free_form_module.f90",
+        )
         
         try:
             lexer = Fortran90Lexer(InputStream(free_form_input))

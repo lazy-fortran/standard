@@ -15,10 +15,12 @@ from pathlib import Path
 import pytest
 from antlr4 import InputStream, CommonTokenStream
 
+sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
 
 from Fortran2003Lexer import Fortran2003Lexer
 from Fortran2003Parser import Fortran2003Parser
+from fixture_utils import load_fixture
 
 
 def parse_f2003(code: str):
@@ -35,78 +37,33 @@ class TestF2003PDTExpanded:
 
     def test_pdt_positional_and_keyword_instantiation(self):
         """PDT instantiation with positional and keyword parameters."""
-        code = """
-module pdt_matrix
-  implicit none
-
-  type :: matrix_t(k, m, n)
-    integer, kind :: k = 4
-    integer, len  :: m, n
-    real(k)       :: data(m, n)
-  end type matrix_t
-
-end module pdt_matrix
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue71_pdt_extended",
+            "pdt_matrix_module.f90",
+        )
         tree, errors, _ = parse_f2003(code)
         assert tree is not None
         assert errors == 0
 
     def test_pdt_deferred_and_assumed_parameters(self):
         """PDTs using deferred (:) and assumed (*) type parameters."""
-        code = """
-module pdt_poly
-  implicit none
-
-  type :: poly_t(k, n)
-    integer, kind :: k = 8
-    integer, len  :: n
-    real(k)       :: coeffs(0:n)
-  end type poly_t
-
-  type(poly_t(8,:)), allocatable :: polys(:)
-  type(poly_t(*,10))             :: default_poly
-
-end module pdt_poly
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue71_pdt_extended",
+            "pdt_poly_module.f90",
+        )
         tree, errors, _ = parse_f2003(code)
         assert tree is not None
         assert errors == 0
 
     def test_pdt_in_derived_types_and_procedures(self):
         """PDTs nested inside other types and used in procedures."""
-        code = """
-module pdt_usage
-  implicit none
-
-  type :: matrix_t(k, m, n)
-    integer, kind :: k
-    integer, len  :: m, n
-    real(k)       :: data(m, n)
-  end type matrix_t
-
-  type :: system_t
-    type(matrix_t(8,3,3)) :: mass
-    type(matrix_t(8,3,3)) :: stiffness
-  end type system_t
-
-contains
-
-  subroutine init_system(sys)
-    type(system_t), intent(out) :: sys
-    ! Simple whole-object assignments; detailed component assignment
-    ! semantics are outside the scope of this syntax-focused test.
-    sys%mass      = sys%mass
-    sys%stiffness = sys%stiffness
-  end subroutine init_system
-
-  function norm_matrix(m) result(res)
-    type(matrix_t(8,3,3)), intent(in) :: m
-    real(8)                            :: res
-    res = sum(abs(m%data))
-  end function norm_matrix
-
-end module pdt_usage
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue71_pdt_extended",
+            "pdt_usage_module.f90",
+        )
         tree, errors, _ = parse_f2003(code)
         assert tree is not None
         assert errors == 0
