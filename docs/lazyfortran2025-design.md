@@ -285,7 +285,7 @@ with `integer(4)` arrays, a matching specialization is generated.
 
 ---
 
-### 1.4 LF‑SYN‑04 – Optional Trait‑Like Contracts (Issue #57) – *OPEN*
+### 1.4 LF‑SYN‑04 – Optional Trait‑Like Contracts (Issue #57) – *PROVISIONAL*
 
 **Summary.**  
 Traits provide optional, lightweight contracts on procedures and types,
@@ -298,30 +298,41 @@ supports addition and scalar multiplication” in a compact way, so that
 errors in generic code point to trait violations rather than cryptic
 template instantiation failures.
 
-**Example (illustrative only, syntax OPEN).**
+**Example (PROVISIONAL Lazy syntax).**
 
 ```fortran
-! PROVISIONAL syntax sketch
 trait AdditiveMonoid(T)
-  requires:
-    T + T  -> T
-    zero() -> T
-end trait
+  procedure :: add
+  procedure :: zero
+end trait AdditiveMonoid
 
-@AdditiveMonoid(T)
-function sum_all(x)
-  sum_all = zero()
+@AdditiveMonoid(real(8))
+function sum_all(x) result(r)
+  real(8), intent(in) :: x(:)
+  r = zero()
   do i = 1, size(x)
-    sum_all = sum_all + x(i)
+    r = add(r, x(i))
   end do
-end function
+end function sum_all
 ```
+
+Current design:
+
+- `trait Name(T, ...)` defines a Lazy‑only trait as a collection of
+  required operations expressed using normal Fortran declaration
+  constructs (`procedure`, `interface`, `type`, …) inside the trait
+  body.
+- `@TraitName(args…)` is a lightweight annotation statement that can be
+  placed next to procedures or types in `.lf` files; the front end
+  records these annotations so later phases can attach them to the
+  surrounding definitions.
 
 Decisions still OPEN:
 
-- Exact trait syntax and annotation mechanism.
-- Whether traits remain purely “static hints” or participate in overload
-  resolution.
+- How traits integrate with world‑wide specialization and overload
+  resolution (pure documentation vs. hard constraints).
+- How traits interact with existing OO features (TYPE/CLASS, extends,
+  and procedure bindings) beyond simple “required operation” sets.
 
 ---
 
