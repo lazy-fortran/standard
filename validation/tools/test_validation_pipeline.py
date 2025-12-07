@@ -4,13 +4,13 @@ Test suite for the complete validation pipeline.
 Tests the integration of kaby76 extraction with our validation framework.
 """
 
-import unittest
 import os
-import tempfile
 import shutil
-from pathlib import Path
-import sys
+import tempfile
+import unittest
+
 import pytest
+import sys
 
 # Add the tools directory to sys.path to import our modules
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -32,30 +32,40 @@ class TestValidationPipeline(unittest.TestCase):
         if os.path.exists(self.test_dir):
             shutil.rmtree(self.test_dir)
     
-    @pytest.mark.skip(reason="External Trash/.NET toolchain not reliably available in CI (see issue #92)")
+    def _require_kaby76_repository(self):
+        """Ensure the external kaby76/fortran repository is available or skip."""
+        try:
+            self.downloader.download()
+        except Exception as exc:
+            pytest.skip(
+                f"External kaby76/fortran repository not available "
+                f"(see issue #92): {exc}"
+            )
+        return ExtractionRunner(self.test_dir)
+    
     def test_pipeline_setup(self):
         """Test that the complete pipeline can be set up."""
-        # Download kaby76 tools
-        self.downloader.download()
+        runner = self._require_kaby76_repository()
         
-        # Create extraction runner
-        runner = ExtractionRunner(self.test_dir)
+        # Only enforce the assertion when the external toolchain is present.
+        if not runner.verify_setup():
+            pytest.skip(
+                "External Trash/.NET toolchain not available "
+                "(verify_setup() is False, see issue #92)"
+            )
         
-        # Verify extraction runner can find the tools
         self.assertTrue(runner.verify_setup())
     
     def test_extraction_runner_initialization(self):
         """Test that extraction runner initializes correctly."""
-        self.downloader.download()
-        runner = ExtractionRunner(self.test_dir)
+        runner = self._require_kaby76_repository()
         
         self.assertEqual(runner.target_dir, self.test_dir)
         self.assertTrue(os.path.exists(runner.kaby76_dir))
     
     def test_can_list_available_standards(self):
         """Test that we can identify available Fortran standards."""
-        self.downloader.download()
-        runner = ExtractionRunner(self.test_dir)
+        runner = self._require_kaby76_repository()
         
         standards = runner.list_available_standards()
         self.assertIsInstance(standards, list)
@@ -65,26 +75,35 @@ class TestValidationPipeline(unittest.TestCase):
         standard_names = [std['name'] for std in standards]
         self.assertIn('Fortran 2023', standard_names)
     
-    @pytest.mark.skip(reason="External Trash/.NET toolchain not reliably available in CI (see issue #92)")
     def test_can_extract_single_standard(self):
         """Test that we can extract a single Fortran standard."""
-        self.downloader.download()
-        runner = ExtractionRunner(self.test_dir)
+        runner = self._require_kaby76_repository()
         
-        # Try to extract Fortran 2023 (should be most complete)
+        if not runner.verify_setup():
+            pytest.skip(
+                "External Trash/.NET toolchain not available "
+                "(verify_setup() is False, see issue #92)"
+            )
+        
+        # Try to extract Fortran 2023 (should be most complete).
         result = runner.extract_standard('Fortran 2023')
         
         self.assertTrue(result['success'])
         self.assertIn('grammar_file', result)
         self.assertTrue(os.path.exists(result['grammar_file']))
     
-    @pytest.mark.skip(reason="External Trash/.NET toolchain not reliably available in CI (see issue #92)")
     def test_generated_grammar_is_valid_antlr(self):
         """Test that generated grammar is valid ANTLR4 syntax."""
-        self.downloader.download()
-        runner = ExtractionRunner(self.test_dir)
+        runner = self._require_kaby76_repository()
+        
+        if not runner.verify_setup():
+            pytest.skip(
+                "External Trash/.NET toolchain not available "
+                "(verify_setup() is False, see issue #92)"
+            )
         
         result = runner.extract_standard('Fortran 2023')
+        self.assertTrue(result['success'])
         grammar_file = result['grammar_file']
         
         # Read grammar file and check basic ANTLR4 structure
