@@ -1,0 +1,4 @@
+DO 100 I = 1, 10
+X = I
+100 CONTINUE
+

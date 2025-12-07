@@ -9,13 +9,18 @@ import os
 import unittest
 from pathlib import Path
 
-# Add grammars directory to path for imports
+# Add tests root (for fixture_utils) and grammars directory to path for imports
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.append(str(ROOT))
+sys.path.append(str(ROOT.parent / "grammars"))
+
 sys.path.insert(0, 'grammars')
 
 try:
     from antlr4 import InputStream, CommonTokenStream
     from FORTRANIILexer import FORTRANIILexer
     from FORTRANIIParser import FORTRANIIParser
+    from fixture_utils import load_fixture
 except ImportError as e:
     print(f"Import error: {e}")
     FORTRANIIParser = None
@@ -66,13 +71,11 @@ class TestFORTRANIIParser(unittest.TestCase):
     
     def test_function_definition(self):
         """Test FUNCTION definitions (introduced in FORTRAN II)"""
-        function_text = """FUNCTION MAX(A, B)
-            IF (A - B) 10, 20, 20
-            10 MAX = B
-            RETURN
-            20 MAX = A
-            RETURN
-            END"""
+        function_text = load_fixture(
+            "FORTRANII",
+            "test_fortran_ii_parser",
+            "function_text.f",
+        )
         
         tree = self.parse(function_text, 'function_subprogram')
         self.assertIsNotNone(tree)
@@ -90,12 +93,11 @@ class TestFORTRANIIParser(unittest.TestCase):
     
     def test_subroutine_definition(self):
         """Test SUBROUTINE definitions (introduced in FORTRAN II)"""
-        subroutine_text = """SUBROUTINE SWAP(X, Y)
-            TEMP = X
-            X = Y
-            Y = TEMP
-            RETURN
-            END"""
+        subroutine_text = load_fixture(
+            "FORTRANII",
+            "test_fortran_ii_parser",
+            "subroutine_text.f",
+        )
         
         tree = self.parse(subroutine_text, 'subroutine_subprogram')
         self.assertIsNotNone(tree)
@@ -156,13 +158,11 @@ class TestFORTRANIIParser(unittest.TestCase):
         self.assertIn('common_stmt', content)
         
         # Parse a complete FORTRAN II program to ensure it works
-        program = """
-            SUBROUTINE CALC(A, B, C)
-            COMMON /DATA/ X, Y
-            C = A + B
-            RETURN
-            END
-        """
+        program = load_fixture(
+            "FORTRANII",
+            "test_fortran_ii_parser",
+            "subroutine_program.f",
+        )
         tree = self.parse(program, 'subroutine_subprogram')
         self.assertIsNotNone(tree)
         # Verify the parse tree contains expected elements

@@ -11,11 +11,15 @@ Non-shallow test suite with proper semantic validation of F2003 C interop featur
 import sys
 import pytest
 import time
+from pathlib import Path
+
 sys.path.insert(0, 'grammars')
+sys.path.append(str(Path(__file__).parent.parent))
 
 from antlr4 import *
 from Fortran2003Lexer import Fortran2003Lexer
 from Fortran2003Parser import Fortran2003Parser
+from fixture_utils import load_fixture
 
 class TestSemanticCInteroperability:
     """Deep semantic validation of C interoperability features"""
@@ -97,8 +101,11 @@ class TestSemanticCInteroperability:
     
     def test_bind_c_token_sequence_validation(self):
         """Validate BIND(C) appears as correct token sequence"""
-        code = """subroutine test() bind(c)
-end subroutine test"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue24_semantic_c_interop",
+            "bind_c_basic_subroutine.f90",
+        )
         
         tree, errors, parser = self.parse_and_validate(code)
         tokens = self.extract_all_tokens(tree)
@@ -116,8 +123,11 @@ end subroutine test"""
     def test_bind_c_syntax_capabilities_and_limitations(self):
         """Test what BIND(C) syntax currently works vs limitations"""
         # Basic BIND(C) that should work (matches working basic tests)
-        code_basic = """subroutine my_func() bind(c)
-end subroutine my_func"""
+        code_basic = load_fixture(
+            "Fortran2003",
+            "test_issue24_semantic_c_interop",
+            "bind_c_my_func_subroutine.f90",
+        )
         
         tree, errors, parser = self.parse_and_validate(code_basic)
         tokens = self.extract_all_tokens(tree)
@@ -130,8 +140,11 @@ end subroutine my_func"""
             f"subroutine keyword missing: {tokens}"
         
         # Test enhanced: BIND(C, NAME="...") syntax now works correctly
-        code_with_name = """subroutine calc() bind(c, name="calculate")
-end subroutine calc"""
+        code_with_name = load_fixture(
+            "Fortran2003",
+            "test_issue24_semantic_c_interop",
+            "bind_c_with_name_subroutine.f90",
+        )
         
         # This now works - limitation has been fixed
         tree, errors, parser = self.parse_and_validate(code_with_name)
@@ -144,11 +157,11 @@ end subroutine calc"""
     
     def test_c_interop_types_token_validation(self):
         """Validate C interop types appear as distinct tokens"""
-        code = """module test
-    integer(c_int) :: i
-    real(c_double) :: x
-    type(c_ptr) :: p
-end module test"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue24_semantic_c_interop",
+            "c_interop_types_module.f90",
+        )
         
         tree, errors, parser = self.parse_and_validate(code)
         tokens = self.extract_all_tokens(tree)
@@ -167,10 +180,11 @@ end module test"""
     
     def test_use_iso_c_binding_semantic_validation(self):
         """Validate USE ISO_C_BINDING statement structure"""
-        code = """module example
-    use iso_c_binding, only: c_int, c_float
-    implicit none
-end module example"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue24_semantic_c_interop",
+            "use_iso_c_binding_example_module.f90",
+        )
         
         tree, errors, parser = self.parse_and_validate(code)
         tokens = self.extract_all_tokens(tree)
@@ -187,9 +201,11 @@ end module example"""
     
     def test_value_attribute_semantic_placement(self):
         """Validate VALUE attribute appears in correct context"""
-        code = """subroutine proc(x) bind(c)
-    integer(c_int), value :: x
-end subroutine proc"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue24_semantic_c_interop",
+            "value_attribute_proc_subroutine.f90",
+        )
         
         tree, errors, parser = self.parse_and_validate(code)
         tokens = self.extract_all_tokens(tree)
@@ -211,18 +227,11 @@ end subroutine proc"""
     
     def test_simpler_semantic_structure_validation(self):
         """Validate simpler but complete C interop structure"""
-        code = """module interop
-    use iso_c_binding
-    implicit none
-    
-contains
-    
-    subroutine simple_func() bind(c, name="func")
-        integer(c_int) :: result
-        result = 42
-    end subroutine simple_func
-    
-end module interop"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue24_semantic_c_interop",
+            "interop_simple_module.f90",
+        )
         
         tree, errors, parser = self.parse_and_validate(code)
         tokens = self.extract_all_tokens(tree)
@@ -266,17 +275,11 @@ end module interop"""
     def test_semantic_error_recovery_validation(self):
         """Test parser recovery from syntax errors with valid constructs"""
         # Test what actually parses vs what doesn't
-        simple_valid_code = """module test
-    use iso_c_binding
-    implicit none
-    
-contains
-    
-    subroutine valid_proc() bind(c)
-        integer(c_int) :: x
-    end subroutine valid_proc
-    
-end module test"""
+        simple_valid_code = load_fixture(
+            "Fortran2003",
+            "test_issue24_semantic_c_interop",
+            "simple_valid_module.f90",
+        )
         
         tree, errors, parser = self.parse_and_validate(simple_valid_code)
         tokens = self.extract_all_tokens(tree)
@@ -321,23 +324,11 @@ end module test"""
     
     def test_parser_performance_with_working_constructs(self):
         """Test parser performance with known working constructs"""
-        working_code = """module performance_test
-    use iso_c_binding
-    implicit none
-    
-contains
-    
-    subroutine simple_proc() bind(c)
-        integer(c_int) :: result
-        result = 1
-    end subroutine simple_proc
-    
-    subroutine another_proc() bind(c)
-        real(c_double) :: value
-        value = 2.0
-    end subroutine another_proc
-    
-end module performance_test"""
+        working_code = load_fixture(
+            "Fortran2003",
+            "test_issue24_semantic_c_interop",
+            "performance_test_module.f90",
+        )
         
         start_time = time.time()
         tree, errors, parser = self.parse_and_validate(working_code)

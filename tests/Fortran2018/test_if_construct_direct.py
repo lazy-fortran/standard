@@ -3,13 +3,16 @@
 
 import sys
 import os
+from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'grammars'))
+sys.path.append(str(Path(__file__).parent.parent))
 
 from antlr4 import *
 from Fortran2018Lexer import Fortran2018Lexer  
 from Fortran2018Parser import Fortran2018Parser
 from antlr4.error.ErrorListener import ErrorListener
+from fixture_utils import load_fixture
 
 class TestErrorListener(ErrorListener):
     def __init__(self):
@@ -20,8 +23,11 @@ class TestErrorListener(ErrorListener):
         self.errors.append(f"Line {line}:{column}: {msg}")
 
 def test_if_construct_direct():
-    code = """if (mydummy > 90.and.gggg > 0) then
-endif"""
+    code = load_fixture(
+        "Fortran2018",
+        "test_if_construct",
+        "if_construct_only.f90",
+    )
     
     print(f"Testing if_construct directly:")
     print(f"Code: {code}")

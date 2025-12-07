@@ -1,0 +1,7 @@
+        READ 100, A, B, C
+        PRINT 200, X, Y
+        PUNCH 300, RESULT
+100     FORMAT (3F10.2)
+200     FORMAT (2E15.6)
+300     FORMAT (F20.8)
+
