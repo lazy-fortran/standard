@@ -1,0 +1,353 @@
+# FORTRAN 66 (ANSI X3.9‑1966) – Grammar Audit (status: in progress)
+
+This document summarizes the **FORTRAN 66** grammar implemented in this
+repository, based on:
+
+- `grammars/FORTRAN66Lexer.g4`, `grammars/FORTRAN66Parser.g4`
+- Inherited grammars (`FORTRANIILexer.g4`, `FORTRANIIParser.g4`)
+- `docs/fixed_form_support.md`
+- Tests in `tests/FORTRAN66/test_fortran66_parser.py`
+- XPASS fixtures listed in `tests/test_fixture_parsing.py`
+
+It describes what is implemented vs. what the 1966 standard family
+expects (FORTRAN IV features plus standardization), without claiming
+full conformance.
+
+## 1. Program units and structure
+
+Specification-wise, FORTRAN 66 standardizes three program unit types:
+
+- Main program
+- Subroutine subprogram
+- Function subprogram
+- BLOCK DATA subprogram (for COMMON block initialization)
+
+In this grammar:
+
+- `fortran66_program`
+  - Top-level rule:
+    - `fortran66_program : (main_program | subprogram | block_data_subprogram) EOF`.
+  - Represents a single program unit per parse.
+
+- `main_program`
+  - Defined as `statement_list` (imported and slightly specialized from
+    FORTRAN II).
+
+- `subprogram`
+  - Union of `subroutine_subprogram` and `function_subprogram`, both
+    imported from the FORTRAN II parser (thus retaining that
+    subprogram structure).
+
+- `block_data_subprogram`
+  - New in FORTRAN 66 grammar:
+    - `BLOCKDATA block_data_name? NEWLINE data_initialization_part? END`.
+  - Provides a standardized BLOCK DATA unit with optional name and a
+    `data_initialization_part` composed of COMMON, DIMENSION,
+    EQUIVALENCE and type declarations.
+
+Tests in `tests/FORTRAN66/test_fortran66_parser.py` exercise:
+
+- Main program (`main_program.f`).
+- Function subprogram (`function_program.f`).
+- Subroutine subprogram (`subroutine_program.f`).
+- BLOCK DATA examples (`test_block_data_subprogram` and
+  `test_block_data_structure`).
+
+## 2. Type system (FORTRAN IV features merged into FORTRAN 66)
+
+The FORTRAN 66 grammar extends the FORTRAN II type system by adding
+FORTRAN IV’s data types:
+
+- `type_spec` in `FORTRAN66Parser.g4`:
+  - `INTEGER`
+  - `REAL`
+  - `LOGICAL`
+  - `DOUBLE PRECISION`
+  - `COMPLEX`
+
+Corresponding tokens are defined in `FORTRAN66Lexer.g4`:
+
+- `LOGICAL`, `DOUBLE` / `PRECISION`, `COMPLEX`, and a `D` exponent
+  marker for double-precision literals.
+
+Type usage:
+
+- `type_declaration : type_spec variable_list`
+  - Used in `data_initialization_body` for BLOCK DATA and allowed as a
+    statement in `statement_body`.
+- Tests:
+  - `test_type_declarations` covers simple declarations such as:
+    - `INTEGER I, J, K`
+    - `REAL X, Y, Z`
+    - `LOGICAL FLAG, READY`
+    - `DOUBLE PRECISION PI`
+    - `COMPLEX Z`
+
+What is *not* present here:
+
+- No `CHARACTER` type (this appears first in the Fortran 77 grammar).
+
+## 3. Logical and relational expressions, IF statements
+
+FORTRAN IV introduced logical data and operations; FORTRAN 66 adopts
+them as part of the standard. The grammar models these as:
+
+- Logical expressions:
+  - `logical_expr` → `logical_term (DOT_OR logical_term)*`
+  - `logical_term` → `logical_factor (DOT_AND logical_factor)*`
+  - `logical_factor` → `DOT_NOT logical_primary` | `logical_primary`
+  - `logical_primary` → `logical_literal` | `relational_expr` |
+    `logical_variable` | `LPAREN logical_expr RPAREN`
+
+- Logical literals:
+  - `logical_literal` → `.TRUE.` or `.FALSE.` (`DOT_TRUE`, `DOT_FALSE`).
+
+- Logical variables:
+  - `logical_variable` → `IDENTIFIER` or array element.
+
+- Relational expressions:
+  - `relational_expr : expr relational_op expr`.
+  - `relational_op` includes `.EQ.`, `.NE.`, `.LT.`, `.LE.`, `.GT.`,
+    `.GE.` tokens.
+
+- Logical IF:
+  - `logical_if_stmt : IF LPAREN logical_expr RPAREN statement_body`.
+
+Tests:
+
+- `test_logical_literals` and `test_logical_operators` confirm
+  literals and operators parse as `logical_literal` and `logical_expr`.
+- `test_relational_operators` asserts parsing of `relational_expr`.
+- `test_logical_if_statement` exercises various `IF (logical-expr)`
+  forms, including ones mixing logical and relational operators.
+
+Arithmetic IF is inherited from FORTRAN II (`arithmetic_if_stmt`) and
+remains available alongside the logical IF.
+
+## 4. Statement coverage versus ANSI X3.9‑1966
+
+Section 7 of the FORTRAN 66 standard (“Statements”, pp. 12ff in
+`validation/pdfs/FORTRAN66_ANSI_X3.9-1966.txt`) classifies:
+
+- Executable statements (7.1):
+  - Assignment statements:
+    - Arithmetic assignment.
+    - Logical assignment.
+    - GO TO assignment (`ASSIGN k TO i`).
+  - Control statements (7.1.2):
+    - Unconditional GO TO.
+    - Assigned GO TO.
+    - Computed GO TO.
+    - Arithmetic IF.
+    - Logical IF.
+    - CALL.
+    - RETURN.
+    - CONTINUE.
+    - Program control statements:
+      - STOP (with octal code).
+      - PAUSE (with octal code).
+    - DO.
+  - Input/output statements (7.1.3):
+    - READ / WRITE (formatted and unformatted).
+    - Auxiliary I/O:
+      - REWIND.
+      - BACKSPACE.
+      - ENDFILE.
+- Non‑executable statements (7.2):
+  - Type statements (`INTEGER`, `REAL`, `DOUBLE PRECISION`, `COMPLEX`,
+    `LOGICAL`).
+  - DIMENSION.
+  - COMMON.
+  - EQUIVALENCE.
+  - DATA.
+  - FORMAT.
+  - EXTERNAL.
+  - INTRINSIC.
+  - Statement function statements.
+  - Others related to program unit classification.
+
+Mapping these families to the current grammar:
+
+- **Assignment statements**
+  - Arithmetic assignment:
+    - Implemented via `assignment_stmt : variable EQUALS expr` inherited
+      from FORTRAN II; used for INTEGER, REAL, DOUBLE PRECISION and
+      COMPLEX variables.
+  - Logical assignment:
+    - Implemented: logical variables participate in `assignment_stmt`
+      and `logical_expr`; tests cover logical variables and literals.
+  - GO TO assignment (`ASSIGN k TO i`):
+    - Not implemented:
+      - Lexer: `ASSIGN` exists in `FORTRANLexer.g4` (inherited), but
+        there is no dedicated GO TO assignment token.
+      - Parser: neither `FORTRANIIParser.g4` nor `FORTRAN66Parser.g4`
+        defines a GO TO assignment rule; `statement_body` has no
+        `assign_stmt` / `goto_assign_stmt` entry.
+      - Effect: any conforming FORTRAN 66 code that uses GO TO
+        assignment will fail to parse.
+
+- **Control statements**
+  - Implemented:
+    - Unconditional GO TO: `goto_stmt : GOTO label`.
+    - Computed GO TO: `computed_goto_stmt : GOTO LPAREN label_list RPAREN COMMA expr`.
+    - Arithmetic IF: `arithmetic_if_stmt : IF (expr) l1, l2, l3`.
+    - Logical IF: `logical_if_stmt : IF (logical_expr) statement_body`.
+    - CALL: `call_stmt : CALL IDENTIFIER (LPAREN expr_list? RPAREN)?`.
+    - RETURN: `return_stmt : RETURN`.
+    - CONTINUE: `continue_stmt : CONTINUE`.
+    - DO: `do_stmt` inherited from FORTRAN II, with integer control
+      variable and label.
+    - STOP / PAUSE:
+      - Implemented as `stop_stmt` and `pause_stmt` rules inherited
+        from FORTRAN II, with `integer_expr?` argument.
+  - Not implemented / not fully aligned with X3.9‑1966:
+    - Assigned GO TO (`GO TO i, (k1, k2, ...)`) is not modeled;
+      only the computed GO TO form with `GO TO (k1, k2, ...), i`
+      exists.
+    - STOP/PAUSE octal restrictions and “only octal digits 0–7” rule
+      are not enforced; the grammar treats their arguments as generic
+      integer expressions.
+
+- **Input/output statements**
+  - Implemented:
+    - READ / WRITE:
+      - `read_stmt` / `write_stmt` inherited from FORTRAN II implement
+        the “READ (u, f) list” and “WRITE (u, f) list” forms, and use
+        `input_list` / `output_list` with DO‑implied lists; tests
+        cover logical/relational expressions and fixed‑form fixtures.
+    - PRINT, PUNCH:
+      - Implemented via `print_stmt` and `punch_stmt`.
+    - FORMAT:
+      - Implemented as `format_stmt` with `format_specification`,
+        `format_item` and `format_descriptor`, plus the `HOLLERITH`
+        token for Hollerith constants; the FORMAT grammar is shared
+        with FORTRAN II.
+  - Not implemented:
+    - REWIND, BACKSPACE, ENDFILE:
+      - The standard defines these as auxiliary I/O statements
+        (7.1.3.3) with specific syntax and semantics for file
+        positioning. The current lexer/parser do not define
+        `REWIND`, `BACKSPACE` or `ENDFILE` tokens or rules.
+      - Effect: REWIND/BACKSPACE/ENDFILE in source will be rejected.
+
+- **Non‑executable (declarative) statements**
+  - Implemented:
+    - Type statements:
+      - Via `type_declaration : type_spec variable_list` with
+        `type_spec` = `INTEGER | REAL | LOGICAL | DOUBLE PRECISION | COMPLEX`.
+    - DIMENSION:
+      - Implemented by the inherited `dimension_stmt` / `array_declarator`
+        and `dimension_list` rules.
+    - EQUIVALENCE:
+      - Implemented by `equivalence_stmt` / `equivalence_set`.
+    - COMMON:
+      - Implemented by `common_stmt : COMMON (SLASH IDENTIFIER SLASH)? variable_list`.
+      - Extended: as with FORTRAN II, named COMMON blocks are accepted,
+        which matches FORTRAN 66 but also allows more flexible usage
+        than the strict wording of some implementations.
+    - FORMAT:
+      - Implemented as described above.
+    - Statement functions:
+      - Supported syntactically via `function_reference` and inherited
+        1957/II mechanisms; the grammar does not distinguish statement
+        functions from external functions at the syntax level.
+  - Partially implemented / missing:
+    - DATA:
+      - The standard defines a DATA statement for initialization
+        (including in BLOCK DATA). The current grammar has no `DATA`
+        token in `FORTRAN66Lexer.g4` and no `data_stmt` rule; BLOCK
+        DATA initialization is modeled only via type declarations and
+        assignments.
+      - Effect: any conforming DATA statements are rejected.
+    - EXTERNAL / INTRINSIC:
+      - Lexer: `EXTERNAL` and `INTRINSIC` tokens exist.
+      - Parser: no `external_stmt` or `intrinsic_stmt` in
+        `FORTRAN66Parser.g4`; these tokens are not used in
+        `statement_body` or in a declaration context.
+      - Effect: declarations like `EXTERNAL F` or `INTRINSIC SIN`
+        are not accepted as first‑class non‑executable statements.
+
+## 5. Fixed-form model
+
+`docs/fixed_form_support.md` describes the Fortran 66 fixed-form
+handling as:
+
+- Layout‑lenient:
+  - Statements are parsed according to token sequence, not strict
+    column positions.
+  - No enforcement of exact 80‑column semantics or sequence numbers.
+- Comments:
+  - Classic column‑1 `C`/`*` forms and sequence fields are treated as
+    historical context but are not modeled with strict semantics in
+    this grammar.
+
+This makes the grammar suitable for analyzing typical FORTRAN 66 code
+without reproducing exact card-image behavior.
+
+## 6. Tests and XPASS fixtures
+
+Direct tests (`tests/FORTRAN66/test_fortran66_parser.py`) cover:
+
+- Program structure:
+  - Main program, function, subroutine parsing via fixtures:
+    - `main_program.f`
+    - `function_program.f`
+    - `subroutine_program.f`
+  - BLOCK DATA subprograms and type declarations.
+- FORTRAN IV data types:
+  - LOGICAL, DOUBLE PRECISION, COMPLEX declarations and literals.
+- Logical expressions and IF:
+  - `logical_expr`, `logical_literal`, `relational_expr`,
+    `logical_if_stmt`.
+
+The fixture harness (`tests/test_fixture_parsing.py`) marks several
+FORTRAN 66 fixtures as XPASS, indicating that they still produce
+syntax errors under the generic entry rule:
+
+- `FORTRAN66/test_fortran66_parser/first_standard_demo.f`
+- `FORTRAN66/test_fortran66_parser/function_program.f`
+- `FORTRAN66/test_fortran66_parser/main_program.f`
+- `FORTRAN66/test_fortran66_parser/standard_program.f`
+- `FORTRAN66/test_fortran66_parser/subroutine_program.f`
+
+The XPASS reason strings describe these fixtures as:
+
+- “more ambitious than the simplified grammar”.
+- exercising constructs “only partially modeled”.
+- representing full standard programs that still yield syntax errors.
+
+This confirms that:
+
+- The targeted tests validate key FORTRAN 66/IV features in isolation.
+- The integrated, whole-program behavior for richer examples still has
+  gaps relative to the standard.
+
+## 7. Summary
+
+The FORTRAN 66 grammar in this repository:
+
+- Standardizes program units (main, subprograms, BLOCK DATA) on top of
+  the FORTRAN II base.
+- Extends the type system with LOGICAL, DOUBLE PRECISION and COMPLEX
+  and provides explicit type declarations.
+- Implements logical and relational expressions and logical IF in
+  addition to arithmetic IF.
+- Retains the full FORTRAN II–style statement family for DIMENSION,
+  EQUIVALENCE, COMMON, FORMAT, and basic I/O.
+- Uses a layout‑lenient fixed-form model, without enforcing strict
+  80‑column semantics.
+- Does **not** yet implement several standard FORTRAN 66 statements
+  and declarations such as DATA, EXTERNAL, INTRINSIC, and sequential
+  I/O control (`REWIND`, `BACKSPACE`, `ENDFILE`).
+- Still rejects some richer, spec-inspired fixtures, which are
+  tracked as XPASS in the generic fixture harness.
+
+Future work should:
+
+- Add explicit grammar rules and tests for the missing standard
+  statements (DATA, EXTERNAL, INTRINSIC, REWIND/BACKSPACE/ENDFILE) if
+  full FORTRAN 66 coverage is desired.
+- Align the generic fixture parser entry rule and expectations for
+  FORTRAN 66 with the dedicated `fortran66_program` rule.
+- Use the XPASS fixtures as a concrete checklist for closing the
+  remaining gaps.
