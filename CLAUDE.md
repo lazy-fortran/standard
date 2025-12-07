@@ -77,7 +77,7 @@ ANTLR4 builds must follow strict inheritance order:
 
 ## Current Implementation Status
 
-Grammars exist for FORTRAN (1957), FORTRAN II, FORTRAN 66, FORTRAN 77 and for the modern standards Fortran 90, 95, 2003, 2008, 2018 and 2023. Test coverage is uneven and several limitation documents (for example `grammars/fortran_2003_limitations.md`, `grammars/fortran_2008_limitations.md`, `grammars/fortran_2018_limitations.md`) describe known gaps.
+Grammars exist for FORTRAN (1957), FORTRAN II, FORTRAN 66, FORTRAN 77 and for the modern standards Fortran 90, 95, 2003, 2008, 2018 and 2023. Test coverage is uneven and spec‑grounded GitHub issues (for example #83, #88, #90) describe known gaps in the Fortran 2003/2008/2018 subsets.
 
 As of this branch the test suite contains roughly 270 passing tests across all standards. The implementation is suitable for experimentation and research, but it should not be treated as a complete, production‑quality implementation of every feature from each Fortran standard.
 
