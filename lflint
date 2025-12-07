@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+
+import argparse
+import sys
+from pathlib import Path
+
+from lazyfortran_tooling import LazyFortranToolError, lint_lazy_file
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="lflint",
+        description="Lazy Fortran linter built on LazyFortran2025.",
+    )
+    parser.add_argument(
+        "paths",
+        nargs="+",
+        help="One or more Lazy Fortran source files (.lf) to lint.",
+    )
+
+    args = parser.parse_args(argv)
+    exit_code = 0
+
+    for raw_path in args.paths:
+        path = Path(raw_path)
+        try:
+            issues = lint_lazy_file(path)
+        except LazyFortranToolError as exc:
+            print(f"{path}: error: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+
+        if issues:
+            exit_code = 1
+            for issue in issues:
+                print(
+                    f"{issue.path}:{issue.line}:{issue.column}: "
+                    f"{issue.code}: {issue.message}"
+                )
+
+    return exit_code
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
