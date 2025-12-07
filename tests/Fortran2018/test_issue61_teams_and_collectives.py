@@ -81,3 +81,14 @@ class TestF2018TeamsAndCollectivesStatus:
         assert tree is not None
         # Once SELECT RANK is fully wired up, this should parse with zero errors.
         assert errors == 0
+
+    def test_team_event_and_collective_semantics_program(self):
+        """Teams, events and collectives program parses without syntax errors."""
+        code = load_fixture(
+            "Fortran2018",
+            "test_issue61_teams_and_collectives",
+            "team_event_semantics.f90",
+        )
+        tree, errors, _ = parse_f2018(code)
+        assert tree is not None
+        assert errors == 0
