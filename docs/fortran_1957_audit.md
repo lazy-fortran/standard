@@ -22,7 +22,88 @@ claim of full conformance to the original IBM 704 FORTRAN compiler.
   - Multiple separately compiled program units in a single source.
   - Any post‑1960s program unit forms (`PROGRAM`, `MODULE`, etc.).
 
-## 2. Statements and control flow
+## 2. Spec-based statement coverage (FORTRAN for the IBM 704)
+
+Historical sources (IBM 704 FORTRAN manuals and later summaries)
+describe an initial FORTRAN release with 32 statement types, including
+DIMENSION/EQUIVALENCE, assignment, arithmetic IF, exception-checking
+IFs, sense-switch/light control, GO TO/ASSIGN/assigned GO TO, DO,
+formatted and unformatted I/O, END FILE/REWIND/BACKSPACE, PAUSE,
+STOP/CONTINUE and FREQUENCY. citeturn0search12turn0search1
+
+Mapping that list to the current grammar:
+
+- **DIMENSION, EQUIVALENCE**
+  - Status: lexer-only; **no statement rules**.
+  - Evidence: tokens exist in `FORTRANLexer.g4`, but
+    `FORTRANParser.g4` has no `dimension_stmt` or `equivalence_stmt`
+    and `statement_body` never references these keywords. Fixtures like
+    `array_program_1957.f` are XPASS and documented as exercising more
+    of the original language than the simplified grammar accepts.
+
+- **Assignment**
+  - Status: **implemented and tested.**
+  - Evidence: `assignment_stmt` rule and multiple fixtures (e.g. math
+    expression blocks) that parse without errors.
+
+- **Arithmetic IF**
+  - Status: **implemented and tested.**
+  - Evidence: `if_stmt_arithmetic` rule and fixtures
+    `arithmetic_if_stmt.f` / `arithmetic_if_control_flow.f`.
+
+- **Exception-checking IFs and sense switch/light control**
+  - Status: **not implemented.**
+  - Evidence: no ACCUMULATOR, QUOTIENT, DIVIDE, SENSE, SWITCH or LIGHT
+    tokens in `FORTRANLexer.g4`; no dedicated parser rules.
+
+- **GO TO, computed GO TO, ASSIGN, assigned GO TO**
+  - Status:
+    - `GOTO` and computed `GOTO`: **implemented and tested.**
+    - `ASSIGN` / assigned `GO TO`: **lexer-only; no syntax.**
+  - Evidence: `goto_stmt` and `computed_goto_stmt` rules exist and are
+    tested (computed GOTO has an explicit zero‑error assertion).
+    `ASSIGN` is a token but not referenced by any parser rule.
+
+- **DO loops**
+  - Status: **implemented (basic 1957 form) and tested.**
+  - Evidence: `do_stmt_basic` implements `DO label var = expr, expr
+    [, expr]`, and fixtures like `do_loop_with_label.f` parse.
+
+- **Formatted I/O (FORMAT, READ/WRITE variants, PRINT, PUNCH)**
+  - Status:
+    - `READ`/`WRITE`: **implemented in a simplified form only.**
+    - `FORMAT`, `PRINT`, `PUNCH` and tape-specific forms:
+      **partial / not implemented.**
+  - Evidence: `read_stmt_basic` / `write_stmt_basic` accept only
+    `READ input_list` / `WRITE output_list` (no format labels or
+    devices). `FORMAT`, `PRINT`, `PUNCH` exist as tokens but have no
+    corresponding parser rules; richer FORMAT/I/O fixtures are XPASS.
+
+- **Unformatted I/O (`READ TAPE`, `READ DRUM`, `WRITE TAPE`, `WRITE DRUM`)**
+  - Status: **not implemented.**
+  - Evidence: no dedicated TAPE/DRUM I/O forms in lexer or parser.
+
+- **Other I/O (`END FILE`, `REWIND`, `BACKSPACE`)**
+  - Status: **not implemented.**
+  - Evidence: these keywords do not appear in `FORTRANLexer.g4` and
+    have no parser rules.
+
+- **PAUSE, STOP, CONTINUE**
+  - Status:
+    - `STOP`, `CONTINUE`: **implemented as standalone statements.**
+    - `PAUSE`: **lexer-only / partial.**
+  - Evidence: `CONTINUE` and `STOP` appear in `statement_body`.
+    `PAUSE` is a token and is tested lexically and via fixtures, but
+    there is no `pause_stmt` rule and tests do not assert zero syntax
+    errors for PAUSE fixtures.
+
+- **FREQUENCY**
+  - Status: **implemented and tested.**
+  - Evidence: `frequency_stmt` rule plus fixtures
+    (`frequency_stmt.f`, `frequency_test_1957.f`) that assert
+    `getNumberOfSyntaxErrors() == 0`.
+
+## 3. Statements and control flow (implemented subset)
 
 Implemented and tested in `tests/FORTRAN/test_fortran_historical_stub.py`
 and the associated fixtures:
@@ -32,7 +113,11 @@ and the associated fixtures:
 - Unconditional GOTO: `GO TO n`.
 - DO loops using labeled termination (no `END DO`).
 - STOP and CONTINUE.
-- PAUSE and FREQUENCY (unique early FORTRAN features).
+- FREQUENCY as an optimization hint.
+- PAUSE is recognized lexically and used in fixtures, but currently
+  lacks a dedicated `pause_stmt` rule; PAUSE tests focus on token
+  recognition and parse-tree construction rather than zero-error
+  parsing.
 
 Out-of-scope / not yet modeled:
 
@@ -59,10 +144,10 @@ Out-of-scope / not explicitly audited:
 
 Implemented (core subset):
 
-- `READ`, `PRINT`, `PUNCH` statements, as exercised in
-  `io_statements.f` and `io_operations_1957.f`.
-- Basic `FORMAT` statements and edit descriptors sufficient for the
-  focused stub tests.
+- Simplified `READ` and `WRITE` forms (`read_stmt_basic`,
+  `write_stmt_basic`) without devices or explicit FORMAT labels.
+- Basic use of `FORMAT` in fixtures, but without a dedicated
+  `format_stmt` rule in `FORTRANParser.g4`.
 
 Known limitations (from fixtures and comments):
 
@@ -73,14 +158,25 @@ Known limitations (from fixtures and comments):
   programs using more complex I/O.
 - FORMAT grammar does not attempt to fully reconstruct all edit
   descriptors and edge cases from IBM manuals.
+- `PRINT`, `PUNCH`, tape/drum I/O forms and `END FILE`/`REWIND`/
+  `BACKSPACE` are not modeled as full statements in the 1957 parser.
 
-## 5. Hollerith, EQUIVALENCE and other 1957-specific features
+## 5. Hollerith, DIMENSION/EQUIVALENCE and other 1957-specific features
 
-Implemented in a limited way:
+Implemented / partially implemented:
 
-- `EQUIVALENCE` and `DIMENSION` are present in the grammar and used in
-  fixtures.
-- `FREQUENCY` and `PAUSE` have explicit tests and parse successfully.
+- `DIMENSION` and `EQUIVALENCE`:
+  - Tokens are present in `FORTRANLexer.g4` and appear in historical
+    fixtures (for example `array_program_1957.f`), but the parser has
+    no corresponding statement rules; fixtures using DIMENSION are
+    XPASS and documented as beyond the simplified grammar.
+- `FREQUENCY`:
+  - Fully modeled via `frequency_stmt` and tested with zero syntax
+    errors.
+- `PAUSE`:
+  - Recognized by the lexer and exercised in fixtures, but there is no
+    explicit `pause_stmt` rule; tests only assert that parsing does not
+    crash and do not assert zero syntax errors.
 
 Not fully implemented:
 
@@ -139,4 +235,3 @@ Today the FORTRAN (1957) grammar is:
 
 Further work on this standard should reference this audit together with
 the open issues for expanding 1957 coverage.
-
