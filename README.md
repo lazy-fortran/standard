@@ -102,9 +102,9 @@ This project provides grammars and tests for many Fortran standards, but it does
 | FORTRAN 77 (1977) | Yes | Yes (`tests/FORTRAN77`) | Adds the CHARACTER type, block `IF ... THEN ... ELSE ... ENDIF`, PARAMETER, SAVE and other features; coverage is representative but not exhaustive. |
 | Fortran 90 (1990) | Yes | Extensive (`tests/Fortran90`) | Modern foundation: free‑form source, modules, derived types, array operations, dynamic arrays, enhanced control constructs (`SELECT CASE`, `WHERE`), etc. |
 | Fortran 95 (1995) | Yes | No dedicated suite yet | Grammar extends F90 with FORALL, enhancements to WHERE and additional intrinsics; tests are still to be written. |
-| Fortran 2003 (2003) | Yes | Extensive (`tests/Fortran2003`) | Adds object‑oriented features, C interoperability, procedure pointers, IEEE arithmetic support, etc. See `grammars/fortran_2003_limitations.md` for known gaps. |
-| Fortran 2008 (2008) | Yes | Present (`tests/Fortran2008`) | Introduces coarrays, submodules, `DO CONCURRENT`, new intrinsics and kinds. See `grammars/fortran_2008_limitations.md`. |
-| Fortran 2018 (2018) | Yes | Present (`tests/Fortran2018`) | Extends coarray parallelism with teams, events and related features. See `grammars/fortran_2018_limitations.md` for current coverage. |
+| Fortran 2003 (2003) | Yes | Extensive (`tests/Fortran2003`) | Adds object‑oriented features, C interoperability, procedure pointers, IEEE arithmetic support, etc. Remaining gaps are tracked in `docs/fortran_2003_audit.md` and spec‑grounded issues such as #90. |
+| Fortran 2008 (2008) | Yes | Present (`tests/Fortran2008`) | Introduces coarrays, submodules, `DO CONCURRENT`, new intrinsics and kinds. Remaining gaps are tracked in spec‑grounded Fortran 2008 issues such as #83. |
+| Fortran 2018 (2018) | Yes | Present (`tests/Fortran2018`) | Extends coarray parallelism with teams, events and related features. Remaining gaps are tracked in spec‑grounded Fortran 2018 issues such as #88. |
 | Fortran 2023 (2023) | Yes | Present (`tests/Fortran2023`) | Adds features such as improved enumerations, conditional expressions and further intrinsic enhancements. Current support is intentionally minimal and evolving. |
 
 At the moment the test suite consists of roughly 270 tests across these standards, and all of them pass after generating the grammars with ANTLR.
