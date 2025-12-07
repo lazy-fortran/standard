@@ -2,14 +2,18 @@
 """Test clean IF construct parsing"""
 
 import sys
-import os
+from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'grammars'))
+# Ensure we can import fixture utilities and grammars
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.append(str(ROOT))
+sys.path.append(str(ROOT.parent / "grammars"))
 
-from antlr4 import *
-from Fortran2018Lexer import Fortran2018Lexer  
-from Fortran2018Parser import Fortran2018Parser
-from antlr4.error.ErrorListener import ErrorListener
+from antlr4 import *  # type: ignore
+from antlr4.error.ErrorListener import ErrorListener  # type: ignore
+from Fortran2018Lexer import Fortran2018Lexer  # type: ignore
+from Fortran2018Parser import Fortran2018Parser  # type: ignore
+from fixture_utils import load_fixture
 
 class TestErrorListener(ErrorListener):
     def __init__(self):
@@ -47,10 +51,11 @@ endif"""
 
 def test_wrapped_program():
     # Test wrapped in program
-    code = """program test
-if (mydummy > 90.and.gggg > 0) then
-endif
-end program test"""
+    code = load_fixture(
+        "Fortran2018",
+        "test_clean_if",
+        "wrapped_program.f90",
+    )
     
     print(f"\nTesting wrapped in program:")
     print(f"Code: {repr(code)}")
