@@ -133,17 +133,17 @@ select_rank_construct
     ;
 
 select_rank_stmt
-    : (IDENTIFIER COLON)? SELECT_RANK LPAREN IDENTIFIER RPAREN NEWLINE
+    : (IDENTIFIER COLON)? SELECT RANK_KEYWORD LPAREN expr_f90 RPAREN NEWLINE
     ;
 
 rank_case_stmt
-    : CASE LPAREN rank_spec RPAREN NEWLINE
+    : RANK_KEYWORD LPAREN rank_value RPAREN NEWLINE   // RANK (n) or RANK (*)
+    | RANK_KEYWORD DEFAULT NEWLINE                    // RANK DEFAULT
     ;
 
-rank_spec
-    : INTEGER_LITERAL              // Specific rank
-    | RANK_STAR                    // RANK(*)
-    | RANK_DEFAULT                 // DEFAULT
+rank_value
+    : INTEGER_LITERAL              // Specific rank: RANK (n)
+    | '*'                          // Assumed-rank case: RANK (*)
     ;
 
 end_select_rank_stmt
