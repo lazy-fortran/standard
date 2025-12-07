@@ -127,8 +127,21 @@ lazy_trait_type_param
     ;
 
 lazy_trait_member
-    : declaration_construct_f2018
+    : lazy_trait_required_procedure_stmt
+    | declaration_construct_f2018
     | NEWLINE
+    ;
+
+// Simplified PROCEDURE declaration used inside traits to describe required
+// operations without needing an explicit interface. This is intentionally
+// narrower than the full Fortran PROCEDURE syntax and only applies in the
+// lazy trait context.
+lazy_trait_required_procedure_stmt
+    : PROCEDURE DOUBLE_COLON lazy_trait_procedure_entity_list NEWLINE
+    ;
+
+lazy_trait_procedure_entity_list
+    : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
 end_trait_stmt
