@@ -24,11 +24,15 @@ for the entire modern Fortran chain (F90 → F95 → F2003 → ... → LazyFortr
 """
 
 import sys
-import os
 import pytest
+from pathlib import Path
+
+# Ensure we can import shared test fixtures utilities
+sys.path.append(str(Path(__file__).parent.parent))
+from fixture_utils import load_fixture
 
 # Add grammars directory to Python path for generated parsers
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../grammars'))
+sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
 
 try:
     from antlr4 import InputStream, CommonTokenStream
@@ -401,14 +405,13 @@ class TestFortran90Parser:
 
     def test_parser_compilation(self):
         """Test that F90 parser compiles and can parse basic constructs."""
-        test_input = """
-        program test_f90
-            integer :: x
-            x = 42
-        end program
-        """
-        
-        parser = self.create_parser(test_input)
+        code = load_fixture(
+            "Fortran90",
+            "test_fortran_90_comprehensive",
+            "basic_program.f90",
+        )
+
+        parser = self.create_parser(code)
         
         try:
             tree = parser.program_unit_f90()
@@ -418,28 +421,13 @@ class TestFortran90Parser:
 
     def test_module_parsing(self):
         """Test F90 module system parsing (major innovation)."""
-        module_input = """
-        module math_utils
-            implicit none
-            public :: add_numbers
-            private :: helper_function
-            
-            contains
-            
-            function add_numbers(a, b) result(sum)
-                integer, intent(in) :: a, b
-                integer :: sum
-                sum = a + b
-            end function add_numbers
-            
-            function helper_function() result(x)
-                integer :: x
-                x = 42
-            end function helper_function
-        end module math_utils
-        """
-        
-        parser = self.create_parser(module_input)
+        code = load_fixture(
+            "Fortran90",
+            "test_fortran_90_comprehensive",
+            "mathematics_module.f90",
+        )
+
+        parser = self.create_parser(code)
         
         try:
             tree = parser.program_unit_f90()
@@ -449,22 +437,13 @@ class TestFortran90Parser:
 
     def test_derived_types_parsing(self):
         """Test F90 derived types parsing (user-defined structures)."""
-        derived_type_input = """
-        program test_types
-            type :: person
-                character(len=50) :: name
-                integer :: age
-                real :: height
-            end type person
-            
-            type(person) :: john
-            john%name = "John Doe"
-            john%age = 30
-            john%height = 5.9
-        end program
-        """
-        
-        parser = self.create_parser(derived_type_input)
+        code = load_fixture(
+            "Fortran90",
+            "test_fortran_90_comprehensive",
+            "derived_types_module.f90",
+        )
+
+        parser = self.create_parser(code)
         
         try:
             tree = parser.program_unit_f90()
@@ -474,24 +453,13 @@ class TestFortran90Parser:
 
     def test_dynamic_arrays_parsing(self):
         """Test F90 dynamic arrays parsing (ALLOCATABLE/POINTER)."""
-        dynamic_array_input = """
-        program test_dynamic
-            integer, allocatable :: dynamic_array(:)
-            integer, pointer :: ptr_array(:)
-            integer, target :: target_array(10)
-            
-            allocate(dynamic_array(100))
-            ptr_array => target_array
-            
-            dynamic_array(1) = 42
-            ptr_array(1) = 24
-            
-            deallocate(dynamic_array)
-            nullify(ptr_array)
-        end program
-        """
-        
-        parser = self.create_parser(dynamic_array_input)
+        code = load_fixture(
+            "Fortran90",
+            "test_fortran_90_comprehensive",
+            "dynamic_arrays.f90",
+        )
+
+        parser = self.create_parser(code)
         
         try:
             tree = parser.program_unit_f90()
@@ -501,25 +469,13 @@ class TestFortran90Parser:
 
     def test_select_case_parsing(self):
         """Test F90 SELECT CASE construct parsing."""
-        select_case_input = """
-        program test_select
-            integer :: grade
-            grade = 85
-            
-            select case (grade)
-            case (90:100)
-                print *, "A"
-            case (80:89)
-                print *, "B"
-            case (70:79)
-                print *, "C"
-            case default
-                print *, "F"
-            end select
-        end program
-        """
-        
-        parser = self.create_parser(select_case_input)
+        code = load_fixture(
+            "Fortran90",
+            "test_fortran_90_comprehensive",
+            "select_case_program.f90",
+        )
+
+        parser = self.create_parser(code)
         
         try:
             tree = parser.program_unit_f90()
@@ -529,17 +485,13 @@ class TestFortran90Parser:
 
     def test_array_constructor_parsing(self):
         """Test F90 array constructor parsing."""
-        array_constructor_input = """
-        program test_arrays
-            integer :: numbers(5)
-            integer :: matrix(2,2)
-            
-            numbers = [1, 2, 3, 4, 5]
-            matrix = reshape([1, 2, 3, 4], [2, 2])
-        end program
-        """
-        
-        parser = self.create_parser(array_constructor_input)
+        code = load_fixture(
+            "Fortran90",
+            "test_fortran_90_comprehensive",
+            "array_constructor_program.f90",
+        )
+
+        parser = self.create_parser(code)
         
         try:
             tree = parser.program_unit_f90()
@@ -549,34 +501,13 @@ class TestFortran90Parser:
 
     def test_enhanced_procedures_parsing(self):
         """Test F90 enhanced procedures with modern features."""
-        enhanced_proc_input = """
-        program test_procedures
-            contains
-            
-            recursive function factorial(n) result(fact)
-                integer, intent(in) :: n
-                integer :: fact
-                
-                if (n <= 1) then
-                    fact = 1
-                else
-                    fact = n * factorial(n - 1)
-                end if
-            end function factorial
-            
-            subroutine process_data(data, size, optional_param)
-                real, intent(inout) :: data(:)
-                integer, intent(in) :: size
-                logical, intent(in), optional :: optional_param
-                
-                if (present(optional_param)) then
-                    print *, "Optional parameter provided"
-                end if
-            end subroutine process_data
-        end program
-        """
-        
-        parser = self.create_parser(enhanced_proc_input)
+        code = load_fixture(
+            "Fortran90",
+            "test_fortran_90_comprehensive",
+            "enhanced_procedures_program.f90",
+        )
+
+        parser = self.create_parser(code)
         
         try:
             tree = parser.program_unit_f90()
