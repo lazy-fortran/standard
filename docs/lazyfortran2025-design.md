@@ -163,13 +163,13 @@ Key decisions (see issue #53 for details):
 
 ---
 
-### 1.3 LF‑SYN‑03 – World‑Wide Automatic Specializations (Issue #51) – *PROVISIONAL*
+### 1.3 LF‑SYN‑03 – World‑Wide Automatic Specializations (Issue #51) – *DECIDED (WORLD MODEL)*
 
 **Summary.**  
 Starting from an entry point, the Lazy Fortran toolchain treats the
 reachable graph of `.lf` files and packages as one **world** and
-generates specializations only for the concrete combinations of argument
-types that actually occur.
+generates specializations only for the concrete combinations of
+argument types that actually occur.
 
 **User story.**  
 As a user, I want generic routines like `dot` or `axpy` to specialize
@@ -194,10 +194,62 @@ The compiler sees `dot` used with `real(8)` arrays and generates the
 needed specialization(s). If another part of the world calls `dot`
 with `integer(4)` arrays, a matching specialization is generated.
 
-Open design points (tracked in #51):
+**World definition.**
 
-- How aggressively to specialize (per call‑site vs. per type pattern).
-- Caching and invalidation in the world‑wide build graph.
+- A world is defined by an entry program or package plus the transitive
+  `use`‑reachable graph of `.lf` libraries and traditional Fortran
+  modules. It is **entry‑point local**, not “every module on the
+  machine”.
+- For a given world, the set of reachable source files and versions is
+  fixed for the duration of compilation; rerunning compilation with the
+  same inputs produces the same set of specializations.
+
+**Specialization model.**
+
+- Within a world, each generic Lazy Fortran procedure body (such as
+  `dot` above) is conceptually parameterized by the types, kinds and
+  ranks of its dummy arguments.
+- When a call like `dot(x, y)` is encountered, the compiler looks at
+  the argument type pattern in that world:
+  - If there is already a specialization for that pattern, it is reused.
+  - Otherwise a new specialization for that pattern is generated.
+- Specializations are shared per type pattern across the world, not per
+  call site: all `dot(real(8), real(8))` calls in the same world use
+  the same specialization.
+
+**Interaction with user-written procedures and ISO Fortran.**
+
+- Generic resolution at each call site remains **STANDARD-COMPLIANT**
+  with ISO/IEC 1539-1:2018, using the rules for generic interfaces in
+  Subclause 15.4.3.4 (and 15.4.3.4.5 for unambiguous resolution).
+- Within that model, explicit, user-written specific procedures always
+  win over generated specializations for the same generic identifier:
+  they are considered before any Lazy Fortran generated variants.
+- Among all applicable candidates (explicit and generated), the most
+  specific candidate is chosen; if no unique most specific candidate
+  exists, the call is rejected with a compile-time ambiguity error.
+- Generated specializations are visible only as additional specific
+  procedures under an existing generic; they must not change behavior
+  that would be valid Fortran 2018 in the absence of Lazy Fortran.
+
+**Errors and implicit typing.**
+
+- If no candidate (explicit or generated) can handle a call, the
+  compiler reports a compile-time error rather than silently choosing a
+  “best guess”.
+- Lazy Fortran does not reintroduce letter-based implicit typing for
+  world‑wide specializations: type inference rules from LF‑SYN‑02 apply
+  unchanged, and all generated entities must satisfy the type and kind
+  rules of ISO/IEC 1539-1:2018.
+
+**Caching and reproducibility.**
+
+- Specializations are cached per world in the same system‑wide store
+  described in LF‑PKG‑01.
+- Cache hits are an implementation detail only: the set of visible
+  specializations for a given world is determined entirely by the
+  source graph and ISO‑compliant generic resolution rules above, not by
+  previous runs.
 
 ---
 
@@ -431,7 +483,7 @@ Open design points (tracked in #55):
 |--------------|-------------------------------------------|-------------:|:-----:|
 | LF‑SYN‑01    | Zero‑boilerplate `.lf` files              | PROVISIONAL  |  #52  |
 | LF‑SYN‑02    | Type inference & implicit rules           | DECIDED (core)| #53  |
-| LF‑SYN‑03    | World‑wide automatic specializations      | PROVISIONAL  |  #51  |
+| LF‑SYN‑03    | World‑wide automatic specializations      | DECIDED (world)| #51  |
 | LF‑SYN‑04    | Trait‑like contracts                      | OPEN         |  #57  |
 | LF‑TOOL‑01   | Interactive REPL & notebooks              | PROVISIONAL  |  #54  |
 | LF‑TOOL‑02   | Canonical formatter and linter            | PROVISIONAL  |  #56  |

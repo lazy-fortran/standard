@@ -34,3 +34,26 @@ def test_design_doc_covers_all_lazy_feature_issues() -> None:
     assert (
       marker in content
     ), f"Design document should reference Lazy Fortran issue #{issue}"
+
+
+def test_world_specializations_doc_spells_out_precedence_and_ambiguity() -> None:
+  design_path = _repo_root() / "docs" / "lazyfortran2025-design.md"
+  content = design_path.read_text(encoding="utf-8")
+
+  assert (
+    "LF‑SYN‑03 – World‑Wide Automatic Specializations (Issue #51)"
+    in content
+  )
+  assert "explicit, user-written specific procedures always" in content
+  assert "win over generated specializations" in content
+  assert "most specific candidate" in content
+  assert "compile-time ambiguity error" in content
+
+
+def test_world_specializations_doc_mentions_iso_generic_resolution() -> None:
+  design_path = _repo_root() / "docs" / "lazyfortran2025-design.md"
+  content = design_path.read_text(encoding="utf-8")
+
+  assert "ISO/IEC 1539-1:2018" in content
+  assert "15.4.3.4" in content
+  assert "STANDARD-COMPLIANT" in content
