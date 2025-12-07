@@ -182,9 +182,10 @@ class TestFortran90Lexer:
                 assert len(tokens) >= 1
                 assert tokens[0].type == expected_token
                 
-        # Note: CASE and CYCLE tokens exist but conflict with FIXED_FORM_COMMENT
-        # This is a known lexer limitation documented in fortran_2003_limitations.md
-        # The tokens are defined correctly but 'C' prefix causes lexer conflicts
+        # Note: CASE and CYCLE tokens exist but conflict with FIXED_FORM_COMMENT.
+        # This lexer limitation is documented in the Fortran 2003 tracking
+        # issues and audit docs; the tokens are defined correctly but the 'C'
+        # prefix causes lexer conflicts.
         assert hasattr(Fortran90Lexer, 'CASE')  # Verify token exists
         assert hasattr(Fortran90Lexer, 'CYCLE')  # Verify token exists
 
