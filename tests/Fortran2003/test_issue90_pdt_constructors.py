@@ -47,6 +47,39 @@ class TestF2003PDTConstructors:
         assert tree is not None
         assert errors == 0
 
+    def test_pdt_constructor_with_mixed_type_params_and_components(self):
+        """PDT constructor: mixed positional/keyword type params and components."""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue90_pdt_constructors",
+            "pdt_ctor_mixed_params_module.f90",
+        )
+        tree, errors = parse_f2003(code)
+        assert tree is not None
+        assert errors == 0
+
+    def test_pdt_constructor_nested_in_component(self):
+        """PDT constructor: nested constructors in component position."""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue90_pdt_constructors",
+            "pdt_ctor_nested_module.f90",
+        )
+        tree, errors = parse_f2003(code)
+        assert tree is not None
+        assert errors == 0
+
+    def test_pdt_constructor_with_deferred_and_assumed_params_context(self):
+        """PDT constructor: used alongside deferred and assumed type parameters."""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue90_pdt_constructors",
+            "pdt_ctor_poly_module.f90",
+        )
+        tree, errors = parse_f2003(code)
+        assert tree is not None
+        assert errors == 0
+
     def test_pdt_constructor_with_positional_type_params_and_components(self):
         """PDT constructor: positional type params and components."""
         code = load_fixture(
