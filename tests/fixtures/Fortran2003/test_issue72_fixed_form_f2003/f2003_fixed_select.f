@@ -1,0 +1,24 @@
+
+C   F2003 SELECT TYPE and ASSOCIATE in fixed form
+      MODULE F2003_FIXED_SELECT
+      IMPLICIT NONE
+
+      TYPE SHAPE_T
+        REAL :: R
+      END TYPE SHAPE_T
+
+      CONTAINS
+
+      SUBROUTINE RENDER(OBJ)
+        CLASS(*), INTENT(IN) :: OBJ
+        SELECT TYPE (OBJ)
+        TYPE IS (SHAPE_T)
+          ASSOCIATE (RADIUS => OBJ%R)
+            PRINT *, 'RADIUS =', RADIUS
+          END ASSOCIATE
+        CLASS DEFAULT
+          PRINT *, 'UNKNOWN SHAPE'
+        END SELECT
+      END SUBROUTINE RENDER
+
+      END MODULE F2003_FIXED_SELECT

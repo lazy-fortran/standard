@@ -1,0 +1,3 @@
+100     FORMAT (I5, F10.2, E15.6, 5HHELLO)
+        END
+

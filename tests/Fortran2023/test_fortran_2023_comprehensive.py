@@ -374,14 +374,11 @@ class TestFortran2023ErrorCorrections:
     def test_namelist_enhancements(self):
         """Test F2023 NAMELIST enhancements."""
         # F2023: PUBLIC namelist groups may contain PRIVATE variables
-        namelist_input = """
-        module test_mod
-            private
-            integer :: private_var
-            public :: public_namelist
-            namelist /public_namelist/ private_var
-        end module
-        """
+        namelist_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive_extra",
+            "namelist_enhancements_module.f90",
+        )
         
         lexer = Fortran2023Lexer(InputStream(namelist_input))
         tokens = []
