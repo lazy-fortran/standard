@@ -125,6 +125,19 @@ class TestBasicF2008Features:
         assert tree is not None, "ERROR STOP failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for ERROR STOP, got {errors}"
     
+    def test_error_stop_no_code(self):
+        """Test ERROR STOP without a stop code"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "error_stop_no_code.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "ERROR STOP without code failed to produce parse tree"
+        assert errors == 0, (
+            f"Expected 0 errors for ERROR STOP without code, got {errors}"
+        )
+
     def test_contiguous_attribute_token(self):
         """Test CONTIGUOUS attribute"""
         code = load_fixture(
@@ -136,6 +149,19 @@ class TestBasicF2008Features:
         assert tree is not None, "CONTIGUOUS attribute failed to produce parse tree"
         # Track remaining work in issue #87
         assert errors == 0, f"Expected 0 errors for CONTIGUOUS attribute, got {errors}"
+
+    def test_contiguous_standalone_statement(self):
+        """Test CONTIGUOUS standalone attribute statement"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "contiguous_statement.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "CONTIGUOUS statement failed to produce parse tree"
+        assert errors == 0, (
+            f"Expected 0 errors for CONTIGUOUS statement, got {errors}"
+        )
 
     def test_image_intrinsics(self):
         """Test coarray intrinsic functions"""
