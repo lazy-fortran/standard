@@ -9,13 +9,18 @@ import os
 import unittest
 from pathlib import Path
 
-# Add grammars directory to path for imports
+# Add tests root (for fixture_utils) and grammars directory to path for imports
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.append(str(ROOT))
+sys.path.append(str(ROOT.parent / "grammars"))
+
 sys.path.insert(0, 'grammars')
 
 try:
     from antlr4 import InputStream, CommonTokenStream
     from FORTRANLexer import FORTRANLexer
     from FORTRANParser import FORTRANParser
+    from fixture_utils import load_fixture
 except ImportError as e:
     print(f"Import error: {e}")
     FORTRANParser = None
@@ -222,11 +227,16 @@ class TestFORTRANParser(unittest.TestCase):
         """Test simple program unit parsing"""
         program_texts = [
             "X = 1",
-            """X = 1
-               Y = 2""",
-            """DO 100 I = 1, 10
-               X = I
-               100 CONTINUE"""
+            load_fixture(
+                "FORTRAN",
+                "test_fortran_parser",
+                "simple_program_2lines.f",
+            ),
+            load_fixture(
+                "FORTRAN",
+                "test_fortran_parser",
+                "do_loop_program.f",
+            ),
         ]
         
         for text in program_texts:
@@ -255,17 +265,11 @@ class TestFORTRANParser(unittest.TestCase):
     
     def test_complex_program_structure(self):
         """Test complex program with multiple statements"""
-        complex_program = """
-            X = 1
-            Y = 2.5
-            Z = X + Y * 2
-            IF (Z) 10, 20, 30
-            DO 100 I = 1, 10
-            A(I) = I ** 2
-            100 CONTINUE
-            WRITE A
-            STOP
-        """
+        complex_program = load_fixture(
+            "FORTRAN",
+            "test_fortran_parser",
+            "complex_program_unit.f",
+        )
         
         tree = self.parse(complex_program, 'program_unit_core')
         self.assertIsNotNone(tree)

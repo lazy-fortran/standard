@@ -16,10 +16,12 @@ from pathlib import Path
 import pytest
 from antlr4 import InputStream, CommonTokenStream
 
+sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
 
 from Fortran2003Lexer import Fortran2003Lexer
 from Fortran2003Parser import Fortran2003Parser
+from fixture_utils import load_fixture
 
 
 def parse_f2003(code: str):
@@ -36,101 +38,44 @@ class TestF2003CInteropExtended:
 
     def test_bind_c_on_function_and_subroutine_with_name(self):
         """BIND(C) with and without NAME= on functions and subroutines."""
-        code = """
-module c_api
-  use iso_c_binding
-  implicit none
-
-contains
-
-  ! Function with BIND(C) and NAME=
-  integer(c_int) function add(a, b) bind(c, name="c_add")
-    integer(c_int), value :: a, b
-    add = a + b
-  end function add
-
-  ! Subroutine with BIND(C) and NAME=
-  subroutine scale_array(n, x, factor) bind(c, name="c_scale_array")
-    integer(c_int), value        :: n
-    real(c_double)               :: x(n)
-    real(c_double), value        :: factor
-  end subroutine scale_array
-
-  ! Function with plain BIND(C)
-  real(c_double) function length(x, y) bind(c)
-    real(c_double), value :: x, y
-    length = sqrt(x*x + y*y)
-  end function length
-
-end module c_api
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue70_c_interop_extended",
+            "c_api_module.f90",
+        )
         tree, errors, _ = parse_f2003(code)
         assert tree is not None
         assert errors == 0
 
     def test_bind_c_derived_type_with_various_c_components(self):
         """Derived type with BIND(C) and interoperable components."""
-        code = """
-module c_structs
-  use iso_c_binding
-  implicit none
-
-  type, bind(c) :: particle_t
-    integer(c_int)      :: id
-    real(c_double)      :: mass
-    real(c_double)      :: position(3)
-    type(c_ptr)         :: payload
-  end type particle_t
-
-  type, bind(c) :: pair_t
-    type(particle_t) :: a
-    type(particle_t) :: b
-  end type pair_t
-
-end module c_structs
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue70_c_interop_extended",
+            "c_structs_module.f90",
+        )
         tree, errors, _ = parse_f2003(code)
         assert tree is not None
         assert errors == 0
 
     def test_value_and_optional_attributes_in_c_binding(self):
         """VALUE and OPTIONAL attributes in interoperable dummies (simplified)."""
-        code = """
-module c_optional_args
-  use iso_c_binding
-  implicit none
-
-contains
-
-  subroutine c_log_message(msg, level) bind(c, name="c_log_message")
-    character(len=*), intent(in) :: msg
-    integer(c_int), value        :: level
-  end subroutine c_log_message
-
-end module c_optional_args
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue70_c_interop_extended",
+            "c_optional_args_module.f90",
+        )
         tree, errors, _ = parse_f2003(code)
         assert tree is not None
         assert errors == 0
 
     def test_import_c_types_in_interface_block(self):
         """IMPORT of multiple C interop types inside an interface block."""
-        code = """
-module c_interfaces
-  use iso_c_binding
-  implicit none
-
-  interface
-    subroutine c_axpy(n, a, x, y) bind(c, name="c_axpy")
-      import :: c_int, c_double
-      integer(c_int),  value        :: n
-      real(c_double),  value        :: a
-      real(c_double)                :: x(n), y(n)
-    end subroutine c_axpy
-  end interface
-
-end module c_interfaces
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue70_c_interop_extended",
+            "c_interfaces_module.f90",
+        )
         tree, errors, _ = parse_f2003(code)
         assert tree is not None
         assert errors == 0
@@ -143,23 +88,17 @@ class TestF2003CInteropNegative:
         """Reject non-C language and malformed NAME clauses."""
         cases = [
             # Unsupported language identifier in BIND
-            """
-module bad_lang
-  implicit none
-contains
-  subroutine s() bind(fortran)
-  end subroutine s
-end module bad_lang
-""",
+            load_fixture(
+                "Fortran2003",
+                "test_issue70_c_interop_extended",
+                "bad_lang_module.f90",
+            ),
             # NAME without string literal
-            """
-module bad_name
-  implicit none
-contains
-  subroutine s() bind(c, name=foo)
-  end subroutine s
-end module bad_name
-""",
+            load_fixture(
+                "Fortran2003",
+                "test_issue70_c_interop_extended",
+                "bad_name_module.f90",
+            ),
         ]
 
         for code in cases:

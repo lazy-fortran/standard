@@ -25,8 +25,11 @@ class TestErrorListener(ErrorListener):
 
 def test_clean_if():
     # Test just the IF construct without orphaned end
-    code = """if (mydummy > 90.and.gggg > 0) then
-endif"""
+    code = load_fixture(
+        "Fortran2018",
+        "test_if_construct",
+        "if_construct_only.f90",
+    )
     
     print(f"Testing clean IF construct:")
     print(f"Code: {repr(code)}")

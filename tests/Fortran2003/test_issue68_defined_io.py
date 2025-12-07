@@ -21,11 +21,13 @@ from pathlib import Path
 import pytest
 from antlr4 import CommonTokenStream, InputStream
 
+sys.path.append(str(Path(__file__).parent.parent))
 # Add grammars directory to path
 sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
 
 from Fortran2003Lexer import Fortran2003Lexer
 from Fortran2003Parser import Fortran2003Parser
+from fixture_utils import load_fixture
 
 
 def parse_f2003(code: str):
@@ -42,74 +44,22 @@ class TestFortran2003DefinedDerivedTypeIO:
 
     def test_type_bound_generic_write_formatted(self):
         """Type-bound GENERIC :: WRITE(FORMATTED) => proc."""
-        code = """
-module defined_io_mod
-  implicit none
-
-  type :: point_t
-    real :: x, y
-  contains
-    procedure :: write_formatted
-    generic :: write(formatted) => write_formatted
-  end type point_t
-
-contains
-
-  subroutine write_formatted(dtv, u, iotype, v_list, ios, msg)
-    class(point_t), intent(in) :: dtv
-    integer, intent(in)        :: u
-    character(*), intent(in)   :: iotype
-    integer, intent(in)        :: v_list(:)
-    integer, intent(out)       :: ios
-    character(*), intent(inout):: msg
-
-    write(u, '(2F10.4)') dtv%x, dtv%y
-        ios    = 0
-        msg    = ''
-  end subroutine write_formatted
-
-end module defined_io_mod
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue68_defined_io",
+            "defined_io_mod.f90",
+        )
         tree, errors, _ = parse_f2003(code)
         assert tree is not None
         assert errors == 0
 
     def test_interface_write_formatted_and_unformatted(self):
         """INTERFACE WRITE(FORMATTED) / WRITE(UNFORMATTED)."""
-        code = """
-module interface_defined_io
-  implicit none
-
-  type :: point_t
-    real :: x, y
-  end type point_t
-
-  interface write(formatted)
-     subroutine write_point_formatted(dtv, u, iotype, v_list, ios, msg)
-       import :: point_t
-       class(point_t), intent(in) :: dtv
-       integer, intent(in)        :: u
-       character(*), intent(in)   :: iotype
-       integer, intent(in)        :: v_list(:)
-       integer, intent(out)       :: ios
-       character(*), intent(inout):: msg
-     end subroutine write_point_formatted
-  end interface
-
-  interface write(unformatted)
-     subroutine write_point_unformatted(dtv, u, iotype, v_list, ios, msg)
-       import :: point_t
-       class(point_t), intent(in) :: dtv
-       integer, intent(in)        :: u
-       character(*), intent(in)   :: iotype
-       integer, intent(in)        :: v_list(:)
-       integer, intent(out)       :: ios
-       character(*), intent(inout):: msg
-     end subroutine write_point_unformatted
-  end interface
-
-end module interface_defined_io
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue68_defined_io",
+            "interface_defined_io.f90",
+        )
         tree, errors, _ = parse_f2003(code)
         assert tree is not None
         assert errors == 0
@@ -123,20 +73,11 @@ end module interface_defined_io
         ensure that such a format is accepted as a string literal in the I/O
         control list.
         """
-        code = """
-program use_defined_io
-  use defined_io_mod
-  implicit none
-
-  type(point_t) :: p
-
-  p%x = 1.0
-  p%y = 2.0
-
-  ! DT edit descriptor inside format string (simplified example)
-  write(*, '(DT\"point\"(10,2))') p
-end program use_defined_io
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue68_defined_io",
+            "use_defined_io_program.f90",
+        )
         tree, errors, _ = parse_f2003(code)
         assert tree is not None
         assert errors == 0
@@ -149,21 +90,10 @@ end program use_defined_io
         a form like WRITE(DT=...) is not valid and should result in a syntax
         error under this grammar.
         """
-        code = """
-module bad_dt_generic
-  implicit none
-
-  interface write(dt=point)
-     module procedure write_point
-  end interface
-
-contains
-
-  subroutine write_point(x)
-    real, intent(in) :: x
-  end subroutine write_point
-
-end module bad_dt_generic
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue68_defined_io",
+            "bad_dt_generic_module.f90",
+        )
         _, errors, _ = parse_f2003(code)
         assert errors > 0

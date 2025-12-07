@@ -16,10 +16,12 @@ from pathlib import Path
 import pytest
 from antlr4 import InputStream, CommonTokenStream
 
+sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
 
 from Fortran2003Lexer import Fortran2003Lexer
 from Fortran2003Parser import Fortran2003Parser
+from fixture_utils import load_fixture
 
 
 def parse_f2003(code: str):
@@ -36,81 +38,33 @@ class TestF2003PDTConstructors:
 
     def test_pdt_constructor_with_keyword_type_param_and_component(self):
         """PDT constructor: keyword type param plus positional component."""
-        code = """
-module pdt_t_module
-  implicit none
-
-  type :: t(k)
-    integer, kind :: k = 0
-    integer :: value
-  end type t
-
-contains
-
-  subroutine use_t
-    type(t) :: foo
-    ! Type parameter set with keyword, component by position
-    foo = t(k=0)(42)
-  end subroutine use_t
-
-end module pdt_t_module
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue90_pdt_constructors",
+            "pdt_t_module.f90",
+        )
         tree, errors = parse_f2003(code)
         assert tree is not None
         assert errors == 0
 
     def test_pdt_constructor_with_positional_type_params_and_components(self):
         """PDT constructor: positional type params and components."""
-        code = """
-module pdt_matrix_ctor
-  implicit none
-
-  type :: matrix_t(k, m, n)
-    integer, kind :: k
-    integer, len  :: m, n
-    real(k)       :: data(m, n)
-  end type matrix_t
-
-contains
-
-  subroutine build_matrix
-    type(matrix_t(8,2,2)) :: a
-    ! Positional type parameters followed by component values
-    a = matrix_t(8,2,2)( [1.0, 2.0, 3.0, 4.0] )
-  end subroutine build_matrix
-
-end module pdt_matrix_ctor
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue90_pdt_constructors",
+            "pdt_matrix_ctor_module.f90",
+        )
         tree, errors = parse_f2003(code)
         assert tree is not None
         assert errors == 0
 
     def test_pdt_constructor_with_array_components(self):
         """PDT constructor: array-valued components using F2003 [ ] syntax."""
-        code = """
-module pdt_x_ctor
-  implicit none
-
-  type :: x_t(n)
-    integer, len :: n
-    integer      :: v(n)
-    character(len=8) :: label(n)
-  end type x_t
-
-contains
-
-  subroutine init_x
-    type(x_t(1)) :: a
-    type(x_t(2)) :: b
-
-    ! Structure constructors with array components
-    a = x_t(1)( [1], ["a1"] )
-    b = x_t(2)( [1,2], ["b1","b2"] )
-  end subroutine init_x
-
-end module pdt_x_ctor
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue90_pdt_constructors",
+            "pdt_x_ctor_module.f90",
+        )
         tree, errors = parse_f2003(code)
         assert tree is not None
         assert errors == 0
-

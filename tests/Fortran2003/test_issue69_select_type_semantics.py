@@ -17,10 +17,12 @@ from pathlib import Path
 import pytest
 from antlr4 import InputStream, CommonTokenStream
 
+sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
 
 from Fortran2003Lexer import Fortran2003Lexer
 from Fortran2003Parser import Fortran2003Parser
+from fixture_utils import load_fixture
 
 
 def parse_f2003(code: str):
@@ -37,22 +39,11 @@ class TestF2003SelectTypeSemantics:
 
     def test_select_type_with_intrinsic_and_default(self):
         """SELECT TYPE with intrinsic TYPE IS and CLASS DEFAULT."""
-        code = """
-program select_intrinsic
-  implicit none
-  class(*), allocatable :: obj
-
-  select type (obj)
-  type is (integer)
-     print *, 'int'
-  type is (real)
-     print *, 'real'
-  class default
-     print *, 'other'
-  end select
-
-end program select_intrinsic
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue69_select_type_semantics",
+            "select_intrinsic_program.f90",
+        )
         tree, errors, _ = parse_f2003(code)
         assert tree is not None
         assert errors == 0
@@ -66,30 +57,11 @@ end program select_intrinsic
         - TYPE IS (point_t) with and without a selector name
         - CLASS DEFAULT branch
         """
-        code = """
-module m_points
-  implicit none
-
-  type :: point_t
-    real :: x, y
-  end type point_t
-
-contains
-
-  subroutine handle_point(obj)
-    class(*), intent(in) :: obj
-
-    select type (p => obj)
-    type is (point_t)
-      print *, 'point:', p%x, p%y
-    class default
-      print *, 'not a point'
-    end select
-
-  end subroutine handle_point
-
-end module m_points
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue69_select_type_semantics",
+            "m_points_module.f90",
+        )
         tree, errors, _ = parse_f2003(code)
         assert tree is not None
         assert errors == 0
@@ -98,25 +70,11 @@ end module m_points
         """
         Nested SELECT TYPE with CLASS(*) and renamed selector inside a branch.
         """
-        code = """
-program nested_select
-  implicit none
-  class(*), allocatable :: obj
-
-  select type (obj)
-  class is (shape_t)
-    select type (s => obj)
-    type is (circle_t)
-      print *, 'circle branch'
-    class default
-      print *, 'shape but not circle'
-    end select
-  class default
-    print *, 'non-shape'
-  end select
-
-end program nested_select
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue69_select_type_semantics",
+            "nested_select_program.f90",
+        )
         tree, errors, _ = parse_f2003(code)
         assert tree is not None
         assert errors == 0
@@ -132,20 +90,11 @@ class TestF2003SelectTypeNegative:
         Our grammar expects `TYPE is (type-spec)` / `CLASS is (type-spec)`.
         A form like `type (integer)` is therefore rejected.
         """
-        code = """
-program bad_guard
-  implicit none
-  class(*), allocatable :: obj
-
-  select type (obj)
-  type (integer)
-     print *, 'missing is'
-  class default
-     print *, 'default'
-  end select
-
-end program bad_guard
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue69_select_type_semantics",
+            "bad_guard_program.f90",
+        )
         _, errors, _ = parse_f2003(code)
         assert errors > 0
 
@@ -154,18 +103,10 @@ end program bad_guard
         CLASS DEFAULT must not carry a type-spec; this malformed form
         should produce a syntax error under the current grammar.
         """
-        code = """
-program bad_default
-  implicit none
-  class(*), allocatable :: obj
-
-  select type (obj)
-  class default (integer)
-     print *, 'illegal'
-  end select
-
-end program bad_default
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_issue69_select_type_semantics",
+            "bad_default_program.f90",
+        )
         _, errors, _ = parse_f2003(code)
         assert errors > 0
-

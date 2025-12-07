@@ -3,13 +3,16 @@
 
 import sys
 import os
+from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'grammars'))
+sys.path.append(str(Path(__file__).parent.parent))
 
 from antlr4 import *
 from Fortran2018Lexer import Fortran2018Lexer  
 from Fortran2018Parser import Fortran2018Parser
 from antlr4.error.ErrorListener import ErrorListener
+from fixture_utils import load_fixture
 
 class TestErrorListener(ErrorListener):
     def __init__(self):
@@ -33,8 +36,11 @@ def print_tree(node, indent=0):
                 print_tree(child, indent + 1)
 
 def test_if_parse_tree():
-    code = """if (mydummy > 90.and.gggg > 0) then
-endif"""
+    code = load_fixture(
+        "Fortran2018",
+        "test_if_construct",
+        "if_construct_only.f90",
+    )
     
     print(f"Testing IF construct parse tree:")
     print(f"Code: {repr(code)}")

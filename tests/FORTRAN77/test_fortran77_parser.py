@@ -156,19 +156,11 @@ END IF"""
     def test_fortran77_revolution_features(self):
         """Test the structured programming revolution features"""
         # Complex nested IF-THEN-ELSE structure
-        nested_if = """IF (STATUS .EQ. 1) THEN
-    IF (COUNT .GT. LIMIT) THEN
-        PRINT *, 'LIMIT EXCEEDED'
-        STOP
-    ELSE
-        COUNT = COUNT + 1
-    END IF
-ELSE IF (STATUS .EQ. 2) THEN
-    PRINT *, 'WARNING STATUS'
-ELSE
-    PRINT *, 'UNKNOWN STATUS'
-    STATUS = 0
-END IF"""
+        nested_if = load_fixture(
+            "FORTRAN77",
+            "test_fortran77_parser_extra",
+            "nested_if_block.f",
+        )
         
         tree = self.parse(nested_if, 'block_if_construct')
         self.assertIsNotNone(tree)

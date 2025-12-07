@@ -21,9 +21,17 @@ from that era for educational and historical research purposes.
 import sys
 import os
 import pytest
+from pathlib import Path
 
-# Add grammars directory to Python path for generated parsers
+# Add tests root (for fixture_utils) and grammars directory to path for imports
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.append(str(ROOT))
+sys.path.append(str(ROOT.parent / "grammars"))
+
+# Keep original relative grammars path for compatibility
 sys.path.insert(0, 'grammars')
+
+from fixture_utils import load_fixture
 
 from antlr4 import InputStream, CommonTokenStream
 from FORTRANLexer import FORTRANLexer
@@ -65,10 +73,11 @@ class TestFORTRANHistoricalStub:
     def test_parser_compilation(self):
         """Test that FORTRAN parser compiles and can parse basic constructs."""
         # Simple 1957 FORTRAN program
-        test_input = """
-        A = B + C
-        END
-        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "simple_program.f",
+        )
         
         parser = self.create_parser(test_input)
         
@@ -122,10 +131,11 @@ class TestFORTRANHistoricalStub:
     def test_arithmetic_if_statement(self):
         """Test parsing of arithmetic IF (unique to early FORTRAN)."""
         # Arithmetic IF: IF (expr) negative_label, zero_label, positive_label
-        test_input = """
-        IF (X - Y) 10, 20, 30
-        END
-        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "arithmetic_if_stmt.f",
+        )
         
         parser = self.create_parser(test_input)
         
@@ -138,10 +148,11 @@ class TestFORTRANHistoricalStub:
     def test_computed_goto_statement(self):
         """Test parsing of computed GOTO (1957 multi-way branch)."""
         # Computed GOTO: GO TO (label1, label2, label3), expression
-        test_input = """
-        GOTO (10, 20, 30), I
-        END
-        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "computed_goto_stmt.f",
+        )
         
         parser = self.create_parser(test_input)
 
@@ -157,11 +168,11 @@ class TestFORTRANHistoricalStub:
     def test_do_loop_with_label(self):
         """Test parsing of DO loops with mandatory labels (1957 style)."""
         # DO loops REQUIRED labels in 1957 (no END DO statement)
-        test_input = """
-        DO 100 I = 1, 10, 2
-100     CONTINUE
-        END
-        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "do_loop_with_label.f",
+        )
         
         parser = self.create_parser(test_input)
         
@@ -173,10 +184,11 @@ class TestFORTRANHistoricalStub:
 
     def test_format_statement(self):
         """Test parsing of FORMAT statements (revolutionary I/O feature)."""
-        test_input = """
-100     FORMAT (I5, F10.2, E15.6, 5HHELLO)
-        END
-        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "format_stmt.f",
+        )
         
         parser = self.create_parser(test_input)
         
@@ -189,12 +201,11 @@ class TestFORTRANHistoricalStub:
     def test_historical_io_statements(self):
         """Test parsing of 1957 I/O statements."""
         # READ, PRINT, PUNCH - the three I/O operations in 1957
-        test_input = """
-        READ 100, A, B, C
-        PRINT 200, X, Y, Z
-        PUNCH 300, RESULT
-        END
-        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "io_statements.f",
+        )
         
         parser = self.create_parser(test_input)
         
@@ -207,11 +218,11 @@ class TestFORTRANHistoricalStub:
     def test_frequency_statement(self):
         """Test parsing of FREQUENCY statement (unique optimization hint)."""
         # FREQUENCY was unique to 1957 FORTRAN for optimization
-        test_input = """
-        FREQUENCY 10 (25, 3, 1)
-10      A = B + C
-        END
-        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "frequency_stmt.f",
+        )
         
         parser = self.create_parser(test_input)
 
@@ -227,11 +238,11 @@ class TestFORTRANHistoricalStub:
     def test_mathematical_expressions(self):
         """Test parsing of mathematical expressions (core FORTRAN innovation)."""
         # Mathematical notation was revolutionary in 1957
-        test_input = """
-        A = B + C * D / E ** F
-        X = (Y + Z) ** 2.0
-        END
-        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "math_expressions_block.f",
+        )
         
         parser = self.create_parser(test_input)
         
@@ -244,25 +255,11 @@ class TestFORTRANHistoricalStub:
     def test_historical_example_program(self):
         """Test parsing of complete 1957 FORTRAN program example."""
         # Simplified quadratic equation solver (1957 style)
-        historical_program = """
-        READ 100, A, B, C
-        DISC = B*B - 4.0*A*C
-        IF (DISC) 10, 20, 30
-10      PRINT 200
-        GOTO 40
-20      ROOT = -B/(2.0*A)
-        PRINT 300, ROOT
-        GOTO 40
-30      ROOT1 = (-B + SQRT(DISC))/(2.0*A)
-        ROOT2 = (-B - SQRT(DISC))/(2.0*A)
-        PRINT 400, ROOT1, ROOT2
-40      STOP
-100     FORMAT (3F10.2)
-200     FORMAT (12HNO REAL ROOTS)
-300     FORMAT (11HSINGLE ROOT, F10.4)
-400     FORMAT (10HTWO ROOTS:, 2F10.4)
-        END
-        """
+        historical_program = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "historical_quadratic_program.f",
+        )
         
         parser = self.create_parser(historical_program)
         
@@ -333,11 +330,11 @@ class TestFORTRANHistoricalAccuracy:
             assert token.type == FORTRANLexer.INTEGER_LITERAL, f"Label '{label}' should be valid in 1957"
         
         # Test parsing labels in context
-        test_program = """
-        100   A = B + C
-        200   CONTINUE
-        99999 END
-        """
+        test_program = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "label_constraints_program.f",
+        )
         
         parser = self.create_parser(test_program)
         try:
@@ -367,15 +364,11 @@ class TestFORTRANHistoricalAccuracy:
     def test_1957_program_structure_accuracy(self):
         """Test that program structure follows 1957 FORTRAN conventions."""
         # 1957 programs had no explicit PROGRAM statement - just statements
-        authentic_1957_program = """
-        C     AUTHENTIC 1957 FORTRAN PROGRAM STRUCTURE
-              READ 100, A, B
-              C = A + B
-              PRINT 200, C
-              STOP
-        100   FORMAT (2F10.2)
-        200   FORMAT (F15.4)
-        """
+        authentic_1957_program = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "authentic_1957_program.f",
+        )
         
         parser = self.create_parser(authentic_1957_program)
         try:
@@ -387,15 +380,11 @@ class TestFORTRANHistoricalAccuracy:
     def test_1957_control_flow_accuracy(self):
         """Test 1957 control flow constructs parse according to historical specs."""
         # Arithmetic IF was the ONLY conditional in 1957
-        arithmetic_if_test = """
-        IF (X - Y) 10, 20, 30
-        10    PRINT 100
-              GOTO 40
-        20    PRINT 200  
-              GOTO 40
-        30    PRINT 300
-        40    CONTINUE
-        """
+        arithmetic_if_test = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "arithmetic_if_control_flow.f",
+        )
         
         parser = self.create_parser(arithmetic_if_test)
         try:
@@ -407,14 +396,11 @@ class TestFORTRANHistoricalAccuracy:
     def test_1957_io_operations_accuracy(self):
         """Test I/O operations match 1957 FORTRAN specifications."""
         # Test all three 1957 I/O operations
-        io_operations = """
-        READ 100, A, B, C
-        PRINT 200, X, Y
-        PUNCH 300, RESULT
-        100 FORMAT (3F10.2)
-        200 FORMAT (2E15.6) 
-        300 FORMAT (F20.8)
-        """
+        io_operations = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "io_operations_1957.f",
+        )
         
         parser = self.create_parser(io_operations)
         try:
@@ -426,10 +412,11 @@ class TestFORTRANHistoricalAccuracy:
     def test_1957_unique_features_accuracy(self):
         """Test features unique to 1957 FORTRAN that were removed later."""
         # PAUSE statement - unique to 1957, removed in later standards
-        pause_test = """
-        PAUSE 1234
-        A = B + C
-        """
+        pause_test = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "pause_test_1957.f",
+        )
         
         parser = self.create_parser(pause_test)
         try:
@@ -439,10 +426,11 @@ class TestFORTRANHistoricalAccuracy:
             pytest.fail(f"1957 PAUSE statement failed: {e}")
         
         # FREQUENCY statement - optimization hint unique to 1957
-        frequency_test = """
-        FREQUENCY 100 (25, 3, 1)
-        100 A = B * C + D
-        """
+        frequency_test = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "frequency_test_1957.f",
+        )
         
         parser = self.create_parser(frequency_test)
         try:
@@ -454,11 +442,11 @@ class TestFORTRANHistoricalAccuracy:
     def test_1957_mathematical_expressions_accuracy(self):
         """Test mathematical expressions follow 1957 precedence and syntax."""
         # 1957 FORTRAN had full operator precedence including ** from day one
-        math_expressions = """
-        A = B + C * D / E ** F
-        X = (Y + Z) ** 2.0 - W * V
-        RESULT = SQRT(DISC) + ABS(ROOT)
-        """
+        math_expressions = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "math_expressions_1957.f",
+        )
         
         parser = self.create_parser(math_expressions)
         try:
@@ -470,12 +458,11 @@ class TestFORTRANHistoricalAccuracy:
     def test_1957_array_support_accuracy(self):
         """Test array support matches 1957 specifications."""
         # Arrays were revolutionary in 1957 - multi-dimensional with subscripts
-        array_program = """
-        DIMENSION A(100), B(10,20), C(5,5,5)
-        A(I) = B(I,J) + C(I,J,K)
-        PRINT 100, A(25)
-        100 FORMAT (F15.6)
-        """
+        array_program = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "array_program_1957.f",
+        )
         
         parser = self.create_parser(array_program)
         try:
@@ -487,11 +474,11 @@ class TestFORTRANHistoricalAccuracy:
     def test_1957_format_statements_accuracy(self):
         """Test FORMAT statements match 1957 I/O formatting capabilities."""
         # FORMAT statements were revolutionary for precise I/O control
-        format_tests = """
-        100 FORMAT (I5, F10.2, E15.6)
-        200 FORMAT (3I10, 2F15.4, 5HHELLO)
-        300 FORMAT (10HRESULT IS:, F20.8)
-        """
+        format_tests = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "format_tests_1957.f",
+        )
         
         parser = self.create_parser(format_tests)
         try:

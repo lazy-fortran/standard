@@ -18,10 +18,12 @@ from pathlib import Path
 import pytest
 from antlr4 import InputStream, CommonTokenStream
 
+sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
 
 from Fortran2003Lexer import Fortran2003Lexer  # type: ignore
 from Fortran2003Parser import Fortran2003Parser  # type: ignore
+from fixture_utils import load_fixture
 
 
 def parse_f2003(code: str):
@@ -45,27 +47,11 @@ class TestF2003Polymorphism:
         - TYPE IS and CLASS IS guards
         - Nested SELECT TYPE inside a CLASS IS branch
         """
-        code = """program poly_nested
-  implicit none
-  class(*), allocatable :: obj
-
-  select type (obj)
-  type is (integer)
-    print *, 'integer'
-  class is (circle_t)
-    print *, 'circle'
-    select type (obj2 => obj)
-    class is (circle_t)
-      print *, 'nested circle'
-    class default
-      print *, 'nested default'
-    end select
-  class default
-    print *, 'outer default'
-  end select
-
-end program poly_nested
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_f2003_polymorphism_and_c_interop",
+            "poly_nested_program.f90",
+        )
         tree, errors, parser = parse_f2003(code)
         assert errors == 0, f"Nested SELECT TYPE construct failed with {errors} errors"
         assert tree is not None
@@ -80,19 +66,11 @@ end program poly_nested
         - class default
         - end select
         """
-        code = """program poly_test
-  implicit none
-  class(*), allocatable :: obj
-
-  select type (obj)
-  type is (integer)
-    print *, 'int'
-  class default
-    print *, 'other'
-  end select
-
-end program poly_test
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_f2003_polymorphism_and_c_interop",
+            "poly_test_program.f90",
+        )
         tree, errors, parser = parse_f2003(code)
         assert errors == 0, f"SELECT TYPE construct failed with {errors} errors"
         assert tree is not None
@@ -104,11 +82,11 @@ end program poly_test
         This focuses on class_declaration_stmt and type_spec_or_star
         using the '*' (unlimited polymorphic) alternative.
         """
-        code = """module m
-    class(*), pointer :: p
-    class(*), allocatable :: a(:)
-end module m
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_f2003_polymorphism_and_c_interop",
+            "m_class_star_module.f90",
+        )
         tree, errors, parser = parse_f2003(code)
         assert errors == 0, f"CLASS(*) declarations failed with {errors} errors"
         assert tree is not None
@@ -124,19 +102,11 @@ class TestF2003CInteropAdvanced:
         Existing tests cover BIND(C, NAME="...") on subroutines; this
         extends coverage to functions.
         """
-        code = """module c_funcs
-    use iso_c_binding
-    implicit none
-
-contains
-
-    integer(c_int) function add_ints(a, b) bind(c, name="add_ints")
-        integer(c_int), value :: a, b
-        add_ints = a + b
-    end function add_ints
-
-end module c_funcs
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_f2003_polymorphism_and_c_interop",
+            "c_funcs_module.f90",
+        )
         tree, errors, parser = parse_f2003(code)
         assert errors == 0, f"BIND(C, NAME=...) on function failed with {errors} errors"
         assert tree is not None
@@ -145,17 +115,11 @@ end module c_funcs
         """
         Derived type with BIND(C) and C interop component types.
         """
-        code = """module c_types
-    use iso_c_binding
-    implicit none
-
-    type, bind(c) :: point
-        real(c_double) :: x
-        real(c_double) :: y
-    end type point
-
-end module c_types
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_f2003_polymorphism_and_c_interop",
+            "c_types_module.f90",
+        )
         tree, errors, parser = parse_f2003(code)
         assert errors == 0, f"TYPE, BIND(C) failed with {errors} errors"
         assert tree is not None
@@ -166,19 +130,11 @@ end module c_types
 
         This uses import_stmt and import_name with c_interop_type.
         """
-        code = """module c_iface
-    use iso_c_binding
-    implicit none
-
-    interface
-        subroutine c_sub(x) bind(c)
-            import :: c_int
-            integer(c_int), value :: x
-        end subroutine c_sub
-    end interface
-
-end module c_iface
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_f2003_polymorphism_and_c_interop",
+            "c_iface_module.f90",
+        )
         tree, errors, parser = parse_f2003(code)
         assert errors == 0, f"IMPORT of C interop types failed with {errors} errors"
         assert tree is not None
