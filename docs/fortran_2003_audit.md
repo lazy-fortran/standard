@@ -151,7 +151,7 @@ supports for practical use, without claiming full ISO conformance.
 
 - **C interoperability (ISO_C_BINDING, BIND(C), C types, VALUE)**
   - **Status:** Substantially implemented and tested (Issues #24, #59, #70).
-  - **Notes:** See `grammars/fortran_2003_limitations.md` section 7 and tests:
+  - **Notes:** See the C interoperability tracking issues (#24, #59, #70) and tests:
     - `test_issue24_semantic_c_interop.py`
     - `test_f2003_polymorphism_and_c_interop.py`
     - `test_issue70_c_interop_extended.py`
@@ -188,8 +188,7 @@ Fortran 2003 support in this repository can be summarized as:
     FORMAT grammars.
   - Strict historical column semantics for fixed-form source.
 
-This audit, combined with the updated `grammars/fortran_2003_limitations.md`,
-forms the spec‑driven checklist requested in Issue #73 and provides a clear
-picture of which parts of Fortran 2003 are supported, tested, or explicitly
-left outside the current subset.
-
+This audit, combined with the spec‑grounded Fortran 2003 tracking issues
+(for example Issue #90), forms the spec‑driven checklist requested in
+Issue #73 and provides a clear picture of which parts of Fortran 2003 are
+supported, tested, or explicitly left outside the current subset.
