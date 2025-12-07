@@ -124,72 +124,148 @@ Tests:
 Arithmetic IF is inherited from FORTRAN II (`arithmetic_if_stmt`) and
 remains available alongside the logical IF.
 
-## 4. Statement coverage versus specification
+## 4. Statement coverage versus ANSI X3.9‑1966
 
-The FORTRAN 66 grammar builds on FORTRAN II and aims to cover the
-standardized statement set. Mapping major statement families to rules:
+Section 7 of the FORTRAN 66 standard (“Statements”, pp. 12ff in
+`validation/pdfs/FORTRAN66_ANSI_X3.9-1966.txt`) classifies:
 
-- **Control flow and branching**
+- Executable statements (7.1):
+  - Assignment statements:
+    - Arithmetic assignment.
+    - Logical assignment.
+    - GO TO assignment (`ASSIGN k TO i`).
+  - Control statements (7.1.2):
+    - Unconditional GO TO.
+    - Assigned GO TO.
+    - Computed GO TO.
+    - Arithmetic IF.
+    - Logical IF.
+    - CALL.
+    - RETURN.
+    - CONTINUE.
+    - Program control statements:
+      - STOP (with octal code).
+      - PAUSE (with octal code).
+    - DO.
+  - Input/output statements (7.1.3):
+    - READ / WRITE (formatted and unformatted).
+    - Auxiliary I/O:
+      - REWIND.
+      - BACKSPACE.
+      - ENDFILE.
+- Non‑executable statements (7.2):
+  - Type statements (`INTEGER`, `REAL`, `DOUBLE PRECISION`, `COMPLEX`,
+    `LOGICAL`).
+  - DIMENSION.
+  - COMMON.
+  - EQUIVALENCE.
+  - DATA.
+  - FORMAT.
+  - EXTERNAL.
+  - INTRINSIC.
+  - Statement function statements.
+  - Others related to program unit classification.
+
+Mapping these families to the current grammar:
+
+- **Assignment statements**
+  - Arithmetic assignment:
+    - Implemented via `assignment_stmt : variable EQUALS expr` inherited
+      from FORTRAN II; used for INTEGER, REAL, DOUBLE PRECISION and
+      COMPLEX variables.
+  - Logical assignment:
+    - Implemented: logical variables participate in `assignment_stmt`
+      and `logical_expr`; tests cover logical variables and literals.
+  - GO TO assignment (`ASSIGN k TO i`):
+    - Not implemented:
+      - Lexer: `ASSIGN` exists in `FORTRANLexer.g4` (inherited), but
+        there is no dedicated GO TO assignment token.
+      - Parser: neither `FORTRANIIParser.g4` nor `FORTRAN66Parser.g4`
+        defines a GO TO assignment rule; `statement_body` has no
+        `assign_stmt` / `goto_assign_stmt` entry.
+      - Effect: any conforming FORTRAN 66 code that uses GO TO
+        assignment will fail to parse.
+
+- **Control statements**
   - Implemented:
-    - `goto_stmt` – unconditional GO TO.
-    - `computed_goto_stmt` – `GO TO (label-list), expr`.
-    - `arithmetic_if_stmt` – three-way arithmetic IF.
-    - `logical_if_stmt` – logical IF.
-    - `do_stmt` – DO with label and bounds (inherited from FORTRAN II).
-    - `continue_stmt`, `stop_stmt`, `pause_stmt`.
+    - Unconditional GO TO: `goto_stmt : GOTO label`.
+    - Computed GO TO: `computed_goto_stmt : GOTO LPAREN label_list RPAREN COMMA expr`.
+    - Arithmetic IF: `arithmetic_if_stmt : IF (expr) l1, l2, l3`.
+    - Logical IF: `logical_if_stmt : IF (logical_expr) statement_body`.
+    - CALL: `call_stmt : CALL IDENTIFIER (LPAREN expr_list? RPAREN)?`.
+    - RETURN: `return_stmt : RETURN`.
+    - CONTINUE: `continue_stmt : CONTINUE`.
+    - DO: `do_stmt` inherited from FORTRAN II, with integer control
+      variable and label.
+    - STOP / PAUSE:
+      - Implemented as `stop_stmt` and `pause_stmt` rules inherited
+        from FORTRAN II, with `integer_expr?` argument.
+  - Not implemented / not fully aligned with X3.9‑1966:
+    - Assigned GO TO (`GO TO i, (k1, k2, ...)`) is not modeled;
+      only the computed GO TO form with `GO TO (k1, k2, ...), i`
+      exists.
+    - STOP/PAUSE octal restrictions and “only octal digits 0–7” rule
+      are not enforced; the grammar treats their arguments as generic
+      integer expressions.
+
+- **Input/output statements**
+  - Implemented:
+    - READ / WRITE:
+      - `read_stmt` / `write_stmt` inherited from FORTRAN II implement
+        the “READ (u, f) list” and “WRITE (u, f) list” forms, and use
+        `input_list` / `output_list` with DO‑implied lists; tests
+        cover logical/relational expressions and fixed‑form fixtures.
+    - PRINT, PUNCH:
+      - Implemented via `print_stmt` and `punch_stmt`.
+    - FORMAT:
+      - Implemented as `format_stmt` with `format_specification`,
+        `format_item` and `format_descriptor`, plus the `HOLLERITH`
+        token for Hollerith constants; the FORMAT grammar is shared
+        with FORTRAN II.
   - Not implemented:
-    - Assigned GO TO (`ASSIGN n TO k` and `GO TO k`) – the grammar
-      has no explicit assigned-GOTO syntax; there is an `ASSIGN` token
-      inherited from FORTRAN I, but no rule uses it for assigned GO TO.
+    - REWIND, BACKSPACE, ENDFILE:
+      - The standard defines these as auxiliary I/O statements
+        (7.1.3.3) with specific syntax and semantics for file
+        positioning. The current lexer/parser do not define
+        `REWIND`, `BACKSPACE` or `ENDFILE` tokens or rules.
+      - Effect: REWIND/BACKSPACE/ENDFILE in source will be rejected.
 
-- **Data declaration and layout**
+- **Non‑executable (declarative) statements**
   - Implemented:
-    - `dimension_stmt`, `equivalence_stmt` – array bounds and memory
-      overlays, inherited from FORTRAN II.
-    - `common_stmt` – COMMON blocks (blank and named).
-    - `type_declaration` – `type_spec variable_list` using INTEGER,
-      REAL, LOGICAL, DOUBLE PRECISION and COMPLEX.
-  - Extended behavior:
-    - As with FORTRAN II, `common_stmt` accepts named COMMON blocks,
-      which is historically characteristic of later standards but
-      convenient for modern usage.
-
-- **I/O and FORMAT**
-  - Implemented:
-    - `read_stmt`, `print_stmt`, `punch_stmt`, `format_stmt` inherited
-      from FORTRAN II.
-    - FORMAT items include full numeric descriptors (through
-      `format_item` and `format_descriptor`) and Hollerith literals via
-      the `HOLLERITH` token.
-  - Not implemented:
-    - Standard FORTRAN 66 sequential I/O statements `REWIND`,
-      `BACKSPACE`, `ENDFILE` and explicit unit control are not present
-      as tokens or rules in this grammar; corresponding data
-      management must be handled at a higher level or is currently
-      unsupported.
-
-- **DATA statement**
-  - Specification:
-    - FORTRAN 66 includes the `DATA` statement for initializing
-      variables.
-  - Grammar:
-    - There is no `data_stmt` rule or `DATA` token in the FORTRAN 66
-      grammars; initialization inside BLOCK DATA is modeled via
-      assignments and declarations, not via DATA statements.
-  - Effect:
-    - Any code using `DATA` will be rejected by this grammar.
-
-- **EXTERNAL and INTRINSIC**
-  - Lexer:
-    - `FORTRAN66Lexer.g4` defines `EXTERNAL` and `INTRINSIC` tokens.
-  - Parser:
-    - No dedicated `external_stmt` or `intrinsic_stmt` rules exist in
-      `FORTRAN66Parser.g4`; these keywords are not referenced in
-      `statement_body`.
-  - Effect:
-    - Statements such as `EXTERNAL F` or `INTRINSIC SIN` are not
-      recognized as distinct declarations and will not parse as
-      intended under FORTRAN 66.
+    - Type statements:
+      - Via `type_declaration : type_spec variable_list` with
+        `type_spec` = `INTEGER | REAL | LOGICAL | DOUBLE PRECISION | COMPLEX`.
+    - DIMENSION:
+      - Implemented by the inherited `dimension_stmt` / `array_declarator`
+        and `dimension_list` rules.
+    - EQUIVALENCE:
+      - Implemented by `equivalence_stmt` / `equivalence_set`.
+    - COMMON:
+      - Implemented by `common_stmt : COMMON (SLASH IDENTIFIER SLASH)? variable_list`.
+      - Extended: as with FORTRAN II, named COMMON blocks are accepted,
+        which matches FORTRAN 66 but also allows more flexible usage
+        than the strict wording of some implementations.
+    - FORMAT:
+      - Implemented as described above.
+    - Statement functions:
+      - Supported syntactically via `function_reference` and inherited
+        1957/II mechanisms; the grammar does not distinguish statement
+        functions from external functions at the syntax level.
+  - Partially implemented / missing:
+    - DATA:
+      - The standard defines a DATA statement for initialization
+        (including in BLOCK DATA). The current grammar has no `DATA`
+        token in `FORTRAN66Lexer.g4` and no `data_stmt` rule; BLOCK
+        DATA initialization is modeled only via type declarations and
+        assignments.
+      - Effect: any conforming DATA statements are rejected.
+    - EXTERNAL / INTRINSIC:
+      - Lexer: `EXTERNAL` and `INTRINSIC` tokens exist.
+      - Parser: no `external_stmt` or `intrinsic_stmt` in
+        `FORTRAN66Parser.g4`; these tokens are not used in
+        `statement_body` or in a declaration context.
+      - Effect: declarations like `EXTERNAL F` or `INTRINSIC SIN`
+        are not accepted as first‑class non‑executable statements.
 
 ## 5. Fixed-form model
 
@@ -275,4 +351,3 @@ Future work should:
   FORTRAN 66 with the dedicated `fortran66_program` rule.
 - Use the XPASS fixtures as a concrete checklist for closing the
   remaining gaps.
-
