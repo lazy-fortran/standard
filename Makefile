@@ -12,7 +12,7 @@ PYTEST = python -m pytest
 GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023 LazyFortran2025
 
 # Default target
-.PHONY: all clean test help
+.PHONY: all clean test help download-standards
 
 all: $(GRAMMARS)
 
@@ -190,6 +190,109 @@ test-cross-validation: Fortran2018
 # ====================================================================
 # UTILITY TARGETS
 # ====================================================================
+
+# Directory for downloaded standards/spec references (git-ignored)
+STANDARDS_DIR ?= validation/pdfs
+
+# Curl command tuned for standards downloads:
+# -f : fail on HTTP errors
+# -L : follow redirects
+# --retry / --retry-delay : handle transient/network/429 issues
+# -A : spoof a common browser user agent (some mirrors are picky)
+CURL_STD ?= curl -fL --retry 5 --retry-delay 10 -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119 Safari/537.36"
+
+# Download historical FORTRAN/Fortran standard references (PDFs and key drafts)
+# into a local, git-excluded cache under $(STANDARDS_DIR). These files are
+# used only for local grammar/spec auditing and are NOT part of the repo.
+download-standards:
+	@echo "Downloading FORTRAN/Fortran standard references into $(STANDARDS_DIR)..."
+	@mkdir -p $(STANDARDS_DIR)
+	@echo "  - FORTRAN (IBM 704, 1957) manual"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/FORTRAN_1957_IBM704_C28-6003_Oct58.pdf \
+		https://bitsavers.org/pdf/ibm/704/C28-6003_704_FORTRAN_Oct58.pdf \
+		|| echo "    ⚠️  Failed to download FORTRAN 1957 IBM 704 manual"
+	@echo "  - FORTRAN II (IBM 704, 1958) manual"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/FORTRANII_1958_IBM704_C28-6000-2.pdf \
+		https://bitsavers.org/pdf/ibm/704/C28-6000-2_704_FORTRANII.pdf \
+		|| echo "    ⚠️  Failed to download FORTRAN II IBM 704 manual"
+	@echo "  - ANSI X3.9-1966 FORTRAN (FORTRAN 66) scan (WG5 archive mirror)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/FORTRAN66_ANSI_X3.9-1966.pdf \
+		https://wg5-fortran.org/ARCHIVE/Fortran66.pdf \
+		|| echo "    ⚠️  Failed to download ANSI X3.9-1966 FORTRAN scan from WG5 archive"
+	@echo "  - ISO 1539:1980 Fortran 77 text (WG5 HTML archive)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/FORTRAN77_ISO_1539-1980.html \
+		https://wg5-fortran.org/ARCHIVE/Fortran77.html \
+		|| echo "    ⚠️  Failed to download ISO 1539:1980 Fortran 77 text from WG5 archive"
+	@echo "  - Fortran 90 draft standard (WG5 N692)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran90_WG5_N692.pdf \
+		https://wg5-fortran.org/N001-N1100/N692.pdf \
+		|| echo "    ⚠️  Failed to download WG5 N692 (Fortran 90 draft)"
+	@echo "  - Fortran 95 related document (Fortran 95 Request for Interpretation)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran95_J3_98-114_RFI.txt \
+		https://j3-fortran.org/doc/year/98/98-114.txt \
+		|| echo "    ⚠️  Failed to download J3 98-114 (Fortran 95 RFI)"
+	@echo "  - Fortran 2003 draft/final text (J3/03-007)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran2003_J3_03-007.pdf \
+		https://j3-fortran.org/doc/year/03/03-007.pdf \
+		|| echo "    ⚠️  Failed to download J3 03-007 (Fortran 2003)"
+	@echo "  - Fortran 2008 draft/final text (J3/08-007)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran2008_J3_08-007.pdf \
+		https://j3-fortran.org/doc/year/08/08-007.pdf \
+		|| echo "    ⚠️  Failed to download J3 08-007 (Fortran 2008)"
+	@echo "  - Fortran 2018 draft/final text (J3/15-007)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran2018_J3_15-007.pdf \
+		https://j3-fortran.org/doc/year/15/15-007.pdf \
+		|| echo "    ⚠️  Failed to download J3 15-007 (Fortran 2018)"
+	@echo "  - Fortran 2023 draft/final text (J3/22-007)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran2023_J3_22-007.pdf \
+		https://j3-fortran.org/doc/year/22/22-007.pdf \
+		|| echo "    ⚠️  Failed to download J3 22-007 (Fortran 2023)"
+	@echo "✅ Download complete (see $(STANDARDS_DIR))"
+
+# OCR historical scanned PDFs into plain text for audit use.
+# Requires tesseract to be installed and available on PATH.
+ocr-standards:
+	@echo "Running Tesseract OCR for historical FORTRAN/Fortran PDFs into $(STANDARDS_DIR)..."
+	@which tesseract >/dev/null 2>&1 || { echo "❌ tesseract not found on PATH"; exit 1; }
+	@which pdftoppm >/dev/null 2>&1 || { echo "❌ pdftoppm not found on PATH"; exit 1; }
+	@mkdir -p $(STANDARDS_DIR)
+	@set -e; \
+	for pdf in \
+		FORTRAN_1957_IBM704_C28-6003_Oct58.pdf \
+		FORTRANII_1958_IBM704_C28-6000-2.pdf \
+		FORTRAN66_ANSI_X3.9-1966.pdf \
+		Fortran90_WG5_N692.pdf \
+		Fortran2003_J3_03-007.pdf \
+		Fortran2008_J3_08-007.pdf \
+		Fortran2018_J3_15-007.pdf \
+		Fortran2023_J3_22-007.pdf; do \
+		if [ -f "$(STANDARDS_DIR)/$$pdf" ]; then \
+			base=$${pdf%.pdf}; \
+			txt_file="$(STANDARDS_DIR)/$${base}.txt"; \
+			tmpdir="$(STANDARDS_DIR)/.ocr_tmp_$${base}"; \
+			echo "  - OCR $$pdf -> $${txt_file}"; \
+			rm -rf "$$tmpdir"; \
+			mkdir -p "$$tmpdir"; \
+			pdftoppm -r 300 -png "$(STANDARDS_DIR)/$$pdf" "$$tmpdir/page" >/dev/null 2>&1 || { echo "    ⚠️  pdftoppm failed for $$pdf"; continue; }; \
+			if ! ls "$$tmpdir"/page-*.png >/dev/null 2>&1; then \
+				echo "    ⚠️  No page images produced for $$pdf"; \
+				continue; \
+			fi; \
+			: > "$$txt_file"; \
+			for img in "$$tmpdir"/page-*.png; do \
+				pagebase=$$(basename "$$img" .png); \
+				outbase="$$tmpdir/$$pagebase"; \
+				tesseract "$$img" "$$outbase" -l eng >/dev/null 2>&1 || echo "    ⚠️  Tesseract failed on $$img"; \
+				if [ -f "$$outbase.txt" ]; then \
+					cat "$$outbase.txt" >> "$$txt_file"; \
+					echo "" >> "$$txt_file"; \
+				fi; \
+			done; \
+		else \
+			echo "    ⚠️  Skipping $$pdf (not present in $(STANDARDS_DIR))"; \
+		fi; \
+	done
+	@echo "✅ OCR pass complete (see $(STANDARDS_DIR)/*.txt)"
 
 # Clean generated files
 clean:
