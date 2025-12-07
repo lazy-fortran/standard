@@ -59,6 +59,8 @@ lazy_specification_construct
     | import_stmt
     | implicit_stmt
     | contains_stmt
+    | lazy_trait_definition
+    | lazy_trait_annotation_stmt
     | declaration_construct_f2018
     | lazy_iso_int_kind_declaration
     ;
@@ -97,6 +99,56 @@ lazy_execution_part
 
 lazy_execution_construct
     : NEWLINE* executable_construct_f2018 NEWLINE*
+    ;
+
+// ============================================================================
+// OPTIONAL TRAIT‑LIKE CONTRACTS (Lazy‑only, PROVISIONAL)
+// ============================================================================
+
+// Lightweight trait definition treated as a specification construct in lazy
+// mode. The body reuses existing Fortran 2018 declaration constructs so that
+// traits can enumerate required procedures and types using familiar syntax.
+lazy_trait_definition
+    : trait_def_stmt
+      lazy_trait_member*
+      end_trait_stmt
+    ;
+
+trait_def_stmt
+    : TRAIT IDENTIFIER lazy_trait_type_param_list? NEWLINE
+    ;
+
+lazy_trait_type_param_list
+    : LPAREN lazy_trait_type_param (COMMA lazy_trait_type_param)* RPAREN
+    ;
+
+lazy_trait_type_param
+    : IDENTIFIER
+    ;
+
+lazy_trait_member
+    : declaration_construct_f2018
+    | NEWLINE
+    ;
+
+end_trait_stmt
+    : END TRAIT (IDENTIFIER)? NEWLINE
+    ;
+
+// Annotation statement that can appear alongside other specification items in
+// a lazy program. Semantically it associates one or more traits (with optional
+// type arguments) to the surrounding definition; the parser simply records the
+// annotation as its own construct.
+lazy_trait_annotation_stmt
+    : AT IDENTIFIER lazy_trait_actual_arg_list? NEWLINE
+    ;
+
+lazy_trait_actual_arg_list
+    : LPAREN lazy_trait_actual_arg (COMMA lazy_trait_actual_arg)* RPAREN
+    ;
+
+lazy_trait_actual_arg
+    : expr_f2023
     ;
 
 // Lazy use statement that accepts both traditional ONLY lists and enhanced
