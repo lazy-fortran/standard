@@ -617,7 +617,7 @@ From the user’s perspective:
 | LF‑SYN‑01    | Zero‑boilerplate `.lf` files              | PROVISIONAL  |  #52  |
 | LF‑SYN‑02    | Type inference & implicit rules           | DECIDED (core)| #53  |
 | LF‑SYN‑03    | World‑wide automatic specializations      | DECIDED (world)| #51  |
-| LF‑SYN‑04    | Trait‑like contracts                      | OPEN         |  #57  |
+| LF‑SYN‑04    | Trait‑like contracts                      | PROVISIONAL  |  #57  |
 | LF‑TOOL‑01   | Interactive REPL & notebooks              | PROVISIONAL  |  #54  |
 | LF‑TOOL‑02   | Canonical formatter and linter            | PROVISIONAL  |  #56  |
 | LF‑PKG‑01    | Package management & system‑wide cache    | PROVISIONAL  |  #55  |
