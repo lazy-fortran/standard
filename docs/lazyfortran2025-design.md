@@ -53,6 +53,69 @@ From the user’s perspective this is the whole program. The compiler
 creates an implicit main program around the top‑level statements and
 makes `square` visible in that program.
 
+**What is allowed at the top level.**
+
+In a `.lf` file, anything that would normally live inside a program or
+module body can appear directly at the top level:
+
+- Executable statements such as assignments, procedure calls, control
+  constructs, and `print` statements.
+- Specification constructs such as `use`, `import`, `implicit`, and
+  the full Fortran 2018 `declaration_construct` family (type
+  declarations, `parameter`, `interface`, `procedure`, etc.).
+- Internal procedures – `function` and `subroutine` definitions – that
+  do not require a preceding `contains` keyword.
+
+These constructs can be interleaved: you can declare names, execute
+statements, and then introduce helper procedures without changing the
+file structure.
+
+**When an implicit program or module is assumed.**
+
+Lazy Fortran distinguishes between “script” and “library” `.lf` files
+based on the presence of executable statements at the top level:
+
+- If there is at least one top‑level executable statement (not inside a
+  procedure), the file behaves as an implicit main program. The toolchain
+  wraps the file in a synthetic `program` whose name is derived from the
+  filename, and all top‑level declarations and procedures belong to that
+  program.
+- If there are no top‑level executable statements but there are
+  declarations and/or procedures, the file behaves as an implicit
+  module. The toolchain wraps the file in a synthetic `module` with a
+  name derived from the filename, and top‑level procedures are treated as
+  module procedures.
+
+This classification is purely a front‑end convenience: the generated
+symbol tables and linkage follow normal Fortran rules. The exact naming
+scheme for the synthetic program/module remains PROVISIONAL and is
+tracked alongside Issue #52.
+
+**Mixing lazy and traditional Fortran units.**
+
+Lazy Fortran is designed for gradual adoption within existing Fortran
+projects:
+
+- Traditional `.f90+` source files continue to compile using the strict
+  Fortran 2023 entry point; they may `use` modules that originate from
+  implicit‑module `.lf` files as long as the build system compiles those
+  `.lf` files first.
+- Script‑style `.lf` files (those with top‑level executable statements)
+  are intended to be entry points, not reusable modules. They can call
+  into both traditional modules and implicit‑module `.lf` libraries via
+  ordinary `use` statements.
+- Build tools are expected to decide, per `.lf` file, whether to treat
+  it as a program or module according to the rules above, and to produce
+  normal Fortran objects that can be linked by existing toolchains.
+
+From a user point of view, this means:
+
+- You can start by adding a single `.lf` script next to existing
+  `.f90` code and calling into your existing modules.
+- Over time, you can migrate helper scripts into `.lf` library files
+  (no top‑level executable statements) that behave like conventional
+  modules while keeping the zero‑boilerplate authoring experience.
+
 ---
 
 ### 1.2 LF‑SYN‑02 – Type Inference & Implicit Rules (Issue #53) – *DECIDED (CORE MODEL)*
@@ -313,4 +376,3 @@ Open design points (tracked in #55):
 
 This table is the primary “at a glance” view for busy readers; details
 and changes should be coordinated with the corresponding GitHub issues.
-
