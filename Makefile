@@ -274,7 +274,6 @@ ocr-standards:
 			echo "  - OCR $$pdf -> $${txt_file}"; \
 			rm -rf "$$tmpdir"; \
 			mkdir -p "$$tmpdir"; \
-			# Convert each page of the PDF to PNG images at 300dpi \
 			pdftoppm -r 300 -png "$(STANDARDS_DIR)/$$pdf" "$$tmpdir/page" >/dev/null 2>&1 || { echo "    ⚠️  pdftoppm failed for $$pdf"; continue; }; \
 			if ! ls "$$tmpdir"/page-*.png >/dev/null 2>&1; then \
 				echo "    ⚠️  No page images produced for $$pdf"; \
