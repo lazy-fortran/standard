@@ -8,12 +8,14 @@ import os
 import pytest
 from pathlib import Path
 
-# Add grammars directory to path
+# Add tests and grammars directories to path
+sys.path.append(str(Path(__file__).parent))
 sys.path.append(str(Path(__file__).parent.parent / "grammars"))
 
 from antlr4 import *
 from Fortran90Lexer import Fortran90Lexer
 from Fortran90Parser import Fortran90Parser
+from fixture_utils import load_fixture
 
 class TestUnifiedGrammarArchitecture:
     """Comprehensive tests for unified grammar architecture."""
@@ -45,49 +47,25 @@ class TestUnifiedGrammarArchitecture:
         """Test basic F90 language constructs."""
         test_cases = [
             # Module system
-            """
-module mathematics
-    implicit none
-    public :: add, multiply
-    private :: internal_helper
-contains
-    function add(a, b) result(sum)
-        integer, intent(in) :: a, b
-        integer :: sum
-        sum = a + b
-    end function add
-end module mathematics
-            """,
+            load_fixture(
+                "Fortran90",
+                "test_comprehensive_parsing",
+                "mathematics_module.f90",
+            ),
             
             # Dynamic arrays
-            """
-program dynamic_arrays
-    implicit none
-    integer, parameter :: n = 100
-    real, allocatable :: dynamic_array(:)
-    real, pointer :: ptr_array(:)
-    
-    allocate(dynamic_array(n))
-    dynamic_array = 1.0
-    deallocate(dynamic_array)
-end program dynamic_arrays
-            """,
+            load_fixture(
+                "Fortran90",
+                "test_comprehensive_parsing",
+                "dynamic_arrays_program.f90",
+            ),
             
             # Derived types
-            """
-module types
-    type :: person_t
-        character(len=50) :: name
-        integer :: age
-        real :: height
-    end type person_t
-contains
-    subroutine print_person(p)
-        type(person_t), intent(in) :: p
-        write(*,*) p%name, p%age, p%height
-    end subroutine
-end module types
-            """
+            load_fixture(
+                "Fortran90",
+                "test_comprehensive_parsing",
+                "types_module.f90",
+            ),
         ]
         
         for i, code in enumerate(test_cases):
@@ -102,25 +80,11 @@ end module types
     
     def test_fixed_form_compatibility(self):
         """Test fixed-form Fortran compatibility."""
-        fixed_form_code = """
-C     This is a fixed-form Fortran program
-      PROGRAM TESTPROG
-      INTEGER I, N
-      PARAMETER (N=10)
-      DIMENSION A(N)
-      
-C     Initialize array
-      DO 100 I=1,N
-          A(I) = I * 2
-  100 CONTINUE
-      
-C     Print results
-      DO 200 I=1,N
-          WRITE(*,*) 'A(', I, ') = ', A(I)
-  200 CONTINUE
-      
-      END
-        """
+        fixed_form_code = load_fixture(
+            "Fortran90",
+            "test_comprehensive_parsing",
+            "fixed_form_program.f",
+        )
         
         tree, errors, exception = self.parse_fortran_code(fixed_form_code.strip(), "Fortran90")
         # Allow parsing errors in integration tests - focus on not crashing
@@ -130,28 +94,11 @@ C     Print results
     
     def test_free_form_features(self):
         """Test free-form specific features."""
-        free_form_code = """
-program free_form_features
-    implicit none
-    integer :: i, j, matrix(5,5)
-    
-    ! Free-form comment
-    do i = 1, 5
-        do j = 1, 5
-            matrix(i,j) = i + j  ! End-of-line comment
-        end do
-    end do
-    
-    ! Array constructor
-    integer, parameter :: small_array(3) = [1, 2, 3]
-    
-    ! Modern array syntax
-    where (matrix > 5)
-        matrix = matrix * 2
-    end where
-    
-end program free_form_features
-        """
+        free_form_code = load_fixture(
+            "Fortran90",
+            "test_comprehensive_parsing",
+            "free_form_features_program.f90",
+        )
         
         tree, errors, exception = self.parse_fortran_code(free_form_code.strip(), "Fortran90")
         # Allow parsing errors in integration tests
@@ -161,37 +108,11 @@ end program free_form_features
     
     def test_complex_fortran90_features(self):
         """Test complex F90 features like SELECT CASE, WHERE constructs."""
-        complex_code = """
-module advanced_features
-    implicit none
-contains
-    subroutine test_select_case(value)
-        integer, intent(in) :: value
-        
-        select case (value)
-        case (1:10)
-            write(*,*) 'Small number'
-        case (11:100)
-            write(*,*) 'Medium number'
-        case default
-            write(*,*) 'Large number'
-        end select
-    end subroutine
-    
-    subroutine test_where_construct()
-        integer, parameter :: n = 100
-        real :: array(n), result(n)
-        
-        where (array > 0.0)
-            result = sqrt(array)
-        elsewhere (array < 0.0)
-            result = 0.0
-        elsewhere
-            result = -1.0
-        end where
-    end subroutine
-end module advanced_features
-        """
+        complex_code = load_fixture(
+            "Fortran90",
+            "test_comprehensive_parsing",
+            "advanced_features_module.f90",
+        )
         
         tree, errors, exception = self.parse_fortran_code(complex_code.strip(), "Fortran90")
         # Allow parsing errors in complex integration tests
@@ -203,28 +124,11 @@ end module advanced_features
                        reason="Fortran95 parser not built")
     def test_fortran95_enhancements(self):
         """Test Fortran95 specific enhancements."""
-        f95_code = """
-program fortran95_features
-    implicit none
-    integer, parameter :: n = 5
-    integer :: matrix(n,n), vector(n)
-    
-    ! FORALL construct (F95 feature)
-    forall (i = 1:n, j = 1:n, i /= j)
-        matrix(i,j) = i * j
-    end forall
-    
-    ! Enhanced WHERE with multiple ELSEWHERE
-    where (matrix > 10)
-        matrix = matrix / 2
-    elsewhere (matrix > 5)
-        matrix = matrix - 1
-    elsewhere
-        matrix = 0
-    end where
-    
-end program fortran95_features
-        """
+        f95_code = load_fixture(
+            "Fortran90",
+            "test_comprehensive_parsing",
+            "fortran95_features_program.f90",
+        )
         
         tree, errors, exception = self.parse_fortran_code(f95_code.strip(), "Fortran95")
         # Allow parsing errors in F95 integration tests
@@ -247,14 +151,11 @@ end program fortran95_features
     def test_mixed_format_handling(self):
         """Test handling of mixed formatting scenarios."""
         # This tests the unified lexer's ability to handle different comment styles
-        mixed_code = """
-! Free-form comment
-program mixed_format
-    implicit none
-    integer :: x
-    x = 1  ! Another free-form comment
-end program mixed_format
-        """
+        mixed_code = load_fixture(
+            "Fortran90",
+            "test_comprehensive_parsing",
+            "mixed_format_program.f90",
+        )
         
         tree, errors, exception = self.parse_fortran_code(mixed_code.strip(), "Fortran90")
         # Allow parsing errors in mixed format integration tests

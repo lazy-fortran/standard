@@ -67,7 +67,7 @@ class TestBasicF2018Features:
         # REAL TEST: For a basic module, errors should be zero
         assert errors == 0, f"Basic module should parse with zero errors, got {errors}"
     
-    @pytest.mark.skip(reason="F2018 coarray inheritance from F2008 is incomplete (see issues #83 and #88)")
+    @pytest.mark.xfail(reason="F2018 coarray inheritance from F2008 is incomplete (see issues #83 and #88)")
     def test_f2018_grammar_inheritance(self):
         """REAL TEST: Verify F2018 inherits F2008 coarray features"""
         code = load_fixture(
@@ -84,7 +84,7 @@ class TestBasicF2018Features:
         # here but mark the test as xfail below.
         assert errors == 0, f"F2008 inheritance should parse with zero errors, got {errors}"
     
-    @pytest.mark.skip(reason="F2018 coarray and SYNC support still being aligned with F2008 (see issues #83 and #88)")
+    @pytest.mark.xfail(reason="F2018 coarray and SYNC support still being aligned with F2008 (see issues #83 and #88)")
     def test_f2018_parser_vs_f2008_functionality(self):
         """REAL TEST: Compare F2018 vs F2008 parsing on same code"""
         code = load_fixture(
@@ -115,7 +115,13 @@ class TestBasicF2018Features:
         except ImportError:
             pytest.skip("F2008 parser not available for comparison")
     
-    @pytest.mark.skip(reason="F2018 program-structure parsing still being aligned with the standard")
+    @pytest.mark.xfail(
+        reason=(
+            "F2018 program-structure parsing still being aligned with the "
+            "standard (no dedicated GitHub issue yet; this test documents "
+            "the gap until an issue is opened)"
+        )
+    )
     def test_complex_program_structure_limitations(self):
         """REAL TEST: Document known program structure parsing limitations"""
         code = load_fixture(
@@ -168,11 +174,11 @@ end module"""
     
     def test_error_recovery_and_robustness(self):
         """REAL TEST: Verify F2018 parser has reasonable error recovery"""
-        invalid_code = """module bad_syntax
-    integer :: x[*
-    invalid_statement
-    call unknown_thing(
-end module"""
+        invalid_code = load_fixture(
+            "Fortran2018",
+            "test_basic_f2018_features",
+            "invalid_bad_syntax_module.f90",
+        )
         
         tree, errors = self.parse_code(invalid_code)
         

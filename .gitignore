@@ -104,3 +104,6 @@ validation/external/
 validation/auto-generated/
 validation_cache/
 test_output/
+
+# Local ANTLR tool JARs (developer convenience only)
+antlr-*.jar
