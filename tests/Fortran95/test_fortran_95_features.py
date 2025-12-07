@@ -12,12 +12,16 @@ Focus (currently exercised):
 - F95 array constructors and intrinsics
 """
 
-import os
 import sys
 import pytest
+from pathlib import Path
+
+# Ensure we can import shared test fixtures utilities
+sys.path.append(str(Path(__file__).parent.parent))
+from fixture_utils import load_fixture
 
 # Add grammars directory to Python path for generated parsers
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../grammars'))
+sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
 
 try:
     from antlr4 import InputStream, CommonTokenStream
@@ -45,10 +49,20 @@ class TestFortran95Lexer:
 
     def test_forall_keywords(self):
         """FORALL and END FORALL should be recognized."""
-        tokens = self.get_tokens("FORALL (i = 1:10)")
+        header = load_fixture(
+            "Fortran95",
+            "test_fortran_95_features",
+            "forall_header.f90",
+        )
+        tokens = self.get_tokens(header)
         assert any(t.type == Fortran95Lexer.FORALL for t in tokens)
 
-        tokens = self.get_tokens("END FORALL")
+        trailer = load_fixture(
+            "Fortran95",
+            "test_fortran_95_features",
+            "end_forall.f90",
+        )
+        tokens = self.get_tokens(trailer)
         assert any(t.type == Fortran95Lexer.END_FORALL for t in tokens)
 
     def test_f95_intrinsic_tokens(self):
@@ -58,20 +72,25 @@ class TestFortran95Lexer:
         originate in Fortran 90 but remain part of the F95 baseline).
         """
         intrinsic_examples = {
-            "CEILING": Fortran95Lexer.CEILING_INTRINSIC,
-            "FLOOR": Fortran95Lexer.FLOOR_INTRINSIC,
-            "MODULO": Fortran95Lexer.MODULO_INTRINSIC,
-            "BIT_SIZE": Fortran95Lexer.BIT_SIZE_INTRINSIC,
-            "BTEST": Fortran95Lexer.BTEST_INTRINSIC,
-            "IAND": Fortran95Lexer.IAND_INTRINSIC,
-            "IBITS": Fortran95Lexer.IBITS_INTRINSIC,
-            "TRANSFER": Fortran95Lexer.TRANSFER_INTRINSIC,
-            "CPU_TIME": Fortran95Lexer.CPU_TIME_INTRINSIC,
-            "SYSTEM_CLOCK": Fortran95Lexer.SYSTEM_CLOCK_INTRINSIC,
+            "ceiling": Fortran95Lexer.CEILING_INTRINSIC,
+            "floor": Fortran95Lexer.FLOOR_INTRINSIC,
+            "modulo": Fortran95Lexer.MODULO_INTRINSIC,
+            "bit_size": Fortran95Lexer.BIT_SIZE_INTRINSIC,
+            "btest": Fortran95Lexer.BTEST_INTRINSIC,
+            "iand": Fortran95Lexer.IAND_INTRINSIC,
+            "ibits": Fortran95Lexer.IBITS_INTRINSIC,
+            "transfer": Fortran95Lexer.TRANSFER_INTRINSIC,
+            "cpu_time": Fortran95Lexer.CPU_TIME_INTRINSIC,
+            "system_clock": Fortran95Lexer.SYSTEM_CLOCK_INTRINSIC,
         }
 
-        for name, expected_type in intrinsic_examples.items():
-            tokens = self.get_tokens(name)
+        for stem, expected_type in intrinsic_examples.items():
+            code = load_fixture(
+                "Fortran95",
+                "test_fortran_95_features",
+                f"{stem}.f90",
+            )
+            tokens = self.get_tokens(code)
             assert tokens, f"No tokens for {name}"
             assert tokens[0].type == expected_type
 
@@ -87,13 +106,21 @@ class TestFortran95Parser:
 
     def test_pure_and_elemental_procedures(self):
         """PURE and ELEMENTAL procedure headers parse."""
-        pure_fun = "PURE FUNCTION f(x) RESULT(y)"
+        pure_fun = load_fixture(
+            "Fortran95",
+            "test_fortran_95_features",
+            "pure_function_stmt.f90",
+        )
         parser = self.create_parser_for_rule(pure_fun)
         tree = parser.pure_function_stmt()
         assert tree is not None
         assert parser.getNumberOfSyntaxErrors() == 0
 
-        elemental_sub = "ELEMENTAL SUBROUTINE saxpy(a, x, y)"
+        elemental_sub = load_fixture(
+            "Fortran95",
+            "test_fortran_95_features",
+            "elemental_subroutine_stmt.f90",
+        )
         parser = self.create_parser_for_rule(elemental_sub)
         tree = parser.elemental_subroutine_stmt()
         assert tree is not None
@@ -101,13 +128,21 @@ class TestFortran95Parser:
 
     def test_forall_construct_and_stmt(self):
         """FORALL construct and single-statement form parse."""
-        stmt_code = "FORALL (i = 1:10) x(i) = i"
+        stmt_code = load_fixture(
+            "Fortran95",
+            "test_fortran_95_features",
+            "forall_stmt.f90",
+        )
         parser = self.create_parser_for_rule(stmt_code)
         tree = parser.forall_stmt()
         assert tree is not None
         assert parser.getNumberOfSyntaxErrors() == 0
 
-        construct_code = "FORALL (i = 1:10) x(i) = i END FORALL"
+        construct_code = load_fixture(
+            "Fortran95",
+            "test_fortran_95_features",
+            "forall_construct.f90",
+        )
         parser = self.create_parser_for_rule(construct_code)
         tree = parser.forall_construct()
         assert tree is not None
@@ -115,7 +150,11 @@ class TestFortran95Parser:
 
     def test_where_construct(self):
         """Enhanced WHERE / ELSEWHERE construct parses."""
-        code = "WHERE (x > 0) x = 1 ELSEWHERE x = 2 END WHERE"
+        code = load_fixture(
+            "Fortran95",
+            "test_fortran_95_features",
+            "where_construct.f90",
+        )
         parser = self.create_parser_for_rule(code)
         tree = parser.where_construct_f95()
         assert tree is not None
@@ -123,7 +162,11 @@ class TestFortran95Parser:
 
     def test_array_constructor(self):
         """F95 array constructor using (/ ... /) parses."""
-        code = "(/ 1, 2, 3 /)"
+        code = load_fixture(
+            "Fortran95",
+            "test_fortran_95_features",
+            "array_constructor.f90",
+        )
         parser = self.create_parser_for_rule(code)
         tree = parser.array_constructor_f95()
         assert tree is not None
