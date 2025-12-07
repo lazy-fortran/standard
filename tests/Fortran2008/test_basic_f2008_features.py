@@ -103,6 +103,21 @@ class TestBasicF2008Features:
         assert tree is not None, "Enhanced intrinsics failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for intrinsics test, got {errors}"
     
+    def test_enhanced_intrinsic_named_arguments(self):
+        """Test F2008 intrinsic functions with named arguments and keywords"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "enhanced_intrinsics_named_args.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, (
+            "Enhanced intrinsics with named arguments failed to produce parse tree"
+        )
+        assert errors == 0, (
+            f"Expected 0 errors for intrinsics named-argument test, got {errors}"
+        )
+    
     def test_new_integer_kinds(self):
         """Test F2008 enhanced integer kind tokens"""
         code = load_fixture(
