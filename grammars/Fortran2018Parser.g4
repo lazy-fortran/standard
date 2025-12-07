@@ -31,8 +31,8 @@ main_program_f2018
 
 // Enhanced module for F2018
 module_f2018
-    : module_stmt specification_part_f2018? module_subprogram_part? 
-      end_module_stmt
+    : module_stmt specification_part_f2018? 
+      module_subprogram_part_f2018? end_module_stmt
     ;
 
 // Enhanced external subprogram for F2018
@@ -51,6 +51,17 @@ function_subprogram_f2018
 subroutine_subprogram_f2018
     : subroutine_stmt_f2018 specification_part_f2018? execution_part_f2018? 
       internal_subprogram_part? end_subroutine_stmt
+    ;
+
+module_subprogram_part_f2018
+    : contains_stmt NEWLINE* (module_subprogram_f2018 NEWLINE*)*
+    ;
+
+module_subprogram_f2018
+    : function_subprogram_f2018
+    | subroutine_subprogram_f2018
+    | module_subroutine_subprogram_f2008
+    | module_function_subprogram_f2008
     ;
 
 // Enhanced function statement for F2018
@@ -348,7 +359,7 @@ do_concurrent_construct_f2018
     ;
 
 do_concurrent_stmt_f2018
-    : (IDENTIFIER COLON)? DO_CONCURRENT concurrent_header_f2018 NEWLINE
+    : (IDENTIFIER COLON)? DO CONCURRENT concurrent_header_f2018 NEWLINE
     ;
 
 concurrent_header_f2018
