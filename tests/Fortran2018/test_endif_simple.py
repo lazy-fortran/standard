@@ -2,14 +2,18 @@
 """Test ENDIF parsing in programs"""
 
 import sys
-import os
+from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'grammars'))
+# Ensure we can import fixture utilities and grammars
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.append(str(ROOT))
+sys.path.append(str(ROOT.parent / "grammars"))
 
-from antlr4 import *
-from Fortran2018Lexer import Fortran2018Lexer  
-from Fortran2018Parser import Fortran2018Parser
-from antlr4.error.ErrorListener import ErrorListener
+from antlr4 import *  # type: ignore
+from antlr4.error.ErrorListener import ErrorListener  # type: ignore
+from Fortran2018Lexer import Fortran2018Lexer  # type: ignore
+from Fortran2018Parser import Fortran2018Parser  # type: ignore
+from fixture_utils import load_fixture
 
 class TestErrorListener(ErrorListener):
     def __init__(self):
@@ -44,15 +48,17 @@ def run_program_case(code, description):
 
 if __name__ == "__main__":
     # Test the exact missing-spaces case wrapped in program
-    missing_spaces_wrapped = """program test
-   if (mydummy > 90.and.gggg > 0) then
-   endif
-end program test"""
+    missing_spaces_wrapped = load_fixture(
+        "Fortran2018",
+        "test_endif_simple",
+        "missing_spaces_wrapped.f90",
+    )
     run_program_case(missing_spaces_wrapped, "Missing-spaces wrapped in program")
     
     # Test simpler case
-    simple_endif = """program test
-if (x > 0) then
-endif
-end program test"""
+    simple_endif = load_fixture(
+        "Fortran2018",
+        "test_endif_simple",
+        "simple_endif.f90",
+    )
     run_program_case(simple_endif, "Simple ENDIF in program")
