@@ -170,3 +170,41 @@ class TestLazyFortran2025Parser:
         tree = parser.lazy_entry()  # type: ignore[call-arg]
         assert tree is not None
         assert parser.getNumberOfSyntaxErrors() == 0
+
+    @pytest.mark.skipif(
+        not hasattr(LazyFortran2025Lexer, "TRAIT"),  # type: ignore[arg-type]
+        reason="Lazy trait tokens not available in generated lexer",
+    )
+    def test_lazy_entry_parses_trait_definition(self) -> None:
+        """Lazy mode accepts top-level trait definitions."""
+        code = (
+            "trait AdditiveMonoid(T)\n"
+            "  procedure :: add\n"
+            "  procedure :: zero\n"
+            "end trait AdditiveMonoid\n"
+        )
+        parser = self.create_parser(code)
+        tree = parser.lazy_entry()  # type: ignore[call-arg]
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    @pytest.mark.skipif(
+        not hasattr(LazyFortran2025Lexer, "TRAIT"),  # type: ignore[arg-type]
+        reason="Lazy trait tokens not available in generated lexer",
+    )
+    def test_lazy_entry_parses_trait_annotation_statement(self) -> None:
+        """Trait annotations parse as lightweight specification constructs."""
+        code = (
+            "trait AdditiveMonoid(T)\n"
+            "  procedure :: add\n"
+            "end trait AdditiveMonoid\n"
+            "@AdditiveMonoid(real(8))\n"
+            "function sum_all(x) result(r)\n"
+            "  real(8), intent(in) :: x(:)\n"
+            "  r = 0.0_real64\n"
+            "end function sum_all\n"
+        )
+        parser = self.create_parser(code)
+        tree = parser.lazy_entry()  # type: ignore[call-arg]
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
