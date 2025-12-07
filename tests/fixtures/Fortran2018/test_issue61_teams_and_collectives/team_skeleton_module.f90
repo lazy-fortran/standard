@@ -1,12 +1,12 @@
-module team_skeleton
+program team_event
   implicit none
-contains
-  subroutine use_team(x)
-    integer :: team, me
-    me = this_image()
-    team = me
-    ! NOTE: full TEAM_TYPE and FORM TEAM syntax are beyond the current
-    ! grammar subset; this test only documents current behavior.
-  end subroutine use_team
-end module team_skeleton
+  integer :: team_handle, stat_var, count_value
 
+  ! Minimal team/event usage intended to exercise the F2018 grammar.
+  form team(1, team_handle)
+  change team(team_handle)
+    event post(team_handle, stat = stat_var)
+    event wait(team_handle)
+    event query(team_handle, count = count_value)
+  end team
+end program team_event
