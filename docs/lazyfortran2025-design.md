@@ -502,10 +502,100 @@ From the user’s perspective:
   - build and specialization of that package,
   - caching of build artifacts in a system‑wide store.
 
-Open design points (tracked in #55):
+**Package names and modules.**
 
-- Exact layout and naming for packages (e.g. `lf-foo` vs. `foo`).
-- Version selection policy (lockfiles vs. minimal version constraints).
+- A **package** is the unit of distribution and caching. Each package
+  exposes one or more Fortran modules.
+- The module name that appears in `use` statements is the **stable,
+  human‑facing identity** of the package; versions are never encoded in
+  the module name.
+- For ecosystem packages, the recommended convention is a short,
+  lowercase module name with an `lf_` prefix (for example
+  `lf_linear_algebra`, `lf_io`), but the standard does not forbid other
+  names when interop with existing code requires it.
+- Multiple modules may come from the same package; the mapping from
+  module name to package is recorded in the package’s metadata and is
+  not inferred from filenames alone.
+
+**Discovery and resolution.**
+
+- From a `.lf` file’s point of view, `use foo` expresses only a logical
+  dependency on module `foo`; **it does not specify a transport
+  mechanism** (Git, local path, registry URL, etc.).
+- Tooling is responsible for:
+  - locating a package that provides module `foo`,
+  - downloading it if necessary,
+  - building it (and its dependencies) for the current world, and
+  - making the resulting modules available to the compiler.
+- If more than one candidate package provides the same module name,
+  the active world configuration (for example a manifest or lockfile)
+  must resolve the ambiguity; the language standard requires that
+  compilation see at most one provider for a given module name.
+- The failure mode for an unresolved `use foo` is a **deterministic
+  compile‑time error** that clearly distinguishes:
+  - “no package providing `foo` was found” from
+  - “multiple packages provide `foo` and the world configuration is
+    ambiguous”.
+
+**Versioning expectations.**
+
+- A world is defined by an entry point plus a set of **concrete package
+  versions** for all its dependencies. Recompiling the same world
+  against the same version set must yield the same effective dependency
+  graph and the same visible modules.
+- Version selection policies (semantic‑version ranges, minimal versions,
+  lockfile formats, registry naming schemes, and so on) are delegated to
+  tooling, but once a world has been **resolved**:
+  - every module name used in that world is mapped to exactly one
+    package version, and
+  - that mapping is stable for the duration of compilation and
+    subsequent incremental builds.
+- Source code inside `.lf` files **never mentions versions directly**:
+  all versioning concerns live in world configuration files and/or
+  command‑line options so that the same source can participate in
+  multiple worlds with different dependency choices.
+
+**System‑wide cache semantics.**
+
+- Package builds and generated specializations are stored in a
+  system‑wide cache keyed at least by:
+  - package identity (including version),
+  - target platform/ABI,
+  - Lazy Fortran / compiler version, and
+  - any configuration knobs that affect code generation in a way that
+    could change observable behavior.
+- The cache is **transparent but reproducible**:
+  - Cache hits must not change the set of visible modules, symbol
+    tables or specializations compared to a fresh build of the same
+    world.
+  - Evicting cache entries may make builds slower, but must not require
+    changes to source code or world configuration.
+- The cache is **shared across projects** on the same machine by
+  default, so that rebuilding the same package/version combination for
+  different worlds or entry points reuses artifacts whenever the keys
+  above match.
+- Tooling may provide environment variables or configuration options to
+  override cache location or disable reuse for debugging, but the
+  default behavior defined here is that standard users do not need to
+  think about cache management.
+
+**Worlds and reproducibility.**
+
+- LF‑PKG‑01 and LF‑SYN‑03 share a common notion of a world: an entry
+  point plus its resolved package graph and any traditional Fortran
+  sources.
+- For a fixed world:
+  - package resolution (which package and version provides each module
+    name),
+  - specialization generation, and
+  - caching behavior
+  must together produce a **stable artifact set** that can be rebuilt on
+  another machine given the same registry contents and world
+  configuration.
+- Tooling is encouraged, but not required, to record enough metadata
+  (for example lockfiles and cache manifests) to allow users to
+  recreate a world later; the Lazy Fortran standard only requires that,
+  when such metadata is present, the behavior be deterministic.
 
 ---
 
