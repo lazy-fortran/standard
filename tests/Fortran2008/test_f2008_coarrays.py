@@ -110,5 +110,18 @@ class TestF2008Coarrays:
         assert tree is not None, "Comprehensive coarray failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for comprehensive coarray test, got {errors}"
 
+    def test_coarray_section_reference(self):
+        """Test coarray array section reference with image selector"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "coarray_section_reference.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "Coarray section reference failed to produce parse tree"
+        assert errors == 0, (
+            f"Expected 0 errors for coarray section reference, got {errors}"
+        )
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
