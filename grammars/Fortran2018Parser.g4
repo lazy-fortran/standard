@@ -100,6 +100,42 @@ declaration_construct_f2018
     | declaration_construct_f2008     // Inherit F2008 declarations
     ;
 
+// Enhanced USE statement for F2018, including intrinsic modules such as
+// ISO_FORTRAN_ENV in addition to the IEEE intrinsic modules from F2003.
+use_stmt
+    : USE IDENTIFIER NEWLINE
+    | USE IDENTIFIER COMMA ONLY COLON only_list NEWLINE
+    | USE COMMA INTRINSIC DOUBLE_COLON intrinsic_module_name NEWLINE
+    | USE COMMA INTRINSIC DOUBLE_COLON intrinsic_module_name COMMA ONLY COLON 
+      only_list NEWLINE
+    ;
+
+intrinsic_module_name
+    : ieee_module_name
+    | IDENTIFIER
+    ;
+
+only_list
+    : only_item_f2018 (COMMA only_item_f2018)*
+    ;
+
+only_item_f2018
+    : IDENTIFIER (POINTER_ASSIGN only_item_target_f2018)?
+    | c_interop_type
+    | OPERATOR LPAREN operator_token RPAREN
+    ;
+
+only_item_target_f2018
+    : IDENTIFIER
+    | INT8
+    | INT16
+    | INT32
+    | INT64
+    | REAL32
+    | REAL64
+    | REAL128
+    ;
+
 // ============================================================================
 // ENHANCED EXECUTION PART (F2018)
 // ============================================================================
