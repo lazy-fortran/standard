@@ -249,6 +249,34 @@ download-standards:
 		|| echo "    ⚠️  Failed to download J3 22-007 (Fortran 2023)"
 	@echo "✅ Download complete (see $(STANDARDS_DIR))"
 
+# OCR historical scanned PDFs into plain text for audit use.
+# Requires tesseract to be installed and available on PATH.
+ocr-standards:
+	@echo "Running Tesseract OCR for historical FORTRAN/Fortran PDFs into $(STANDARDS_DIR)..."
+	@which tesseract >/dev/null 2>&1 || { echo "❌ tesseract not found on PATH"; exit 1; }
+	@mkdir -p $(STANDARDS_DIR)
+	@set -e; \
+	for pdf in \
+		FORTRAN_1957_IBM704_C28-6003_Oct58.pdf \
+		FORTRANII_1958_IBM704_C28-6000-2.pdf \
+		FORTRAN66_ANSI_X3.9-1966.pdf \
+		FORTRAN77_ISO_1539-1980.pdf \
+		Fortran90_WG5_N692.pdf \
+		Fortran2003_J3_03-007.pdf \
+		Fortran2008_J3_08-007.pdf \
+		Fortran2018_J3_15-007.pdf \
+		Fortran2023_J3_22-007.pdf; do \
+		if [ -f "$(STANDARDS_DIR)/$$pdf" ]; then \
+			base=$${pdf%.pdf}; \
+			txt_file="$(STANDARDS_DIR)/$${base}.txt"; \
+			echo "  - OCR $$pdf -> $${txt_file}"; \
+			tesseract "$(STANDARDS_DIR)/$$pdf" "$(STANDARDS_DIR)/$${base}" -l eng >/dev/null 2>&1 || echo "    ⚠️  OCR failed for $$pdf"; \
+		else \
+			echo "    ⚠️  Skipping $$pdf (not present in $(STANDARDS_DIR))"; \
+		fi; \
+	done
+	@echo "✅ OCR pass complete (see $(STANDARDS_DIR)/*.txt)"
+
 # Clean generated files
 clean:
 	@echo "Cleaning generated files..."
