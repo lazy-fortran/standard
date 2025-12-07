@@ -10,6 +10,7 @@ grammar-aware.
 
 from __future__ import annotations
 
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -92,6 +93,42 @@ def _parse_lazy_source(source: str) -> None:
         )
 
 
+def _extract_inline_if_condition_and_remainder(
+    stripped: str,
+) -> tuple[str, str] | None:
+    """
+    Return condition and trailing statement for a compact inline IF.
+
+    The input string must start with ``if`` and contain a parenthesized
+    condition followed by the body on the same line.
+    """
+
+    if "(" not in stripped or ")" not in stripped:
+        return None
+
+    after_if = stripped[2:].lstrip()
+    if not after_if.startswith("("):
+        return None
+
+    close_index = after_if.find(")")
+    if close_index == -1:
+        return None
+
+    condition = after_if[1:close_index].strip()
+    remainder = after_if[close_index + 1 :].strip()
+    if not remainder:
+        return None
+
+    return condition, remainder
+
+
+def _normalize_condition_spacing(condition: str) -> str:
+    """Normalize spacing around simple relational operators."""
+
+    condition = re.sub(r"\s*(>=|<=|>|<)\s*", r" \1 ", condition)
+    return " ".join(condition.split())
+
+
 def _normalize_inline_if(line: str) -> str | None:
     """
     Transform simple inline IF statements into a canonical block form.
@@ -110,7 +147,6 @@ def _normalize_inline_if(line: str) -> str | None:
     stripped = line.lstrip()
     leading = line[: len(line) - len(stripped)]
 
-    # Quick filters: comments, existing block IF, or empty lines are left alone.
     if not stripped or stripped.startswith("!"):
         return None
 
@@ -120,33 +156,12 @@ def _normalize_inline_if(line: str) -> str | None:
     if " then" in lower or lower.startswith("if (") and " then" in lower:
         return None
 
-    # Extract condition and trailing statement in a very small subset of cases.
-    # We avoid complex parsing here and rely on simple structure.
-    if "(" not in stripped or ")" not in stripped:
+    extracted = _extract_inline_if_condition_and_remainder(stripped)
+    if extracted is None:
         return None
 
-    try:
-        after_if = stripped[2:].lstrip()
-        if not after_if.startswith("("):
-            return None
-        close_index = after_if.find(")")
-        if close_index == -1:
-            return None
-        condition = after_if[1:close_index].strip()
-        remainder = after_if[close_index + 1 :].strip()
-        if not remainder:
-            return None
-    except Exception:
-        return None
-
-    # Simple spacing inside condition: "x>0" -> "x > 0"
-    condition = (
-        condition.replace(">", " > ")
-        .replace("<", " < ")
-        .replace(">  =", ">=")
-        .replace("<  =", "<=")
-    )
-    condition = " ".join(condition.split())
+    condition, remainder = extracted
+    condition = _normalize_condition_spacing(condition)
 
     # Canonical PRINT spacing for the example style
     if remainder.lower().startswith("print*"):
