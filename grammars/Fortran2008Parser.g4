@@ -162,10 +162,10 @@ cosubscript_list
     ;
 
 cosubscript
-    : expr_f90                        // Expression for specific image
-    | expr_f90 COLON                  // lower bound:
-    | COLON expr_f90                  // :upper bound  
-    | expr_f90 COLON expr_f90         // lower:upper
+    : expr_f2003                      // Expression for specific image
+    | expr_f2003 COLON                // lower bound:
+    | COLON expr_f2003                // :upper bound  
+    | expr_f2003 COLON expr_f2003     // lower:upper
     | COLON                           // : (all images)
     ;
 
@@ -190,9 +190,10 @@ sync_memory_stmt
 
 image_set
     : MULTIPLY                        // * (all images)
-    | expr_f90                        // Single image or scalar expression
-    | LSQUARE expr_f90 (COMMA expr_f90)* RSQUARE  // Explicit image set [i1, i2, ...]
-    | LBRACKET expr_f90 (COMMA expr_f90)* RBRACKET
+    | expr_f2003                      // Single image or scalar expression
+    | LSQUARE expr_f2003 (COMMA expr_f2003)* RSQUARE
+      // Explicit image set [i1, i2, ...]
+    | LBRACKET expr_f2003 (COMMA expr_f2003)* RBRACKET
     ;
 
 sync_stat_list
@@ -222,19 +223,21 @@ entity_decl
 lhs_expression
     : identifier_or_keyword                 // Simple variable
       coarray_spec?
-    | identifier_or_keyword LPAREN actual_arg_list? RPAREN
-      coarray_spec?                         // Array element
+    | identifier_or_keyword LPAREN (actual_arg_list | section_subscript_list)? RPAREN
+      coarray_spec?                         // Array element or section
     | identifier_or_keyword PERCENT identifier_or_keyword
       coarray_spec?                         // Component
     | identifier_or_keyword PERCENT identifier_or_keyword
-      LPAREN actual_arg_list? RPAREN
-      coarray_spec?                         // Component array/method
-    | identifier_or_keyword LPAREN actual_arg_list? RPAREN
+      LPAREN (actual_arg_list | section_subscript_list)? RPAREN
+      coarray_spec?                         // Component array/section/method
+    | identifier_or_keyword LPAREN (actual_arg_list | section_subscript_list)? RPAREN
       PERCENT identifier_or_keyword
-      coarray_spec?                         // Array element's component
-    | identifier_or_keyword LPAREN actual_arg_list? RPAREN
-      PERCENT identifier_or_keyword LPAREN actual_arg_list? RPAREN
-      coarray_spec?                         // Array element's component method
+      coarray_spec?                         // Array element or section component
+    | identifier_or_keyword LPAREN
+      (actual_arg_list | section_subscript_list)? RPAREN
+      PERCENT identifier_or_keyword LPAREN
+      (actual_arg_list | section_subscript_list)? RPAREN
+      coarray_spec?                         // Array element/section component method
     ;
 
 // ============================================================================  
