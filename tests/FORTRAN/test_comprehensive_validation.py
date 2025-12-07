@@ -6,12 +6,15 @@ covering all fixed issues and implemented features.
 """
 
 import sys
-import os
 import unittest
 from pathlib import Path
 
-# Add grammars directory to path for imports
-sys.path.insert(0, 'grammars')
+# Add tests root (for fixture_utils) and grammars directory to path for imports
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.append(str(ROOT))
+sys.path.append(str(ROOT.parent / "grammars"))
+
+from fixture_utils import load_fixture
 
 from antlr4 import InputStream, CommonTokenStream
 from FORTRANLexer import FORTRANLexer
@@ -186,62 +189,32 @@ class TestComprehensiveValidation(unittest.TestCase):
         """Test complete classic FORTRAN programs"""
         
         # Bubble sort algorithm
-        bubble_sort = """
-        N = 10
-        DO 100 I = 1, N
-        DO 200 J = 1, N
-        IF (A(I) .GT. A(J)) 10, 200, 10
-        10 TEMP = A(I)
-        A(I) = A(J)
-        A(J) = TEMP  
-        200 CONTINUE
-        100 CONTINUE
-        """
+        bubble_sort = load_fixture(
+            "FORTRAN",
+            "test_comprehensive_validation",
+            "bubble_sort.f",
+        )
         
         # Quadratic equation solver
-        quadratic = """
-        A = 1.0
-        B = -5.0
-        C = 6.0
-        DISC = B ** 2 - 4.0 * A * C
-        IF (DISC) 10, 20, 30
-        10 WRITE -1
-        GOTO 40
-        20 X = -B / (2.0 * A)
-        WRITE X
-        GOTO 40
-        30 SQRT_D = DISC ** 0.5  
-        X1 = (-B + SQRT_D) / (2.0 * A)
-        X2 = (-B - SQRT_D) / (2.0 * A)
-        WRITE X1
-        WRITE X2
-        40 STOP
-        """
+        quadratic = load_fixture(
+            "FORTRAN",
+            "test_comprehensive_validation",
+            "quadratic_solver.f",
+        )
         
         # Matrix operations
-        matrix = """
-        DO 100 I = 1, 3
-        DO 200 J = 1, 3
-        IF (I .EQ. J) 10, 20, 20
-        10 MATRIX(I, J) = 1.0
-        GOTO 200
-        20 MATRIX(I, J) = 0.0
-        200 CONTINUE
-        100 CONTINUE
-        """
+        matrix = load_fixture(
+            "FORTRAN",
+            "test_comprehensive_validation",
+            "matrix_init.f",
+        )
         
         # Factorial calculation
-        factorial = """
-        N = 5
-        FACT = 1
-        I = 1
-        10 IF (I .GT. N) 20, 15, 20
-        15 FACT = FACT * I
-        I = I + 1
-        GOTO 10
-        20 WRITE FACT
-        STOP
-        """
+        factorial = load_fixture(
+            "FORTRAN",
+            "test_comprehensive_validation",
+            "factorial.f",
+        )
         
         programs = [
             (bubble_sort.strip(), "Bubble sort algorithm"),
@@ -363,45 +336,11 @@ class TestComprehensiveValidation(unittest.TestCase):
     
     def test_comprehensive_integration(self):
         """Final integration test with complex FORTRAN program using all features"""
-        complex_program = """
-        ! Comprehensive test program using all implemented features
-        
-        ! Variable declarations and initialization
-        N_SIZE = 10
-        PI_CONSTANT = 3.14159
-        TOLERANCE = 1.0E-6
-        
-        ! Array operations with complex subscripts
-        DO 100 I = 1, N_SIZE
-        DO 200 J = 1, N_SIZE
-        INDEX_CALC = I * N_SIZE + J
-        MATRIX_A(I, J) = PI_CONSTANT * INDEX_CALC
-        200 CONTINUE
-        100 CONTINUE
-        
-        ! Complex arithmetic with proper precedence
-        RESULT = (MATRIX_A(1, 1) + MATRIX_A(2, 2)) ** 2 - PI_CONSTANT / 4.0
-        
-        ! Conditional logic with relational operators
-        IF (RESULT .GT. TOLERANCE) 10, 20, 10
-        10 STATUS_FLAG = 1
-        GOTO 30
-        20 STATUS_FLAG = 0
-        30 CONTINUE
-        
-        ! Subroutine calls with complex arguments
-        CALL PROCESS_DATA(MATRIX_A, N_SIZE, STATUS_FLAG)
-        CALL CALCULATE_RESULT(RESULT + PI_CONSTANT, TOLERANCE * 2.0)
-        CALL FINALIZE()
-        
-        ! I/O operations
-        WRITE RESULT, STATUS_FLAG
-        READ NEXT_VALUE
-        
-        ! Program termination
-        STOP
-        END
-        """
+        complex_program = load_fixture(
+            "FORTRAN",
+            "test_comprehensive_validation",
+            "complex_program.f",
+        )
         
         tree = self.parse_program(complex_program.strip())
         self.assertIsNotNone(tree, "Failed to parse comprehensive integration program")
