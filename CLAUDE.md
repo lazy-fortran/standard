@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 LazyFortran2025 is a comprehensive ANTLR4-based grammar implementation covering all FORTRAN/Fortran standards from 1957 to 2023+. The project uses a revolutionary modular inheritance architecture where each standard only defines NEW features and imports from its predecessor.
 
+LazyFortran2025 now ships as an ANTLR4 grammar pair (`LazyFortran2025Lexer.g4` and `LazyFortran2025Parser.g4`) that imports the Fortran 2023 lexer and parser. The parser exposes two entry points:
+- `traditional_entry` for strict Fortran 2023 program units (standard `.f90+` files)
+- `lazy_entry` for `.lf` files with optional PROGRAM/MODULE wrappers, optional CONTAINS, and relaxed type declarations to support type inference at the semantic layer.
+
 ## Essential Build Commands
 
 ```bash
