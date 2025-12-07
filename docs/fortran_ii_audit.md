@@ -47,22 +47,36 @@ XPASS even though targeted subprogram tests succeed.
 
 ## 2. Spec-based statement coverage
 
-Historically, FORTRAN II:
+The IBM reference manual **“FORTRAN II for the IBM 704 Data
+Processing System” (Form C28-6000-2, 1958)** describes FORTRAN II
+as:
 
-- Retained the FORTRAN I (1957) statement set: assignment,
-  arithmetic IF, DO, GO TO and computed GO TO, FORMAT and I/O
-  statements, DIMENSION, EQUIVALENCE, FREQUENCY, PAUSE, STOP,
-  CONTINUE, etc.
-- Added six key statements/subprogram forms:
-  - `SUBROUTINE`
-  - `FUNCTION`
-  - `CALL`
-  - `RETURN`
-  - `COMMON`
-  - `END` (as a standard program unit terminator)
+- “compatible with the original FORTRAN, and [containing] six new
+  types of statements and incorporat[ing] all the statements in the
+  original FORTRAN language” (Part I, Chapter 1, “Types of
+  Statements” and the discussion quoted on p. 2 of the local OCR at
+  `validation/pdfs/FORTRANII_1958_IBM704_C28-6000-2.txt`).
+- Listing all FORTRAN II statements in **Appendix A. Summary of
+  FORTRAN II Statements** (page 59 in the same OCR file).
 
-The FORTRAN II parser in this repo implements all of these categories
-explicitly and, in several cases, extends beyond a minimal subset.
+From the manual, the “six new” FORTRAN II statement/subprogram
+forms are:
+
+- `SUBROUTINE`
+- `FUNCTION`
+- `CALL`
+- `RETURN`
+- `COMMON`
+- `END` (used as a standardized program‑unit terminator)
+
+All original FORTRAN (1957) statements (assignment, arithmetic IF,
+DO, GO TO / computed GO TO, FORMAT and I/O, DIMENSION,
+EQUIVALENCE, FREQUENCY, PAUSE, STOP, CONTINUE, tape/drum/file
+control, etc.) remain available.
+
+The FORTRAN II parser in this repo implements these categories
+explicitly at the syntax level, with a few notable differences from
+the strict 1958 specification (see COMMON and I/O sections below).
 
 ### 2.1 FORTRAN I statement set (inherited and redefined)
 
@@ -267,4 +281,3 @@ Future work should:
 - Tighten the implementation and tests until the XPASS fixtures parse
   with zero syntax errors or any unsupported constructs are explicitly
   documented as out of scope.
-
