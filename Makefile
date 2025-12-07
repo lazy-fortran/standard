@@ -12,7 +12,7 @@ PYTEST = python -m pytest
 GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023 LazyFortran2025
 
 # Default target
-.PHONY: all clean test help
+.PHONY: all clean test help download-standards
 
 all: $(GRAMMARS)
 
@@ -190,6 +190,57 @@ test-cross-validation: Fortran2018
 # ====================================================================
 # UTILITY TARGETS
 # ====================================================================
+
+# Directory for downloaded standards/spec references (git-ignored)
+STANDARDS_DIR ?= validation/pdfs
+
+# Download historical FORTRAN/Fortran standard references (PDFs and key drafts)
+# into a local, git-excluded cache under $(STANDARDS_DIR). These files are
+# used only for local grammar/spec auditing and are NOT part of the repo.
+download-standards:
+	@echo "Downloading FORTRAN/Fortran standard references into $(STANDARDS_DIR)..."
+	@mkdir -p $(STANDARDS_DIR)
+	@echo "  - FORTRAN (IBM 704, 1957) manual"
+	@curl -fL -o $(STANDARDS_DIR)/FORTRAN_1957_IBM704_C28-6003_Oct58.pdf \
+		https://bitsavers.org/pdf/ibm/704/C28-6003_704_FORTRAN_Oct58.pdf \
+		|| echo "    ⚠️  Failed to download FORTRAN 1957 IBM 704 manual"
+	@echo "  - FORTRAN II (IBM 704, 1958) manual"
+	@curl -fL -o $(STANDARDS_DIR)/FORTRANII_1958_IBM704_C28-6000-2.pdf \
+		https://bitsavers.org/pdf/ibm/704/C28-6000-2_704_FORTRANII.pdf \
+		|| echo "    ⚠️  Failed to download FORTRAN II IBM 704 manual"
+	@echo "  - ANSI X3.9-1966 FORTRAN (FORTRAN 66) scan (via Software Preservation)"
+	@curl -fL -o $(STANDARDS_DIR)/FORTRAN66_ANSI_X3.9-1966.pdf \
+		https://web.archive.org/web/20170705070450/http://www.softwarepreservation.org/projects/FORTRAN/ANSI_X3.9-1966_FORTRAN.pdf \
+		|| echo "    ⚠️  Failed to download ANSI X3.9-1966 FORTRAN scan"
+	@echo "  - ISO 1539:1980 Fortran 77 scan (via Software Preservation)"
+	@curl -fL -o $(STANDARDS_DIR)/FORTRAN77_ISO_1539-1980.pdf \
+		https://web.archive.org/web/20160305063303/http://www.softwarepreservation.org/projects/FORTRAN/ISO_1539-1980_Fortran77.pdf \
+		|| echo "    ⚠️  Failed to download ISO 1539:1980 Fortran 77 scan"
+	@echo "  - Fortran 90 draft standard (WG5 N692)"
+	@curl -fL -o $(STANDARDS_DIR)/Fortran90_WG5_N692.pdf \
+		https://wg5-fortran.org/N001-N1100/N692.pdf \
+		|| echo "    ⚠️  Failed to download WG5 N692 (Fortran 90 draft)"
+	@echo "  - Fortran 95 related document (Fortran 95 Request for Interpretation)"
+	@curl -fL -o $(STANDARDS_DIR)/Fortran95_J3_98-114_RFI.txt \
+		https://j3-fortran.org/doc/year/98/98-114.txt \
+		|| echo "    ⚠️  Failed to download J3 98-114 (Fortran 95 RFI)"
+	@echo "  - Fortran 2003 draft/final text (J3/03-007)"
+	@curl -fL -o $(STANDARDS_DIR)/Fortran2003_J3_03-007.pdf \
+		https://j3-fortran.org/doc/year/03/03-007.pdf \
+		|| echo "    ⚠️  Failed to download J3 03-007 (Fortran 2003)"
+	@echo "  - Fortran 2008 draft/final text (J3/08-007)"
+	@curl -fL -o $(STANDARDS_DIR)/Fortran2008_J3_08-007.pdf \
+		https://j3-fortran.org/doc/year/08/08-007.pdf \
+		|| echo "    ⚠️  Failed to download J3 08-007 (Fortran 2008)"
+	@echo "  - Fortran 2018 draft/final text (J3/15-007)"
+	@curl -fL -o $(STANDARDS_DIR)/Fortran2018_J3_15-007.pdf \
+		https://j3-fortran.org/doc/year/15/15-007.pdf \
+		|| echo "    ⚠️  Failed to download J3 15-007 (Fortran 2018)"
+	@echo "  - Fortran 2023 draft/final text (J3/22-007)"
+	@curl -fL -o $(STANDARDS_DIR)/Fortran2023_J3_22-007.pdf \
+		https://j3-fortran.org/doc/year/22/22-007.pdf \
+		|| echo "    ⚠️  Failed to download J3 22-007 (Fortran 2023)"
+	@echo "✅ Download complete (see $(STANDARDS_DIR))"
 
 # Clean generated files
 clean:
