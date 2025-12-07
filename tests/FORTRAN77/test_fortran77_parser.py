@@ -9,13 +9,16 @@ import os
 import unittest
 from pathlib import Path
 
-# Add grammars directory to path for imports
-sys.path.insert(0, 'grammars')
+# Add tests root (for fixture_utils) and grammars directory to path for imports
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.append(str(ROOT))
+sys.path.append(str(ROOT.parent / "grammars"))
 
 try:
-    from antlr4 import InputStream, CommonTokenStream
-    from FORTRAN77Lexer import FORTRAN77Lexer
-    from FORTRAN77Parser import FORTRAN77Parser
+    from antlr4 import InputStream, CommonTokenStream  # type: ignore
+    from FORTRAN77Lexer import FORTRAN77Lexer  # type: ignore
+    from FORTRAN77Parser import FORTRAN77Parser  # type: ignore
+    from fixture_utils import load_fixture
 except ImportError as e:
     print(f"Import error: {e}")
     FORTRAN77Parser = None
@@ -141,24 +144,11 @@ END IF"""
     
     def test_structured_programming_example(self):
         """Test complete structured programming example (FORTRAN 77)"""
-        program_text = """PROGRAM EXAMPLE
-CHARACTER*20 NAME
-INTEGER AGE
-LOGICAL ADULT
-
-PRINT *, 'ENTER NAME AND AGE:'
-READ *, NAME, AGE
-
-IF (AGE .GE. 18) THEN
-    ADULT = .TRUE.
-    PRINT *, NAME, ' IS AN ADULT'
-ELSE
-    ADULT = .FALSE.
-    PRINT *, NAME, ' IS A MINOR'
-END IF
-
-STOP
-END"""
+        program_text = load_fixture(
+            "FORTRAN77",
+            "test_fortran77_parser",
+            "structured_program_example.f",
+        )
         
         tree = self.parse(program_text, 'main_program')
         self.assertIsNotNone(tree)
