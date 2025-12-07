@@ -2,12 +2,13 @@
 """Test token recognition"""
 
 import sys
-import os
+from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'grammars'))
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.append(str(ROOT.parent / "grammars"))
 
-from antlr4 import *
-from Fortran2018Lexer import Fortran2018Lexer
+from antlr4 import *  # type: ignore
+from Fortran2018Lexer import Fortran2018Lexer  # type: ignore
 
 def test_token_recognition():
     code = "endif"

@@ -2,13 +2,14 @@
 """Test direct ENDIF parsing"""
 
 import sys
-import os
+from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'grammars'))
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.append(str(ROOT.parent / "grammars"))
 
-from antlr4 import *
-from Fortran2018Lexer import Fortran2018Lexer  
-from Fortran2018Parser import Fortran2018Parser
+from antlr4 import *  # type: ignore
+from Fortran2018Lexer import Fortran2018Lexer  # type: ignore
+from Fortran2018Parser import Fortran2018Parser  # type: ignore
 
 def test_direct_parsing():
     code = "endif"
