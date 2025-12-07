@@ -1,58 +1,298 @@
 # Fortran 90 (1990) – Grammar Audit (status: in progress)
 
-This audit summarizes the **Fortran 90** grammar based on:
+This audit describes what the **Fortran 90** grammar in this repository
+implements and compares it against the Fortran 90 standard text we have
+locally:
+
+- WG5 N692 “Fortran 90” draft / ISO/IEC 1539:1991 (E), stored as
+  `validation/pdfs/Fortran90_WG5_N692.txt`.
+
+The implementation view is based on:
 
 - `grammars/Fortran90Lexer.g4`, `grammars/Fortran90Parser.g4`
 - `docs/fixed_form_support.md`
-- Tests under `tests/Fortran90/`
-- Fixture expectations in `tests/test_fixture_parsing.py`
+- `tests/Fortran90/test_fortran_90_comprehensive.py`
+- XPASS fixtures recorded in `tests/test_fixture_parsing.py`
 
-It focuses on what is implemented and where the test suite still
-documents gaps.
+It is descriptive and spec‑aware, not a claim of full conformance.
 
-## 1. Major F90 features
+## 1. Program units, modules and procedures
 
-The comprehensive tests in `tests/Fortran90/test_fortran_90_comprehensive.py`
-confirm that the lexer and parser support:
+Specification (N692 §§2.2, 5.2.2, 5.5, 12):
 
-- Module system (`MODULE`, `USE`, `ONLY`, PUBLIC/PRIVATE).
-- Interface blocks (INTERFACE, END INTERFACE, GENERIC, OPERATOR,
-  ASSIGNMENT).
-- Derived types and components.
-- Dynamic arrays (ALLOCATABLE, POINTER, TARGET, ALLOCATE/DEALLOCATE).
-- Enhanced control (`SELECT CASE`, `WHERE`, EXIT/CYCLE).
-- Array operations and constructors.
-- Modern I/O features (NAMELIST, non-advancing I/O, etc.).
-- Modern operators (`::`, `=>`, `%`, relational operators, string
-  concatenation, BOZ constants, logical literals).
+- Program units: main program, external subprograms, modules, and
+  block data program units.
+- Internal procedures contained in a main program, an external
+  subprogram or a module.
 
-These are extensively exercised at the lexer level and through targeted
-parser tests.
+Grammar:
 
-## 2. Unified fixed/free-form architecture
+- Program unit entry:
+  - `program_unit_f90` is the top‑level rule, covering:
+    - Main program (`program_stmt` + body + `end_program_stmt`).
+    - External subroutines/functions (`subroutine_subprogram`,
+      `function_subprogram`).
+    - Modules (`module`).
+    - Block data program units are inherited from earlier standards.
+- Modules:
+  - `module` and `end_module_stmt` define a MODULE unit with:
+    - `specification_part` (USE/import + declarations).
+    - Optional `execution_part` and `internal_subprogram_part`.
+  - `use_stmt` and `import_stmt` cover USE and IMPORT forms.
+- External and internal procedures:
+  - `function_subprogram` and `subroutine_subprogram` include:
+    - A function/subroutine header (`function_stmt` / `subroutine_stmt`).
+    - Optional `specification_part`, `execution_part`, and
+      `internal_subprogram_part` (F90 internal procedures via
+      `contains_stmt`).
 
-Per `docs/fixed_form_support.md`:
+Notable simplifications / gaps:
 
-- Fortran 90 uses a **unified** lexer/parser for both fixed-form and
-  free-form.
-- Fixed-form is modeled as a **layout‑lenient subset**:
-  - `FIXED_FORM_COMMENT` treats `C`/`c`/`*` at line start as a comment
-    without column tracking.
-  - No enforcement of strict label columns, continuation column or
-    sequence numbers.
-- Free-form continuation and comments are fully supported.
+- Detailed rules about which specification statements may appear in
+  which program unit contexts and in which order (N692 §5.2.1) are
+  only partially enforced: `specification_part` allows a broad
+  `declaration_construct*` sequence and some minor reordering
+  differences are accepted.
+- Separate module subprograms (introduced later) are not modeled; F90
+  does not require them, so this is historically acceptable.
 
-Known lexer limitation:
+## 2. Free‑form and fixed‑form source
 
-- Some tokens (e.g. bare `CASE`, `CYCLE`, `COUNT`) can clash with the
-  fixed-form comment rule in isolation, as documented in the F90
-  tests.
+Specification (N692 §3) defines fixed and free source forms, with strict
+rules for columns in fixed form and much more flexible free form.
 
-## 3. Fixture coverage and XPASS gaps
+Grammar / lexer (Fortran90Lexer.g4, `docs/fixed_form_support.md`):
 
-`tests/test_fixture_parsing.py` marks many Fortran 90 fixtures as
-XPASS, with explanations that they still produce syntax errors or
-exercise rough edges in the unified grammar. These include:
+- Free form:
+  - `FREE_FORM_COMMENT` for `!` comments.
+  - `CONTINUATION` for trailing `&` with optional comment.
+  - Free‑form whitespace and case‑insensitive keywords are fully
+    supported.
+- Fixed form:
+  - `FIXED_FORM_COMMENT` treats leading `C`/`c`/`*` as entire‑line
+    comments.
+  - There is **no** token‑level enforcement of:
+    - Labels in columns 1–5.
+    - Continuation in column 6.
+    - Statement text in columns 7–72.
+    - Sequence numbers in 73–80.
+
+Implication:
+
+- The F90 grammar uses a **layout‑lenient** fixed‑form model that is
+  intentionally less strict than N692 §3. It is practical for parsing
+  typical legacy F77/F90 code but not card‑accurate.
+
+## 3. Types, derived types and declarations
+
+Specification (N692 §§4–5):
+
+- Intrinsic types with kind and length parameters.
+- Derived types with TYPE/END TYPE, components and structure
+  constructors.
+- Specification statements for attributes like ALLOCATABLE, POINTER,
+  TARGET, DIMENSION, INTENT, OPTIONAL, SAVE, EXTERNAL, INTRINSIC,
+  PUBLIC, PRIVATE.
+
+Grammar:
+
+- Intrinsic type spec (Fortran90Parser.g4):
+  - `intrinsic_type_spec_f90` handles:
+    - `INTEGER (kind_selector)?`
+    - `REAL (kind_selector)?`
+    - `DOUBLE PRECISION`
+    - `COMPLEX (kind_selector)?`
+    - `LOGICAL (kind_selector)?`
+    - `CHARACTER (char_selector)?`
+  - `kind_selector` and `char_selector` both accept general `expr_f90`
+    expressions; KIND/LEN are modeled syntactically, not restricted to
+    constant expressions.
+- Derived types:
+  - `derived_type_def`, `type_stmt`, `component_def_stmt`,
+    `component_decl`, `component_attr_spec`, `end_type_stmt` implement
+    the F90 TYPE definition.
+  - `derived_type_spec_f90` supports `TYPE(type_name)` in type
+    declarations.
+  - `structure_constructor` allows both positional and keyword
+    component specifications.
+- Type declarations and attributes:
+  - `type_declaration_stmt_f90` combines a type specifier, optional
+    attribute specifiers (`attr_spec_f90`) and an entity declaration
+    list (`entity_decl_list_f90`).
+  - `attr_spec_f90` supports:
+    - PARAMETER, DIMENSION, ALLOCATABLE, POINTER, TARGET, PUBLIC,
+      PRIVATE, INTENT, OPTIONAL, EXTERNAL, INTRINSIC, SAVE.
+  - Separate attribute statements (`allocatable_stmt`, `pointer_stmt`,
+    `target_stmt`, `optional_stmt`, `intent_stmt`, `public_stmt`,
+    `private_stmt`, `save_stmt`, `external_stmt`, `intrinsic_stmt`)
+    are all wired into `declaration_construct`.
+
+Gaps (spec vs grammar):
+
+- The grammar does not syntactically enforce:
+  - That KIND and LEN selectors are integer constant expressions.
+  - Many fine‑grained attribute ordering and consistency rules (e.g.
+    not all attribute combinations are valid for every context).
+- IMPLICIT and IMPLICIT NONE:
+  - F90’s `IMPLICIT` statement is not modeled explicitly; implicit
+    typing is inherited from earlier grammars via naming conventions.
+  - IMPLICIT NONE is therefore not recognized as a statement. This
+    limitation is tracked at a higher level (see issue #167 and the
+    planned F90 IMPLICIT work).
+
+## 4. Arrays, pointers, ALLOCATABLE and dynamic memory
+
+Specification (N692 §§5.1.2.4–5.1.2.7, 6, 13.8):
+
+- Array declarations (explicit‑, assumed‑, deferred‑shape,
+  assumed‑size).
+- ALLOCATABLE and POINTER arrays, TARGETs.
+- ALLOCATE / DEALLOCATE / NULLIFY and pointer association status
+  inquiries.
+
+Grammar:
+
+- Array specs:
+  - `array_spec_f90` combines:
+    - `explicit_shape_spec_list`
+    - `assumed_shape_spec_list`
+    - `deferred_shape_spec_list`
+    - `assumed_size_spec`
+- Dynamic memory:
+  - `allocate_stmt`, `allocation_list`, `allocation`, `allocate_object`
+    and `allocate_shape_spec_list` implement the ALLOCATE statement.
+  - `deallocate_stmt` and `deallocate_list` implement DEALLOCATE.
+  - `nullify_stmt` and `pointer_object_list` implement NULLIFY.
+  - `pointer_assignment_stmt` implements `=>` pointer assignment.
+  - `stat_variable` and `io_control_spec` cover `STAT=` and related
+    status/control specifiers.
+- Intrinsic inquiry functions (subset):
+  - `intrinsic_function_f90` includes SIZE, SHAPE, LBOUND, UBOUND,
+    ALLOCATED and PRESENT, SELECTED_REAL_KIND, SELECTED_INT_KIND.
+
+Gaps:
+
+- The grammar does not enforce all context restrictions, such as:
+  - Where assumed‑shape and deferred‑shape arrays are allowed (e.g.
+    dummy arguments vs locals).
+  - The full rules for pointer vs target combinations.
+  - Those are left to semantic analysis or downstream tooling.
+
+## 5. Control constructs (IF, CASE, DO, WHERE)
+
+Specification (N692 §§8.1.2–8.1.4, 7.5):
+
+- IF construct, CASE construct, DO construct, WHERE construct.
+
+Grammar:
+
+- IF construct:
+  - `if_construct`, `if_then_stmt`, `else_if_stmt`, `else_stmt`,
+    `end_if_stmt` implement block IF/ELSE IF/ELSE/END IF, including
+    named constructs.
+- CASE construct:
+  - `select_case_construct`, `select_case_stmt`, `case_construct`,
+    `case_stmt`, `case_selector`, `case_value_range_list`,
+    `case_value_range` support `SELECT CASE` with scalar expression,
+    ranges and optional construct names.
+- DO construct:
+  - `do_construct_f90`, `do_stmt_f90`, `loop_control`, `end_do_stmt`
+    implement:
+    - Counted DO loops.
+    - DO WHILE loops.
+    - Named constructs and `CYCLE` / `EXIT` (`cycle_stmt`, `exit_stmt`)
+      with optional construct names.
+- WHERE construct:
+  - `where_construct`, `where_construct_stmt`, `elsewhere_stmt`,
+    `end_where_stmt`, `where_stmt`, `logical_expr_f90` implement the
+    WHERE construct and single WHERE statement.
+
+Gaps:
+
+- Complex nesting rules and interactions between named constructs and
+  `CYCLE` / `EXIT` are not fully validated. The generic fixture suite
+  still marks several F90 integration fixtures (e.g.
+  `select_case_program.f90`) as XPASS because of current limitations
+  in the entry rule and integration of constructs.
+
+## 6. Expressions and literals
+
+Specification (N692 §7, §4.3, §4.5, §13.7–13.8):
+
+- Scalar and array expressions, logical operations, relational
+  operations, concatenation, BOZ literals, kind‑ and length‑selected
+  literals.
+
+Grammar:
+
+- `expr_f90`:
+  - A single recursive rule representing:
+    - Logical operators (`.EQV.`, `.NEQV.`, `.OR.`, `.AND.`, `.NOT.`).
+    - Relational operators (both dotted and symbolic: `.EQ.`, `==`,
+      `.NE.`, `/=`, `.LT.`, `<`, etc.).
+    - Character concatenation (`//`).
+    - Arithmetic (`**`, `*`, `/`, `+`, `-`) including unary prefix
+      `+`/`-`.
+    - `primary_f90`.
+- `primary_f90`:
+  - Includes `literal_f90`, `variable_f90`, `function_reference_f90`,
+    `intrinsic_function_f90`, `array_constructor_f90`,
+    `structure_constructor`, and parenthesized expressions.
+- Literals:
+  - `literal_f90` supports:
+    - Integer and real literals with optional kind markers.
+    - Single‑ and double‑quoted character literals.
+    - Logical `.TRUE.`/`.FALSE.` (`logical_literal_f90`).
+    - BOZ literal constants (`boz_literal_constant` for B/O/Z forms).
+
+Gaps:
+
+- The expression rule is deliberately highly permissive and does not
+  encode precedence using a tower of nonterminals; precedence and
+  conformability semantics are assumed to be handled downstream.
+  This is a practical divergence from the careful precedence
+  discussion in N692 §7.1/§7.2 but adequate for syntactic parsing.
+  (Some constraints are encoded by test expectations.)
+
+## 7. I/O: READ, WRITE, NAMELIST, control lists
+
+Specification (N692 §10):
+
+- READ, WRITE, PRINT statements with formatted and list‑directed I/O.
+- NAMELIST I/O.
+- Control specifiers: UNIT, FMT, IOSTAT, ERR, END, EOR, ADVANCE,
+  SIZE, REC.
+
+Grammar:
+
+- `read_stmt_f90` / `write_stmt_f90`:
+  - Implement READ and WRITE with:
+    - Positional unit and format forms.
+    - General `io_control_spec_list` control lists.
+    - NAMELIST WRITE `WRITE namelist_name`.
+- `io_control_spec`:
+  - Covers UNIT, FMT, IOSTAT, ERR, END, EOR, ADVANCE, SIZE, REC, or a
+    positional unit/expression.
+- `format_spec`:
+  - Accepts list‑directed `*`, labels, format expressions and NAMELIST
+    names.
+- `namelist_stmt`:
+  - Included in `declaration_construct` as an F90 declaration form.
+
+Gaps:
+
+- File manipulation statements OPEN, CLOSE, INQUIRE, BACKSPACE,
+  REWIND, ENDFILE remain modeled only at the FORTRAN 77 level (and
+  even there incompletely), and are not integrated into F90 execution
+  as dedicated F90 rules. This is tracked across the F77/F90 issues
+  (#163 and related items).
+
+## 8. Fixtures, XPASS status and integration gaps
+
+`tests/Fortran90/test_fortran_90_comprehensive.py` (30 tests) confirms
+that the grammar can parse a broad set of Fortran 90 features when
+exercised in focused unit tests. However, the generic fixture harness
+still marks a number of F90 fixtures as XPASS, including:
 
 - `tests/fixtures/Fortran90/test_fortran_90_comprehensive/`:
   - `basic_program.f90`
@@ -73,33 +313,51 @@ exercise rough edges in the unified grammar. These include:
   - `fortran95_features_program.f90`
   - `mixed_format_program.f90`
 
-The XPASS reasons describe:
+The XPASS reasons in `tests/test_fixture_parsing.py` document the main
+integration gaps:
 
-- Remaining limitations in:
-  - Module/program-unit handling.
-  - Derived type constructs in larger modules.
-  - Dynamic arrays and array constructors.
-  - Enhanced procedure usage.
-  - Unified fixed/free-form integration.
+- Remaining issues in:
+  - Module and program‑unit handling for large, multi‑unit programs.
+  - Integrated derived type usage in large modules.
+  - Complex array constructor/dynamic array patterns.
+  - Enhanced procedure usage (RECURSIVE, keyword arguments, OPTIONAL)
+    in “full‑program” settings.
+  - Unified fixed/free‑form parsing on mixed‑format sources.
 
-These fixtures together form the concrete list of F90 cases that the
-current grammar still fails to parse.
+These fixtures collectively define the **current outer edge** of the
+Fortran 90 grammar’s practical coverage.
 
-## 4. Summary
+## 9. Summary
 
-The Fortran 90 grammar:
+The Fortran 90 grammar in this repository:
 
-- Implements the major F90 innovations and passes extensive targeted
-  tests.
-- Provides a unified fixed/free-form lexer with a documented,
-  layout‑lenient fixed-form subset.
-- Still fails on a set of realistic comprehensive fixtures, which are
-  currently XPASS and documented as known limitations.
+- Implements most of the **major language features** described in
+  WG5 N692 / ISO/IEC 1539:1991 at the syntactic level, including:
+  - Module system and explicit interfaces.
+  - Derived types and structure constructors.
+  - Dynamic arrays, pointers and ALLOCATABLE objects, plus associated
+    intrinsics and statements (ALLOCATE/DEALLOCATE/NULLIFY).
+  - Block IF, CASE, DO, DO WHILE, WHERE, named constructs, CYCLE/EXIT.
+  - Enhanced expressions and literals (kinded numerics, BOZ, strings).
+  - Enhanced I/O (I/O control lists, NAMELIST, list‑directed I/O).
+  - Internal subprograms and unified program‑unit structure.
+- Uses a unified lexer for free‑form and fixed‑form with **lenient
+  fixed‑form** handling (no card‑accurate column enforcement).
+- Passes a broad comprehensive test suite targeted at individual F90
+  features.
+- Still has important integration gaps, captured by XPASS fixtures and
+  higher‑level issues (`#146`, `#147`, the IMPLICIT/annotation issues,
+  and the F77/F90 file I/O gaps).
 
 Future work should:
 
-- Resolve the XPASS fixtures by improving module handling, array
-  constructs and unified fixed/free-form behavior.
-- Expand this audit with a more explicit feature matrix once those
-  gaps are addressed.
+- Tighten module/program‑unit integration and internal procedures so
+  that the comprehensive F90 fixtures parse without XPASS.
+- Add explicit IMPLICIT and IMPLICIT NONE statement support in line
+  with N692 §5.2.2.
+- Integrate or wrap the FORTRAN 77 OPEN/CLOSE/INQUIRE/BACKSPACE/
+  REWIND/ENDFILE statements into the F90 execution part, matching
+  N692 §10.
+- Keep the grammar and tests in sync with the spec‑section annotations
+  tracked by issue #173.
 
