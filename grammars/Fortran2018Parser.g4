@@ -94,7 +94,11 @@ declaration_construct_f2018
 // ============================================================================
 
 execution_part_f2018
-    : executable_construct_f2018*
+    : execution_construct_f2018*
+    ;
+
+execution_construct_f2018
+    : NEWLINE* executable_construct_f2018 NEWLINE*
     ;
 
 // Enhanced executable construct for F2018
@@ -128,7 +132,7 @@ executable_construct_f2018
 
 select_rank_construct
     : select_rank_stmt
-      (rank_case_stmt execution_part_f2018?)*
+      rank_construct*
       end_select_rank_stmt
     ;
 
@@ -136,18 +140,23 @@ select_rank_stmt
     : (IDENTIFIER COLON)? SELECT RANK_KEYWORD LPAREN expr_f90 RPAREN NEWLINE
     ;
 
+rank_construct
+    : rank_case_stmt
+      execution_part_f2018?
+    ;
+
 rank_case_stmt
-    : RANK_KEYWORD LPAREN rank_value RPAREN NEWLINE   // RANK (n) or RANK (*)
+    : RANK_KEYWORD LPAREN rank_value RPAREN NEWLINE   // RANK (selector) or RANK (*)
     | RANK_KEYWORD DEFAULT NEWLINE                    // RANK DEFAULT
     ;
 
 rank_value
-    : INTEGER_LITERAL              // Specific rank: RANK (n)
-    | '*'                          // Assumed-rank case: RANK (*)
+    : expr_f90                     // Specific rank selector: scalar-int-constant-expr
+    | MULTIPLY                     // Assumed-rank case: RANK (*)
     ;
 
 end_select_rank_stmt
-    : END SELECT (IDENTIFIER)? NEWLINE
+    : END_SELECT (IDENTIFIER)? NEWLINE
     ;
 
 // ============================================================================
@@ -390,9 +399,9 @@ stop_code
 // ============================================================================
 
 type_declaration_stmt_f2018
-    : type_declaration_stmt           // Inherit F2003 declarations
+    : assumed_rank_declaration        // NEW in F2018 (DIMENSION(..))
+    | type_declaration_stmt           // Inherit F2003 declarations
     | enhanced_intrinsic_declaration  // Inherit F2008 enhanced types
-    | assumed_rank_declaration        // NEW in F2018
     ;
 
 assumed_rank_declaration

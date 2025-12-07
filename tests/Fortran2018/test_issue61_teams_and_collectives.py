@@ -70,14 +70,8 @@ class TestF2018TeamsAndCollectivesStatus:
         best_errors = min(errors_actual, errors_legacy)
         assert best_errors == 0
 
-    @pytest.mark.xfail(
-        reason=(
-            "SELECT RANK construct is only partially implemented "
-            "(status test for Issue #61; full support tracked in issue #88)"
-        )
-    )
     def test_select_rank_construct_minimal_example(self):
-        """Minimal SELECT RANK construct intended to become strict once implemented."""
+        """SELECT RANK construct with basic rank cases and default branch parses cleanly."""
         code = load_fixture(
             "Fortran2018",
             "test_issue61_teams_and_collectives",
