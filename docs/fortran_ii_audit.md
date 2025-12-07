@@ -4,102 +4,267 @@ This document describes what the **FORTRAN II** grammar in this
 repository currently supports, based on:
 
 - `grammars/FORTRANIILexer.g4`, `grammars/FORTRANIIParser.g4`
+- `grammars/FORTRANLexer.g4`, `grammars/FORTRANParser.g4`
 - `docs/fixed_form_support.md`
 - `tests/FORTRANII/test_fortran_ii_parser.py`
-- `tests/test_fixture_parsing.py` and its XPASS entries
+- `tests/test_fixture_parsing.py` (XPASS fixtures)
 
-It reflects the implementation status, not full conformance to every
-FORTRAN II dialect.
+It is intentionally descriptive of the current implementation, not a
+claim of full conformance to every historical FORTRAN II dialect.
 
 ## 1. Program structure and subprograms
 
-Implemented and tested (see `tests/FORTRANII/test_fortran_ii_parser.py`):
+Specification-wise, FORTRAN II is essentially FORTRAN I plus support
+for separately compiled subroutines and functions, together with a
+`COMMON` statement and a formal `END` statement for program units.
 
-- Subroutine subprograms (`SUBROUTINE ... END`) with parameters.
-- Function subprograms (`FUNCTION ... END`) with parameters and
-  multiple `RETURN` statements.
-- CALL statements with optional argument lists.
+In this repository:
 
-Fixtures demonstrate:
+- Top-level program rule:
+  - `fortran_program` accepts exactly one of:
+    - `main_program` (a sequence of statements),
+    - `subroutine_subprogram`,
+    - `function_subprogram`.
+  - Multiple program units per file are not modeled; instead, each
+    unit would be parsed separately.
+- Subprograms:
+  - `subroutine_subprogram` parses:
+    - `SUBROUTINE name (optional-parameter-list)` on the first line,
+      followed by a `statement_list` and `END`.
+  - `function_subprogram` parses:
+    - Optional `type_spec` (`INTEGER` or `REAL`) followed by
+      `FUNCTION name(parameter-list)`, a `statement_list` and `END`.
+- Tests:
+  - `tests/FORTRANII/test_fortran_ii_parser.py` exercises:
+    - `subroutine_subprogram` (`subroutine_text.f`).
+    - `function_subprogram` (`function_text.f`).
+    - A subroutine-style program (`subroutine_program.f`).
 
-- A simple subroutine program (`subroutine_program.f`).
-- A function example (`function_text.f`).
-- A separate subroutine definition (`subroutine_text.f`).
+The generic fixture harness (`tests/test_fixture_parsing.py`) still
+uses the imported `program_unit_core` entry rule from `FORTRANParser`
+for FORTRANII, which is one reason some FORTRAN II fixtures remain
+XPASS even though targeted subprogram tests succeed.
 
-Current limitations:
+## 2. Spec-based statement coverage
 
-- The generic fixture parser marks several FORTRAN II fixtures as XPASS
-  with messages that they exceed the simplified grammar.
-- Only subprograms (functions/subroutines) are explicitly tested; full
-  mixtures of main program plus multiple subprogram units are not.
+Historically, FORTRAN II:
 
-## 2. COMMON and shared storage
+- Retained the FORTRAN I (1957) statement set: assignment,
+  arithmetic IF, DO, GO TO and computed GO TO, FORMAT and I/O
+  statements, DIMENSION, EQUIVALENCE, FREQUENCY, PAUSE, STOP,
+  CONTINUE, etc.
+- Added six key statements/subprogram forms:
+  - `SUBROUTINE`
+  - `FUNCTION`
+  - `CALL`
+  - `RETURN`
+  - `COMMON`
+  - `END` (as a standard program unit terminator)
 
-Implemented:
+The FORTRAN II parser in this repo implements all of these categories
+explicitly and, in several cases, extends beyond a minimal subset.
 
-- `COMMON` statements, including:
-  - Unnamed COMMON lists.
-  - Named COMMON blocks (`COMMON /BLOCK/ X, Y`).
-  - Arrays in COMMON (`ARRAY(100)`).
+### 2.1 FORTRAN I statement set (inherited and redefined)
 
-These are exercised in `test_common_statement` and in the FORTRAN II
-fixtures.
+The FORTRAN II parser redefines a full set of 1957-style statements:
 
-## 3. Fixed-form and labels
+- Assignment:
+  - `assignment_stmt : variable EQUALS expr`
+  - Implemented and widely used in fixtures (math expressions, array
+    examples, etc.).
+
+- Branching and control:
+  - `goto_stmt` – unconditional `GO TO label`.
+  - `computed_goto_stmt` – `GO TO (label-list), expr`.
+  - `arithmetic_if_stmt` – `IF (expr) l1, l2, l3`.
+  - `do_stmt` – `DO label var ASSIGN expr, expr [, expr]`.
+  - `continue_stmt`, `stop_stmt`, `pause_stmt`.
+  - These rules represent the core 1957 control constructs, with
+    `pause_stmt` and `frequency_stmt` modeling the original PAUSE and
+    FREQUENCY features.
+
+- Data layout and optimization:
+  - `dimension_stmt` – array declarations with constant bounds.
+  - `equivalence_stmt` – memory overlay sets.
+  - `frequency_stmt` – compiler optimization hints with integer
+    counts.
+
+- I/O and FORMAT:
+  - `read_stmt` – forms with unit and format label variations.
+  - `print_stmt` – `PRINT format, list`.
+  - `punch_stmt` – `PUNCH format, list`.
+  - `format_stmt` – FORMAT with a list of `format_item`s; items can
+    be numeric descriptors or Hollerith text.
+
+Compared to the FORTRAN I stub, the FORTRAN II parser is significantly
+more complete: it includes explicit rules for DIMENSION,
+EQUIVALENCE, FORMAT, PRINT and PUNCH, rather than treating them as
+tokens only.
+
+### 2.2 FORTRAN II additions
+
+New FORTRAN II features and their representation:
+
+- `CALL`:
+  - `call_stmt : CALL IDENTIFIER (LPAREN expr_list? RPAREN)?`
+  - Tested in `test_call_statements` with different argument counts.
+
+- `SUBROUTINE` and `FUNCTION`:
+  - `subroutine_subprogram` and `function_subprogram` rules, with
+    optional type spec for functions.
+  - Tested in `test_subroutine_definition` and `test_function_definition`.
+
+- `RETURN`:
+  - `return_stmt : RETURN`
+  - Tested indirectly via fixtures that include RETURN statements and
+    by asserting that function examples contain two RETURNs.
+
+- `COMMON`:
+  - `common_stmt : COMMON (SLASH IDENTIFIER SLASH)? variable_list`
+  - Supports both blank COMMON and named `COMMON /BLOCK/` forms.
+  - Tested explicitly in `test_common_statement`.
+
+- `END`:
+  - `end_stmt : END` as a generic terminator for main program or
+    subprogram; there is no explicit modeling of sense-switch
+    overrides or integer arguments some compilers allowed.
+
+## 3. Data types and expressions
+
+Data types:
+
+- The grammar allows optional `type_spec` for functions:
+  - `type_spec : INTEGER | REAL`.
+- There is no explicit support for DOUBLE PRECISION or COMPLEX types
+  in the FORTRAN II parser; those appear later in the grammar chain
+  (e.g. FORTRAN 66 and beyond).
+
+Expressions:
+
+- `expr` in `FORTRANIIParser.g4` defines a full precedence hierarchy:
+  - Exponentiation (`**`), multiplication/division, addition/subtraction,
+    unary plus/minus, and parenthesized expressions.
+- `integer_expr` is a syntactic alias for `expr`; integer semantics
+  are left to a later semantic phase or consumer.
+- `function_reference` supports calls to intrinsic functions (e.g.
+  `SIN(X)`), modeled as `IDENTIFIER LPAREN expr_list RPAREN`.
+
+## 4. COMMON semantics
+
+Specification:
+
+- Historically, FORTRAN II only provided a single “blank” COMMON area;
+  named COMMON blocks (`COMMON /BLOCK/ ...`) were introduced later
+  (FORTRAN 66 era).
+
+Implementation in this grammar:
+
+- `common_stmt` accepts both:
+  - `COMMON A, B, C` (blank COMMON).
+  - `COMMON /BLOCK/ X, Y` (named COMMON).
+
+Implications:
+
+- The grammar is intentionally more generous than pure historical
+  FORTRAN II with respect to COMMON naming: it allows named COMMON
+  blocks as a convenience, even though that feature is associated with
+  later standards.
+
+## 5. Fixed-form and labels
 
 From `docs/fixed_form_support.md`:
 
-- The lexer models labels as explicit tokens (1–5 digits, no leading
-  zero).
-- The parser uses a **logical** fixed-form model:
-  - Optional label followed by a statement and optional newline.
-  - No strict enforcement of label columns, continuation, or sequence
-    numbers.
-- Column‑1 `C`/`*` comments and strict label column ranges are not
-  enforced.
+- Labels:
+  - `FORTRANIILexer.g4` defines a `LABEL` token as 1–5 digits with no
+    leading zero, matching the 1–99999 label range historically used
+    in FORTRAN.
+  - The parser `label` rule uses this token in `statement` forms.
+- Layout:
+  - The grammar uses a **logical** fixed-form model:
+    - `statement : label? statement_body NEWLINE? | NEWLINE`.
+    - It does not enforce physical column positions for labels,
+      continuation marks or sequence numbers.
+  - Sequence fields (columns 73–80) are not modeled.
+  - Column‑1 `C`/`*` comments and strict column ranges are not
+    enforced.
 
 Implication:
 
-- Many historically “card-accurate” FORTRAN II sources will be
-  accepted as long as the token sequence is valid, regardless of
-  physical columns.
+- The grammar accepts a wide variety of FORTRAN II code layouts as
+  long as the token sequence is valid, but does not attempt
+  card-image fidelity.
 
-## 4. Known gaps and XPASS fixtures
+## 6. Hollerith constants
 
-In `tests/test_fixture_parsing.py` the following fixtures are marked
-XPASS for FORTRAN II:
+Lexer:
+
+- `HOLLERITH : [1-9] [0-9]* H ~[\r\n]*? ;`
+  - A simple pattern matching `nH...` sequences up to end of line.
+
+Parser usage:
+
+- `format_item` allows `HOLLERITH` as a standalone format item.
+
+Limitations:
+
+- The grammar does not enforce that the digit count `n` matches the
+  number of characters following `H`:
+  - This is a lexical/semantic check left to downstream tools.
+- Outside FORMAT, Hollerith usage is limited to the simple lexer rule;
+  the tests treat Hollerith handling primarily as “token is
+  recognized” rather than as strict, length-checked semantics.
+
+## 7. Known gaps and XPASS fixtures
+
+`tests/test_fixture_parsing.py` marks several FORTRAN II fixtures as
+XPASS with messages indicating that they exceed the current grammar:
 
 - `FORTRANII/test_fortran_ii_parser/function_text.f`
 - `FORTRANII/test_fortran_ii_parser/subroutine_program.f`
 - `FORTRANII/test_fortran_ii_parser/subroutine_text.f`
 
-The XPASS reasons state that these represent richer historical usage
-than the simplified grammar accepts and that the subroutine program
-“exceeds the current stub grammar”.
+The XPASS reasons explain that these fixtures:
 
-These XPASS fixtures indicate:
+- Represent richer historical usage than the simplified grammar
+  accepts.
+- Exceed what is described as the “current stub” for FORTRAN II in the
+  generic fixture harness.
 
-- The grammar does not yet fully accept all realistic FORTRAN II
-  examples in the tests.
-- There are still missing or incomplete rules for subprogram structure
-  and/or statement forms in FORTRAN II.
+Taken together with the targeted `test_fortran_ii_parser.py` tests,
+this means:
 
-## 5. Summary
+- The dedicated FORTRAN II rules (CALL, SUBROUTINE, FUNCTION, COMMON)
+  work on the focused examples.
+- The generic “one size fits all” fixture parser, which still uses
+  `program_unit_core` as its entry rule for FORTRANII, does not
+  successfully parse some of the richer subprogram fixtures and treats
+  them as expected failures.
 
-The FORTRAN II grammar today:
+## 8. Summary
 
-- Correctly recognizes and parses:
-  - CALL statements.
-  - FUNCTION and SUBROUTINE subprogram definitions.
-  - COMMON statements (unnamed and named blocks).
-- Uses a layout‑lenient fixed-form model without 80-column enforcement.
-- Still rejects several test fixtures that represent plausible
-  historical FORTRAN II programs.
+The FORTRAN II grammar in this repository:
+
+- Implements a largely complete statement set for FORTRAN I and FORTRAN
+  II, including:
+  - Assignment, GOTO, computed GOTO, arithmetic IF, DO, CONTINUE,
+    STOP, PAUSE, DIMENSION, EQUIVALENCE, FREQUENCY, READ/PRINT/PUNCH,
+    FORMAT.
+  - SUBROUTINE and FUNCTION subprograms, CALL and RETURN, COMMON and
+    END.
+- Extends COMMON to allow both blank and named forms, slightly beyond
+  strictly historical FORTRAN II.
+- Uses a layout‑lenient fixed-form model with explicit LABEL tokens,
+  without strict 80-column enforcement.
+- Provides Hollerith support for FORMAT items but does not enforce
+  length checks on the `nH...` form.
+- Still rejects several richer FORTRAN II fixtures in the generic
+  fixture harness, indicating remaining integration or coverage gaps.
 
 Future work should:
 
-- Use the XPASS fixtures as concrete targets for expanding FORTRAN II
-  coverage.
-- Decide whether to remain layout‑lenient or to add an optional strict
-  fixed-form mode, as discussed in open issues.
+- Align the fixture harness entry rule for FORTRAN II with the
+  dedicated `fortran_program` or subprogram rules.
+- Tighten the implementation and tests until the XPASS fixtures parse
+  with zero syntax errors or any unsupported constructs are explicitly
+  documented as out of scope.
 
