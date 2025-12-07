@@ -9,11 +9,15 @@ These are REAL tests that:
 """
 
 import sys
-import os
 import pytest
+from pathlib import Path
+
+# Ensure we can import shared test fixtures utilities
+sys.path.append(str(Path(__file__).parent.parent))
+from fixture_utils import load_fixture
 
 # Add grammars directory to Python path for generated parsers
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../grammars'))
+sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
 
 from antlr4 import *
 from Fortran2018Lexer import Fortran2018Lexer  
@@ -49,8 +53,11 @@ class TestBasicF2018Features:
     
     def test_basic_module_parsing_works(self):
         """REAL TEST: Verify basic module parsing works (inherited from F2008)"""
-        code = """module basic_test
-end module basic_test"""
+        code = load_fixture(
+            "Fortran2018",
+            "test_basic_f2018_features",
+            "basic_module.f90",
+        )
         
         tree, errors = self.parse_code(code)
         
@@ -63,16 +70,11 @@ end module basic_test"""
     @pytest.mark.skip(reason="F2018 coarray inheritance from F2008 is incomplete (see issues #83 and #88)")
     def test_f2018_grammar_inheritance(self):
         """REAL TEST: Verify F2018 inherits F2008 coarray features"""
-        code = """module coarray_test
-    integer :: data[*]
-contains
-    subroutine test()
-        sync all
-        if (this_image() == 1) then
-            print *, 'inherited from F2008'
-        end if
-    end subroutine
-end module"""
+        code = load_fixture(
+            "Fortran2018",
+            "test_basic_f2018_features",
+            "coarray_test_module.f90",
+        )
         
         tree, errors = self.parse_code(code)
         
@@ -85,20 +87,17 @@ end module"""
     @pytest.mark.skip(reason="F2018 coarray and SYNC support still being aligned with F2008 (see issues #83 and #88)")
     def test_f2018_parser_vs_f2008_functionality(self):
         """REAL TEST: Compare F2018 vs F2008 parsing on same code"""
-        code = """module comparison
-    integer :: x[*]
-    contains
-    subroutine sync_test()
-        sync all
-    end subroutine
-end module"""
+        code = load_fixture(
+            "Fortran2018",
+            "test_basic_f2018_features",
+            "comparison_module.f90",
+        )
         
         # Test with F2018 parser
         f2018_tree, f2018_errors = self.parse_code(code)
         
         # Test with F2008 parser for comparison
         try:
-            sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../grammars'))
             from Fortran2008Lexer import Fortran2008Lexer
             from Fortran2008Parser import Fortran2008Parser
             
@@ -119,15 +118,11 @@ end module"""
     @pytest.mark.skip(reason="F2018 program-structure parsing still being aligned with the standard")
     def test_complex_program_structure_limitations(self):
         """REAL TEST: Document known program structure parsing limitations"""
-        code = """program complex_test
-    integer :: i
-    real :: x
-    
-    i = 1
-    x = 2.0
-    
-    print *, i, x
-end program"""
+        code = load_fixture(
+            "Fortran2018",
+            "test_basic_f2018_features",
+            "complex_program.f90",
+        )
         
         tree, errors = self.parse_code(code)
         
