@@ -4,12 +4,15 @@ Simple working test for Fortran 2003 parser to verify basic functionality.
 """
 
 import sys
-import os
 import pytest
 from pathlib import Path
 
-# Add grammars directory to path
-sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
+# Add tests root (for fixture_utils) and grammars directory to path
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.append(str(ROOT))
+sys.path.append(str(ROOT.parent / "grammars"))
+
+from fixture_utils import load_fixture
 
 from antlr4 import *
 
@@ -56,43 +59,51 @@ class TestSimpleFortran2003:
     
     def test_simple_program(self):
         """Test simple F2003 program parsing."""
-        simple_program = """program simple
-end program simple
-"""
+        simple_program = load_fixture(
+            "Fortran2003",
+            "test_simple_f2003",
+            "simple_program.f90",
+        )
         tree, errors, exception = self.parse_fortran_code(simple_program)
         self.validate_parse_tree(tree, "Program_unit_f2003")
     
     def test_simple_module(self):
         """Test simple F2003 module parsing.""" 
-        simple_module = """module simple_mod
-end module simple_mod
-"""
+        simple_module = load_fixture(
+            "Fortran2003",
+            "test_simple_f2003",
+            "simple_module.f90",
+        )
         tree, errors, exception = self.parse_fortran_code(simple_module)
         self.validate_parse_tree(tree, "Program_unit_f2003")
     
     def test_class_declaration(self):
         """Test F2003 CLASS declaration parsing."""
-        class_code = """program test_class
-class(integer), pointer :: obj
-end program test_class
-"""
+        class_code = load_fixture(
+            "Fortran2003",
+            "test_simple_f2003",
+            "class_program.f90",
+        )
         tree, errors, exception = self.parse_fortran_code(class_code)
         self.validate_parse_tree(tree, "Program_unit_f2003")
     
     def test_procedure_pointer(self):
         """Test F2003 procedure pointer parsing."""
-        proc_code = """program test_proc
-procedure(interface), pointer :: proc_ptr
-end program test_proc
-"""
+        proc_code = load_fixture(
+            "Fortran2003",
+            "test_simple_f2003",
+            "proc_ptr_program.f90",
+        )
         tree, errors, exception = self.parse_fortran_code(proc_code)
         self.validate_parse_tree(tree, "Program_unit_f2003")
     
     def test_parse_tree_structure(self):
         """Test detailed parse tree structure."""
-        code = """program test
-end program test
-"""
+        code = load_fixture(
+            "Fortran2003",
+            "test_simple_f2003",
+            "basic_program.f90",
+        )
         tree, _, _ = self.parse_fortran_code(code)
         
         # Verify parse tree structure
