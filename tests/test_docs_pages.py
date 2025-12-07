@@ -17,3 +17,20 @@ def test_docs_index_references_design_markdown() -> None:
   assert "lazyfortran2025-design.md" in content
   assert "Lazy Fortran 2025 Design" in content
 
+
+def test_design_doc_has_work_in_progress_notice() -> None:
+  design_path = _repo_root() / "docs" / "lazyfortran2025-design.md"
+  content = design_path.read_text(encoding="utf-8")
+
+  assert "WORK IN PROGRESS" in content
+
+
+def test_design_doc_covers_all_lazy_feature_issues() -> None:
+  design_path = _repo_root() / "docs" / "lazyfortran2025-design.md"
+  content = design_path.read_text(encoding="utf-8")
+
+  for issue in range(51, 58):
+    marker = f"Issue #{issue}"
+    assert (
+      marker in content
+    ), f"Design document should reference Lazy Fortran issue #{issue}"
