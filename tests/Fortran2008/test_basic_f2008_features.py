@@ -68,7 +68,6 @@ class TestBasicF2008Features:
             assert tree is not None, f"{description} failed to produce parse tree"
             assert errors == 0, f"{description}: expected 0 errors, got {errors}"
 
-    @pytest.mark.xfail(reason="Fortran 2008 submodule grammar still incomplete (see issue #85)")
     def test_submodule_basic_syntax(self):
         """Test basic submodule syntax recognition (future strict test)"""
         code = load_fixture(
@@ -102,6 +101,21 @@ class TestBasicF2008Features:
         tree, errors = self.parse_code(code)
         assert tree is not None, "Enhanced intrinsics failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for intrinsics test, got {errors}"
+    
+    def test_enhanced_intrinsic_named_arguments(self):
+        """Test F2008 intrinsic functions with named arguments and keywords"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "enhanced_intrinsics_named_args.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, (
+            "Enhanced intrinsics with named arguments failed to produce parse tree"
+        )
+        assert errors == 0, (
+            f"Expected 0 errors for intrinsics named-argument test, got {errors}"
+        )
     
     def test_new_integer_kinds(self):
         """Test F2008 enhanced integer kind tokens"""
