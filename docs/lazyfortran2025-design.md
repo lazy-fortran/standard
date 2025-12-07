@@ -279,6 +279,69 @@ Design goals:
 - REPL cells behave like incremental `.lf` chunks in a shared module.
 - Errors and types reported in the same way as in file‑based compilation.
 
+#### Session model and mapping to files
+
+- Each REPL session behaves as a single implicit `.lf` file whose
+  contents grow over time; conceptually, the toolchain maintains an
+  in‑memory `session.lf` module that is updated as you execute cells.
+- At any time, exporting the session to a real `session.lf` file and
+  compiling it with the Lazy Fortran toolchain must produce the same
+  observable behavior (up to I/O ordering) as the interactive run.
+- Notebook cells correspond to contiguous chunks in this implicit file,
+  ordered by execution order, not by their visual position in the UI.
+
+#### State, scope, and persistence
+
+- Top‑level variables, procedures, and types defined in a cell remain
+  available to later cells in the same session, just as if they had been
+  defined earlier in a `.lf` file.
+- Re‑executing a cell re‑runs its executable statements and updates
+  definitions in the implicit module; subsequent calls and uses see the
+  most recent definition.
+- Names follow the same scoping rules as in a single module or program:
+  there is one global scope per session, with blocks and internal
+  procedures introducing nested scopes exactly as in files.
+
+#### Types, implicit rules, and inference
+
+- The REPL uses the same default typing rules as `.lf` files:
+  in the absence of an `implicit` statement, undeclared names are
+  allowed and participate in type inference.
+- An `implicit none` statement in an early cell affects the whole
+  session and forbids new undeclared names in later cells, matching the
+  behavior of a file where `implicit none` appears near the top.
+- When a session is exported to a file, the resulting `session.lf` must
+  type‑check under the Lazy Fortran rules without adding extra
+  declarations.
+
+#### Redefinitions and errors
+
+- Redeclaring a variable or procedure name in a later cell replaces the
+  previous definition for future cells while leaving the behavior of
+  already‑run cells unchanged (similar to re‑executing cells in a
+  notebook).
+- The environment should surface clear diagnostics when a redefinition
+  would violate standard Fortran rules at file granularity (for example,
+  incompatible interfaces for the same procedure name), and suggest
+  moving conflicting definitions into separate modules.
+- Runtime errors raised while executing a cell do not roll back
+  successful prior definitions in that cell; partially executed cells
+  follow the same semantics as partially executed code blocks in a
+  program.
+
+#### Integration with traditional Fortran
+
+- `use` statements in the REPL behave exactly as in a `.lf` file:
+  sessions can import both traditional modules and implicit‑module
+  `.lf` libraries compiled on disk.
+- Sessions that contain top‑level executable statements are treated as
+  implicit programs when exported; sessions that only define procedures
+  and types are exported as implicit modules, using the same rules as
+  `.lf` files.
+- Tooling should make it easy to promote a stable REPL session into a
+  checked‑in `.lf` file, encouraging users to migrate exploratory code
+  into version‑controlled modules once it matures.
+
 ---
 
 ### 2.2 LF‑TOOL‑02 – Canonical Formatter and Linter (Issue #56) – *PROVISIONAL*
