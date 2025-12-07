@@ -67,7 +67,6 @@ class TestBasicF2018Features:
         # REAL TEST: For a basic module, errors should be zero
         assert errors == 0, f"Basic module should parse with zero errors, got {errors}"
     
-    @pytest.mark.xfail(reason="F2018 coarray inheritance from F2008 is incomplete (see issues #83 and #88)")
     def test_f2018_grammar_inheritance(self):
         """REAL TEST: Verify F2018 inherits F2008 coarray features"""
         code = load_fixture(
@@ -80,11 +79,10 @@ class TestBasicF2018Features:
         
         # REAL TEST: F2008 features should eventually work in F2018
         assert tree is not None, "F2008 coarray features should work in F2018"
-        # This expectation is tightened in issue #88; for now keep the assertion
-        # here but mark the test as xfail below.
+        # This expectation was tightened as F2018 coarray support improved
+        # (see issues #83 and #88).
         assert errors == 0, f"F2008 inheritance should parse with zero errors, got {errors}"
     
-    @pytest.mark.xfail(reason="F2018 coarray and SYNC support still being aligned with F2008 (see issues #83 and #88)")
     def test_f2018_parser_vs_f2008_functionality(self):
         """REAL TEST: Compare F2018 vs F2008 parsing on same code"""
         code = load_fixture(
@@ -115,13 +113,6 @@ class TestBasicF2018Features:
         except ImportError:
             pytest.skip("F2008 parser not available for comparison")
     
-    @pytest.mark.xfail(
-        reason=(
-            "F2018 program-structure parsing still being aligned with the "
-            "standard (no dedicated GitHub issue yet; this test documents "
-            "the gap until an issue is opened)"
-        )
-    )
     def test_complex_program_structure_limitations(self):
         """REAL TEST: Document known program structure parsing limitations"""
         code = load_fixture(
