@@ -254,6 +254,7 @@ download-standards:
 ocr-standards:
 	@echo "Running Tesseract OCR for historical FORTRAN/Fortran PDFs into $(STANDARDS_DIR)..."
 	@which tesseract >/dev/null 2>&1 || { echo "❌ tesseract not found on PATH"; exit 1; }
+	@which pdftoppm >/dev/null 2>&1 || { echo "❌ pdftoppm not found on PATH"; exit 1; }
 	@mkdir -p $(STANDARDS_DIR)
 	@set -e; \
 	for pdf in \
@@ -269,8 +270,26 @@ ocr-standards:
 		if [ -f "$(STANDARDS_DIR)/$$pdf" ]; then \
 			base=$${pdf%.pdf}; \
 			txt_file="$(STANDARDS_DIR)/$${base}.txt"; \
+			tmpdir="$(STANDARDS_DIR)/.ocr_tmp_$${base}"; \
 			echo "  - OCR $$pdf -> $${txt_file}"; \
-			tesseract "$(STANDARDS_DIR)/$$pdf" "$(STANDARDS_DIR)/$${base}" -l eng >/dev/null 2>&1 || echo "    ⚠️  OCR failed for $$pdf"; \
+			rm -rf "$$tmpdir"; \
+			mkdir -p "$$tmpdir"; \
+			# Convert each page of the PDF to PNG images at 300dpi \
+			pdftoppm -r 300 -png "$(STANDARDS_DIR)/$$pdf" "$$tmpdir/page" >/dev/null 2>&1 || { echo "    ⚠️  pdftoppm failed for $$pdf"; continue; }; \
+			if ! ls "$$tmpdir"/page-*.png >/dev/null 2>&1; then \
+				echo "    ⚠️  No page images produced for $$pdf"; \
+				continue; \
+			fi; \
+			: > "$$txt_file"; \
+			for img in "$$tmpdir"/page-*.png; do \
+				pagebase=$$(basename "$$img" .png); \
+				outbase="$$tmpdir/$$pagebase"; \
+				tesseract "$$img" "$$outbase" -l eng >/dev/null 2>&1 || echo "    ⚠️  Tesseract failed on $$img"; \
+				if [ -f "$$outbase.txt" ]; then \
+					cat "$$outbase.txt" >> "$$txt_file"; \
+					echo "" >> "$$txt_file"; \
+				fi; \
+			done; \
 		else \
 			echo "    ⚠️  Skipping $$pdf (not present in $(STANDARDS_DIR))"; \
 		fi; \
