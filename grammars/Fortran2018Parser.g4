@@ -358,28 +358,30 @@ do_concurrent_construct_f2018
       end_do_stmt
     ;
 
+// ISO/IEC 1539-1:2018 Section 11.1.7.2 - DO CONCURRENT statement
+// R1130: do-concurrent-stmt is [do-construct-name:] DO [label] CONCURRENT
+//        concurrent-header concurrent-locality-list
 do_concurrent_stmt_f2018
-    : (IDENTIFIER COLON)? DO CONCURRENT concurrent_header_f2018 NEWLINE
+    : (IDENTIFIER COLON)? DO CONCURRENT concurrent_header_f2018
+      concurrent_locality_list? NEWLINE
     ;
 
+// R1127: concurrent-header is ( [integer-type-spec ::] concurrent-control-list
+//        [, scalar-mask-expr] )
 concurrent_header_f2018
-    : LPAREN forall_triplet_spec_list 
-      (COMMA concurrent_locality_list)? 
-      (COMMA scalar_mask_expr)? RPAREN
+    : LPAREN forall_triplet_spec_list (COMMA scalar_mask_expr)? RPAREN
     ;
 
 concurrent_locality_list
-    : concurrent_locality (COMMA concurrent_locality)*
+    : concurrent_locality+
     ;
 
+// R1131: concurrent-locality is locality-spec
+// R1132-R1135: locality specs use parentheses, not double-colon
 concurrent_locality
-    : locality_spec DOUBLE_COLON variable_name_list
-    ;
-
-locality_spec
-    : LOCAL_INIT
-    | LOCAL
-    | SHARED
+    : LOCAL LPAREN variable_name_list RPAREN
+    | LOCAL_INIT LPAREN variable_name_list RPAREN
+    | SHARED LPAREN variable_name_list RPAREN
     | DEFAULT LPAREN NONE RPAREN
     ;
 
