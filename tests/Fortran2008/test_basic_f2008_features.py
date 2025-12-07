@@ -68,7 +68,6 @@ class TestBasicF2008Features:
             assert tree is not None, f"{description} failed to produce parse tree"
             assert errors == 0, f"{description}: expected 0 errors, got {errors}"
 
-    @pytest.mark.xfail(reason="Fortran 2008 submodule grammar still incomplete (see issue #85)")
     def test_submodule_basic_syntax(self):
         """Test basic submodule syntax recognition (future strict test)"""
         code = load_fixture(
