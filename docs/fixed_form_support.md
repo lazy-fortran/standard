@@ -1,0 +1,159 @@
+# Fixed-form Fortran Support and Historical Subset
+
+This document describes how this repository models **fixed-form Fortran**
+across the historical standards (FORTRAN 1957, FORTRAN II, FORTRAN 66,
+FORTRAN 77) and the modern unified grammars (Fortran 90/95/2003+).
+
+The goal is to make the **supported subset explicit** and to point out
+fixed-form behaviours that remain **intentionally out of scope** and are
+tracked as missing work (umbrella Issue #91).
+
+## 1. Conceptual Model vs. Strict Column Rules
+
+Classic fixed-form Fortran uses an 80-column card layout:
+
+- Columns **1–5**: statement labels (1–99999)
+- Column **6**: continuation mark
+- Columns **7–72**: statement text
+- Columns **73–80**: sequence numbers (usually ignored by the compiler)
+- Column **1**: `C` / `c` / `*` comment indicator in many dialects
+
+In this repository:
+
+- Grammars treat fixed-form as a **layout‑lenient model**:
+  - Labels and statements are parsed based on tokens and rule order,
+    **not** on physical column numbers.
+  - Sequence numbers (73–80) are **not** modeled.
+  - Column‑6 continuation is **not** implemented as a separate pre‑lexing
+    phase.
+- Strict 80‑column enforcement and full historical line‑layout semantics
+  are **not yet implemented** and remain **out of scope** for now.
+
+Issue **#91** is the umbrella tracker for any future work toward
+full, column‑accurate fixed-form semantics.
+
+## 2. Historical Dialects (FORTRAN, FORTRAN II, FORTRAN 66, FORTRAN 77)
+
+The historical grammars provide a **representative, educational subset**
+of each standard rather than a complete, bit‑perfect reconstruction of
+every vendor implementation.
+
+### 2.1 FORTRAN (1957)
+
+- Implemented as a **historical stub**:
+  - Arithmetic expressions, DO loops, arithmetic IF, computed GOTO.
+  - FORMAT, DIMENSION, EQUIVALENCE, FREQUENCY, PAUSE, simple I/O.
+- Fixed-form handling:
+  - Uses a **statement‑oriented** lexer (`FORTRANLexer.g4`) with explicit
+    `NEWLINE` tokens.
+  - **Does not** enforce columns 1–5 / 6 / 7–72 / 73–80.
+  - Comments use modern `!` syntax; classic `C`/`*` column‑1 comments
+    in fixtures under `tests/fixtures/FORTRAN/test_fortran_historical_stub`
+    intentionally exceed the implemented subset and are expected to
+    produce syntax errors (see `tests/test_fixture_parsing.py`).
+- Full punch‑card column semantics for 1957 FORTRAN remain outside the
+  current subset and are tracked conceptually under Issue #91.
+
+### 2.2 FORTRAN II (1958)
+
+- Extends FORTRAN with:
+  - `SUBROUTINE`, `FUNCTION`, `CALL`, `RETURN`, `COMMON`.
+  - Explicit `LABEL` tokens (1–5 digits, no leading zero) in
+    `FORTRANIILexer.g4`.
+- Fixed-form handling:
+  - `FORTRANIIParser.g4` models **optional labels followed by a statement**
+    and an optional `NEWLINE`, reflecting the punch‑card structure.
+  - Layout is still **logical**, not column‑sensitive; any indentation
+    that keeps tokens in the right order is accepted.
+  - Column‑1 `C`/`*` comments and strict label column ranges are not
+    enforced; code relying on those details may fall outside the
+    supported subset.
+
+### 2.3 FORTRAN 66 (1966) and FORTRAN 77 (1977)
+
+- FORTRAN 66 (`FORTRAN66Lexer.g4`) and FORTRAN 77 (`FORTRAN77Lexer.g4`)
+  extend the earlier dialects with:
+  - FORTRAN IV logical operators and data types (LOGICAL, DOUBLE PRECISION,
+    COMPLEX).
+  - Standardized labels, BLOCK/BLOCK DATA, EXTERNAL/INTRINSIC (F66).
+  - CHARACTER, IF–THEN–ELSE/ENDIF, PARAMETER, SAVE, PROGRAM, ENDDO,
+    expanded I/O (F77).
+- Fixed-form handling:
+  - Inherits the **layout‑lenient** model from earlier grammars.
+  - Tests under `tests/FORTRAN77` and the shared fixture suites exercise
+    labeled statements and typical fixed‑form layouts, but they do **not**
+    require exact column positions.
+  - Classic column‑1 comment forms (`C`/`*`) and sequence‑number handling
+    are treated as historical context, not as part of the core subset.
+
+## 3. Fortran 90/95 Unified Fixed/Free Form
+
+Fortran 90 and later use a **unified grammar** that accepts both
+fixed-form and free-form syntax in a single lexer/parser per standard.
+
+- `Fortran90Lexer.g4` introduces:
+  - `FREE_FORM_COMMENT` (`! ...`) and simplified `FIXED_FORM_COMMENT`
+    that treats `C`, `c` or `*` at the start of a line as a comment
+    without tracking explicit column numbers.
+  - `CONTINUATION` based on the free-form `&` continuation convention.
+- `Fortran90Parser.g4` and `Fortran95Parser.g4`:
+  - Accept both traditional `.f` and modern `.f90` layouts.
+  - Model labels and statements at the token/rule level, not via
+    positional column constraints.
+- The fixture `tests/fixtures/Fortran90/test_comprehensive_parsing/fixed_form_program.f`
+  is intentionally kept as a **known limitation** in
+  `tests/test_fixture_parsing.py` to document remaining gaps in F90
+  fixed-form integration; those rough edges are covered by Issue #91.
+
+## 4. Fortran 2003 Fixed-form (Unified Grammar)
+
+Fortran 2003 inherits the unified fixed/free architecture:
+
+- `Fortran2003Lexer.g4` imports `Fortran95Lexer.g4` and adds:
+  - F2003 object‑oriented, C interoperability, IEEE arithmetic tokens.
+  - Fixed-form comment tokens tuned for the representative test cases.
+- `docs/fortran_2003_audit.md` documents the current status:
+  - Representative fixed-form F2003 code paths are implemented and
+    tested (`tests/Fortran2003/test_fortran_2003_comprehensive.py`,
+    `tests/Fortran2003/test_issue72_fixed_form_f2003.py`).
+  - **Strict historical column semantics for fixed-form source are
+    explicitly listed as “Intentionally out of scope or not yet
+    implemented” and remain under umbrella Issue #91.**
+
+In practice this means:
+
+- The F2003 grammar supports fixed-form **layouts** that look like
+  traditional `.f` code (labels, uppercase keywords, C‑style comments),
+  but it does **not** attempt to enforce every 80‑column rule from the
+  ISO text.
+- Tests assert that modern F2003 features (OOP, CLASS(*), BIND(C),
+  PDTs) work correctly when written in typical fixed-form style, while
+  more exotic column‑sensitive behaviours are intentionally left out.
+
+## 5. Out-of-scope Fixed-form Features (Tracked by Issue #91)
+
+The following behaviours are **not currently implemented** and are
+considered out of scope for the subset implemented in this repository:
+
+- Full 80‑column line semantics per historical standards, including:
+  - Enforcing statement labels strictly in columns 1–5.
+  - Treating any non‑blank in column 6 as a continuation mark.
+  - Distinguishing statement text (7–72) from sequence numbers (73–80).
+- Vendor‑specific or dialect‑specific fixed-form extensions not covered
+  by the tests in `tests/` (for example, non‑standard comment markers).
+- Card‑image reconstruction, listing‑file reproduction and other
+  presentation‑level behaviours that depend on physical column widths.
+
+Future work on these features should:
+
+- Reference **Issue #91** in the issue body and tests.
+- Include **spec‑grounded test cases** (preferably real historical
+  programs) that demonstrate both:
+  - The intended behaviour under strict column rules.
+  - The current behaviour of this grammar (to avoid regressions).
+
+This document, together with the existing audit in
+`docs/fortran_2003_audit.md` and the fixture expectations in
+`tests/test_fixture_parsing.py`, forms the explicit specification of the
+fixed-form subset implemented today.
+

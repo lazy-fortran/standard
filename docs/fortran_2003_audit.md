@@ -191,7 +191,8 @@ Fortran 2003 support in this repository can be summarized as:
   - Full semantic validation of interoperability (beyond syntax).
   - Exact reconstruction of all Fortran 2003 edit descriptors and low-level
     FORMAT grammars.
-  - Strict historical column semantics for fixed-form source.
+  - Strict historical column semantics for fixed-form source (tracked
+    under umbrella Issue #91 and documented in `docs/fixed_form_support.md`).
 
 This audit, combined with the spec‑grounded Fortran 2003 tracking issues
 (for example Issue #90), forms the spec‑driven checklist requested in

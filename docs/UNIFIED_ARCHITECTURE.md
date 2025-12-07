@@ -26,7 +26,7 @@ Each grammar:
 - **Imports from its predecessor** using ANTLR4 import mechanism
 - **Maintains historical accuracy** for each standard's era
 
-### 3. Format Detection Strategy
+### 3. Format Detection Strategy (Current Subset)
 
 The unified approach uses **dual comment handling** and **context-sensitive parsing**:
 
@@ -34,12 +34,22 @@ The unified approach uses **dual comment handling** and **context-sensitive pars
 // Free-form comments (priority - most common in F90+)
 FREE_FORM_COMMENT: '!' ~[\r\n]* -> channel(HIDDEN);
 
-// Fixed-form comments  
+// Fixed-form comments (subset – layout‑lenient, not full 80-column)
 FIXED_FORM_COMMENT: [Cc*] ~[\r\n]* -> channel(HIDDEN);
 
 // Free-form continuation
 CONTINUATION: '&' [ \t]* FREE_FORM_COMMENT? -> channel(HIDDEN);
 ```
+
+This reflects the **implemented subset** rather than full historical
+column semantics. In particular:
+
+- Classic 80‑column layout (labels in 1–5, continuation in 6, text in
+  7–72, sequence numbers in 73–80) is **not** enforced.
+- Column‑6 continuation is modeled via the F90+ `&` convention, not
+  punch‑card continuation rules.
+- Strict column‑accurate fixed-form support remains out of scope and is
+  tracked under umbrella Issue **#91** (see `docs/fixed_form_support.md`).
 
 **Format detection** is handled at the **driver/parser level** based on:
 1. **File extension** (`.f`/`.for` = fixed, `.f90+` = free)
@@ -151,7 +161,10 @@ tree = parser.program_unit_f90()
 The unified architecture provides **consistent error reporting** across formats:
 - **Lexical errors**: Invalid tokens, malformed literals
 - **Syntax errors**: Grammar rule violations, missing constructs
-- **Format errors**: Mixed format usage, column violations (fixed-form)
+- **Format errors**: Mixed format usage or layout issues within the
+  **implemented subset** of fixed-form support (see
+  `docs/fixed_form_support.md` for details). Strict column‑violation
+  checks are not currently implemented and are tracked by Issue #91.
 
 ## Performance Considerations
 

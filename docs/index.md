@@ -7,7 +7,10 @@ PROGRESS** view of where the language is headed.
   Short, user‑facing summary of core features (syntax, tooling, packages).
 - [Unified Grammar Architecture](UNIFIED_ARCHITECTURE.md)  
   Background on the grammar inheritance model used in this repository.
+- [Fixed-form Fortran Support](fixed_form_support.md)  
+  Explicit description of the fixed-form subset implemented for
+  historical dialects and Fortran 90/95/2003+, and the remaining gaps
+  tracked by Issue #91.
 
 For detailed discussion, see issues #51–#57 and related design issues on
 GitHub.
-
