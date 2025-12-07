@@ -36,6 +36,28 @@ def test_design_doc_covers_all_lazy_feature_issues() -> None:
     ), f"Design document should reference Lazy Fortran issue #{issue}"
 
 
+def test_type_inference_doc_spells_out_numeric_kinds() -> None:
+  design_path = _repo_root() / "docs" / "lazyfortran2025-design.md"
+  content = design_path.read_text(encoding="utf-8")
+
+  assert "Kinds represent **bytes per numeric component**" in content
+  assert "double precision => real(8)" in content
+  assert "double complex => complex(8)" in content
+
+
+def test_type_inference_doc_covers_implicit_modes_and_promotion() -> None:
+  design_path = _repo_root() / "docs" / "lazyfortran2025-design.md"
+  content = design_path.read_text(encoding="utf-8")
+
+  assert (
+    "In plain `.lf` without `implicit`, undeclared names are allowed"
+    in content
+  )
+  assert "With `implicit none`, undeclared names are errors" in content
+  assert "integer division stays integer" in content
+  assert "complex dominates real" in content
+
+
 def test_world_specializations_doc_spells_out_precedence_and_ambiguity() -> None:
   design_path = _repo_root() / "docs" / "lazyfortran2025-design.md"
   content = design_path.read_text(encoding="utf-8")
