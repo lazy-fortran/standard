@@ -1,0 +1,2 @@
+PURE FUNCTION f(x) RESULT(y)
+

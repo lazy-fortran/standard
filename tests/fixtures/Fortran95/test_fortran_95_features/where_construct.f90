@@ -1,0 +1,2 @@
+WHERE (x > 0) x = 1 ELSEWHERE x = 2 END WHERE
+
