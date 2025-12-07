@@ -59,6 +59,8 @@ lazy_specification_construct
     | import_stmt
     | implicit_stmt
     | contains_stmt
+    | lazy_trait_definition
+    | lazy_trait_annotation_stmt
     | declaration_construct_f2018
     | lazy_iso_int_kind_declaration
     ;
@@ -97,6 +99,84 @@ lazy_execution_part
 
 lazy_execution_construct
     : NEWLINE* executable_construct_f2018 NEWLINE*
+    ;
+
+// ============================================================================
+// OPTIONAL TRAIT‑LIKE CONTRACTS (Lazy‑only, PROVISIONAL)
+// ============================================================================
+
+// Lightweight trait definition treated as a specification construct in lazy
+// mode. The body reuses existing Fortran 2018 declaration constructs so that
+// traits can enumerate required procedures and types using familiar syntax.
+lazy_trait_definition
+    : trait_def_stmt
+      lazy_trait_member*
+      end_trait_stmt
+    ;
+
+trait_def_stmt
+    : TRAIT IDENTIFIER lazy_trait_type_param_list? NEWLINE
+    ;
+
+lazy_trait_type_param_list
+    : LPAREN lazy_trait_type_param (COMMA lazy_trait_type_param)* RPAREN
+    ;
+
+lazy_trait_type_param
+    : IDENTIFIER
+    ;
+
+lazy_trait_member
+    : lazy_trait_required_procedure_stmt
+    | declaration_construct_f2018
+    | NEWLINE
+    ;
+
+// Simplified PROCEDURE declaration used inside traits to describe required
+// operations without needing an explicit interface. This is intentionally
+// narrower than the full Fortran PROCEDURE syntax and only applies in the
+// lazy trait context.
+lazy_trait_required_procedure_stmt
+    : PROCEDURE DOUBLE_COLON lazy_trait_procedure_entity_list NEWLINE
+    ;
+
+lazy_trait_procedure_entity_list
+    : IDENTIFIER (COMMA IDENTIFIER)*
+    ;
+
+end_trait_stmt
+    : END TRAIT (IDENTIFIER)? NEWLINE
+    ;
+
+// Annotation statement that can appear alongside other specification items in
+// a lazy program. Semantically it associates one or more traits (with optional
+// type arguments) to the surrounding definition; the parser simply records the
+// annotation as its own construct.
+lazy_trait_annotation_stmt
+    : AT IDENTIFIER lazy_trait_actual_arg_list? NEWLINE
+    ;
+
+lazy_trait_actual_arg_list
+    : LPAREN lazy_trait_actual_arg (COMMA lazy_trait_actual_arg)* RPAREN
+    ;
+
+lazy_trait_actual_arg
+    : lazy_trait_type_arg
+    | expr_f2023
+    ;
+
+// Trait actual arguments accept a lightweight type-like form such as
+// REAL(8) or INTEGER(4) in addition to regular F2023 expressions.
+lazy_trait_type_arg
+    : lazy_intrinsic_type_spec LPAREN .*? RPAREN
+    ;
+
+lazy_intrinsic_type_spec
+    : INTEGER
+    | REAL
+    | COMPLEX
+    | LOGICAL
+    | CHARACTER
     ;
 
 // Lazy use statement that accepts both traditional ONLY lists and enhanced
