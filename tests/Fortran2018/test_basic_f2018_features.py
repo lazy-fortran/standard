@@ -212,5 +212,17 @@ end module"""
         assert working_basic >= 1, \
             f"At least one basic Fortran form should parse without errors, got {working_basic}"
 
+    def test_assumed_rank_dummy_argument_parses_without_errors(self):
+        """REAL TEST: Assumed-rank dummy arguments using DIMENSION(..) are supported."""
+        code = load_fixture(
+            "Fortran2018",
+            "test_basic_f2018_features",
+            "assumed_rank_dummy.f90",
+        )
+
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "Assumed-rank dummy argument code should parse"
+        assert errors == 0, f"Assumed-rank dummy should parse with zero errors, got {errors}"
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
