@@ -1,5 +1,7 @@
 # NEVER commit auto-generated content, PDFs, or external tools
-validation/pdfs/          # ISO specification PDFs
+validation/pdfs/          # ISO specification PDFs and OCR outputs
+validation/pdfs/.ocr_tmp_*/  # Tesseract OCR intermediate directories
+validation/pdfs/*.txt        # Extracted/OCRed standard text
 validation/cache/         # Processing cache
 validation/auto-generated/ # Generated reference grammars (all files)
 validation/external/    # Downloaded external tools (kaby76/fortran - all files)  
