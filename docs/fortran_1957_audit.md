@@ -24,14 +24,17 @@ claim of full conformance to the original IBM 704 FORTRAN compiler.
 
 ## 2. Spec-based statement coverage (FORTRAN for the IBM 704)
 
-Historical sources (IBM 704 FORTRAN manuals and later summaries)
-describe an initial FORTRAN release with 32 statement types, including
-DIMENSION/EQUIVALENCE, assignment, arithmetic IF, exception-checking
-IFs, sense-switch/light control, GO TO/ASSIGN/assigned GO TO, DO,
-formatted and unformatted I/O, END FILE/REWIND/BACKSPACE, PAUSE,
-STOP/CONTINUE and FREQUENCY. citeturn0search12turn0search1
+The IBM reference manual **“FORTRAN Automatic Coding System for the
+IBM 704 Data Processing System” (Form C28-6003, Oct 1958)** lists 32
+statement types in *Appendix B. Table of FORTRAN Statements* in the
+local OCR’d copy
+`validation/pdfs/FORTRAN_1957_IBM704_C28-6003_Oct58.txt`. These
+include DIMENSION/EQUIVALENCE, assignment, arithmetic IF,
+exception-checking IFs, sense-switch/light control, GO TO/ASSIGN /
+assigned GO TO, DO, formatted and unformatted I/O, END FILE /
+REWIND / BACKSPACE, PAUSE, STOP / CONTINUE and FREQUENCY.
 
-Mapping that list to the current grammar:
+Mapping that Appendix‑B list to the current grammar:
 
 - **DIMENSION, EQUIVALENCE**
   - Status: lexer-only; **no statement rules**.
