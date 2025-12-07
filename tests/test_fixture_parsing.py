@@ -56,6 +56,11 @@ class StandardConfig:
 
 
 STANDARD_CONFIGS: Dict[str, StandardConfig] = {
+    "Fortran90": StandardConfig(
+        lexer_name="Fortran90Lexer",
+        parser_name="Fortran90Parser",
+        entry_rule="program_unit_f90",
+    ),
     "Fortran2003": StandardConfig(
         lexer_name="Fortran2003Lexer",
         parser_name="Fortran2003Parser",
@@ -119,6 +124,17 @@ XPASS_FIXTURES = {
     ("Fortran2023", Path("Fortran2023/test_fortran_2023_comprehensive/enum_program.f90")),
     ("Fortran2023", Path("Fortran2023/test_fortran_2023_comprehensive/ieee_program.f90")),
     ("Fortran2023", Path("Fortran2023/test_fortran_2023_comprehensive/mixed_era_program.f90")),
+    # Fortran90 comprehensive fixtures currently exercise areas where the F90
+    # grammar still has known limitations (e.g. modules as top-level units,
+    # array constructors, and enhanced procedures). These are covered by the
+    # dedicated Fortran90 comprehensive test suite and tracked separately.
+    ("Fortran90", Path("Fortran90/test_fortran_90_comprehensive/basic_program.f90")),
+    ("Fortran90", Path("Fortran90/test_fortran_90_comprehensive/mathematics_module.f90")),
+    ("Fortran90", Path("Fortran90/test_fortran_90_comprehensive/derived_types_module.f90")),
+    ("Fortran90", Path("Fortran90/test_fortran_90_comprehensive/dynamic_arrays.f90")),
+    ("Fortran90", Path("Fortran90/test_fortran_90_comprehensive/select_case_program.f90")),
+    ("Fortran90", Path("Fortran90/test_fortran_90_comprehensive/array_constructor_program.f90")),
+    ("Fortran90", Path("Fortran90/test_fortran_90_comprehensive/enhanced_procedures_program.f90")),
 }
 
 
