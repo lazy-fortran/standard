@@ -124,7 +124,9 @@ From a user point of view, this means:
 Lazy Fortran infers types from usage in `.lf` files (assignments,
 literals, expressions and calls) while keeping standard Fortran numeric
 promotion rules. Explicit declarations remain required at module
-boundaries and under `implicit none`.
+boundaries and under `implicit none`. Inference is always **local and
+predictable**: it never changes the meaning of a program that would be
+valid Fortran 2018 without Lazy Fortran.
 
 **User story.**  
 As a user, I want `x = 3` and `y = x + 2.5` to “just work” with sensible
@@ -160,6 +162,36 @@ Key decisions (see issue #53 for details):
   operates on declared entities.
 - With any other `implicit` statement, classic Fortran implicit typing
   takes precedence and lazy inference for undeclared names is disabled.
+
+**Numeric kinds and legacy specifiers.**
+
+- `real(4)` / `real(8)` mean 4‑byte and 8‑byte reals respectively.
+- `integer(4)` / `integer(8)` follow the same convention.
+- `complex(k)` has two `real(k)` components.
+- Legacy specifiers map onto this model in a predictable way:
+  - `double precision => real(8)`
+  - `double complex => complex(8)`
+
+**Expression typing and promotions.**
+
+- Type promotion in expressions follows **standard Fortran rules**:
+  - integer division stays integer,
+  - complex dominates real,
+  - real dominates integer at the highest participating kind.
+- Lazy inference never introduces new, non‑standard promotions; it only
+  infers types that are consistent with the ISO Fortran rules.
+
+**Where inference is encouraged vs. explicit types.**
+
+- In implicit‑program `.lf` scripts, inference is encouraged for local
+  temporaries and scratch variables so that short examples like
+  `x = 3` and `y = x + 2.5` “just work”.
+- At module boundaries (public procedures, exported types, and
+  module‑wide state), explicit type declarations remain the norm to keep
+  APIs stable and self‑documenting.
+- When the compiler cannot infer a type unambiguously from usage, it
+  must issue a clear error that points at the relevant assignment or
+  declaration site rather than guessing.
 
 ---
 
