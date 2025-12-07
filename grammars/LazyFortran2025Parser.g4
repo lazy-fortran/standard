@@ -168,7 +168,7 @@ lazy_trait_actual_arg
 // Trait actual arguments accept a lightweight type-like form such as
 // REAL(8) or INTEGER(4) in addition to regular F2023 expressions.
 lazy_trait_type_arg
-    : lazy_intrinsic_type_spec LPAREN lazy_trait_kind_arg RPAREN
+    : lazy_intrinsic_type_spec LPAREN .*? RPAREN
     ;
 
 lazy_intrinsic_type_spec
@@ -177,11 +177,6 @@ lazy_intrinsic_type_spec
     | COMPLEX
     | LOGICAL
     | CHARACTER
-    ;
-
-lazy_trait_kind_arg
-    : INTEGER_LITERAL
-    | IDENTIFIER
     ;
 
 // Lazy use statement that accepts both traditional ONLY lists and enhanced
