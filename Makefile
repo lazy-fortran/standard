@@ -9,7 +9,7 @@ TEST_DIR = tests
 PYTEST = python -m pytest
 
 # Grammar inheritance chain (build order matters!)
-GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023
+GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023 LazyFortran2025
 
 # Default target
 .PHONY: all clean test help
@@ -31,6 +31,8 @@ Fortran2003: $(GRAMMAR_DIR)/Fortran2003Lexer.py
 Fortran2008: $(GRAMMAR_DIR)/Fortran2008Lexer.py
 Fortran2018: $(GRAMMAR_DIR)/Fortran2018Lexer.py
 Fortran2023: $(GRAMMAR_DIR)/Fortran2023Lexer.py
+
+LazyFortran2025: $(GRAMMAR_DIR)/LazyFortran2025Lexer.py
 
 # FORTRAN I (1957) - Foundation
 $(GRAMMAR_DIR)/FORTRANLexer.py: $(GRAMMAR_DIR)/FORTRANLexer.g4 $(GRAMMAR_DIR)/FORTRANParser.g4
@@ -101,6 +103,13 @@ $(GRAMMAR_DIR)/Fortran2023Lexer.py: $(GRAMMAR_DIR)/Fortran2023Lexer.g4 $(GRAMMAR
 	cd $(GRAMMAR_DIR) && \
 	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2023Lexer.g4 && \
 	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2023Parser.g4
+
+# Lazy Fortran 2025 (future standard) - Relaxed syntax on top of Fortran 2023
+$(GRAMMAR_DIR)/LazyFortran2025Lexer.py: $(GRAMMAR_DIR)/LazyFortran2025Lexer.g4 $(GRAMMAR_DIR)/LazyFortran2025Parser.g4 Fortran2023
+	@echo "Building Lazy Fortran 2025..."
+	cd $(GRAMMAR_DIR) && \
+	$(ANTLR4) $(ANTLR4_PYTHON) -lib . LazyFortran2025Lexer.g4 && \
+	$(ANTLR4) $(ANTLR4_PYTHON) -lib . LazyFortran2025Parser.g4
 
 
 # ====================================================================
