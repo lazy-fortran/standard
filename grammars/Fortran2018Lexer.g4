@@ -44,17 +44,17 @@ COSHAPE          : C O S H A P E ;
 TEAM_NUMBER      : T E A M '_' N U M B E R ;
 
 // Team Support (NEW in F2018)
-FORM_TEAM        : F O R M '_' T E A M ;
-CHANGE_TEAM      : C H A N G E '_' T E A M ;
-END_TEAM         : E N D '_' T E A M ;
+FORM_TEAM        : F O R M WS+ T E A M ;
+CHANGE_TEAM      : C H A N G E WS+ T E A M ;
+END_TEAM         : E N D WS+ T E A M ;
 TEAM_TYPE        : T E A M '_' T Y P E ;
 GET_TEAM         : G E T '_' T E A M ;
 
 // Events (NEW in F2018)
 EVENT_TYPE       : E V E N T '_' T Y P E ;
-EVENT_POST       : E V E N T '_' P O S T ;
-EVENT_WAIT       : E V E N T '_' W A I T ;
-EVENT_QUERY      : E V E N T '_' Q U E R Y ;
+EVENT_POST       : E V E N T WS+ P O S T ;
+EVENT_WAIT       : E V E N T WS+ W A I T ;
+EVENT_QUERY      : E V E N T WS+ Q U E R Y ;
 
 // Assumed Rank Support (NEW in F2018)
 ASSUMED_RANK     : A S S U M E D '_' R A N K ;
