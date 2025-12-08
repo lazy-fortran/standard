@@ -1,26 +1,73 @@
-// FORTRAN II (1958) - Procedural Programming Revolution
-// Introduces separately compiled subroutines and functions
+/*
+ * FORTRANIILexer.g4
+ *
+ * FORTRAN II (1958) - Procedural Programming Revolution
+ * Introduces separately compiled subroutines and functions.
+ *
+ * This lexer extends FORTRANLexer (1957) with the six new FORTRAN II
+ * statement/subprogram forms: SUBROUTINE, FUNCTION, CALL, RETURN,
+ * COMMON, and END (as a formal terminator).
+ *
+ * Reference: IBM FORTRAN II for the IBM 704 Data Processing System
+ *            (Form C28-6000-2, 1958)
+ *            - Part I, Chapter 1: Introduction and Types of Statements
+ *            - Part I, Chapter 3: The New FORTRAN II Statements
+ *            - Appendix A: Summary of FORTRAN II Statements
+ *
+ * Manual available at: Computer History Museum archive
+ *   https://archive.computerhistory.org/resources/text/Fortran/
+ */
+
 lexer grammar FORTRANIILexer;
 
-import FORTRANLexer;  // Import FORTRAN I (1957) constructs
+import FORTRANLexer;  // Import FORTRAN I (1957) constructs (C28-6003)
 
-// ====================================================================
-// FORTRAN II (1958) NEW FEATURES
-// ====================================================================
+// ============================================================================
+// FORTRAN II (1958) NEW KEYWORDS
+// C28-6000-2 Part I, Chapter 3: The New FORTRAN II Statements
+// ============================================================================
+// FORTRAN II adds six new statement/subprogram forms to the original 1957
+// FORTRAN language. These enable separate compilation of subroutines and
+// functions, shared storage via COMMON, and explicit subprogram termination.
 
-// Procedural Programming and shared storage (NEW in FORTRAN II, 1958)
-CALL         : C A L L ;             // Subroutine call
-SUBROUTINE   : S U B R O U T I N E ; // Subroutine definition
-FUNCTION     : F U N C T I O N ;     // Function definition  
-RETURN       : R E T U R N ;         // Return from subprogram
-COMMON       : C O M M O N ;         // Shared variable storage (COMMON blocks)
+// CALL statement - C28-6000-2 Part I, Chapter 3, Section 3.1
+// Transfers control to a subroutine with optional arguments
+CALL         : C A L L ;
 
-// Statement labels: 1-5 digits, cannot start with 0
+// SUBROUTINE definition - C28-6000-2 Part I, Chapter 3, Section 3.2
+// Defines a separately compiled subroutine subprogram
+SUBROUTINE   : S U B R O U T I N E ;
+
+// FUNCTION definition - C28-6000-2 Part I, Chapter 3, Section 3.3
+// Defines a separately compiled function subprogram
+FUNCTION     : F U N C T I O N ;
+
+// RETURN statement - C28-6000-2 Part I, Chapter 3, Section 3.4
+// Returns control from a subroutine or function to the caller
+RETURN       : R E T U R N ;
+
+// COMMON statement - C28-6000-2 Part I, Chapter 3, Section 3.5
+// Declares shared storage between program units
+COMMON       : C O M M O N ;
+
+// ============================================================================
+// STATEMENT LABELS
+// C28-6000-2 Part I, Chapter 2: Coding for FORTRAN II (columns 1-5)
+// ============================================================================
+// Statement labels are 1-5 digit integers (1-99999) placed in columns 1-5
 LABEL : [1-9] ([0-9] ([0-9] ([0-9] [0-9]?)?)?)? ;
 
-// Hollerith constants (string literals)
+// ============================================================================
+// HOLLERITH CONSTANTS
+// C28-6000-2 Part I, Chapter 2 and Appendix A (FORMAT specification)
+// ============================================================================
 // Format: nHcharacters where n = number of characters following H
+// Used in FORMAT statements and I/O lists for literal text
 HOLLERITH : [1-9] [0-9]* H ~[\r\n]*? ;
 
-// Fixed-form newlines
+// ============================================================================
+// SOURCE FORMAT
+// C28-6000-2 Part I, Chapter 2: Coding for FORTRAN II
+// ============================================================================
+// Newlines are significant (statement terminators in fixed-form source)
 NEWLINE : '\r'? '\n' ;
