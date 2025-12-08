@@ -14,7 +14,7 @@ from Fortran2018Parser import Fortran2018Parser
 from antlr4.error.ErrorListener import ErrorListener
 from fixture_utils import load_fixture
 
-class TestErrorListener(ErrorListener):
+class ParseErrorListener(ErrorListener):
     def __init__(self):
         super().__init__()
         self.errors = []
@@ -37,7 +37,7 @@ def test_if_construct_direct():
     token_stream = CommonTokenStream(lexer)
     parser = Fortran2018Parser(token_stream)
     
-    error_listener = TestErrorListener()
+    error_listener = ParseErrorListener()
     parser.removeErrorListeners()
     parser.addErrorListener(error_listener)
     

@@ -11,7 +11,7 @@ from Fortran2018Lexer import Fortran2018Lexer
 from Fortran2018Parser import Fortran2018Parser
 from antlr4.error.ErrorListener import ErrorListener
 
-class TestErrorListener(ErrorListener):
+class ParseErrorListener(ErrorListener):
     def __init__(self):
         super().__init__()
         self.errors = []
@@ -28,7 +28,7 @@ def run_if_construct_case(code, description):
     token_stream = CommonTokenStream(lexer)
     parser = Fortran2018Parser(token_stream)
     
-    error_listener = TestErrorListener()
+    error_listener = ParseErrorListener()
     parser.removeErrorListeners()
     parser.addErrorListener(error_listener)
     
