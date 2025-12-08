@@ -140,11 +140,105 @@ END IF"""
             "EXTERNAL FUNC1, FUNC2",
             "EXTERNAL MYSUB"
         ]
-        
+
         for text in test_cases:
             with self.subTest(external_stmt=text):
                 tree = self.parse(text, 'external_stmt')
                 self.assertIsNotNone(tree)
+
+    def test_implicit_statement(self):
+        """Test IMPLICIT statement (NEW in FORTRAN 77)
+
+        Per ANSI X3.9-1978 Section 8.4, the IMPLICIT statement specifies
+        the type and size of all variables, arrays, and functions that
+        begin with specified letters.
+
+        Syntax: IMPLICIT type (letter-spec-list) [, type (letter-spec-list)]...
+        Letter-spec can be a single letter or a letter range (A-Z).
+
+        Note: IMPLICIT NONE was NOT part of FORTRAN 77; it was added in
+        Fortran 90.
+        """
+        test_cases = [
+            "IMPLICIT INTEGER (I-N)",
+            "IMPLICIT REAL (A-H, O-Z)",
+            "IMPLICIT INTEGER (I-N), REAL (A-H, O-Z)",
+            "IMPLICIT DOUBLE PRECISION (D)",
+            "IMPLICIT COMPLEX (Z)",
+            "IMPLICIT LOGICAL (L)",
+            "IMPLICIT CHARACTER (C)",
+            "IMPLICIT INTEGER (I, J, K)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(implicit_stmt=text):
+                tree = self.parse(text, 'implicit_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_implicit_statement_in_program(self):
+        """Test IMPLICIT statement in program context (FORTRAN 77)"""
+        program_text = """IMPLICIT INTEGER (I-N)
+IMPLICIT REAL (A-H, O-Z)
+INTEGER X
+X = 1
+END
+"""
+        tree = self.parse(program_text, 'main_program')
+        self.assertIsNotNone(tree)
+
+    def test_parameter_statement(self):
+        """Test PARAMETER statement (NEW in FORTRAN 77)
+
+        Per ANSI X3.9-1978 Section 8.5, the PARAMETER statement defines
+        named constants that may be used wherever a constant is allowed.
+
+        Syntax: PARAMETER (named-constant = constant-expr [, ...])
+        """
+        test_cases = [
+            "PARAMETER (PI = 3.14159)",
+            "PARAMETER (MAXSIZE = 100)",
+            "PARAMETER (PI = 3.14159, TWO_PI = 6.28318)",
+            "PARAMETER (N = 10, M = 20, K = 30)",
+            "PARAMETER (EPS = 1.0E-6)",
+            "PARAMETER (TITLE = 'HELLO')",
+        ]
+
+        for text in test_cases:
+            with self.subTest(parameter_stmt=text):
+                tree = self.parse(text, 'parameter_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_parameter_with_expressions(self):
+        """Test PARAMETER with constant expressions (FORTRAN 77)
+
+        Per ANSI X3.9-1978, constant expressions may include:
+        - Literal constants
+        - Previously defined named constants
+        - Intrinsic functions with constant arguments
+        """
+        test_cases = [
+            "PARAMETER (TWOPI = 2 * 3.14159)",
+            "PARAMETER (SIZE = 10 * 10)",
+            "PARAMETER (HALF = 1.0 / 2.0)",
+            "PARAMETER (VAL = 2 ** 10)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(parameter_expr=text):
+                tree = self.parse(text, 'parameter_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_parameter_statement_in_program(self):
+        """Test PARAMETER statement in program context (FORTRAN 77)"""
+        program_text = """PARAMETER (PI = 3.14159)
+PARAMETER (MAXSIZE = 100)
+REAL RADIUS, AREA
+RADIUS = 5.0
+AREA = PI * RADIUS ** 2
+END
+"""
+        tree = self.parse(program_text, 'main_program')
+        self.assertIsNotNone(tree)
     
     def test_structured_programming_example(self):
         """Test complete structured programming example (FORTRAN 77)"""
