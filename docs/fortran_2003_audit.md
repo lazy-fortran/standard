@@ -533,10 +533,15 @@ Gaps:
 
 Gaps that warrant explicit issues:
 
-- A semantic‑layer issue to track **C interoperability correctness**
-  (type interoperability, VALUE rules, etc.).
-- A similar issue for **IEEE intrinsic usage semantics** (where and
-  how IEEE functions and constants may appear).
+- **RESOLVED (Issue #186)**: A semantic validation layer for C
+  interoperability and IEEE arithmetic has been implemented in
+  `tools/f2003_semantic_validator.py`. This module:
+  - Validates that `BIND(C)` entities are tracked and reported
+  - Checks that C interoperable types require `USE ISO_C_BINDING`
+  - Validates `VALUE` attribute usage in C interoperability context
+  - Detects IEEE module imports and validates entity usage
+  - Provides detailed diagnostics with ISO section references
+  - Test coverage in `tests/Fortran2003/test_issue186_semantic_validation.py`
 - Issue #244 tracks the documentation of `ISO_FORTRAN_ENV` scope in the
   F2003 grammar (this section).
 
@@ -708,8 +713,12 @@ Additional issues (either existing or to be opened) should cover:
 - SELECT TYPE guard/tokenization accuracy for `TYPE IS`/`CLASS IS`.
 - #185 – **DT edit descriptors** (resolved): documented decision to keep
   them as opaque character strings, with test coverage added.
-- Semantic-level checks for C interoperability, IEEE arithmetic, PDTs,
-  and procedure pointer characteristics.
+- #186 – **C interoperability and IEEE arithmetic semantics** (resolved):
+  implemented `tools/f2003_semantic_validator.py` with comprehensive
+  validation of BIND(C) entities, ISO_C_BINDING imports, VALUE attribute
+  usage, and IEEE module entity tracking. Test suite in
+  `tests/Fortran2003/test_issue186_semantic_validation.py` (33 tests).
+- Semantic-level checks for PDTs and procedure pointer characteristics.
 
 When those issues and their follow‑ups are addressed, Fortran 2003 in
 this repo will have a fully annotated grammar and an audit that
