@@ -37,12 +37,12 @@ REWIND / BACKSPACE, PAUSE, STOP / CONTINUE and FREQUENCY.
 Mapping that Appendix‑B list to the current grammar:
 
 - **DIMENSION, EQUIVALENCE**
-  - Status: lexer-only; **no statement rules**.
-  - Evidence: tokens exist in `FORTRANLexer.g4`, but
-    `FORTRANParser.g4` has no `dimension_stmt` or `equivalence_stmt`
-    and `statement_body` never references these keywords. Fixtures like
-    `array_program_1957.f` are XPASS and documented as exercising more
-    of the original language than the simplified grammar accepts.
+  - Status: **implemented and tested**.
+  - Evidence: `dimension_stmt` and `equivalence_stmt` rules exist in
+    `FORTRANParser.g4` and are wired into `statement_body`. Dedicated
+    tests in `tests/FORTRAN/test_fortran_historical_stub.py` validate
+    parsing of single/multi-dimensional arrays and multi-variable
+    equivalence sets with zero syntax errors.
 
 - **Assignment**
   - Status: **implemented and tested.**
@@ -164,10 +164,9 @@ Known limitations (from fixtures and comments):
 Implemented / partially implemented:
 
 - `DIMENSION` and `EQUIVALENCE`:
-  - Tokens are present in `FORTRANLexer.g4` and appear in historical
-    fixtures (for example `array_program_1957.f`), but the parser has
-    no corresponding statement rules; fixtures using DIMENSION are
-    XPASS and documented as beyond the simplified grammar.
+  - **Fully implemented** via `dimension_stmt` and `equivalence_stmt`
+    rules in `FORTRANParser.g4`. Both statements now parse with zero
+    syntax errors and are validated by dedicated tests.
 - `FREQUENCY`:
   - Fully modeled via `frequency_stmt` and tested with zero syntax
     errors.
