@@ -286,41 +286,34 @@ Gaps and limitations:
     statements are reused; F95’s refinements (e.g. automatic
     deallocation) are semantic and not represented in syntax.
 
-## 6. Array constructors and implied‑DO (historical note)
+## 6. Array constructors and implied‑DO
 
-Specification:
+Specification (ISO/IEC 1539‑1:1997, Section 4.5):
 
 - Fortran 95 continues to use the F90 array constructor syntax:
   - `(/ ac-spec /)`, with possible implied‑DO lists.
 - Square‑bracket array constructors `[ ... ]` are a **Fortran 2003**
-  feature, not part of the Fortran 95 standard.
+  feature (ISO/IEC 1539‑1:2004), not part of the Fortran 95 standard.
 
 Grammar implementation:
 
 - `array_constructor_f95`:
-  - `LBRACKET ac_spec_f95 RBRACKET`
   - `LPAREN SLASH ac_spec_f95 SLASH RPAREN`
+  - Only the standard `(/ ... /)` form is accepted.
 - `ac_value_f95` and `ac_implied_do_f95` mirror the F90 rules but use
   `expr_f95` and `do_variable`.
 - Tests:
   - `test_array_constructor` parses `array_constructor.f90` via the
-    `array_constructor_f95` rule. The fixture uses the traditional
-    `(/ ... /)` form.
+    `array_constructor_f95` rule. The fixture uses the `(/ ... /)` form.
+  - `test_bracket_array_constructor_rejected` verifies that square
+    bracket syntax `[...]` is rejected by the F95 grammar.
 
-Gaps and historical inaccuracies:
+Remaining gaps:
 
-- **Square‑bracket array constructors in F95**:
-  - Allowing `[ ... ]` via `LBRACKET`/`RBRACKET` in the F95 grammar is
-    historically inaccurate; that syntax belongs to Fortran 2003.
-  - It effectively exposes a Fortran 2003 feature at the F95 grammar
-    level without documenting it as a deliberate extension.
 - **Entry‑point integration**:
   - As with other F95 rules, `array_constructor_f95` is not referenced
-  from F90’s `primary_f90` / `array_constructor_f90`, so full F95
+    from F90's `primary_f90` / `array_constructor_f90`, so full F95
     programs continue to use the F90 constructor rule.
-
-These discrepancies warrant explicit tracking in dedicated Fortran 95
-issues (one for the historical inaccuracy, another for integration).
 
 ## 7. Intrinsic procedures and F95 additions
 
@@ -494,10 +487,10 @@ The Fortran 95 layer in this repository:
   program‑unit and execution‑part structure, and does not allow F95
   intrinsics to be used as intrinsic calls.
 - **Contains historical inaccuracies**, notably:
-  - Square‑bracket array constructors exposed at the Fortran 95 level
-    even though they are a Fortran 2003 feature.
   - PURE/ELEMENTAL procedure support attributed to F90 in the grammar
     even though they are language features of Fortran 95.
+  - (Resolved: Square‑bracket array constructors were removed from the
+    F95 grammar; only the standard `(/ ... /)` form is now accepted.)
 
 Existing issues:
 
@@ -515,11 +508,9 @@ cover at least:
 - Integration of F95 constructs into a proper `program_unit_f95` entry
   and the execution/specification parts.
 - Making F95 intrinsic tokens usable as function and subroutine calls.
-- Correcting the historical placement of bracket array constructors so
-  they are treated explicitly as a Fortran 2003 feature (or clearly
-  documented extension if kept here).
 - Documenting the PURE/ELEMENTAL historical mismatch between the F90
   grammar and the actual standards.
+- (Resolved: #181 – bracket array constructors removed from F95 grammar.)
 
 Together with the Fortran 90 audit, this document completes the
 spec‑aware audit chain up through Fortran 95 for issue #140, while
