@@ -57,13 +57,8 @@ COMMON       : C O M M O N ;
 // Statement labels are 1-5 digit integers (1-99999) placed in columns 1-5
 LABEL : [1-9] ([0-9] ([0-9] ([0-9] [0-9]?)?)?)? ;
 
-// ============================================================================
-// HOLLERITH CONSTANTS
-// C28-6000-2 Part I, Chapter 2 and Appendix A (FORMAT specification)
-// ============================================================================
-// Format: nHcharacters where n = number of characters following H
-// Used in FORMAT statements and I/O lists for literal text
-HOLLERITH : [1-9] [0-9]* H ~[\r\n]*? ;
+// Note: HOLLERITH constants are inherited from FORTRANLexer (1957).
+// Per IBM 704 manual C28-6003, Hollerith was present in original FORTRAN.
 
 // ============================================================================
 // SOURCE FORMAT
