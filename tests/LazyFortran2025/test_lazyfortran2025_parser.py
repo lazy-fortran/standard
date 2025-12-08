@@ -12,7 +12,8 @@ from pathlib import Path
 import pytest
 
 
-GRAMMARS_DIR = Path(__file__).resolve().parents[2] / "grammars"
+GRAMMARS_DIR = Path(__file__).resolve().parents[2] / "grammars/generated/modern"
+FIXTURES_DIR = Path(__file__).resolve().parents[2] / "grammars/fixtures"
 sys.path.insert(0, str(GRAMMARS_DIR))
 
 TEST_ROOT = Path(__file__).resolve().parent.parent
@@ -76,7 +77,7 @@ class TestLazyFortran2025Parser:
 
     def test_traditional_entry_parses_traditional_fixture(self) -> None:
         """traditional_entry preserves strict Fortran 2023 behavior."""
-        fixture_path = GRAMMARS_DIR / "test_traditional.f90"
+        fixture_path = FIXTURES_DIR / "test_traditional.f90"
         code = fixture_path.read_text()
 
         parser = self.create_parser(code)
@@ -85,7 +86,7 @@ class TestLazyFortran2025Parser:
 
     def test_lazy_entry_parses_lazy_fixture(self) -> None:
         """lazy_entry accepts top-level statements and procedures."""
-        fixture_path = GRAMMARS_DIR / "test_lazy.lf"
+        fixture_path = FIXTURES_DIR / "test_lazy.lf"
         code = fixture_path.read_text()
 
         parser = self.create_parser(code)

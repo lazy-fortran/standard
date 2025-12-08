@@ -13,7 +13,7 @@ import pytest
 import time
 from pathlib import Path
 
-sys.path.insert(0, 'grammars')
+sys.path.insert(0, 'grammars/generated/modern')
 sys.path.append(str(Path(__file__).parent.parent))
 
 from antlr4 import *

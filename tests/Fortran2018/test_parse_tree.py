@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.append(str(ROOT.parent / "grammars"))
+sys.path.append(str(ROOT.parent / "grammars/generated/modern"))
 sys.path.append(str(ROOT))
 
 from antlr4 import *  # type: ignore
