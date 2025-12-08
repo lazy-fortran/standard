@@ -174,18 +174,14 @@ Tests:
 
 - `test_fortran77_revolution_features` uses the fixture
   `test_fortran77_parser_extra/nested_if_block.f` to stress nested
-  structured IFs, but note that:
-  - In `tests/test_fixture_parsing.py`, the same fixture is marked
-    XPASS for FORTRAN 77, indicating that when parsed via the generic
-    fixture harness (using `main_program` as entry rule), it still
-    produces syntax errors.
+  structured IFs, and it passes both targeted tests and the generic
+  fixture harness using the `main_program` entry rule.
 
 Interpretation:
 
-- The block IF machinery is implemented and passes targeted unit tests.
-- Some realistic nested IF examples in the fixture suite still fail
-  when parsed as whole programs, indicating integration or entry-rule
-  issues.
+- The block IF machinery is fully implemented and passes all tests.
+- Nested IF examples in the fixture suite parse correctly as whole
+  programs via the `main_program` entry rule.
 
 ### 4.2 Enhanced DO loops
 
@@ -318,10 +314,8 @@ Mapping that classification to the current grammar:
       `execution_part_construct` and `executable_construct`.
     - Targeted tests (including the nested IF fixture via
       `block_if_construct`) pass.
-  - Integration gap:
-    - The `nested_if_block.f` fixture is still XPASS when parsed
-      through the generic harness with `main_program` as entry, as
-      tracked by issue #166 and the earlier meta issue #145.
+    - The `nested_if_block.f` fixture also passes when parsed through
+      the generic harness with `main_program` as entry rule.
 
 - **CONTINUE, STOP, PAUSE, DO**
   - Implemented:
@@ -341,16 +335,17 @@ Mapping that classification to the current grammar:
       - `output_item_list` supporting implied DO constructs.
 
 - **REWIND, BACKSPACE, ENDFILE, OPEN, CLOSE, INQUIRE**
-  - Missing:
-    - Although `OPEN`, `CLOSE`, `INQUIRE`, `BACKSPACE`, and `REWIND`
-      tokens exist in `FORTRAN77Lexer.g4`, there are no corresponding
-      statement rules (`open_stmt`, `close_stmt`, `inquire_stmt`,
-      `rewind_stmt`, `backspace_stmt`, `endfile_stmt`) in
-      `FORTRAN77Parser.g4`, and `statement_body` does not mention
-      them. There is no ENDFILE token or rule at all.
-    - Any standard‑conforming program that uses these file‑control
-      statements will be rejected or see them as unknown tokens.
-    - This is tracked in issue #163.
+  - Implemented:
+    - `OPEN`, `CLOSE`, `INQUIRE`, `BACKSPACE`, `REWIND`, and `ENDFILE`
+      tokens exist in `FORTRAN77Lexer.g4`.
+    - Corresponding statement rules (`open_stmt`, `close_stmt`,
+      `inquire_stmt`, `rewind_stmt`, `backspace_stmt`, `endfile_stmt`)
+      are defined in `FORTRAN77Parser.g4` per ISO 1539:1980 Sections
+      12.9 and 12.10.
+    - All file I/O statements are wired into `statement_body` and
+      `executable_construct`.
+    - Tests: `test_file_io_statements_fixture` exercises positional
+      and keyword-based forms for all file I/O statements.
 
 - **CALL, RETURN, END**
   - Implemented:
@@ -445,16 +440,15 @@ cover:
 
 In the generic fixture harness (`tests/test_fixture_parsing.py`):
 
-- `FORTRAN77/test_fortran77_parser_extra/nested_if_block.f` is marked
-  XPASS, with the explanation that it:
-  - “exercises complex structured programming patterns that still
-    cause {errors} syntax errors in the current FORTRAN 77 grammar.”
+- `FORTRAN77/test_fortran77_parser_extra/nested_if_block.f` passes
+  when parsed via the `main_program` entry rule with zero syntax
+  errors.
 
 Thus:
 
-- The core structured programming features work in targeted tests.
-- At least one more complex nested IF example still fails when parsed
-  as a standalone program via the fixture harness.
+- The core structured programming features work in both targeted tests
+  and generic fixture parsing.
+- Complex nested IF examples parse correctly as standalone programs.
 
 ## 9. Summary
 
@@ -472,17 +466,8 @@ The FORTRAN 77 grammar in this repository:
   DIMENSION, EQUIVALENCE, arithmetic/logical IFs and BLOCK DATA).
 - Uses a layout‑lenient fixed-form model without strict 80‑column
   semantics.
-- Does not yet model file I/O control statements (OPEN, CLOSE,
-  INQUIRE, BACKSPACE, REWIND, ENDFILE) as full statements in the
-  parser, even though some tokens exist.
-- Still has at least one realistic nested IF program (nested_if_block.f)
-  that fails under the generic fixture parser, indicating remaining
-  integration gaps.
-
-Future work should:
-
-- Add parser rules and tests for OPEN/CLOSE/INQUIRE/BACKSPACE/
-  REWIND/ENDFILE if full FORTRAN 77 coverage is desired.
-- Resolve the XPASS nested IF fixture by refining the block IF
-  constructs or adjusting the fixture expectations, and reflect any
-  changes back into this audit.
+- Models file I/O control statements (OPEN, CLOSE, INQUIRE,
+  BACKSPACE, REWIND, ENDFILE) with full parser rules per ISO
+  1539:1980 Sections 12.9 and 12.10.
+- Nested IF programs (including nested_if_block.f) parse correctly
+  under the generic fixture parser with zero syntax errors.
