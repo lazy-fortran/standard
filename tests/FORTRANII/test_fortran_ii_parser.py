@@ -34,7 +34,7 @@ class TestFORTRANIIParser(unittest.TestCase):
         if FORTRANIIParser is None:
             self.skipTest("FORTRANIIParser not available - grammar not yet implemented")
     
-    def parse(self, text, rule_name='program_unit_core'):
+    def parse(self, text, rule_name):
         """Helper to parse text using specified rule"""
         input_stream = InputStream(text)
         lexer = FORTRANIILexer(input_stream)
