@@ -428,6 +428,73 @@ class TestFORTRAN66Parser(unittest.TestCase):
         tree = self.parse(program, 'main_program')
         self.assertIsNotNone(tree)
 
+    # ====================================================================
+    # FORTRAN 66 GO TO ASSIGNMENT AND ASSIGNED GO TO (X3.9-1966 Sections 7.1.1.3/7.1.2.1.2)
+    # ====================================================================
+
+    def test_assign_statement(self):
+        """Test GO TO assignment statement (X3.9-1966 Section 7.1.1.3)"""
+        test_cases = [
+            "ASSIGN 100 TO N",
+            "ASSIGN 200 TO I",
+            "ASSIGN 10 TO LABEL",
+            "ASSIGN 99999 TO K",
+        ]
+
+        for text in test_cases:
+            with self.subTest(assign_stmt=text):
+                tree = self.parse(text, 'assign_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_assigned_goto_statement(self):
+        """Test assigned GO TO statement (X3.9-1966 Section 7.1.2.1.2)"""
+        test_cases = [
+            "GOTO N, (100, 200)",
+            "GOTO I, (10, 20, 30)",
+            "GOTO LABEL, (100)",
+            "GOTO K, (100, 200, 300, 400, 500)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(assigned_goto=text):
+                tree = self.parse(text, 'assigned_goto_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_assign_in_statement_body(self):
+        """Test ASSIGN as statement_body alternative"""
+        test_cases = [
+            "ASSIGN 100 TO N",
+            "ASSIGN 200 TO I",
+        ]
+
+        for text in test_cases:
+            with self.subTest(stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree)
+
+    def test_assigned_goto_in_statement_body(self):
+        """Test assigned GO TO as statement_body alternative"""
+        test_cases = [
+            "GOTO N, (100, 200)",
+            "GOTO I, (10, 20, 30)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree)
+
+    def test_assign_goto_fixture(self):
+        """Test program with ASSIGN and assigned GO TO statements"""
+        program = load_fixture(
+            "FORTRAN66",
+            "test_fortran66_parser",
+            "assign_goto.f",
+        )
+
+        tree = self.parse(program, 'main_program')
+        self.assertIsNotNone(tree)
+
 
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail
