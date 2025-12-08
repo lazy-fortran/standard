@@ -609,8 +609,7 @@ variable_list
 // - Section 4.4: Double precision type
 // - Section 4.5: Complex type
 // - Section 4.6: Logical type
-// - Section 4.7: Character type
-// - Section 4.8: Character constants
+// - Section 4.8: CHARACTER type and character constants
 
 // Literal constant - ISO 1539:1980 Section 4
 // Override to add CHARACTER constants (STRING_LITERAL)
