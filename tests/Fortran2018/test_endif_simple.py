@@ -15,7 +15,7 @@ from Fortran2018Lexer import Fortran2018Lexer  # type: ignore
 from Fortran2018Parser import Fortran2018Parser  # type: ignore
 from fixture_utils import load_fixture
 
-class TestErrorListener(ErrorListener):
+class ParseErrorListener(ErrorListener):
     def __init__(self):
         super().__init__()
         self.errors = []
@@ -32,7 +32,7 @@ def run_program_case(code, description):
     token_stream = CommonTokenStream(lexer)
     parser = Fortran2018Parser(token_stream)
     
-    error_listener = TestErrorListener()
+    error_listener = ParseErrorListener()
     parser.removeErrorListeners()
     parser.addErrorListener(error_listener)
     
