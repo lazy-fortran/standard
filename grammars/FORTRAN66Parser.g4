@@ -317,7 +317,7 @@ statement_body
     | intrinsic_stmt           // X3.9-1966 Section 8.7
     // Executable statements - X3.9-1966 Section 7.1
     // Assignment statements - Section 7.1.1
-    | assignment_stmt          // X3.9-1966 Section 7.1.1.1 (arithmetic), 7.1.1.2 (logical)
+    | assignment_stmt          // X3.9-1966 Section 7.1.1.1 (arith), 7.1.1.2 (logical)
     | assign_stmt              // X3.9-1966 Section 7.1.1.3 (ASSIGN k TO i)
     // Control statements - Section 7.1.2
     | goto_stmt                // X3.9-1966 Section 7.1.2.1.1 (unconditional GO TO)
