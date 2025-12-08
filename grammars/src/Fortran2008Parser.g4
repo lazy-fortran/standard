@@ -1,8 +1,30 @@
 /*
  * Fortran2008Parser.g4
- * 
+ *
  * Fortran 2008 - Enhanced Parallel Programming Revolution
  * Unified parser supporting both fixed-form (.f, .for) and free-form (.f90+)
+ *
+ * Reference: ISO/IEC 1539-1:2010 (Fortran 2008 International Standard)
+ *            J3/10-007 (Fortran 2008 final text)
+ *
+ * This parser implements syntax rules for Fortran 2008 as defined in
+ * ISO/IEC 1539-1:2010, building on the Fortran 2003 parser with:
+ * - Coarrays and image control (Sections 2.4.7, 5.3.6, 6.6, 8.5)
+ * - Submodules and separate module procedures (Section 11.2.3)
+ * - DO CONCURRENT construct (Section 8.1.6.6)
+ * - BLOCK construct enhancements (Section 8.1.4)
+ * - CONTIGUOUS attribute (Section 5.3.7)
+ * - ERROR STOP statement (Section 8.4)
+ * - New intrinsic procedures (Section 13.7)
+ * - Enhanced ALLOCATE with coarray support (Section 6.7.1)
+ *
+ * INHERITANCE ARCHITECTURE (IN THIS REPO):
+ * FORTRAN / FORTRANII / FORTRAN66 / FORTRAN77
+ *   -> Fortran90Parser
+ *   -> Fortran95Parser
+ *   -> Fortran2003Parser
+ *   -> Fortran2008Parser (this file)
+ *   -> F2018+ standards
  */
 
 parser grammar Fortran2008Parser;
@@ -14,160 +36,249 @@ options {
 }
 
 // ============================================================================
-// FORTRAN 2008 PROGRAM STRUCTURE
+// FORTRAN 2008 PROGRAM STRUCTURE (ISO/IEC 1539-1:2010 Section 2.1, 11)
 // ============================================================================
+// ISO/IEC 1539-1:2010 Section 11 defines program units including the new
+// submodule program unit added in F2008.
+//
+// Section 2.1: High level syntax
+// - R201 (program) -> program-unit [program-unit]...
+// - R202 (program-unit) -> main-program | external-subprogram | module
+//                          | submodule | block-data
+//
+// F2008 additions:
+// - Submodules (Section 11.2.3) for separate compilation of module procedures
 
-// F2008 program unit (enhanced with coarray and submodule support)
+// F2008 program unit (ISO/IEC 1539-1:2010 R202)
+// Enhanced with submodule support
 program_unit_f2008
-    : NEWLINE* (main_program_f2008 | module_f2008 | submodule_f2008 
+    : NEWLINE* (main_program_f2008 | module_f2008 | submodule_f2008
       | external_subprogram_f2008) NEWLINE*
     ;
 
-// Enhanced main program for F2008
+// Main program (ISO/IEC 1539-1:2010 Section 11.1, R1101)
+// R1101: main-program -> [program-stmt] [specification-part]
+//                        [execution-part] [internal-subprogram-part]
+//                        end-program-stmt
+// Enhanced with F2008 specification and execution parts
 main_program_f2008
-    : program_stmt specification_part_f2008? execution_part_f2008? 
+    : program_stmt specification_part_f2008? execution_part_f2008?
       internal_subprogram_part? end_program_stmt
     ;
 
-// Enhanced module for F2008
+// Module (ISO/IEC 1539-1:2010 Section 11.2.1, R1104)
+// R1104: module -> module-stmt [specification-part] [module-subprogram-part]
+//                  end-module-stmt
+// Enhanced with F2008 specification part
 module_f2008
     : module_stmt specification_part_f2008? module_subprogram_part? end_module_stmt
     ;
 
-// Enhanced external subprogram for F2008
+// External subprogram (ISO/IEC 1539-1:2010 Section 12.6, R1227)
+// R1227: external-subprogram -> function-subprogram | subroutine-subprogram
 external_subprogram_f2008
     : function_subprogram_f2008
     | subroutine_subprogram_f2008
     ;
 
-// Enhanced function subprogram for F2008
+// Function subprogram (ISO/IEC 1539-1:2010 Section 12.6.2.2, R1223)
+// R1223: function-subprogram -> function-stmt [specification-part]
+//                               [execution-part] [internal-subprogram-part]
+//                               end-function-stmt
 function_subprogram_f2008
-    : function_stmt_f2008 specification_part_f2008? execution_part_f2008? 
+    : function_stmt_f2008 specification_part_f2008? execution_part_f2008?
       internal_subprogram_part? end_function_stmt
     ;
 
-// Enhanced subroutine subprogram for F2008
+// Subroutine subprogram (ISO/IEC 1539-1:2010 Section 12.6.2.3, R1231)
+// R1231: subroutine-subprogram -> subroutine-stmt [specification-part]
+//                                 [execution-part] [internal-subprogram-part]
+//                                 end-subroutine-stmt
 subroutine_subprogram_f2008
-    : subroutine_stmt_f2008 specification_part_f2008? execution_part_f2008? 
+    : subroutine_stmt_f2008 specification_part_f2008? execution_part_f2008?
       internal_subprogram_part? end_subroutine_stmt
     ;
 
-// Enhanced function statement for F2008
+// Function statement (ISO/IEC 1539-1:2010 Section 12.6.2.2, R1224)
+// R1224: function-stmt -> [prefix] FUNCTION function-name
+//                         ( [dummy-arg-name-list] ) [suffix]
 function_stmt_f2008
     : prefix? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN
       suffix? binding_spec? NEWLINE
     ;
 
-// Enhanced subroutine statement for F2008
+// Subroutine statement (ISO/IEC 1539-1:2010 Section 12.6.2.3, R1232)
+// R1232: subroutine-stmt -> [prefix] SUBROUTINE subroutine-name
+//                           [( [dummy-arg-list] )] [proc-language-binding-spec]
 subroutine_stmt_f2008
-    : prefix? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? 
+    : prefix? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)?
       binding_spec? NEWLINE
     ;
 
 // ============================================================================
-// SUBMODULES (NEW in F2008)
+// SUBMODULES (ISO/IEC 1539-1:2010 Section 11.2.3)
 // ============================================================================
+// Submodules allow separate compilation of module procedures while hiding
+// implementation details. A submodule extends a module or another submodule.
+//
+// Key rules from ISO/IEC 1539-1:2010:
+// - R1116: submodule -> submodule-stmt [specification-part]
+//                       [module-subprogram-part] end-submodule-stmt
+// - R1117: submodule-stmt -> SUBMODULE ( parent-identifier ) submodule-name
+// - R1118: parent-identifier -> ancestor-module-name [: parent-submodule-name]
+// - R1119: end-submodule-stmt -> END [SUBMODULE [submodule-name]]
 
-// Submodule definition
+// Submodule definition (ISO/IEC 1539-1:2010 R1116)
 submodule_f2008
-    : submodule_stmt specification_part_f2008? module_subprogram_part? 
+    : submodule_stmt specification_part_f2008? module_subprogram_part?
       end_submodule_stmt
     ;
 
+// Submodule statement (ISO/IEC 1539-1:2010 R1117)
+// R1117: submodule-stmt -> SUBMODULE ( parent-identifier ) submodule-name
 submodule_stmt
     : SUBMODULE LPAREN parent_identifier RPAREN submodule_identifier NEWLINE
     ;
 
+// End submodule statement (ISO/IEC 1539-1:2010 R1119)
+// R1119: end-submodule-stmt -> END [SUBMODULE [submodule-name]]
 end_submodule_stmt
     : END_SUBMODULE (submodule_identifier)? NEWLINE
     ;
 
+// Parent identifier (ISO/IEC 1539-1:2010 R1118)
+// R1118: parent-identifier -> ancestor-module-name [: parent-submodule-name]
+// Extended to support nested submodule hierarchies
 parent_identifier
     : IDENTIFIER (COLON IDENTIFIER)*
-      // parent_module_name[:parent_submodule_name[:...]]
     ;
 
+// Submodule name
 submodule_identifier
     : IDENTIFIER
     ;
 
 // ============================================================================
-// ENHANCED SPECIFICATION PART (F2008)
+// SPECIFICATION PART (ISO/IEC 1539-1:2010 Section 2.1, R204)
 // ============================================================================
+// The specification part contains declarations and attributes.
+// R204: specification-part -> [use-stmt]... [import-stmt]... [implicit-part]
+//                             [declaration-construct]...
+// F2008 adds CONTIGUOUS attribute (Section 5.3.7) and coarray declarations.
 
+// F2008 specification part
 specification_part_f2008
     : ((use_stmt | import_stmt | implicit_stmt | declaration_construct_f2008) NEWLINE*)*
     ;
 
-// Enhanced declaration construct for F2008
+// Declaration construct (ISO/IEC 1539-1:2010 R207)
+// R207: declaration-construct -> derived-type-def | entry-stmt | enum-def
+//       | format-stmt | interface-block | parameter-stmt
+//       | procedure-declaration-stmt | other-specification-stmt
+//       | type-declaration-stmt | stmt-function-stmt
+// F2008 adds CONTIGUOUS statement (Section 5.3.7, R544)
 declaration_construct_f2008
-    : derived_type_def_f2003          // Inherit F2003 types
-    | class_declaration_stmt          // Inherit F2003 CLASS  
-    | procedure_declaration_stmt      // Inherit F2003 procedures
-    | interface_block                 // Inherit F2003 interfaces
-    | volatile_stmt                   // Inherit F2003 VOLATILE
-    | protected_stmt                  // Inherit F2003 PROTECTED
-    | contiguous_stmt                 // NEW in F2008
-    | type_declaration_stmt_f2008     // Enhanced for F2008
+    : derived_type_def_f2003          // Derived types (Section 4.5)
+    | class_declaration_stmt          // CLASS declarations (Section 4.5.6)
+    | procedure_declaration_stmt      // Procedure declarations (Section 12.4.3.2)
+    | interface_block                 // Interface blocks (Section 12.4.3)
+    | volatile_stmt                   // VOLATILE (Section 5.3.19)
+    | protected_stmt                  // PROTECTED (Section 5.3.14)
+    | contiguous_stmt                 // CONTIGUOUS (Section 5.3.7) - NEW in F2008
+    | type_declaration_stmt_f2008     // Type declarations with F2008 kinds
     | declaration_construct_f2003     // Inherit F2003 declarations
     ;
 
 // ============================================================================
-// ENHANCED EXECUTION PART (F2008)
+// EXECUTION PART (ISO/IEC 1539-1:2010 Section 2.1, R208)
 // ============================================================================
+// The execution part contains executable constructs.
+// R208: execution-part -> executable-construct [execution-part-construct]...
+// R213: executable-construct -> action-stmt | associate-construct | block-construct
+//                             | case-construct | critical-construct | do-construct
+//                             | forall-construct | if-construct | select-type-construct
+//                             | where-construct
+// F2008 adds: ERROR STOP (Section 8.4), SYNC statements (Section 8.5),
+// DO CONCURRENT (Section 8.1.6.6), enhanced BLOCK (Section 8.1.4)
 
-// Mirror the F2003 structure: wrap executable constructs with explicit
-// NEWLINE handling so that statement sequencing works correctly.
+// F2008 execution part
 execution_part_f2008
     : execution_construct_f2008*
     ;
 
+// Execution construct wrapper with newline handling
 execution_construct_f2008
     : NEWLINE* executable_construct_f2008 NEWLINE*
     ;
 
-// Enhanced executable construct for F2008
+// Executable construct (ISO/IEC 1539-1:2010 R213)
+// Enhanced with F2008-specific constructs
 executable_construct_f2008
-    : assignment_stmt                 // Inherit from F2003
-    | call_stmt                       // Inherit from F2003
-    | print_stmt                      // Inherit from F2003
-    | stop_stmt                       // Inherit from F2003
-    | error_stop_stmt                 // NEW in F2008
-    | select_type_construct           // Inherit from F2003
-    | associate_construct             // Inherit from F2003
-    | block_construct_f2008           // Enhanced in F2008
-    | allocate_stmt_f2008             // Enhanced in F2008
-    | sync_construct                  // NEW in F2008
-    | wait_stmt                       // Inherit from F2003
-    | flush_stmt                      // Inherit from F2003
-    | if_construct                    // Inherit from F95
-    | do_construct_f2008              // Enhanced in F2008
-    | select_case_construct           // Inherit from F95
+    : assignment_stmt                 // Assignment (Section 7.2)
+    | call_stmt                       // CALL (Section 12.5.1)
+    | print_stmt                      // PRINT (Section 9.6.3)
+    | stop_stmt                       // STOP (Section 8.4)
+    | error_stop_stmt                 // ERROR STOP (Section 8.4) - NEW in F2008
+    | select_type_construct           // SELECT TYPE (Section 8.1.9)
+    | associate_construct             // ASSOCIATE (Section 8.1.3)
+    | block_construct_f2008           // BLOCK (Section 8.1.4) - Enhanced in F2008
+    | allocate_stmt_f2008             // ALLOCATE (Section 6.7.1) - Enhanced in F2008
+    | sync_construct                  // SYNC (Section 8.5) - NEW in F2008
+    | wait_stmt                       // WAIT (Section 9.7.1)
+    | flush_stmt                      // FLUSH (Section 9.7.2)
+    | if_construct                    // IF (Section 8.1.7)
+    | do_construct_f2008              // DO (Section 8.1.6) - Enhanced in F2008
+    | select_case_construct           // SELECT CASE (Section 8.1.8)
     | type_declaration_stmt_f2008     // F2008 allows mixed declarations
     | executable_construct            // Inherit F2003 constructs
     ;
 
 // ============================================================================
-// COARRAY SUPPORT (NEW in F2008)
+// COARRAY SUPPORT (ISO/IEC 1539-1:2010 Sections 2.4.7, 5.3.6, 6.6)
 // ============================================================================
+// Coarrays implement a PGAS (Partitioned Global Address Space) parallel
+// programming model. Each image has its own set of coarray data.
+//
+// Key coarray rules from ISO/IEC 1539-1:2010:
+// - R509: coarray-spec -> deferred-coshape-spec-list | explicit-coshape-spec
+// - R510: deferred-coshape-spec -> :
+// - R511: explicit-coshape-spec -> [[lower-cobound:]upper-cobound,]...*
+// - R624: image-selector -> [ cosubscript-list ]
 
-// Coarray specification in variable declarations
+// Coarray specification (ISO/IEC 1539-1:2010 R509)
+// Used in declarations to specify coarray bounds
 coarray_spec
     : LBRACKET cosubscript_list RBRACKET
     ;
 
+// Cosubscript list (ISO/IEC 1539-1:2010 R625)
+// R625: cosubscript-list -> cosubscript [, cosubscript]...
 cosubscript_list
     : cosubscript (COMMA cosubscript)*
-    | MULTIPLY                        // [*] - any image
+    | MULTIPLY                        // [*] - any image (deferred)
     ;
 
+// Cosubscript (ISO/IEC 1539-1:2010 R625)
+// Individual cosubscript in image selector
 cosubscript
     : expr_f2003                      // Expression for specific image
     | expr_f2003 COLON                // lower bound:
-    | COLON expr_f2003                // :upper bound  
+    | COLON expr_f2003                // :upper bound
     | expr_f2003 COLON expr_f2003     // lower:upper
     | COLON                           // : (all images)
     ;
+
+// ============================================================================
+// IMAGE CONTROL STATEMENTS (ISO/IEC 1539-1:2010 Section 8.5)
+// ============================================================================
+// Image control statements synchronize execution between images.
+//
+// Key rules from ISO/IEC 1539-1:2010:
+// - R858: sync-all-stmt -> SYNC ALL [(sync-stat-list)]
+// - R859: sync-images-stmt -> SYNC IMAGES (image-set [, sync-stat-list])
+// - R862: sync-memory-stmt -> SYNC MEMORY [(sync-stat-list)]
+// - R860: image-set -> int-expr | *
+// - R863: sync-stat -> STAT = stat-variable | ERRMSG = errmsg-variable
 
 // Sync constructs for coarray synchronization
 sync_construct
@@ -176,41 +287,58 @@ sync_construct
     | sync_memory_stmt
     ;
 
+// SYNC ALL statement (ISO/IEC 1539-1:2010 Section 8.5.3, R858)
+// R858: sync-all-stmt -> SYNC ALL [(sync-stat-list)]
+// Synchronizes all images in the current team
 sync_all_stmt
     : SYNC ALL (LPAREN sync_stat_list? RPAREN)? NEWLINE
     ;
 
+// SYNC IMAGES statement (ISO/IEC 1539-1:2010 Section 8.5.4, R859)
+// R859: sync-images-stmt -> SYNC IMAGES (image-set [, sync-stat-list])
+// Synchronizes specified images
 sync_images_stmt
     : SYNC IMAGES LPAREN image_set (COMMA sync_stat_list)? RPAREN NEWLINE
     ;
 
-sync_memory_stmt  
+// SYNC MEMORY statement (ISO/IEC 1539-1:2010 Section 8.5.5, R862)
+// R862: sync-memory-stmt -> SYNC MEMORY [(sync-stat-list)]
+// Memory fence for segment ordering
+sync_memory_stmt
     : SYNC MEMORY (LPAREN sync_stat_list? RPAREN)? NEWLINE
     ;
 
+// Image set (ISO/IEC 1539-1:2010 R860)
+// R860: image-set -> int-expr | *
 image_set
     : MULTIPLY                        // * (all images)
     | expr_f2003                      // Single image or scalar expression
     | LSQUARE expr_f2003 (COMMA expr_f2003)* RSQUARE
-      // Explicit image set [i1, i2, ...]
     | LBRACKET expr_f2003 (COMMA expr_f2003)* RBRACKET
     ;
 
+// Sync stat list (ISO/IEC 1539-1:2010 R863)
 sync_stat_list
     : sync_stat (COMMA sync_stat)*
     ;
 
+// Sync stat (ISO/IEC 1539-1:2010 R863)
+// R863: sync-stat -> STAT = stat-variable | ERRMSG = errmsg-variable
 sync_stat
     : STAT EQUALS variable_f90
     | ERRMSG EQUALS variable_f90
     ;
 
-// --------------------------------------------------------------------------
-// Override core F2003 variable and entity rules to add coarray awareness.
-// --------------------------------------------------------------------------
+// ============================================================================
+// COARRAY-AWARE DECLARATIONS (ISO/IEC 1539-1:2010 Section 5.3.6)
+// ============================================================================
+// Override F2003 rules to support coarray codimensions in declarations
+// and variable references.
 
-// Enhanced entity declaration to support coarray codimensions in F2008.
-// This mirrors the F2003 entity_decl rule but adds an optional coarray_spec.
+// Entity declaration with coarray support (ISO/IEC 1539-1:2010 R503)
+// R503: entity-decl -> object-name [(array-spec)] [coarray-spec] [* char-length]
+//                      [initialization] | function-name [* char-length]
+// Enhanced to include optional coarray-spec
 entity_decl
     : identifier_or_keyword
       (LPAREN array_spec RPAREN)?
@@ -218,8 +346,10 @@ entity_decl
       (EQUALS expr_f2003)?
     ;
 
-// Enhanced left-hand side expression with optional coarray codimensions.
-// This mirrors the F2003 lhs_expression rule but adds a trailing coarray_spec.
+// Left-hand side expression with coarray image selector (ISO/IEC 1539-1:2010 R601)
+// R601: designator -> ... | coindexed-named-object
+// R624: image-selector -> [ cosubscript-list ]
+// Enhanced to support image selectors on various LHS forms
 lhs_expression
     : identifier_or_keyword                 // Simple variable
       coarray_spec?
@@ -240,15 +370,24 @@ lhs_expression
       coarray_spec?                         // Array element/section component method
     ;
 
-// ============================================================================  
-// MODULE SUBPROGRAM BINDING (F2008)
 // ============================================================================
+// SEPARATE MODULE PROCEDURES (ISO/IEC 1539-1:2010 Section 12.6.2.5)
+// ============================================================================
+// Separate module procedures allow the interface to be defined in a module
+// while the implementation is in a submodule. This provides information
+// hiding and separate compilation.
+//
+// Key rules from ISO/IEC 1539-1:2010:
+// - R1237: separate-module-subprogram -> mp-subprogram-stmt [specification-part]
+//                                        [execution-part] [internal-subprogram-part]
+//                                        end-mp-subprogram-stmt
+// - R1238: mp-subprogram-stmt -> MODULE PROCEDURE procedure-name
+// - The implementation uses MODULE FUNCTION and MODULE SUBROUTINE forms
 
-// Override the F2003 module_subprogram rule so that module-contained
-// procedures use the F2008-aware subprogram rules and therefore can
-// contain coarray and SYNC constructs.  For F2008 submodules we also
-// need to support "separate module procedure" definitions that start
-// with MODULE SUBROUTINE / MODULE FUNCTION.
+// Module subprogram (ISO/IEC 1539-1:2010 R1108)
+// R1108: module-subprogram -> function-subprogram | subroutine-subprogram
+//                            | separate-module-subprogram
+// Override to include F2008 separate module procedures
 module_subprogram
     : function_subprogram_f2008
     | subroutine_subprogram_f2008
@@ -256,87 +395,132 @@ module_subprogram
     | module_function_subprogram_f2008
     ;
 
-// Separate module subroutine definition inside a submodule
+// Separate module subroutine (ISO/IEC 1539-1:2010 Section 12.6.2.5, R1237)
+// Implementation of a module procedure interface defined in parent module
 module_subroutine_subprogram_f2008
     : module_subroutine_stmt_f2008 specification_part_f2008?
       execution_part_f2008? internal_subprogram_part? end_subroutine_stmt
     ;
 
-// Separate module function definition inside a submodule
+// Separate module function (ISO/IEC 1539-1:2010 Section 12.6.2.5, R1237)
+// Implementation of a module function interface defined in parent module
 module_function_subprogram_f2008
     : module_function_stmt_f2008 specification_part_f2008?
       execution_part_f2008? internal_subprogram_part? end_function_stmt
     ;
 
-// MODULE SUBROUTINE statement (F2008 submodules)
+// MODULE SUBROUTINE statement (ISO/IEC 1539-1:2010 R1238 variant)
+// Defines implementation of a module procedure interface as subroutine
 module_subroutine_stmt_f2008
     : MODULE SUBROUTINE IDENTIFIER
       (LPAREN dummy_arg_name_list? RPAREN)?
       binding_spec? NEWLINE
     ;
 
-// MODULE FUNCTION statement (F2008 submodules)
+// MODULE FUNCTION statement (ISO/IEC 1539-1:2010 R1238 variant)
+// Defines implementation of a module procedure interface as function
 module_function_stmt_f2008
     : MODULE FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN
       suffix? binding_spec? NEWLINE
     ;
 
 // ============================================================================
-// ENHANCED DO CONSTRUCTS (F2008)
+// DO CONCURRENT CONSTRUCT (ISO/IEC 1539-1:2010 Section 8.1.6.6)
 // ============================================================================
+// DO CONCURRENT provides explicit parallelization hints to the compiler.
+// Iterations are independent and may execute in any order or concurrently.
+//
+// Key rules from ISO/IEC 1539-1:2010:
+// - R818: loop-control -> [,] do-variable = ... | [,] WHILE (...) |
+//                         [,] CONCURRENT concurrent-header
+// - R819: concurrent-header -> (concurrent-spec [, scalar-mask-expr])
+// - R820: concurrent-spec -> concurrent-control-list [, concurrent-limit]
+// - R821: concurrent-control -> index-name = concurrent-limit : concurrent-limit
+//                               [: concurrent-step]
 
+// DO construct with F2008 DO CONCURRENT support
 do_construct_f2008
-    : do_construct                    // Inherit standard DO from F95
-    | do_concurrent_construct         // NEW in F2008
+    : do_construct                    // Standard DO (Section 8.1.6)
+    | do_concurrent_construct         // DO CONCURRENT (Section 8.1.6.6)
     ;
 
-// DO CONCURRENT construct for explicit parallelization
+// DO CONCURRENT construct (ISO/IEC 1539-1:2010 Section 8.1.6.6)
+// Enables loop parallelization with independent iterations
 do_concurrent_construct
     : do_concurrent_stmt
       execution_part_f2008?
       end_do_stmt
     ;
 
+// DO CONCURRENT statement (ISO/IEC 1539-1:2010 R818)
+// R818: loop-control -> ... | [,] CONCURRENT concurrent-header
 do_concurrent_stmt
     : (IDENTIFIER COLON)? DO CONCURRENT concurrent_header NEWLINE
     ;
 
+// Concurrent header (ISO/IEC 1539-1:2010 R819)
+// R819: concurrent-header -> (concurrent-spec [, scalar-mask-expr])
 concurrent_header
     : LPAREN forall_triplet_spec_list (COMMA scalar_mask_expr)? RPAREN
     ;
 
+// Concurrent control list (ISO/IEC 1539-1:2010 R820)
+// R820: concurrent-spec -> concurrent-control-list [, concurrent-limit]
+// Uses FORALL triplet syntax for index specifications
 forall_triplet_spec_list
     : forall_triplet_spec (COMMA forall_triplet_spec)*
     ;
 
+// Concurrent control (ISO/IEC 1539-1:2010 R821)
+// R821: concurrent-control -> index-name = concurrent-limit : concurrent-limit
+//                             [: concurrent-step]
 forall_triplet_spec
     : IDENTIFIER EQUALS expr_f90 COLON expr_f90 (COLON expr_f90)?
     ;
 
+// Scalar mask expression (ISO/IEC 1539-1:2010 R819)
+// Optional logical mask to filter iterations
 scalar_mask_expr
     : logical_expr
     ;
 
 // ============================================================================
-// ENHANCED BLOCK CONSTRUCT (F2008)
+// BLOCK CONSTRUCT (ISO/IEC 1539-1:2010 Section 8.1.4)
 // ============================================================================
+// The BLOCK construct provides local scoping for variables.
+// Variables declared within a BLOCK are local to that block.
+//
+// Key rules from ISO/IEC 1539-1:2010:
+// - R807: block-construct -> block-stmt [specification-part] [execution-part]
+//                            end-block-stmt
+// - R808: block-stmt -> [block-construct-name:] BLOCK
+// - R809: end-block-stmt -> END BLOCK [block-construct-name]
 
+// BLOCK construct (ISO/IEC 1539-1:2010 R807)
+// Enhanced with F2008 specification and execution parts
 block_construct_f2008
     : (IDENTIFIER COLON)? BLOCK NEWLINE
-      specification_part_f2008?        // Enhanced specification part
-      execution_part_f2008?            // Enhanced execution part  
+      specification_part_f2008?        // Local declarations
+      execution_part_f2008?            // Executable statements
       END BLOCK (IDENTIFIER)? NEWLINE
     ;
 
-// ============================================================================  
-// ENHANCED TYPE DECLARATIONS (F2008)
 // ============================================================================
+// TYPE DECLARATIONS (ISO/IEC 1539-1:2010 Section 5.1)
+// ============================================================================
+// F2008 extends type declarations with new integer/real kinds from
+// ISO_FORTRAN_ENV (Section 13.8.2) and the CONTIGUOUS attribute (Section 5.3.7).
 
+// Type declaration with F2008 intrinsic kinds
 type_declaration_stmt_f2008
     : type_declaration_stmt           // Inherit F2003 declarations
-    | enhanced_intrinsic_declaration  // NEW F2008 intrinsic types
+    | enhanced_intrinsic_declaration  // ISO_FORTRAN_ENV kinds
     ;
 
+// Enhanced intrinsic declarations (ISO/IEC 1539-1:2010 Section 13.8.2)
+// INT8, INT16, INT32, INT64: Integer kinds for specific bit sizes
+// REAL32, REAL64, REAL128: Real kinds for IEEE floating-point sizes
+// These are named constants from ISO_FORTRAN_ENV used as type specifiers
 enhanced_intrinsic_declaration
     : INT8 (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
     | INT16 (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
@@ -347,12 +531,17 @@ enhanced_intrinsic_declaration
     | REAL128 (COMMA attr_spec_list)? DOUBLE_COLON entity_decl_list NEWLINE
     ;
 
-// CONTIGUOUS attribute statement
+// CONTIGUOUS statement (ISO/IEC 1539-1:2010 Section 5.3.7, R544)
+// R544: contiguous-stmt -> CONTIGUOUS [::] object-name-list
+// Specifies that an array occupies a contiguous block of memory
 contiguous_stmt
     : CONTIGUOUS DOUBLE_COLON object_name_list NEWLINE
     ;
 
-// Extend F2003 attr_spec to include CONTIGUOUS as a valid attribute
+// Attribute specification (ISO/IEC 1539-1:2010 R502)
+// R502: attr-spec -> access-spec | ALLOCATABLE | ASYNCHRONOUS | CODIMENSION [...]
+//                  | CONTIGUOUS | DIMENSION (array-spec) | EXTERNAL | ...
+// Extended with CONTIGUOUS (Section 5.3.7) - NEW in F2008
 attr_spec
     : PUBLIC
     | PRIVATE
@@ -365,24 +554,36 @@ attr_spec
     | PROTECTED
     | PARAMETER
     | VALUE
-    | CONTIGUOUS
+    | CONTIGUOUS                      // NEW in F2008 (Section 5.3.7)
     ;
 
 // ============================================================================
-// ENHANCED ALLOCATE STATEMENT (F2008)
+// ALLOCATE STATEMENT (ISO/IEC 1539-1:2010 Section 6.7.1)
 // ============================================================================
+// ALLOCATE statement with coarray support for allocating coarray codimensions.
+//
+// Key rules from ISO/IEC 1539-1:2010:
+// - R626: allocate-stmt -> ALLOCATE ([type-spec::] allocation-list [, alloc-opt-list])
+// - R628: allocation -> allocate-object [(allocate-shape-spec-list)]
+//                       [allocate-coarray-spec]
+// - R636: allocate-coarray-spec -> [allocate-coshape-spec-list,] [lower-bound-expr:]
 
+// ALLOCATE statement with coarray support (ISO/IEC 1539-1:2010 R626)
 allocate_stmt_f2008
     : ALLOCATE LPAREN type_spec DOUBLE_COLON allocation_list_f2008
       (COMMA alloc_opt_list)? RPAREN NEWLINE
-    | ALLOCATE LPAREN allocation_list_f2008 
+    | ALLOCATE LPAREN allocation_list_f2008
       (COMMA alloc_opt_list)? RPAREN NEWLINE
     ;
 
+// Allocation list (ISO/IEC 1539-1:2010 R627)
 allocation_list_f2008
     : allocation_f2008 (COMMA allocation_f2008)*
     ;
 
+// Allocation with coarray codimension (ISO/IEC 1539-1:2010 R628)
+// R628: allocation -> allocate-object [(allocate-shape-spec-list)]
+//                     [allocate-coarray-spec]
 allocation_f2008
     : IDENTIFIER coarray_spec? (LPAREN allocate_shape_spec_list RPAREN)?
     | derived_type_spec DOUBLE_COLON IDENTIFIER coarray_spec?
@@ -390,60 +591,84 @@ allocation_f2008
     ;
 
 // ============================================================================
-// ERROR HANDLING ENHANCEMENTS (F2008)
+// ERROR STOP STATEMENT (ISO/IEC 1539-1:2010 Section 8.4)
 // ============================================================================
+// ERROR STOP initiates error termination of execution, indicating
+// abnormal program termination (unlike STOP which is normal termination).
+//
+// Key rule from ISO/IEC 1539-1:2010:
+// - R856: error-stop-stmt -> ERROR STOP [stop-code]
+// - R857: stop-code -> scalar-default-char-expr | scalar-int-expr
 
+// ERROR STOP statement (ISO/IEC 1539-1:2010 R856)
 error_stop_stmt
     : ERROR_STOP (INTEGER_LITERAL | string_literal)? NEWLINE
     ;
 
 // ============================================================================
-// ENHANCED INTRINSIC FUNCTIONS (F2008)
+// INTRINSIC FUNCTIONS (ISO/IEC 1539-1:2010 Section 13.7)
 // ============================================================================
+// F2008 adds several new intrinsic procedures for mathematical functions,
+// array operations, and image inquiry.
 
-// Override intrinsic function calls to include F2008 functions
+// F2008 intrinsic function calls
+// Extended to include new F2008 intrinsics
 intrinsic_function_call_f2008
     : intrinsic_function_call         // Inherit F2003 intrinsics
-    | bessel_function_call            // NEW in F2008
-    | math_function_call              // NEW in F2008
-    | array_function_call             // NEW in F2008
-    | image_function_call             // NEW in F2008
+    | bessel_function_call            // Bessel functions (Section 13.7.22-27)
+    | math_function_call              // Error/gamma functions (Section 13.7)
+    | array_function_call             // Array functions (Section 13.7)
+    | image_function_call             // Image intrinsics (Section 13.7)
     ;
 
+// Bessel function calls (ISO/IEC 1539-1:2010 Section 13.7.22-27)
+// Mathematical functions for cylindrical coordinate problems
 bessel_function_call
-    : BESSEL_J0 LPAREN actual_arg_list RPAREN
-    | BESSEL_J1 LPAREN actual_arg_list RPAREN
-    | BESSEL_JN LPAREN actual_arg_list RPAREN
-    | BESSEL_Y0 LPAREN actual_arg_list RPAREN
-    | BESSEL_Y1 LPAREN actual_arg_list RPAREN
-    | BESSEL_YN LPAREN actual_arg_list RPAREN
+    : BESSEL_J0 LPAREN actual_arg_list RPAREN    // Section 13.7.22
+    | BESSEL_J1 LPAREN actual_arg_list RPAREN    // Section 13.7.23
+    | BESSEL_JN LPAREN actual_arg_list RPAREN    // Section 13.7.24
+    | BESSEL_Y0 LPAREN actual_arg_list RPAREN    // Section 13.7.25
+    | BESSEL_Y1 LPAREN actual_arg_list RPAREN    // Section 13.7.26
+    | BESSEL_YN LPAREN actual_arg_list RPAREN    // Section 13.7.27
     ;
 
+// Mathematical function calls (ISO/IEC 1539-1:2010 Section 13.7)
+// Error function and gamma function
 math_function_call
-    : ERF LPAREN actual_arg_list RPAREN
-    | ERFC LPAREN actual_arg_list RPAREN
-    | GAMMA LPAREN actual_arg_list RPAREN
-    | LOG_GAMMA LPAREN actual_arg_list RPAREN
+    : ERF LPAREN actual_arg_list RPAREN          // Section 13.7.52
+    | ERFC LPAREN actual_arg_list RPAREN         // Section 13.7.53
+    | GAMMA LPAREN actual_arg_list RPAREN        // Section 13.7.61
+    | LOG_GAMMA LPAREN actual_arg_list RPAREN    // Section 13.7.108
     ;
 
+// Array function calls (ISO/IEC 1539-1:2010 Section 13.7)
+// Array reduction and location functions
 array_function_call
-    : NORM2 LPAREN actual_arg_list RPAREN
-    | PARITY LPAREN actual_arg_list RPAREN
-    | FINDLOC LPAREN actual_arg_list RPAREN
+    : NORM2 LPAREN actual_arg_list RPAREN        // Section 13.7.119
+    | PARITY LPAREN actual_arg_list RPAREN       // Section 13.7.127
+    | FINDLOC LPAREN actual_arg_list RPAREN      // Section 13.7.58
     ;
 
+// Image inquiry function calls (ISO/IEC 1539-1:2010 Section 13.7)
+// Coarray image inquiry and storage inquiry
 image_function_call
-    : THIS_IMAGE LPAREN actual_arg_list? RPAREN
-    | NUM_IMAGES LPAREN actual_arg_list? RPAREN
-    | STORAGE_SIZE LPAREN actual_arg_list RPAREN
+    : THIS_IMAGE LPAREN actual_arg_list? RPAREN  // Section 13.7.165
+    | NUM_IMAGES LPAREN actual_arg_list? RPAREN  // Section 13.7.121
+    | STORAGE_SIZE LPAREN actual_arg_list RPAREN // Section 13.7.163
     ;
 
 // ============================================================================
-// ENHANCED PRIMARY EXPRESSIONS (F2008)
+// PRIMARY EXPRESSIONS (ISO/IEC 1539-1:2010 Section 7.1.1)
 // ============================================================================
+// Primary expressions are the basic building blocks of Fortran expressions.
+//
+// Key rule from ISO/IEC 1539-1:2010:
+// - R701: primary -> designator | literal-constant | array-constructor |
+//                    structure-constructor | function-reference |
+//                    type-param-inquiry | type-param-name | (expr)
 
-// Override the F2003 primary rule to include F2008 intrinsics via
-// intrinsic_function_call_f2008 (which itself wraps the F2003 set).
+// Primary expression (ISO/IEC 1539-1:2010 R701)
+// Override F2003 to include F2008 intrinsic functions
 primary
     : identifier_or_keyword (PERCENT identifier_or_keyword)*
     | identifier_or_keyword LPAREN actual_arg_list? RPAREN
@@ -456,30 +681,39 @@ primary
     | REAL_LITERAL
     | SINGLE_QUOTE_STRING
     | DOUBLE_QUOTE_STRING
-    | '*'                // I/O format asterisk
+    | '*'                // List-directed format
     | array_constructor
     | LPAREN primary RPAREN
     ;
 
-// Enhanced variable reference with coarray support
+// Variable with coarray image selector (ISO/IEC 1539-1:2010 R601, R624)
+// R624: image-selector -> [ cosubscript-list ]
 variable_f2008
     : IDENTIFIER coarray_spec? (PERCENT IDENTIFIER)*
     | IDENTIFIER (LPAREN actual_arg_list RPAREN)? coarray_spec?
     ;
 
 // ============================================================================
-// UTILITY RULES
+// RULE OVERRIDES
 // ============================================================================
+// Override F2003 top-level rules to use F2008 enhanced versions.
+// This ensures F2008 features (coarrays, DO CONCURRENT, submodules, etc.)
+// are available when using the F2008 parser.
 
-// Override F2003 rules to use F2008 enhanced versions where applicable
+// Specification part override
+// Routes to F2008 specification part with CONTIGUOUS support
 specification_part
     : specification_part_f2008
     ;
 
-execution_part  
+// Execution part override
+// Routes to F2008 execution part with SYNC, ERROR STOP, DO CONCURRENT
+execution_part
     : execution_part_f2008
     ;
 
+// Program unit override
+// Routes to F2008 program unit with submodule support
 program_unit
     : program_unit_f2008
     ;
