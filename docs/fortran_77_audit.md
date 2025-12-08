@@ -357,18 +357,23 @@ Mapping that classification to the current grammar:
       wired into `statement_body`.
 
 - **PROGRAM, FUNCTION, SUBROUTINE, ENTRY, BLOCK DATA**
-  - Implemented / partially implemented:
+  - Implemented:
     - FUNCTION, SUBROUTINE and BLOCK DATA are supported through the
       imported FORTRAN II/66 rules (`function_subprogram`,
       `subroutine_subprogram`, `block_data_subprogram`).
-    - `PROGRAM` exists as a token in `FORTRAN77Lexer.g4`, but there
-      is no `program_stmt` rule and no explicit program‑unit wrapper
-      for “PROGRAM name … END”.
-    - ENTRY is not modeled at all: no `ENTRY` token or `entry_stmt`
-      rule.
-    - The top‑level entry rule remains the FORTRAN 66 main program
-      (`main_program : statement_list`).
-    - These gaps are tracked by issue #164.
+    - PROGRAM statement:
+      - Grammar: `program_stmt : PROGRAM IDENTIFIER NEWLINE`
+      - The `main_program` rule is overridden to accept an optional
+        `program_stmt` followed by statements and `end_stmt`.
+      - Syntax: `PROGRAM name` at the start of a main program unit.
+    - ENTRY statement:
+      - Grammar: `entry_stmt : ENTRY IDENTIFIER entry_dummy_arg_list?`
+      - Per ISO 1539:1980 Section 15.7, provides alternate entry points
+        into FUNCTION or SUBROUTINE subprograms.
+      - Supports dummy argument lists and alternate return specifiers (*).
+      - Tests: `test_entry_statement` and `test_entry_statement_in_subroutine_fixture`
+        exercise various ENTRY forms including no-argument, with arguments,
+        and alternate return specifiers.
 
 - **DIMENSION, COMMON, EQUIVALENCE, IMPLICIT, PARAMETER, EXTERNAL, INTRINSIC, SAVE**
   - Implemented:
