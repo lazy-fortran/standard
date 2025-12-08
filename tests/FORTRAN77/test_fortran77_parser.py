@@ -11,7 +11,7 @@ from pathlib import Path
 # Add tests root (for fixture_utils) and grammars directory to path for imports
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT))
-sys.path.append(str(ROOT.parent / "grammars"))
+sys.path.append(str(ROOT.parent / "grammars/generated/early"))
 
 try:
     from antlr4 import InputStream, CommonTokenStream  # type: ignore
@@ -439,7 +439,7 @@ END
     def test_proper_inheritance(self):
         """Test that FORTRAN77 properly inherits from FORTRAN66"""
         # Read the grammar file
-        grammar_path = ROOT.parent / "grammars" / "FORTRAN77Parser.g4"
+        grammar_path = ROOT.parent / "grammars/src" / "FORTRAN77Parser.g4"
         with open(grammar_path, 'r') as f:
             content = f.read()
         

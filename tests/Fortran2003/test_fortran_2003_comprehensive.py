@@ -14,7 +14,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from fixture_utils import load_fixture
 
 # Add grammars directory to path
-sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
+sys.path.append(str(Path(__file__).parent.parent.parent / "grammars/generated/modern"))
 
 from antlr4 import *
 
