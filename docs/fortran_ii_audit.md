@@ -325,8 +325,8 @@ Use `*_strict` entry points for historical audits. Issue #156 resolved.
 
 ### 8.2 Inherited FORTRAN I Statements (C28-6003 Appendix B)
 
-All original FORTRAN (1957) statements remain available in FORTRAN II.
-These are inherited from `FORTRANParser.g4` or redefined in
+Most core FORTRAN (1957) statements remain available in FORTRAN II.
+These are either inherited from `FORTRANParser.g4` or redefined in
 `FORTRANIIParser.g4`:
 
 | Statement Form                       | Grammar Rule(s)                | Status          |
@@ -348,46 +348,55 @@ These are inherited from `FORTRANParser.g4` or redefined in
 | PRINT n, list                        | `print_stmt`                   | Implemented     |
 | PUNCH n, list                        | `punch_stmt`                   | Implemented     |
 
-### 8.3 FORTRAN I Features Not Yet Implemented in FORTRAN II Parser
+### 8.3 FORTRAN I Features Not Included in FORTRAN II Statement Set
 
-The following FORTRAN I (C28-6003) features are not directly implemented
-in the FORTRAN II parser. They are handled at the FORTRAN I level or
-remain as gaps:
+The following FORTRAN I (C28-6003) features are either implemented only
+at the FORTRAN I level (not wired into the FORTRAN II `statement_body`)
+or are out of scope for the current grammar:
 
 | Statement Form                       | Grammar Rule(s)                | Status          |
 |--------------------------------------|--------------------------------|-----------------|
-| ASSIGN i TO n                        | (FORTRAN I: `assign_stmt`)     | Gap: see #141   |
-| GO TO n, (n1, n2, ...)               | (FORTRAN I: `assigned_goto_stmt`) | Gap: see #141 |
-| IF (SENSE SWITCH i) n1, n2           | (FORTRAN I: `if_stmt_sense_switch`) | Inherited     |
-| IF (SENSE LIGHT i) n1, n2            | (FORTRAN I: `if_stmt_sense_light`) | Inherited     |
-| IF ACCUMULATOR OVERFLOW n1, n2       | (FORTRAN I: see FORTRANParser) | Inherited       |
-| IF QUOTIENT OVERFLOW n1, n2          | (FORTRAN I: see FORTRANParser) | Inherited       |
-| IF DIVIDE CHECK n1, n2               | (FORTRAN I: see FORTRANParser) | Inherited       |
-| SENSE LIGHT i                        | (FORTRAN I: `sense_light_stmt`) | Inherited      |
-| READ INPUT TAPE i, n, list           | Not implemented                | Gap: see #153   |
-| READ TAPE i, list                    | Not implemented                | Gap: see #153   |
-| READ DRUM i, j, list                 | Not implemented                | Gap: see #153   |
-| WRITE OUTPUT TAPE i, n, list         | Not implemented                | Gap: see #153   |
-| WRITE TAPE i, list                   | Not implemented                | Gap: see #153   |
-| WRITE DRUM i, j, list                | Not implemented                | Gap: see #153   |
-| END FILE i                           | Not implemented                | Gap: see #153   |
-| REWIND i                             | Not implemented                | Gap: see #153   |
-| BACKSPACE i                          | Not implemented                | Gap: see #153   |
+| ASSIGN i TO n                        | (FORTRAN I: `assign_stmt`)     | FORTRAN I only  |
+| GO TO n, (n1, n2, ...)               | (FORTRAN I: `assigned_goto_stmt`) | FORTRAN I only |
+| IF (SENSE SWITCH i) n1, n2           | (FORTRAN I: `if_stmt_sense_switch`) | FORTRAN I only |
+| IF (SENSE LIGHT i) n1, n2            | (FORTRAN I: `if_stmt_sense_light`) | FORTRAN I only |
+| IF ACCUMULATOR OVERFLOW n1, n2       | (FORTRAN I: see FORTRANParser) | FORTRAN I only  |
+| IF QUOTIENT OVERFLOW n1, n2          | (FORTRAN I: see FORTRANParser) | FORTRAN I only  |
+| IF DIVIDE CHECK n1, n2               | (FORTRAN I: see FORTRANParser) | FORTRAN I only  |
+| SENSE LIGHT i                        | (FORTRAN I: `sense_light_stmt`) | FORTRAN I only |
+| READ INPUT TAPE i, n, list           | Not implemented                | Out of scope    |
+| READ TAPE i, list                    | Not implemented                | Out of scope    |
+| READ DRUM i, j, list                 | Not implemented                | Out of scope    |
+| WRITE OUTPUT TAPE i, n, list         | Not implemented                | Out of scope    |
+| WRITE TAPE i, list                   | Not implemented                | Out of scope    |
+| WRITE DRUM i, j, list                | Not implemented                | Out of scope    |
+| END FILE i                           | Not implemented                | Out of scope    |
+| REWIND i                             | Not implemented                | Out of scope    |
+| BACKSPACE i                          | Not implemented                | Out of scope    |
 
-### 8.4 Gaps Requiring Follow-up Issues
+### 8.4 Implementation Status
 
-The following gaps have been identified during this crosswalk and are
-tracked by existing issues:
+The following features from the original IBM 704 FORTRAN II context have
+been addressed:
 
-- **#141**: FORTRAN 1957 historical stub promotion (general coverage,
-  includes ASSIGN/assigned GO TO)
+- **ASSIGN/assigned GO TO**: Implemented and tested in `FORTRANParser.g4`
+  as part of the FORTRAN I grammar (issue #141, closed). These constructs
+  are not yet wired into the FORTRAN II `statement_body` and therefore
+  remain FORTRAN I–only in this repository.
+- **FORMAT and Hollerith**: Implemented (issue #154, closed)
+- **Sense switch/light and hardware IFs**: Implemented in FORTRAN I parser
+  and available via the FORTRAN I entry points
+
+The following enhancement remains open:
+
 - **#143**: FORTRAN II strict fixed-form card layout semantics
-- **#153**: Full 704 I/O statement family (READ/WRITE/TAPE/DRUM/END FILE/
-  REWIND/BACKSPACE)
-- **#154**: FORMAT grammar and Hollerith constants
 
-All identified gaps have corresponding GitHub issues; no new issues
-required from this crosswalk.
+The following features are explicitly out of scope for the current
+simplified grammar:
+
+- Tape/drum I/O forms (READ INPUT TAPE, WRITE OUTPUT TAPE, READ/WRITE
+  TAPE/DRUM) and auxiliary file control (END FILE, REWIND, BACKSPACE)
+  are not implemented. These were closed as out of scope (issue #153).
 
 ## 9. Summary
 
