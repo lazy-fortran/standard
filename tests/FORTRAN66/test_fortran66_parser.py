@@ -495,6 +495,126 @@ class TestFORTRAN66Parser(unittest.TestCase):
         tree = self.parse(program, 'main_program')
         self.assertIsNotNone(tree)
 
+    # ====================================================================
+    # FORTRAN 66 DATA STATEMENT (X3.9-1966 Section 7.2)
+    # ====================================================================
+
+    def test_data_statement_simple(self):
+        """Test simple DATA statement (X3.9-1966 Section 7.2)"""
+        test_cases = [
+            "DATA X /1.0/",
+            "DATA I /1/",
+            "DATA FLAG /.TRUE./",
+            "DATA X, Y /1.0, 2.0/",
+            "DATA I, J, K /1, 2, 3/",
+        ]
+
+        for text in test_cases:
+            with self.subTest(data_stmt=text):
+                tree = self.parse(text, 'data_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_data_statement_repeat_count(self):
+        """Test DATA statement with repeat count (X3.9-1966 Section 7.2)"""
+        test_cases = [
+            "DATA A /3*0.0/",
+            "DATA ARR /10*1/",
+            "DATA X, Y, Z /3*0.0/",
+            "DATA MAT /25*1.0/",
+        ]
+
+        for text in test_cases:
+            with self.subTest(data_stmt=text):
+                tree = self.parse(text, 'data_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_data_statement_multiple_sets(self):
+        """Test DATA statement with multiple initialization sets"""
+        test_cases = [
+            "DATA X /1.0/, Y /2.0/",
+            "DATA I /1/, J /2/, K /3/",
+            "DATA A, B /1.0, 2.0/, C /3.0/",
+        ]
+
+        for text in test_cases:
+            with self.subTest(data_stmt=text):
+                tree = self.parse(text, 'data_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_data_statement_signed_constants(self):
+        """Test DATA statement with signed constants"""
+        test_cases = [
+            "DATA X /-1.0/",
+            "DATA I /+5/",
+            "DATA A, B /+1.0, -2.0/",
+        ]
+
+        for text in test_cases:
+            with self.subTest(data_stmt=text):
+                tree = self.parse(text, 'data_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_data_statement_array_elements(self):
+        """Test DATA statement with array elements"""
+        test_cases = [
+            "DATA ARR(1) /1.0/",
+            "DATA ARR(1), ARR(2) /1.0, 2.0/",
+            "DATA MAT(1,1), MAT(2,2) /1.0, 1.0/",
+        ]
+
+        for text in test_cases:
+            with self.subTest(data_stmt=text):
+                tree = self.parse(text, 'data_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_data_statement_implied_do(self):
+        """Test DATA statement with implied DO loop (X3.9-1966 Section 7.2)"""
+        test_cases = [
+            "DATA (ARR(I), I=1,10) /10*0.0/",
+            "DATA (A(I), I=1,5) /1.0, 2.0, 3.0, 4.0, 5.0/",
+        ]
+
+        for text in test_cases:
+            with self.subTest(data_stmt=text):
+                tree = self.parse(text, 'data_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_data_statement_in_statement_body(self):
+        """Test DATA as statement_body alternative"""
+        test_cases = [
+            "DATA X /1.0/",
+            "DATA I, J /1, 2/",
+            "DATA ARR /10*0.0/",
+        ]
+
+        for text in test_cases:
+            with self.subTest(stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree)
+
+    def test_data_statement_fixture(self):
+        """Test program with DATA statements"""
+        program = load_fixture(
+            "FORTRAN66",
+            "test_fortran66_parser",
+            "data_stmt.f",
+        )
+
+        tree = self.parse(program, 'main_program')
+        self.assertIsNotNone(tree)
+
+    def test_data_in_block_data(self):
+        """Test DATA statement in BLOCK DATA subprogram"""
+        test_cases = [
+            "BLOCKDATA\nCOMMON X, Y, Z\nDATA X, Y, Z /1.0, 2.0, 3.0/\nEND",
+            "BLOCKDATA INIT\nCOMMON /BLK/ A, B\nDATA A, B /0.0, 0.0/\nEND",
+        ]
+
+        for text in test_cases:
+            with self.subTest(block_data=text):
+                tree = self.parse(text, 'block_data_subprogram')
+                self.assertIsNotNone(tree)
+
 
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail

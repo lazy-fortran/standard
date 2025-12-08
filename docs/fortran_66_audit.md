@@ -269,14 +269,22 @@ Mapping these families to the current grammar:
       - Supported syntactically via `function_reference` and inherited
         1957/II mechanisms; the grammar does not distinguish statement
         functions from external functions at the syntax level.
-  - Partially implemented / missing:
     - DATA:
-      - The standard defines a DATA statement for initialization
-        (including in BLOCK DATA). The current grammar has no `DATA`
-        token in `FORTRAN66Lexer.g4` and no `data_stmt` rule; BLOCK
-        DATA initialization is modeled only via type declarations and
-        assignments.
-      - Effect: any conforming DATA statements are rejected.
+      - Lexer: `DATA` token defined in `FORTRAN66Lexer.g4`.
+      - Parser: `data_stmt` rule implemented in `FORTRAN66Parser.g4`
+        per X3.9-1966 Section 7.2, wired into both `statement_body`
+        and `data_initialization_body` (for BLOCK DATA).
+      - Syntax: `DATA nlist /clist/, nlist /clist/, ...` where:
+        - `nlist` = list of variables, array elements, or implied DO loops
+        - `clist` = list of constants with optional repeat count (e.g., `3*0.0`)
+      - Supports: simple variables, array elements, implied DO loops,
+        signed constants, and repeat counts.
+      - Tests: covered by `test_data_statement_simple`,
+        `test_data_statement_repeat_count`, `test_data_statement_multiple_sets`,
+        `test_data_statement_signed_constants`, `test_data_statement_array_elements`,
+        `test_data_statement_implied_do`, `test_data_statement_in_statement_body`,
+        `test_data_statement_fixture`, and `test_data_in_block_data` in
+        `tests/FORTRAN66/test_fortran66_parser.py`.
     - EXTERNAL / INTRINSIC:
       - Lexer: `EXTERNAL` and `INTRINSIC` tokens exist.
       - Parser: `external_stmt` and `intrinsic_stmt` rules are
@@ -364,14 +372,17 @@ The FORTRAN 66 grammar in this repository:
 - Implements GO TO assignment (`ASSIGN k TO i`) and assigned GO TO
   (`GO TO i, (k1, k2, ...)`) per X3.9-1966 Sections 7.1.1.3 and 7.1.2.1.2.
   (NON-COMPLIANT: both are deleted features per ISO/IEC 1539-1:2018 Annex B.2)
-- Does **not** yet implement the DATA statement for initialization.
+- Implements the DATA statement for compile-time initialization per
+  X3.9-1966 Section 7.2, including:
+  - Simple variable and array element initialization
+  - Implied DO loops for array initialization
+  - Repeat counts for constant values
+  - Integration with BLOCK DATA subprograms
 - Still rejects some richer, spec-inspired fixtures, which are
   tracked as XPASS in the generic fixture harness.
 
 Future work should:
 
-- Add explicit grammar rules and tests for the missing DATA statement
-  if full FORTRAN 66 coverage is desired.
 - Align the generic fixture parser entry rule and expectations for
   FORTRAN 66 with the dedicated `fortran66_program` rule.
 - Use the XPASS fixtures as a concrete checklist for closing the
