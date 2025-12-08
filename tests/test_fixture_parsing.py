@@ -450,45 +450,8 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
         "historical usage than the simplified grammar accepts and currently "
         "reports {errors} syntax errors."
     ),
-    (
-        "FORTRAN66",
-        Path("FORTRAN66/test_fortran66_parser/first_standard_demo.f"),
-    ): (
-        "FORTRAN 66 first-standard demo fixture {relpath} is more ambitious "
-        "than the simplified grammar and still produces {errors} syntax "
-        "errors."
-    ),
-    (
-        "FORTRAN66",
-        Path("FORTRAN66/test_fortran66_parser/function_program.f"),
-    ): (
-        "FORTRAN 66 function-program fixture {relpath} exercises constructs "
-        "that are only partially modeled in the current grammar and reports "
-        "{errors} syntax errors."
-    ),
-    (
-        "FORTRAN66",
-        Path("FORTRAN66/test_fortran66_parser/main_program.f"),
-    ): (
-        "FORTRAN 66 main-program fixture {relpath} still yields {errors} "
-        "syntax errors; the historical grammar is intentionally simplified."
-    ),
-    (
-        "FORTRAN66",
-        Path("FORTRAN66/test_fortran66_parser/standard_program.f"),
-    ): (
-        "FORTRAN 66 standard-program fixture {relpath} is a richer example "
-        "than the stub grammar supports and is expected to report {errors} "
-        "syntax errors."
-    ),
-    (
-        "FORTRAN66",
-        Path("FORTRAN66/test_fortran66_parser/subroutine_program.f"),
-    ): (
-        "FORTRAN 66 subroutine-program fixture {relpath} currently produces "
-        "{errors} syntax errors; full historical coverage is out of scope for "
-        "the simplified grammar."
-    ),
+    # FORTRAN 66 fixtures have been updated to parse correctly with the
+    # enhanced grammar per issue #144. They are no longer marked as XPASS.
     # Fortran2003 negative / fixed-form fixtures that intentionally exercise
     # error paths or comment-handling edge cases. These are tied to specific
     # Fortran 2003 issues in the audit document.

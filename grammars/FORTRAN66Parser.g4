@@ -100,19 +100,51 @@ logical_if_stmt
 // ====================================================================
 
 // FORTRAN 66 program with standardized program units
+// Per X3.9-1966, a FORTRAN program consists of one or more program units
+// (main program, external functions, external subroutines, block data)
+// compiled separately or together in sequence.
 fortran66_program
-    : (main_program | subprogram | block_data_subprogram) EOF
+    : NEWLINE* program_unit+ NEWLINE* EOF
+    ;
+
+// A program unit is a main program, subprogram, or block data unit
+// Main program must be distinguished from subprograms; a main program
+// ends with END and does not start with SUBROUTINE or FUNCTION.
+program_unit
+    : subprogram                // Check subprogram first (has leading keyword)
+    | block_data_subprogram     // BLOCK DATA has leading keyword
+    | main_program              // Main program: statements ending with END
     ;
 
 // Main program (standardized from FORTRAN IV)
+// A main program is a sequence of statements ending with END.
+// It does not have a leading SUBROUTINE, FUNCTION, or BLOCK DATA keyword.
 main_program
-    : statement_list
+    : statement+ end_stmt NEWLINE?
     ;
 
 // Subprograms (functions and subroutines from FORTRAN IV)
 subprogram
     : subroutine_subprogram
     | function_subprogram
+    ;
+
+// Override subroutine_subprogram to use explicit END handling
+// for proper multiple program unit support.
+// Leading NEWLINE* allows blank lines between program units.
+subroutine_subprogram
+    : NEWLINE* SUBROUTINE IDENTIFIER parameter_list? NEWLINE
+      statement*
+      end_stmt NEWLINE?
+    ;
+
+// Override function_subprogram to use explicit END handling
+// for proper multiple program unit support.
+// Leading NEWLINE* allows blank lines between program units.
+function_subprogram
+    : NEWLINE* type_spec? FUNCTION IDENTIFIER parameter_list NEWLINE
+      statement*
+      end_stmt NEWLINE?
     ;
 
 // BLOCK DATA subprogram (NEW standardized unit in FORTRAN 66)
@@ -169,6 +201,8 @@ label
     ;
 
 // All statement types standardized in FORTRAN 66
+// NOTE: end_stmt is NOT included here - it is handled separately as a
+// program unit terminator to enable parsing multiple program units.
 statement_body
     : assignment_stmt      // Variable = Expression
     | goto_stmt           // Unconditional jump to labeled statement
@@ -187,7 +221,6 @@ statement_body
     | equivalence_stmt   // Variable memory overlay
     | common_stmt        // Global variable declarations
     | type_declaration  // Variable type declarations
-    | end_stmt          // End of program
     | return_stmt       // Return from subprogram
     | call_stmt         // Call subroutine
     ;
@@ -195,6 +228,64 @@ statement_body
 // Variable list for declarations
 variable_list
     : variable (COMMA variable)*
+    ;
+
+// ====================================================================
+// FORTRAN 66 (1966) - DO STATEMENT OVERRIDE
+// ====================================================================
+// Override do_stmt from FORTRANIIParser to use EQUALS (=) instead of
+// ASSIGN keyword. Per ANSI X3.9-1966 Section 7.1.2.8, the DO statement
+// syntax is: DO s i = e1, e2 [, e3]
+// where = is the equals sign, not the ASSIGN keyword.
+do_stmt
+    : DO label variable EQUALS expr COMMA expr (COMMA expr)?
+    ;
+
+// ====================================================================
+// FORTRAN 66 (1966) - LITERAL OVERRIDE
+// ====================================================================
+// Override literal to accept LABEL tokens as integers. Due to lexer
+// token precedence, LABEL is defined before INTEGER_LITERAL in
+// FORTRANIILexer and matches first for 1-5 digit numbers like 100.
+// This allows expressions like PRINT 100 to parse correctly.
+literal
+    : INTEGER_LITERAL
+    | LABEL                     // Accept LABEL as integer (token precedence)
+    | REAL_LITERAL
+    | logical_literal           // From FORTRAN IV (1962)
+    ;
+
+// ====================================================================
+// FORTRAN 66 (1966) - FORMAT DESCRIPTOR OVERRIDE
+// ====================================================================
+// Override format handling to properly parse FORTRAN 66 format specs
+// like I5, F10.2, E15.6, etc. The lexer tokenizes F10.2 as F10 (IDENTIFIER)
+// followed by .2 (REAL_LITERAL), so we need to handle this combination.
+// Per ANSI X3.9-1966 Section 7.2.3, format descriptors include:
+// - Iw (integer), Fw.d (float), Ew.d (exponential), Dw.d (double)
+// - Gw.d (general), Aw (character), Lw (logical)
+// - nX (skip), nP (scale factor), nHc...c (Hollerith)
+
+format_item
+    : format_repeat_count? format_descriptor_full
+    | HOLLERITH
+    ;
+
+format_repeat_count
+    : INTEGER_LITERAL
+    | LABEL
+    ;
+
+// Full format descriptor including optional decimal and exponent parts
+// Handles cases like F10, F10.2, E15.6E2, etc.
+format_descriptor_full
+    : IDENTIFIER format_decimal_part?
+    ;
+
+// Decimal part of format descriptor (.d or .dEe)
+// The lexer produces .2 as REAL_LITERAL for .2
+format_decimal_part
+    : REAL_LITERAL              // Handles .2, .6E2, etc.
     ;
 
 // ====================================================================
