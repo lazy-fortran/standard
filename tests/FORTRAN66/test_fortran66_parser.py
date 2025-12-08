@@ -683,6 +683,105 @@ class TestFORTRAN66Parser(unittest.TestCase):
         tree = self.parse(program, 'main_program')
         self.assertIsNotNone(tree)
 
+    # ====================================================================
+    # NEGATIVE TESTS: array element assignments vs statement_function_stmt
+    # ====================================================================
+    # Per X3.9-1966 Section 7.2, statement function dummy arguments must be
+    # simple identifiers, not arbitrary expressions. Array element assignments
+    # like A(1) = expr or A(I+1, J) = expr should NOT parse as statement
+    # functions; they must parse as assignment_stmt instead.
+    # ====================================================================
+
+    def test_array_element_not_statement_function_literal_index(self):
+        """Verify array element with literal index is NOT a statement function"""
+        test_cases = [
+            "A(1) = 2.0",
+            "B(100) = X",
+            "MAT(1, 2) = 3.0",
+            "ARR(1, 2, 3) = Y",
+        ]
+
+        for text in test_cases:
+            with self.subTest(array_assignment=text):
+                input_stream = InputStream(text)
+                lexer = FORTRAN66Lexer(input_stream)
+                token_stream = CommonTokenStream(lexer)
+                parser = FORTRAN66Parser(token_stream)
+                parser.statement_function_stmt()
+                self.assertGreater(
+                    parser.getNumberOfSyntaxErrors(), 0,
+                    f"'{text}' should NOT parse as statement_function_stmt"
+                )
+
+    def test_array_element_not_statement_function_expr_index(self):
+        """Verify array element with expression index is NOT a statement function"""
+        test_cases = [
+            "A(I+1) = X",
+            "B(2*J) = Y",
+            "C(I-1, J+1) = Z",
+            "D(N/2) = W",
+        ]
+
+        for text in test_cases:
+            with self.subTest(array_assignment=text):
+                input_stream = InputStream(text)
+                lexer = FORTRAN66Lexer(input_stream)
+                token_stream = CommonTokenStream(lexer)
+                parser = FORTRAN66Parser(token_stream)
+                parser.statement_function_stmt()
+                self.assertGreater(
+                    parser.getNumberOfSyntaxErrors(), 0,
+                    f"'{text}' should NOT parse as statement_function_stmt"
+                )
+
+    def test_array_element_parses_as_assignment_stmt(self):
+        """Verify array element assignments parse correctly as assignment_stmt"""
+        test_cases = [
+            "A(1) = 2.0",
+            "B(I+1) = X * Y",
+            "MAT(1, 2) = 3.0",
+            "C(I-1, J+1) = Z",
+            "ARR(N/2) = W + 1.0",
+        ]
+
+        for text in test_cases:
+            with self.subTest(array_assignment=text):
+                input_stream = InputStream(text)
+                lexer = FORTRAN66Lexer(input_stream)
+                token_stream = CommonTokenStream(lexer)
+                parser = FORTRAN66Parser(token_stream)
+                tree = parser.assignment_stmt()
+                self.assertIsNotNone(tree)
+                self.assertEqual(
+                    parser.getNumberOfSyntaxErrors(), 0,
+                    f"'{text}' should parse as assignment_stmt without errors"
+                )
+
+    def test_statement_body_disambiguates_array_vs_function(self):
+        """Verify statement_body correctly parses array elements as assignments"""
+        test_cases = [
+            ("F(X) = X * X", "Statement_function_stmt"),
+            ("A(1) = 2.0", "Assignment_stmt"),
+            ("B(I+1) = X", "Assignment_stmt"),
+            ("SUM(A, B) = A + B", "Statement_function_stmt"),
+            ("MAT(1, 2) = 3.0", "Assignment_stmt"),
+        ]
+
+        for text, expected_type in test_cases:
+            with self.subTest(stmt=text, expected=expected_type):
+                input_stream = InputStream(text)
+                lexer = FORTRAN66Lexer(input_stream)
+                token_stream = CommonTokenStream(lexer)
+                parser = FORTRAN66Parser(token_stream)
+                tree = parser.statement_body()
+                self.assertIsNotNone(tree)
+                child = tree.getChild(0)
+                child_type = type(child).__name__
+                self.assertIn(
+                    expected_type, child_type,
+                    f"'{text}' should parse as {expected_type}, got {child_type}"
+                )
+
 
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail
