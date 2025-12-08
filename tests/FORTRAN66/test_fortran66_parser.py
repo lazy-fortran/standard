@@ -284,23 +284,79 @@ class TestFORTRAN66Parser(unittest.TestCase):
             "READY = .TRUE.",
             "FLAG = .FALSE.",
             "RESULT = READY .AND. FLAG",
-            
+
             # Double precision literals
             "PI = 3.14159265358979D0",
-            
+
             # Complex literals
             "Z = (1.0, 2.0)",
             "IMPEDANCE = (3.0, 4.0)",
-            
+
             # Mixed mode arithmetic
             "X = I + 3.14",
         ]
-        
+
         for test_code in test_cases:
             with self.subTest(code=test_code):
                 tree = self.parse(test_code, 'assignment_stmt')
                 self.assertIsNotNone(tree)
                 self.assertTrue(len(str(tree.getText())) > 5)
+
+    # ====================================================================
+    # FORTRAN 66 EXTERNAL AND INTRINSIC STATEMENTS (X3.9-1966 Section 7.2)
+    # ====================================================================
+
+    def test_external_statement(self):
+        """Test EXTERNAL statement (X3.9-1966 Section 7.2)"""
+        test_cases = [
+            "EXTERNAL F",
+            "EXTERNAL MYFUNC",
+            "EXTERNAL F, G",
+            "EXTERNAL MYFUNC, MYSUB, HELPER",
+        ]
+
+        for text in test_cases:
+            with self.subTest(external_stmt=text):
+                tree = self.parse(text, 'external_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_intrinsic_statement(self):
+        """Test INTRINSIC statement (X3.9-1966 Section 7.2)"""
+        test_cases = [
+            "INTRINSIC SIN",
+            "INTRINSIC COS",
+            "INTRINSIC SIN, COS",
+            "INTRINSIC SIN, COS, SQRT, ABS",
+            "INTRINSIC ATAN2, MAX, MIN",
+        ]
+
+        for text in test_cases:
+            with self.subTest(intrinsic_stmt=text):
+                tree = self.parse(text, 'intrinsic_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_external_intrinsic_in_program(self):
+        """Test EXTERNAL and INTRINSIC as statement_body alternatives"""
+        test_cases = [
+            "EXTERNAL F",
+            "INTRINSIC SIN",
+        ]
+
+        for text in test_cases:
+            with self.subTest(stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree)
+
+    def test_external_intrinsic_fixture(self):
+        """Test program with EXTERNAL and INTRINSIC declarations"""
+        program = load_fixture(
+            "FORTRAN66",
+            "test_fortran66_parser",
+            "external_intrinsic.f",
+        )
+
+        tree = self.parse(program, 'main_program')
+        self.assertIsNotNone(tree)
 
 
 if __name__ == "__main__":
