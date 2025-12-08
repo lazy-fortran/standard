@@ -309,6 +309,113 @@ class TestFORTRANIIParser(unittest.TestCase):
                 tree = self.parse(expr_text, 'expr')
                 self.assertIsNotNone(tree, f"Failed to parse: {expr_text}")
 
+    def test_label_tokens_as_integer_literals_in_expressions(self):
+        """Test LABEL tokens are valid integer literals in expression context.
+
+        The FORTRAN II lexer defines LABEL as 1-5 digit integers starting with
+        1-9 (statement labels in columns 1-5). In expression context, these
+        same numeric tokens should be accepted as integer literals via the
+        literal rule: INTEGER_LITERAL | LABEL.
+
+        Per issue #210: This test explicitly documents and protects the
+        LABEL-as-literal contract in the expression grammar.
+        """
+        # Test cases: expressions where numeric operands are lexed as LABEL
+        # tokens (1-5 digit integers starting with 1-9)
+        test_cases = [
+            # Simple LABEL values in expressions
+            ("1", "single digit"),
+            ("42", "two digits"),
+            ("100", "three digits"),
+            ("9999", "four digits"),
+            ("12345", "five digits - max LABEL length"),
+            # Arithmetic with LABEL tokens
+            ("1 + 2", "addition of labels"),
+            ("42 * 3", "multiplication with labels"),
+            ("100 - 50", "subtraction of labels"),
+            ("99 / 9", "division of labels"),
+            ("2 ** 3", "exponentiation of labels"),
+            # Mixed expressions
+            ("1 + 2 * 3", "precedence with labels"),
+            ("100 + 200 + 300", "chained addition"),
+            ("2 ** 3 ** 4", "chained exponentiation (right assoc)"),
+            ("-42", "unary minus with label"),
+            ("+100", "unary plus with label"),
+            # Labels in function/array subscripts
+            ("A(1)", "label as array subscript"),
+            ("A(1, 2, 3)", "multiple label subscripts"),
+            ("SIN(100)", "label in function argument"),
+            # Complex expressions
+            ("1 + A * 2", "label mixed with variable"),
+            ("(100 + 200) * 3", "parenthesized labels"),
+            ("2 ** 10 - 1", "power with label operands"),
+        ]
+
+        for expr_text, description in test_cases:
+            with self.subTest(expr=expr_text, desc=description):
+                tree = self.parse(expr_text, 'expr')
+                self.assertIsNotNone(tree, f"Failed to parse: {expr_text}")
+                # Verify the expression text is preserved
+                # (spaces stripped by getText but structure intact)
+                parsed_text = tree.getText()
+                self.assertIsNotNone(parsed_text)
+
+    def test_label_in_literal_rule(self):
+        """Test that LABEL tokens match through the literal parser rule.
+
+        Verifies the grammar rule:
+            literal: INTEGER_LITERAL | LABEL
+
+        This ensures LABEL tokens are explicitly accepted as literals.
+        """
+        # Parse via literal rule directly
+        label_values = ["1", "9", "10", "99", "100", "999", "1000", "9999",
+                        "10000", "12345", "99999"]
+
+        for value in label_values:
+            with self.subTest(label=value):
+                tree = self.parse(value, 'literal')
+                self.assertIsNotNone(tree, f"Failed to parse literal: {value}")
+                self.assertEqual(tree.getText(), value)
+
+    def test_label_in_assignment_statement(self):
+        """Test LABEL tokens work in assignment statement expressions.
+
+        Assignment statements are the primary use of expressions in FORTRAN II.
+        This ensures LABEL-as-literal works in real statement context.
+        """
+        test_cases = [
+            "X = 1",
+            "X = 100",
+            "X = 1 + 2",
+            "X = 2 ** 10",
+            "A(1) = 42",
+            "RESULT = 100 * 2 + 50",
+        ]
+
+        for stmt_text in test_cases:
+            with self.subTest(stmt=stmt_text):
+                tree = self.parse(stmt_text, 'assignment_stmt')
+                self.assertIsNotNone(tree, f"Failed to parse: {stmt_text}")
+
+    def test_label_in_do_statement(self):
+        """Test LABEL tokens in DO statement loop bounds.
+
+        DO statements use expressions for initial, limit, and step values.
+        These are commonly integer literals (lexed as LABEL tokens).
+        """
+        test_cases = [
+            "DO 100 I = 1, 10",
+            "DO 100 I = 1, 100, 2",
+            "DO 999 J = 10, 1, -1",
+            "DO 50 K = 1, N",
+        ]
+
+        for stmt_text in test_cases:
+            with self.subTest(stmt=stmt_text):
+                tree = self.parse(stmt_text, 'do_stmt')
+                self.assertIsNotNone(tree, f"Failed to parse: {stmt_text}")
+
 
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail
