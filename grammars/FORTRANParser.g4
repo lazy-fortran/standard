@@ -43,9 +43,17 @@ statement_body
     | frequency_stmt
     | read_stmt_basic
     | write_stmt_basic
+    | pause_stmt
     | CONTINUE
     | STOP
     | END
+    ;
+
+// PAUSE statement (1957 operator intervention)
+// PAUSE or PAUSE n (where n is an optional integer)
+// Per IBM 704 FORTRAN manual Appendix B
+pause_stmt
+    : PAUSE (INTEGER_LITERAL)?
     ;
 
 // Assignment statement (universal since 1957)
