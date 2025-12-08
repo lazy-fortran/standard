@@ -348,46 +348,52 @@ These are inherited from `FORTRANParser.g4` or redefined in
 | PRINT n, list                        | `print_stmt`                   | Implemented     |
 | PUNCH n, list                        | `punch_stmt`                   | Implemented     |
 
-### 8.3 FORTRAN I Features Not Yet Implemented in FORTRAN II Parser
+### 8.3 FORTRAN I Features Inherited or Out of Scope
 
-The following FORTRAN I (C28-6003) features are not directly implemented
-in the FORTRAN II parser. They are handled at the FORTRAN I level or
-remain as gaps:
+The following FORTRAN I (C28-6003) features are either inherited from
+the FORTRAN I parser or are out of scope for the current grammar:
 
 | Statement Form                       | Grammar Rule(s)                | Status          |
 |--------------------------------------|--------------------------------|-----------------|
-| ASSIGN i TO n                        | (FORTRAN I: `assign_stmt`)     | Gap: see #141   |
-| GO TO n, (n1, n2, ...)               | (FORTRAN I: `assigned_goto_stmt`) | Gap: see #141 |
+| ASSIGN i TO n                        | (FORTRAN I: `assign_stmt`)     | Inherited       |
+| GO TO n, (n1, n2, ...)               | (FORTRAN I: `assigned_goto_stmt`) | Inherited    |
 | IF (SENSE SWITCH i) n1, n2           | (FORTRAN I: `if_stmt_sense_switch`) | Inherited     |
 | IF (SENSE LIGHT i) n1, n2            | (FORTRAN I: `if_stmt_sense_light`) | Inherited     |
 | IF ACCUMULATOR OVERFLOW n1, n2       | (FORTRAN I: see FORTRANParser) | Inherited       |
 | IF QUOTIENT OVERFLOW n1, n2          | (FORTRAN I: see FORTRANParser) | Inherited       |
 | IF DIVIDE CHECK n1, n2               | (FORTRAN I: see FORTRANParser) | Inherited       |
 | SENSE LIGHT i                        | (FORTRAN I: `sense_light_stmt`) | Inherited      |
-| READ INPUT TAPE i, n, list           | Not implemented                | Gap: see #153   |
-| READ TAPE i, list                    | Not implemented                | Gap: see #153   |
-| READ DRUM i, j, list                 | Not implemented                | Gap: see #153   |
-| WRITE OUTPUT TAPE i, n, list         | Not implemented                | Gap: see #153   |
-| WRITE TAPE i, list                   | Not implemented                | Gap: see #153   |
-| WRITE DRUM i, j, list                | Not implemented                | Gap: see #153   |
-| END FILE i                           | Not implemented                | Gap: see #153   |
-| REWIND i                             | Not implemented                | Gap: see #153   |
-| BACKSPACE i                          | Not implemented                | Gap: see #153   |
+| READ INPUT TAPE i, n, list           | Not implemented                | Out of scope    |
+| READ TAPE i, list                    | Not implemented                | Out of scope    |
+| READ DRUM i, j, list                 | Not implemented                | Out of scope    |
+| WRITE OUTPUT TAPE i, n, list         | Not implemented                | Out of scope    |
+| WRITE TAPE i, list                   | Not implemented                | Out of scope    |
+| WRITE DRUM i, j, list                | Not implemented                | Out of scope    |
+| END FILE i                           | Not implemented                | Out of scope    |
+| REWIND i                             | Not implemented                | Out of scope    |
+| BACKSPACE i                          | Not implemented                | Out of scope    |
 
-### 8.4 Gaps Requiring Follow-up Issues
+### 8.4 Implementation Status
 
-The following gaps have been identified during this crosswalk and are
-tracked by existing issues:
+The following features from the original IBM 704 FORTRAN II spec have
+been addressed:
 
-- **#141**: FORTRAN 1957 historical stub promotion (general coverage,
-  includes ASSIGN/assigned GO TO)
+- **ASSIGN/assigned GO TO**: Implemented in FORTRAN I parser and inherited
+  by FORTRAN II (see `assign_stmt`, `assigned_goto_stmt` in FORTRANParser.g4)
+- **FORMAT and Hollerith**: Implemented (issue #154, closed)
+- **Sense switch/light and hardware IFs**: Implemented in FORTRAN I parser
+  and inherited by FORTRAN II
+
+The following enhancement remains open:
+
 - **#143**: FORTRAN II strict fixed-form card layout semantics
-- **#153**: Full 704 I/O statement family (READ/WRITE/TAPE/DRUM/END FILE/
-  REWIND/BACKSPACE)
-- **#154**: FORMAT grammar and Hollerith constants
 
-All identified gaps have corresponding GitHub issues; no new issues
-required from this crosswalk.
+The following features are explicitly out of scope for the current
+simplified grammar:
+
+- Tape/drum I/O forms (READ INPUT TAPE, WRITE OUTPUT TAPE, READ/WRITE
+  TAPE/DRUM) and auxiliary file control (END FILE, REWIND, BACKSPACE)
+  are not implemented. These were closed as out of scope (issue #153).
 
 ## 9. Summary
 
