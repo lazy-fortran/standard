@@ -467,7 +467,170 @@ Consequences:
   - They do not exercise many F95 areas that are already partially
     modeled in the grammar (type rules, I/O refinements, etc.).
 
-## 11. Summary and issue mapping
+## 11. ISO/IEC 1539-1:1997 Spec-Grammar Cross-Walk
+
+This section provides a comprehensive mapping between the ISO/IEC 1539-1:1997
+standard sections and the corresponding grammar rules in this repository.
+The cross-walk is organized by standard section for easy reference.
+
+### Section 4 - Types (R401-R435)
+
+| Spec Rule | ISO Section | Grammar Rule | Status |
+|-----------|-------------|--------------|--------|
+| R402 literal-constant | 4.3 | `literal_f95` | Implemented |
+| R404 intrinsic-type-spec | 4.3 | `intrinsic_type_spec_f95` | Implemented |
+| R424 derived-type-def | 4.4.1 | `derived_type_def_f95` | Implemented |
+| R429 component-decl | 4.4.1 | `entity_decl_f95` | Implemented (default init) |
+| R430 structure-constructor | 4.4.6 | `structure_constructor_f95` | Implemented |
+| R431 array-constructor | 4.5 | `array_constructor_f95` | Implemented (only `(/ /)` form) |
+| R434 ac-value | 4.5 | `ac_value_f95` | Implemented |
+| R435 ac-implied-do | 4.5 | `ac_implied_do_f95` | Implemented |
+
+### Section 5 - Data Object Declarations (R501-R534)
+
+| Spec Rule | ISO Section | Grammar Rule | Status |
+|-----------|-------------|--------------|--------|
+| R501 type-declaration-stmt | 5.1 | `type_declaration_stmt_f95` | Implemented |
+| R502 type-spec | 5.1 | `type_spec_f95` | Implemented |
+| R503 attr-spec | 5.1 | `attr_spec_f95` | Implemented |
+| R504 entity-decl | 5.1 | `entity_decl_f95` | Implemented |
+| R506 kind-selector | 5.1 | `kind_selector_f95` | Implemented |
+| R507 char-selector | 5.1 | `char_selector_f95` | Implemented |
+| R509 array-spec | 5.1.2 | `array_spec_f95` | Implemented |
+| R510-R511 explicit-shape-spec | 5.1.2.1 | `explicit_shape_spec_f95` | Implemented |
+| R512-R513 assumed-shape-spec | 5.1.2.2 | `assumed_shape_spec_f95` | Implemented |
+| R515-R516 deferred-shape-spec | 5.1.2.3 | `deferred_shape_spec_f95` | Implemented |
+| R517 assumed-size-spec | 5.1.2.4 | `assumed_size_spec_f95` | Implemented |
+
+### Section 6 - Use of Data Objects (R601-R626)
+
+| Spec Rule | ISO Section | Grammar Rule | Status |
+|-----------|-------------|--------------|--------|
+| R601 variable | 6.1 | `variable_f95` | Implemented |
+| R612 section-subscript | 6.2.2 | `section_subscript_f95` | Implemented |
+| R613 subscript-triplet | 6.2.2.1 | `subscript_triplet_f95` | Implemented |
+| R617 substring-range | 6.1.1 | `substring_range_f95` | Implemented |
+
+### Section 7 - Expressions and Assignment (R701-R743)
+
+| Spec Rule | ISO Section | Grammar Rule | Status |
+|-----------|-------------|--------------|--------|
+| R701 primary | 7.2 | `primary_f95` | Implemented |
+| R702 expr | 7.1 | `expr_f95` | Implemented |
+| R727 where-construct | 7.5.3 | `where_construct_f95` | Implemented (F95 enhanced) |
+| R728 where-construct-stmt | 7.5.3 | `where_construct_stmt_f95` | Implemented |
+| R730 where-assignment-stmt | 7.5.3 | `where_assignment_stmt_f95` | Implemented |
+| R732 masked-elsewhere-stmt | 7.5.3 | `elsewhere_stmt_f95` | Implemented |
+| R733 elsewhere-stmt | 7.5.3 | `elsewhere_stmt_f95` | Implemented |
+| R735 where-stmt | 7.5.3.2 | `where_stmt_f95` | Implemented |
+| R736 forall-construct | 7.5.4.1 | `forall_construct` | Implemented |
+| R737 forall-body-construct | 7.5.4.1 | `forall_body_construct` | Implemented |
+| R738 forall-construct-stmt | 7.5.4.1 | `forall_construct_stmt` | Implemented |
+| R739 forall-assignment-stmt | 7.5.4.1 | `forall_assignment_stmt` | Implemented |
+| R740 forall-stmt | 7.5.4.2 | `forall_stmt` | Implemented |
+| R741 forall-header | 7.5.4 | `forall_header` | Implemented |
+| R742 forall-triplet-spec | 7.5.4 | `forall_triplet_spec` | Implemented |
+| R743 end-forall-stmt | 7.5.4.1 | `end_forall_stmt` | Implemented |
+
+### Section 8 - Execution Control (R801-R844)
+
+| Spec Rule | ISO Section | Grammar Rule | Status |
+|-----------|-------------|--------------|--------|
+| R214 executable-construct | 8.1 | `executable_construct_f95` | Implemented |
+| R215 action-stmt | 8.1 | `executable_stmt_f95` | Implemented |
+| R216 construct | 8.1 | `construct_f95` | Implemented |
+| do-construct | 8.1.4 | `do_construct_f95` | Inherited from F90 |
+
+### Section 9 - Input/Output Statements (R901-R929)
+
+| Spec Rule | ISO Section | Grammar Rule | Status |
+|-----------|-------------|--------------|--------|
+| R908 read-stmt | 9.4 | `read_stmt_f95` | Implemented |
+| R909 write-stmt | 9.4 | `write_stmt_f95` | Implemented |
+| R912 io-control-spec | 9.4 | `io_control_spec_f95` | Implemented |
+| R914-R915 input-item | 9.4.1 | `input_item_f95` | Implemented |
+| R916-R917 output-item | 9.4.2 | `output_item_f95` | Implemented |
+| R918 io-implied-do | 9.4 | `io_implied_do_f95` | Implemented |
+
+### Section 11 - Program Units (R1101-R1117)
+
+| Spec Rule | ISO Section | Grammar Rule | Status |
+|-----------|-------------|--------------|--------|
+| R201 program | 11.1 | `program_unit_f95` | Implemented |
+| R204 specification-part | 11.1 | `specification_part_f95` | Implemented |
+| R207 declaration-construct | 11.1 | `declaration_construct_f95` | Implemented |
+| R208 execution-part | 11.1 | `execution_part_f95` | Implemented |
+| R1101 main-program | 11.1 | `main_program_f95` | Implemented |
+| R1102 external-subprogram | 11.2 | `external_subprogram_f95` | Implemented |
+| R1104 module | 11.3 | `module_f95` | Implemented |
+| R1107 module-subprogram-part | 11.3.1 | `module_subprogram_part_f95` | Implemented |
+| R1213 internal-subprogram-part | 12.5.1 | `internal_subprogram_part_f95` | Implemented |
+
+### Section 12 - Procedures (R1201-R1229)
+
+| Spec Rule | ISO Section | Grammar Rule | Status |
+|-----------|-------------|--------------|--------|
+| R1206 procedure-designator | 12.3 | `procedure_designator_f95` | Implemented |
+| R1207 actual-arg-spec | 12.4.1 | `actual_arg_spec_f95` | Implemented |
+| R1209 function-reference | 12.4 | `function_reference_f95` | Implemented |
+| R1210 call-stmt | 12.4.2 | `call_stmt_f95` | Implemented |
+| R1216 function-subprogram | 12.5.2 | `function_subprogram_f95` | Implemented |
+| R1217 function-stmt | 12.5.2 | `function_stmt_f95` | Implemented |
+| R1220 subroutine-subprogram | 12.5.3 | `subroutine_subprogram_f95` | Implemented |
+| R1221 subroutine-stmt | 12.5.3 | `subroutine_stmt_f95` | Implemented |
+| R1224 prefix | 12.5.2 | `prefix_f95` | Implemented |
+| R1225 prefix-spec | 12.5.2 | `prefix_spec_f95` | Implemented (PURE/ELEMENTAL) |
+
+### Section 13 - Intrinsic Procedures (Lexer Tokens)
+
+| Intrinsic | ISO Section | Lexer Token | Status |
+|-----------|-------------|-------------|--------|
+| CEILING | 13.10.19 | `CEILING_INTRINSIC` | Implemented |
+| FLOOR | 13.10.39 | `FLOOR_INTRINSIC` | Implemented |
+| MODULO | 13.10.75 | `MODULO_INTRINSIC` | Implemented |
+| BIT_SIZE | 13.10.11 | `BIT_SIZE_INTRINSIC` | Implemented |
+| BTEST | 13.10.17 | `BTEST_INTRINSIC` | Implemented |
+| IAND | 13.10.46 | `IAND_INTRINSIC` | Implemented |
+| IBCLR | 13.10.47 | `IBCLR_INTRINSIC` | Implemented |
+| IBITS | 13.10.48 | `IBITS_INTRINSIC` | Implemented |
+| IBSET | 13.10.49 | `IBSET_INTRINSIC` | Implemented |
+| IEOR | 13.10.50 | `IEOR_INTRINSIC` | Implemented |
+| IOR | 13.10.54 | `IOR_INTRINSIC` | Implemented |
+| ISHFT | 13.10.57 | `ISHFT_INTRINSIC` | Implemented |
+| ISHFTC | 13.10.58 | `ISHFTC_INTRINSIC` | Implemented |
+| NOT | 13.10.78 | `NOT_INTRINSIC` | Implemented |
+| TRANSFER | 13.10.112 | `TRANSFER_INTRINSIC` | Implemented |
+| CPU_TIME | 13.11.2 | `CPU_TIME_INTRINSIC` | Implemented (F95 new) |
+| SYSTEM_CLOCK | 13.11.5 | `SYSTEM_CLOCK_INTRINSIC` | Implemented |
+
+### J3/98-114 (Request for Interpretation)
+
+The J3/98-114 document clarifies semantic rules for dummy arguments and
+function results with nonconstant bounds in explicit interfaces. These
+rules are **not enforced by the grammar** as they require semantic analysis
+of symbol tables and expression trees. The grammar correctly parses the
+syntactic forms but leaves characteristic-matching validation to a later
+analysis phase and is therefore **NON-COMPLIANT** with the full semantic
+requirements of J3/98-114 until a dedicated analysis phase is implemented.
+
+### Gaps and Unimplemented Rules
+
+The following F95 features are **not yet implemented** or have limitations
+and are therefore **NON-COMPLIANT** with the corresponding ISO sections
+until they are addressed:
+
+1. **Automatic deallocation** (Section 6.3.3): Semantic behavior, not syntax –
+   **NON-COMPLIANT** (semantic deallocation rules not modeled).
+2. **NULL() intrinsic** (Section 13.10.79): Lexer token not defined –
+   **NON-COMPLIANT** (intrinsic missing from token set).
+3. **FORALL index variable restrictions**: Semantic, not syntactic –
+   **NON-COMPLIANT** (index restrictions not enforced).
+4. **Initialization expression restrictions** (Section 7.1.6): Grammar accepts
+   any expression; the constraint that initialization expressions must be
+   constant is semantic – **NON-COMPLIANT** (initialization expression
+   constraints not modeled).
+
+## 12. Summary and issue mapping
 
 The Fortran 95 layer in this repository:
 
@@ -509,7 +672,10 @@ Outstanding work tracked by issues:
 - Making F95 intrinsic tokens usable as function and subroutine calls.
 
 Together with the Fortran 90 audit, this document completes the
-spec‑aware audit chain up through Fortran 95 for issue #140, while
+spec-aware audit chain up through Fortran 95 for issue #140, while
 honestly recording areas where the implementation is intentionally or
 unintentionally divergent from the standard.
 
+The spec-grammar cross-walk in Section 11 provides a comprehensive
+mapping from ISO/IEC 1539-1:1997 syntax rules to grammar implementation,
+fulfilling the requirements of issue #174.
