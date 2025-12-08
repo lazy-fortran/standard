@@ -138,10 +138,16 @@ C_NULL_PTR       : [cC] '_' N U L L '_' P T R ;
 C_NULL_FUNPTR    : [cC] '_' N U L L '_' F U N P T R ;
 
 // Additional F2003 tokens
-// NOTE: SELECT TYPE / TYPE IS / CLASS IS / CLASS DEFAULT are modelled
-// in the parser using existing SELECT, TYPE, CLASS and DEFAULT tokens.
-// The legacy underscored forms are not used for standard-conforming
-// code and have been removed from the public surface.
+//
+// SELECT TYPE / TYPE IS / CLASS IS / CLASS DEFAULT:
+// These constructs are modelled in the parser using existing SELECT, TYPE,
+// CLASS and DEFAULT tokens. The IS in TYPE IS / CLASS IS is intentionally
+// parsed as an IDENTIFIER rather than a dedicated keyword token (Issue #184).
+// This design:
+//   - Works for all case variations (Fortran is case-insensitive)
+//   - Allows is to remain a valid variable name elsewhere
+//   - Simplifies the grammar without loss of functionality
+// See Fortran2003Parser.g4 type_guard_stmt for the detailed rationale.
 ERRMSG           : E R R M S G ;
 ID               : I D ;
 
