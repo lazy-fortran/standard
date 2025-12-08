@@ -512,12 +512,69 @@ class TestFortran90Parser:
         )
 
         parser = self.create_parser(code)
-        
+
         try:
             tree = parser.program_unit_f90()
             assert tree is not None
         except Exception as e:
             pytest.fail(f"F90 enhanced procedures parsing failed: {e}")
+
+    def test_implicit_syntax_parsing(self):
+        """Test F90 full IMPLICIT statement syntax per ISO/IEC 1539:1991 Section 5.2.
+
+        Fortran 90 supports both:
+        - IMPLICIT NONE (disables implicit typing)
+        - IMPLICIT type (letter-spec-list) [, type (letter-spec-list)]...
+
+        Examples:
+        - IMPLICIT INTEGER (I-N), REAL (A-H, O-Z)
+        - IMPLICIT INTEGER(KIND=4) (I-N)
+        """
+        code = load_fixture(
+            "Fortran90",
+            "test_fortran_90_comprehensive",
+            "implicit_syntax.f90",
+        )
+
+        parser = self.create_parser(code)
+
+        try:
+            tree = parser.program_unit_f90()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F90 IMPLICIT syntax parsing failed: {e}")
+
+    def test_implicit_none_parsing(self):
+        """Test F90 IMPLICIT NONE parsing (simple case)."""
+        code = """program test_implicit_none
+    implicit none
+    integer :: x
+    x = 42
+end program
+"""
+        parser = self.create_parser(code)
+
+        try:
+            tree = parser.program_unit_f90()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F90 IMPLICIT NONE parsing failed: {e}")
+
+    def test_implicit_spec_list_parsing(self):
+        """Test F90 IMPLICIT with type mappings per ISO/IEC 1539:1991 Section 5.2."""
+        code = """program test_implicit_spec
+    implicit integer (i-n), real (a-h, o-z)
+    i = 10
+    a = 3.14
+end program
+"""
+        parser = self.create_parser(code)
+
+        try:
+            tree = parser.program_unit_f90()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F90 IMPLICIT spec-list parsing failed: {e}")
 
 
 class TestFortran90Foundation:
