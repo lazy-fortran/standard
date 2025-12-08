@@ -84,7 +84,8 @@ type_spec
 // program unit terminator in main_program, subroutine_subprogram, and
 // function_subprogram rules.
 statement_body
-    : assignment_stmt      // Variable = Expression (mathematical notation!)
+    : statement_function_stmt  // Statement function definition (spec part)
+    | assignment_stmt      // Variable = Expression (mathematical notation!)
     | goto_stmt           // Unconditional jump to labeled statement
     | computed_goto_stmt  // Multi-way branch based on integer expression
     | arithmetic_if_stmt  // Three-way branch based on expression sign
@@ -107,6 +108,43 @@ statement_body
 // CALL statement (NEW in FORTRAN II)
 call_stmt
     : CALL IDENTIFIER (LPAREN expr_list? RPAREN)?
+    ;
+
+
+// ====================================================================
+// STATEMENT FUNCTION DEFINITION
+// ====================================================================
+// Per ANSI X3.9-1966 Section 7.2 and FORTRAN 77 Section 8, a statement
+// function defines a scalar function within the specification part of a
+// program unit. It has the form:
+//
+//     name(dummy-arg-list) = scalar-expression
+//
+// where:
+// - name is the function name (follows implicit or explicit typing)
+// - dummy-arg-list is a non-empty list of identifier dummy arguments
+// - scalar-expression is any valid expression using those arguments
+//
+// Statement functions must appear after specification statements and
+// before executable statements (enforced semantically, not syntactically).
+//
+// Examples:
+//   F(X) = X * X + 2.0 * X + 1.0
+//   AREA(R) = 3.14159 * R * R
+//   DIST(X1, Y1, X2, Y2) = SQRT((X2-X1)**2 + (Y2-Y1)**2)
+//
+// Note: Statement functions are distinct from array element assignments.
+// The key syntactic difference is that statement function dummy arguments
+// are simple identifiers, not arbitrary expressions.
+// ====================================================================
+
+statement_function_stmt
+    : IDENTIFIER LPAREN statement_function_dummy_arg_list RPAREN EQUALS expr
+    ;
+
+// Dummy argument list for statement functions (identifiers only)
+statement_function_dummy_arg_list
+    : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
 
