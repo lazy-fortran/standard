@@ -1,133 +1,168 @@
 /*
  * FORTRANLexer.g4
- * 
+ *
  * FORTRAN I (1957) - The Original IBM 704 FORTRAN
  * One of the world's first high-level programming languages.
  *
  * This lexer defines a shared core and a substantial subset of the original
  * 1957 FORTRAN language, and serves as the lexical foundation for the later
  * standards implemented in this repository.
+ *
+ * Reference: IBM Reference Manual, FORTRAN Automatic Coding System for the
+ *            IBM 704 Data Processing System (Form C28-6003, October 1958)
+ *            - Chapter I: Introduction
+ *            - Chapter II: The FORTRAN Language
+ *            - Chapter III: Input-Output
+ *            - Appendix B: Table of FORTRAN Statements (32 statement types)
+ *
+ * Manual available at: Computer History Museum archive
+ *   https://archive.computerhistory.org/resources/text/Fortran/102649787.05.01.acc.pdf
  */
 
 lexer grammar FORTRANLexer;
 
-// ============================================================================  
+// ============================================================================
 // FORTRAN I (1957) ORIGINAL FEATURES - IBM 704
 // ============================================================================
+// Reference: C28-6003 Chapter II (The FORTRAN Language) and Appendix B
+//
 // Historically, the original FORTRAN system for the IBM 704 provided arithmetic
 // expressions, assignment, DO loops, arithmetic IF, GOTO, formatted I/O and
 // related facilities. User-written subroutines and functions (SUBROUTINE,
 // FUNCTION, CALL, RETURN) and the COMMON statement were introduced later in
 // FORTRAN II (1958); they are not modelled as keywords in this lexer.
 
-// Control Flow (FORTRAN I, 1957) 
-IF           : I F ;        // Arithmetic IF (three-way branch)
-GOTO         : G O T O ;    // Unconditional branch  
-DO           : D O ;        // DO loops with statement labels
-END          : E N D ;      // End of program
-CONTINUE     : C O N T I N U E ; // DO loop continuation
-STOP         : S T O P ;    // Program termination
+// Control Flow Keywords
+// C28-6003 Appendix B: GO TO, IF, DO, CONTINUE, STOP, END statements
+IF           : I F ;        // Arithmetic IF (three-way branch) - Appendix B row 3
+GOTO         : G O T O ;    // Unconditional/computed GO TO - Appendix B rows 1-2
+DO           : D O ;        // DO loops with statement labels - Appendix B row 18
+END          : E N D ;      // End of program - Appendix B row 32
+CONTINUE     : C O N T I N U E ; // DO loop continuation - Appendix B row 19
+STOP         : S T O P ;    // Program termination - Appendix B row 30
 
-// I/O Operations (FORTRAN I, 1957)
-READ         : R E A D ;    // Input from cards/tape
-WRITE        : W R I T E ;  // Output (same as PRINT)
-PRINT        : P R I N T ;  // Line printer output
-PUNCH        : P U N C H ;  // Card punch output
+// I/O Keywords
+// C28-6003 Chapter III (Input-Output) and Appendix B rows 20-28
+READ         : R E A D ;    // Input - Appendix B rows 20-24
+WRITE        : W R I T E ;  // Output - Appendix B rows 25-27
+PRINT        : P R I N T ;  // Line printer output - Appendix B row 28
+PUNCH        : P U N C H ;  // Card punch output - Appendix B row 29
 
-// Array and Memory (early FORTRAN)
-DIMENSION    : D I M E N S I O N ;    // Array declarations
-EQUIVALENCE  : E Q U I V A L E N C E ; // Memory overlay
-FORMAT       : F O R M A T ;         // I/O formatting
+// Storage/Declaration Keywords
+// C28-6003 Chapter II.B (Variables and Subscripts) and Appendix B
+DIMENSION    : D I M E N S I O N ;    // Array declarations - Appendix B row 14
+EQUIVALENCE  : E Q U I V A L E N C E ; // Memory overlay - Appendix B row 15
+FORMAT       : F O R M A T ;          // I/O formatting - Appendix B row 16
 
-// Statement Functions (FORTRAN I, 1957)
+// Statement Functions
+// C28-6003 Chapter II.E (Function Statements) and Appendix B row 17
 // Note: FORTRAN I only had statement functions (names ending in F)
 // Full subroutines with CALL/SUBROUTINE/FUNCTION/RETURN came in FORTRAN II (1958)
 
-// Program Control (FORTRAN I, 1957)
-PAUSE        : P A U S E ;           // Operator intervention
-FREQUENCY    : F R E Q U E N C Y ;   // Optimization hint (1957 only)
-ASSIGN       : A S S I G N ;         // Assign label to variable (assigned GOTO)
-TO           : T O ;                 // Used in ASSIGN i TO n
+// Program Control Keywords
+// C28-6003 Chapter II.G and Appendix B
+PAUSE        : P A U S E ;           // Operator intervention - Appendix B row 31
+FREQUENCY    : F R E Q U E N C Y ;   // Optimization hint - Appendix B row 13
+ASSIGN       : A S S I G N ;         // ASSIGN i TO n - Appendix B row 12
+TO           : T O ;                 // Used in ASSIGN i TO n - Appendix B row 12
 
 // Hardware-specific IF statements (IBM 704, 1957)
-// Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B
-SENSE        : S E N S E ;           // SENSE LIGHT / IF (SENSE ...)
-LIGHT        : L I G H T ;           // SENSE LIGHT i
-SWITCH       : S W I T C H ;         // IF (SENSE SWITCH i) n1, n2
-ACCUMULATOR  : A C C U M U L A T O R ; // IF ACCUMULATOR OVERFLOW n1, n2
-QUOTIENT     : Q U O T I E N T ;     // IF QUOTIENT OVERFLOW n1, n2
-DIVIDE       : D I V I D E ;         // IF DIVIDE CHECK n1, n2
-CHECK        : C H E C K ;           // IF DIVIDE CHECK n1, n2
-OVERFLOW     : O V E R F L O W ;     // Used in overflow check IFs
+// C28-6003 Appendix B rows 4-11: IF statements for hardware indicators
+// These test IBM 704 console switches, sense lights, and overflow indicators
+SENSE        : S E N S E ;           // SENSE LIGHT - Appendix B row 11
+LIGHT        : L I G H T ;           // SENSE LIGHT i - Appendix B row 11
+SWITCH       : S W I T C H ;         // IF (SENSE SWITCH i) - Appendix B row 4
+ACCUMULATOR  : A C C U M U L A T O R ; // IF ACCUMULATOR OVERFLOW - Appendix B row 5
+QUOTIENT     : Q U O T I E N T ;     // IF QUOTIENT OVERFLOW - Appendix B row 6
+DIVIDE       : D I V I D E ;         // IF DIVIDE CHECK - Appendix B row 7
+CHECK        : C H E C K ;           // IF DIVIDE CHECK - Appendix B row 7
+OVERFLOW     : O V E R F L O W ;     // Used in overflow IF statements
 
-// Data Types (early FORTRAN)
-INTEGER      : I N T E G E R ;
-REAL         : R E A L ;
-IMPLICIT     : I M P L I C I T ;    // Implicit typing rules (I-N integer, else real)
-
-// ============================================================================
-// OPERATORS: Arithmetic (Universal since 1957)
-// ============================================================================
-EQUALS       : '=' ;  // Assignment operator
-PLUS         : '+' ;
-MINUS        : '-' ;
-MULTIPLY     : '*' ;
-SLASH        : '/' ;    // Division AND DATA delimiters (context-dependent)
-POWER        : '**' ;
+// Data Type Keywords
+// C28-6003 Chapter II.A (Constants) and Chapter II.B (Variables)
+// Note: In 1957 FORTRAN, types were determined by naming convention (I-N = integer)
+// Explicit type declarations (INTEGER, REAL) were extensions in some implementations
+INTEGER      : I N T E G E R ;      // Explicit integer declaration (extension)
+REAL         : R E A L ;            // Explicit real declaration (extension)
+IMPLICIT     : I M P L I C I T ;    // Implicit typing (I-N = integer, else real)
 
 // ============================================================================
-// OPERATORS: Relational (1957 dotted style)
+// OPERATORS: Arithmetic
+// C28-6003 Chapter II.C (Expressions) - arithmetic operations
+// ============================================================================
+EQUALS       : '=' ;    // Assignment - C28-6003 Chapter II.C
+PLUS         : '+' ;    // Addition - C28-6003 Chapter II.C
+MINUS        : '-' ;    // Subtraction/negation - C28-6003 Chapter II.C
+MULTIPLY     : '*' ;    // Multiplication - C28-6003 Chapter II.C
+SLASH        : '/' ;    // Division - C28-6003 Chapter II.C
+POWER        : '**' ;   // Exponentiation - C28-6003 Chapter II.C
+
+// ============================================================================
+// OPERATORS: Relational
+// C28-6003 Chapter II.C (Expressions) - relational operators introduced
+// in original FORTRAN for use in IF statement expressions
 // ============================================================================
 // Note: F90+ also allows ==, /=, <, <=, >, >= but these dotted forms
 // are the universal subset that works across ALL standards
-EQ           : '.' E Q '.' ;
-NE           : '.' N E '.' ;
-LT           : '.' L T '.' ;
-LE           : '.' L E '.' ;
-GT           : '.' G T '.' ;
-GE           : '.' G E '.' ;
+EQ           : '.' E Q '.' ;    // Equal - C28-6003 Chapter II.C
+NE           : '.' N E '.' ;    // Not equal - C28-6003 Chapter II.C
+LT           : '.' L T '.' ;    // Less than - C28-6003 Chapter II.C
+LE           : '.' L E '.' ;    // Less or equal - C28-6003 Chapter II.C
+GT           : '.' G T '.' ;    // Greater than - C28-6003 Chapter II.C
+GE           : '.' G E '.' ;    // Greater or equal - C28-6003 Chapter II.C
 
 // ============================================================================
-// DELIMITERS: Universal punctuation
+// DELIMITERS: Punctuation
+// C28-6003 Chapter II - used throughout for subscripts, lists, ranges
 // ============================================================================
-LPAREN       : '(' ;
-RPAREN       : ')' ;
-COMMA        : ',' ;
-COLON        : ':' ;
+LPAREN       : '(' ;    // Subscripts, function args, lists - C28-6003 Chapter II.B
+RPAREN       : ')' ;    // Subscripts, function args, lists - C28-6003 Chapter II.B
+COMMA        : ',' ;    // List separator - C28-6003 throughout
+COLON        : ':' ;    // Array slice notation (later standards)
 
 // ============================================================================
-// LITERALS: Numbers and identifiers (Universal patterns)
+// LITERALS: Numbers and identifiers
+// C28-6003 Chapter II.A (Constants) and Chapter II.B (Variables)
 // ============================================================================
+// Fixed-point (integer) constants: C28-6003 Chapter II.A.1
 INTEGER_LITERAL : DIGIT+ ;
+// Floating-point (real) constants: C28-6003 Chapter II.A.2
 REAL_LITERAL    : DIGIT+ '.' DIGIT+ (EXPONENT)?  // 123.456, 123.456E10
                 | '.' DIGIT+ (EXPONENT)?         // .456, .456E10
-                | DIGIT+ EXPONENT               // 123E10
+                | DIGIT+ EXPONENT                // 123E10
                 ;
-
+// Variable names: C28-6003 Chapter II.B (1-6 alphanumeric, start with letter)
+// Note: 1957 FORTRAN limited names to 6 characters; this lexer is more permissive
 IDENTIFIER      : LETTER (LETTER | DIGIT | '_')* ;
 
 // ============================================================================
-// WHITESPACE AND COMMENTS: Basic handling
+// WHITESPACE AND COMMENTS
+// C28-6003 Chapter I.B (Coding for FORTRAN) - source format rules
 // ============================================================================
 // Skip whitespace (tabs, spaces only - newlines handled separately)
+// Note: 1957 FORTRAN ignored blanks entirely within statements
 WS : [ \t]+ -> skip ;
 
 // Newlines are significant in Fortran (statement terminators)
+// C28-6003: each card = one statement (unless continued)
 NEWLINE : [\r\n]+ ;
 
 // Comments: Only handle ! style to avoid conflicts with C identifiers
-// Column 1 'C' comments will be handled in format-specific lexers
+// Note: 1957 used column-1 C for comments; this lexer uses modern ! style
+// Column 1 C/* comments are handled in format-specific lexers
 COMMENT : '!' ~[\r\n]* -> skip ;
 
 // ============================================================================
-// CHARACTER FRAGMENTS: Basic building blocks
+// CHARACTER FRAGMENTS
+// C28-6003 Appendix A (Table of FORTRAN Characters) - character set
 // ============================================================================
-fragment LETTER : [A-Za-z] ;  
-fragment DIGIT  : [0-9] ;
-fragment EXPONENT : [eE] [+-]? DIGIT+ ;
+fragment LETTER : [A-Za-z] ;    // Alphabetic (1957: uppercase only on 704)
+fragment DIGIT  : [0-9] ;       // Numeric digits 0-9
+fragment EXPONENT : [eE] [+-]? DIGIT+ ;  // E exponent notation
 
 // ============================================================================
-// CASE-INSENSITIVE FRAGMENTS: For keyword definitions
+// CASE-INSENSITIVE FRAGMENTS
+// Note: 1957 FORTRAN was uppercase-only; modern systems are case-insensitive
 // ============================================================================
 // These fragments enable case-insensitive keyword matching across
 // all FORTRAN standards (historically uppercase-only, modern case-insensitive)
