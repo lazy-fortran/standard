@@ -99,6 +99,8 @@ statement_body
     | save_stmt         // NEW: SAVE statement
     | intrinsic_stmt    // NEW: INTRINSIC statement
     | external_stmt     // NEW: EXTERNAL statement
+    | implicit_stmt     // NEW: IMPLICIT statement (F77 Section 8.4)
+    | parameter_stmt    // NEW: PARAMETER statement (F77 Section 8.5)
     | open_stmt         // NEW: OPEN statement (F77 Section 12.10.1)
     | close_stmt        // NEW: CLOSE statement (F77 Section 12.10.2)
     | inquire_stmt      // NEW: INQUIRE statement (F77 Section 12.10.3)
@@ -312,6 +314,78 @@ external_stmt
 
 external_name_list
     : IDENTIFIER (COMMA IDENTIFIER)*
+    ;
+
+// ====================================================================
+// FORTRAN 77 (1977) - IMPLICIT STATEMENT
+// ====================================================================
+// Per ANSI X3.9-1978 Section 8.4, the IMPLICIT statement specifies the
+// type and size of all variables, arrays, and functions that begin with
+// specified letters.
+//
+// Syntax: IMPLICIT type (letter-spec-list) [, type (letter-spec-list)]...
+// Example: IMPLICIT INTEGER (I-N), REAL (A-H, O-Z)
+//
+// Note: IMPLICIT NONE was NOT part of FORTRAN 77; it was added in
+// Fortran 90. This grammar implements only the FORTRAN 77 syntax.
+
+implicit_stmt
+    : IMPLICIT implicit_spec_list
+    ;
+
+implicit_spec_list
+    : implicit_spec (COMMA implicit_spec)*
+    ;
+
+implicit_spec
+    : type_spec LPAREN letter_spec_list RPAREN
+    ;
+
+letter_spec_list
+    : letter_spec (COMMA letter_spec)*
+    ;
+
+// Letter specification: single letter or letter range (A-Z)
+letter_spec
+    : IDENTIFIER                         // Single letter (e.g., A)
+    | IDENTIFIER MINUS IDENTIFIER        // Letter range (e.g., A-H)
+    ;
+
+// ====================================================================
+// FORTRAN 77 (1977) - PARAMETER STATEMENT
+// ====================================================================
+// Per ANSI X3.9-1978 Section 8.5, the PARAMETER statement defines
+// named constants that may be used wherever a constant is allowed.
+//
+// Syntax: PARAMETER (named-constant = constant-expr [, ...])
+// Example: PARAMETER (PI = 3.14159, TWO_PI = 6.28318)
+//
+// Constraints:
+// - A named constant must be defined before it is referenced
+// - The expression must be a constant expression
+
+parameter_stmt
+    : PARAMETER LPAREN parameter_assignment_list RPAREN
+    ;
+
+parameter_assignment_list
+    : parameter_assignment (COMMA parameter_assignment)*
+    ;
+
+parameter_assignment
+    : IDENTIFIER EQUALS constant_expr
+    ;
+
+// Constant expression for PARAMETER values
+// Per ANSI X3.9-1978, a constant expression consists only of:
+// - Literal constants
+// - Named constants previously defined
+// - Intrinsic functions with constant arguments
+// Semantic validation is deferred to later phases; syntactically we
+// accept any expression to allow forward references within a single
+// PARAMETER statement.
+constant_expr
+    : expr
     ;
 
 // ====================================================================
