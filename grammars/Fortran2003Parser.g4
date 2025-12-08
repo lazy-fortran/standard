@@ -770,19 +770,38 @@ read_stmt
     ;
 
 // Unified F2003 I/O specification list - handles all I/O statements
+//
+// FORMAT STRINGS AND DT EDIT DESCRIPTORS (ISO/IEC 1539-1:2004 Section 10.2.2)
+// ---------------------------------------------------------------------------
+// Format specifications (fmt=... or positional string literals) are parsed
+// as opaque character literals. The grammar does NOT structurally parse the
+// format-specification content, including DT edit descriptors.
+//
+// DT edit descriptors for defined derived-type I/O have the form:
+//   DT [ char-literal-constant ] [ ( v-list ) ]
+// Examples:
+//   write(*, '(DT)') obj
+//   write(*, '(DT"mytype")') obj
+//   write(*, '(DT(10,2))') obj
+//   write(*, '(DT"fmt"(5,3,1))') obj
+//
+// The DT descriptor syntax is accepted as part of the format string character
+// literal, but is not validated or parsed into structured nodes. This is an
+// intentional design decision documented in docs/fortran_2003_audit.md.
+// See also: issue #185, generic_spec rule for READ(FORMATTED)/WRITE(UNFORMATTED).
 f2003_io_spec_list
     : f2003_io_spec (COMMA f2003_io_spec)*
     ;
 
 f2003_io_spec
-    : IDENTIFIER EQUALS primary                  
+    : IDENTIFIER EQUALS primary
         // Regular identifier = value (file='test.dat')
     | UNIT EQUALS primary                        // unit=10, unit=*
     | FILE EQUALS primary                        // file='filename'
     | ACCESS EQUALS primary                      // access='stream'
     | FORM EQUALS primary                        // form='unformatted'
     | STATUS EQUALS primary                      // status='new'
-    | BLANK EQUALS primary                       // blank='null'  
+    | BLANK EQUALS primary                       // blank='null'
     | POSITION EQUALS primary                    // position='rewind'
     | ACTION EQUALS primary                      // action='read'
     | DELIM EQUALS primary                       // delim='apostrophe'
@@ -800,8 +819,8 @@ f2003_io_spec
     | STREAM EQUALS primary                      // stream='yes' (F2003)
     | PENDING EQUALS primary                     // pending=pending_var (F2003)
     | ID EQUALS primary                          // id=id_var (F2003)
-    | FMT EQUALS primary                         // fmt=*, fmt=100
-    | primary                                    // Positional specifier: *, 10, etc.
+    | FMT EQUALS primary                         // fmt=*, fmt=100, fmt='(DT)'
+    | primary                                    // Positional: *, 10, '(DT)', etc.
     ;
 
 output_item_list
