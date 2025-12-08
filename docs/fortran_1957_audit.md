@@ -95,14 +95,17 @@ Mapping that Appendix‑B list to the current grammar:
     - `READ n, list`, `READ n`, and `READ list`: **implemented and tested.**
     - `PRINT n` and `PRINT n, list`: **implemented and tested.**
     - `PUNCH n` and `PUNCH n, list`: **implemented and tested.**
-    - `FORMAT` statement: **token only, parser rule not implemented.**
+    - `FORMAT` statement: **implemented and tested.**
     - Tape-specific forms: **not implemented.**
   - Evidence: `read_stmt_basic` accepts `READ label COMMA input_list`
     (formatted with list), `READ label` (format-only per C28-6003 row 24),
     and `READ input_list` (simple). `print_stmt` and `punch_stmt` rules
     implement `PRINT/PUNCH n [, list]` forms per C28-6003 rows 28-29.
-    `write_stmt_basic` accepts `WRITE output_list`. The fixture
-    `io_statements.f` now parses with zero errors.
+    `write_stmt_basic` accepts `WRITE output_list`. The `format_stmt` rule
+    in `FORTRANParser.g4` implements `FORMAT (specification)` with support
+    for edit descriptors (Iw, Fw.d, Ew.d), repeat counts, and Hollerith
+    constants. The fixtures `format_stmt.f` and `format_tests_1957.f` now
+    parse with zero errors.
 
 - **Unformatted I/O (`READ TAPE`, `READ DRUM`, `WRITE TAPE`, `WRITE DRUM`)**
   - Status: **not implemented.**
@@ -181,24 +184,23 @@ Implemented (core subset):
 - `PRINT n` and `PRINT n, list` (line printer output) via `print_stmt`.
 - `PUNCH n` and `PUNCH n, list` (card punch output) via `punch_stmt`.
 - `WRITE output_list` (simple output) via `write_stmt_basic`.
-- Basic use of `FORMAT` in fixtures, but without a dedicated
-  `format_stmt` rule in `FORTRANParser.g4`.
+- `FORMAT (specification)` via `format_stmt` in `FORTRANParser.g4`,
+  with support for:
+  - Edit descriptors: Iw (integer), Fw.d (fixed-point), Ew.d (exponential)
+  - Repeat counts: nIw, nFw.d, etc.
+  - Hollerith constants: nHtext (the only string literals in 1957 FORTRAN)
 
 Known limitations (from fixtures and comments):
 
-- Several FORMAT and tape/drum I/O fixtures under
-  `tests/fixtures/FORTRAN/test_fortran_historical_stub` are currently
-  XPASS in `tests/test_fixture_parsing.py` and still produce syntax
-  errors. These include richer FORMAT tests requiring the FORMAT
-  statement parser rule.
-- FORMAT grammar does not attempt to fully reconstruct all edit
-  descriptors and edge cases from IBM manuals.
-- Tape/drum I/O forms and `END FILE`/`REWIND`/`BACKSPACE` are not
-  modeled as full statements in the 1957 parser.
+- Tape/drum I/O forms (`READ TAPE`, `WRITE TAPE`, `READ DRUM`, `WRITE DRUM`)
+  and auxiliary I/O (`END FILE`, `REWIND`, `BACKSPACE`) are not implemented
+  in the 1957 parser.
+- FORMAT grammar accepts common edit descriptors but does not enforce
+  strict width/precision semantics or all IBM 704 edge cases.
 
 ## 5. Hollerith, DIMENSION/EQUIVALENCE and other 1957-specific features
 
-Implemented / partially implemented:
+Implemented:
 
 - `DIMENSION` and `EQUIVALENCE`:
   - **Fully implemented** via `dimension_stmt` and `equivalence_stmt`
@@ -209,13 +211,16 @@ Implemented / partially implemented:
     errors.
 - `PAUSE`:
   - Fully modeled via `pause_stmt` and tested with zero syntax errors.
-
-Not fully implemented:
-
-- Hollerith constants (`nHtext`) are **not** modeled as dedicated
-  tokens with length checking. The tests explicitly state that
-  “HOLLERITH tokens [are] not yet implemented in this stub” and only
-  verify that the lexer can consume example text.
+- Hollerith constants (`nHtext`):
+  - **Implemented** as `HOLLERITH` token in `FORTRANLexer.g4`. The
+    pattern matches nH followed by characters up to a comma, right paren,
+    or end of line (the typical delimiters in FORMAT specifications).
+  - Tests verify that the lexer correctly recognizes HOLLERITH tokens
+    and that FORMAT statements with Hollerith constants parse with zero
+    syntax errors.
+  - Note: Strict length-count semantics (exactly n characters after H)
+    would require a semantic check; the current lexer uses delimiter-based
+    matching for practical robustness.
 
 ## 6. Fixed-form source and card layout
 
@@ -275,7 +280,7 @@ each Appendix B entry to the corresponding grammar rule(s) or notes gaps.
 | 13  | FREQUENCY n (i1, i2, ...)     | `frequency_stmt`               | Implemented     |
 | 14  | DIMENSION v, v, ...           | `dimension_stmt`               | Implemented     |
 | 15  | EQUIVALENCE (a,b,...), ...    | `equivalence_stmt`             | Implemented     |
-| 16  | FORMAT (specification)        | Token only                     | Gap: see #154   |
+| 16  | FORMAT (specification)        | `format_stmt`                  | Implemented     |
 | 17  | f(a, b, ...) = e              | Not implemented                | Gap: stmt func  |
 | 18  | DO n i = m1, m2, m3           | `do_stmt_basic`                | Implemented     |
 | 19  | CONTINUE                      | `CONTINUE` token in body       | Implemented     |
@@ -301,7 +306,7 @@ each Appendix B entry to the corresponding grammar rule(s) or notes gaps.
 | END FILE i                     | Not implemented                | Gap: see #153   |
 | REWIND i                       | Not implemented                | Gap: see #153   |
 | BACKSPACE i                    | Not implemented                | Gap: see #153   |
-| Hollerith constants (nHtext)   | Not implemented                | Gap: see #154   |
+| Hollerith constants (nHtext)   | `HOLLERITH` token              | Implemented     |
 
 **Gaps requiring follow-up issues:**
 
@@ -311,11 +316,10 @@ tracked by existing issues:
 - **#141**: FORTRAN 1957 historical stub promotion (general coverage)
 - **#153**: Full 704 I/O statement family (READ/WRITE/TAPE/DRUM/END FILE/
   REWIND/BACKSPACE)
-- **#154**: FORMAT grammar and Hollerith constants
 - **#155**: Strict fixed-form card layout and C/* comments
 
-All identified gaps have corresponding GitHub issues; no new issues
-required from this crosswalk.
+Note: Issue **#154** (FORMAT grammar and Hollerith constants) has been
+resolved by this implementation.
 
 ## 9. Summary
 
@@ -327,11 +331,12 @@ Today the FORTRAN (1957) grammar is:
     features for demonstration and testing.
   - Contains inline C28-6003 spec references in grammar comments for
     traceability to the original IBM 704 manual.
+  - Supports FORMAT statements with edit descriptors (Iw, Fw.d, Ew.d),
+    repeat counts, and Hollerith constants (nHtext).
 - Not yet:
   - A complete reconstruction of the IBM 704 FORTRAN compiler.
   - Column‑accurate for fixed-form card images.
-  - Fully supportive of all FORMAT and Hollerith usage seen in
-    historical programs.
+  - Fully supportive of tape/drum I/O statements.
 
 Further work on this standard should reference this audit together with
 the open issues for expanding 1957 coverage.

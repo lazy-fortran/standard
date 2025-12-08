@@ -339,27 +339,11 @@ punch_stmt
     : PUNCH integer_expr COMMA output_list
     ;
 
-// FORMAT statement - Appendix A: FORMAT (specification)
-// Defines I/O formatting layout
-format_stmt
-    : FORMAT LPAREN format_specification RPAREN
-    ;
-
-// Format specification items - Appendix A
-format_specification
-    : format_item (COMMA format_item)*
-    ;
-
-// Individual format items - Appendix A
-format_item
-    : INTEGER_LITERAL? format_descriptor  // e.g., I5, F10.2, E15.6
-    | HOLLERITH                          // e.g., 5HHELLO (literal text)
-    ;
-
-// Format descriptors (I, E, F, G, A, H, X, etc.)
-format_descriptor
-    : IDENTIFIER
-    ;
+// Note: FORMAT statement (format_stmt) is inherited from FORTRANParser.
+// The 1957 FORTRAN grammar includes FORMAT statements per C28-6003 Appendix B
+// row 16. FORMAT was part of the original IBM 704 FORTRAN specification.
+// See FORTRANParser.g4 for format_stmt, format_specification, format_item,
+// format_repeat_count, format_descriptor, and format_decimal_part rules.
 
 
 // ============================================================================

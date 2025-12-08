@@ -121,6 +121,19 @@ COMMA        : ',' ;    // List separator - C28-6003 throughout
 COLON        : ':' ;    // Array slice notation (later standards)
 
 // ============================================================================
+// HOLLERITH CONSTANTS
+// C28-6003 Chapter III (Input-Output) and Appendix B row 16: FORMAT
+// ============================================================================
+// Format: nHcharacters where n = number of characters following H
+// Hollerith constants (nHtext) were the ONLY string-literal mechanism in 1957.
+// Used in FORMAT statements for literal text output.
+// Example: 5HHELLO, 10HRESULT IS:
+// Note: This pattern greedily matches nH followed by any characters up to
+// a comma, right paren, or end of line - the typical delimiters in FORMAT
+// specifications. Strict length-count semantics would require a semantic check.
+HOLLERITH : [1-9] [0-9]* H ~[,)\r\n]* ;
+
+// ============================================================================
 // LITERALS: Numbers and identifiers
 // C28-6003 Chapter II.A (Constants) and Chapter II.B (Variables)
 // ============================================================================
