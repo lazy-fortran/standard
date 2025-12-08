@@ -310,14 +310,6 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ),
     (
         "Fortran90",
-        Path("Fortran90/test_comprehensive_parsing/fixed_form_program.f"),
-    ): (
-        "Fortran 90 fixed-form integration fixture {relpath} still produces "
-        "{errors} syntax errors; unified fixed/free-form handling is "
-        "documented as a known limitation of the current F90 grammar."
-    ),
-    (
-        "Fortran90",
         Path("Fortran90/test_comprehensive_parsing/free_form_features_program.f90"),
     ): (
         "Fortran 90 free-form features fixture {relpath} currently reports "
