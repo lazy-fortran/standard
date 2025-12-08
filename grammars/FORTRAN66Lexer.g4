@@ -74,6 +74,9 @@ DOT_GE          : '.' G E '.' ;
 BLOCK           : B L O C K ;          // BLOCK keyword
 BLOCKDATA       : B L O C K D A T A ;  // BLOCK DATA program unit
 
+// DATA statement keyword (ANSI X3.9-1966 Section 7.2)
+DATA            : D A T A ;
+
 // Standard procedure specifications (formalized in FORTRAN 66)
 EXTERNAL        : E X T E R N A L ;    // External procedure declaration
 INTRINSIC       : I N T R I N S I C ;  // Intrinsic function specification

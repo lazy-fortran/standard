@@ -172,9 +172,10 @@ data_initialization_statement
 
 data_initialization_body
     : common_stmt           // COMMON variable declarations
-    | dimension_stmt       // Array dimension declarations  
+    | dimension_stmt       // Array dimension declarations
     | equivalence_stmt     // Variable equivalences
     | type_declaration    // Type declarations
+    | data_stmt            // DATA initialization (X3.9-1966 Section 7.2)
     ;
 
 
@@ -225,6 +226,7 @@ statement_body
     | type_declaration  // Variable type declarations
     | external_stmt     // External procedure declaration (X3.9-1966 Section 7.2)
     | intrinsic_stmt    // Intrinsic function specification (X3.9-1966 Section 7.2)
+    | data_stmt         // DATA initialization (X3.9-1966 Section 7.2)
     | rewind_stmt       // Sequential file positioning (X3.9-1966 Section 7.1.3.3)
     | backspace_stmt    // Sequential file positioning (X3.9-1966 Section 7.1.3.3)
     | endfile_stmt      // Sequential file positioning (X3.9-1966 Section 7.1.3.3)
@@ -287,6 +289,75 @@ identifier_list
 // Variable list for declarations
 variable_list
     : variable (COMMA variable)*
+    ;
+
+// ====================================================================
+// FORTRAN 66 (1966) - DATA STATEMENT
+// ====================================================================
+// Per ANSI X3.9-1966 Section 7.2, DATA is a nonexecutable statement
+// for compile-time initialization of variables and arrays.
+// Syntax: DATA nlist /clist/, nlist /clist/, ...
+// where nlist = list of variables, array elements, or array names
+//       clist = list of constants (with optional repeat count)
+// DATA statements may appear in main programs, subprograms, and BLOCK DATA.
+//
+// Example: DATA X, Y, Z /1.0, 2.0, 3.0/
+// Example: DATA A /3*0.0/  (repeat count: 3 zeros)
+// Example: DATA (ARR(I), I=1,10) /10*1.0/  (implied DO)
+
+// DATA statement (X3.9-1966 Section 7.2)
+data_stmt
+    : DATA data_stmt_set (COMMA data_stmt_set)*
+    ;
+
+// DATA statement set: variable list with constant list
+data_stmt_set
+    : data_stmt_object_list SLASH data_stmt_value_list SLASH
+    ;
+
+// List of objects to initialize (variables, array elements, implied DO)
+data_stmt_object_list
+    : data_stmt_object (COMMA data_stmt_object)*
+    ;
+
+// Individual data object: variable, array element, or implied DO
+data_stmt_object
+    : variable                              // Simple variable or array element
+    | LPAREN data_implied_do RPAREN         // Implied DO loop
+    ;
+
+// Implied DO for DATA statement
+// Example: (ARR(I), I=1,10) or (A(I,J), J=1,5, I=1,3)
+data_implied_do
+    : data_stmt_object_list COMMA IDENTIFIER EQUALS expr COMMA expr (COMMA expr)?
+    ;
+
+// List of constant values
+data_stmt_value_list
+    : data_stmt_value (COMMA data_stmt_value)*
+    ;
+
+// Constant value with optional repeat count
+// Example: 3*0.0 means three zeros, 1.0 means single value
+data_stmt_value
+    : data_stmt_repeat? data_stmt_constant
+    ;
+
+// Repeat count for constants (e.g., 3* in 3*0.0)
+data_stmt_repeat
+    : unsigned_int MULTIPLY
+    ;
+
+// Unsigned integer for repeat count
+unsigned_int
+    : INTEGER_LITERAL
+    | LABEL               // LABEL tokens match 1-5 digit integers
+    ;
+
+// Data constant (signed or unsigned literal)
+data_stmt_constant
+    : PLUS? literal
+    | MINUS literal
     ;
 
 // ====================================================================
