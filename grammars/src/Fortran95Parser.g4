@@ -292,7 +292,7 @@ scalar_mask_expr
 // forall-body-construct -> forall-assignment-stmt | where-construct | forall-construct
 forall_body_construct
     : forall_assignment_stmt NEWLINE?
-    | where_construct
+    | where_construct_f95
     | forall_construct
     ;
 
