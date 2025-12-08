@@ -186,6 +186,9 @@ Mapping these families to the current grammar:
       - Tests: `test_assign_statement`, `test_assign_in_statement_body`,
         and `test_assign_goto_fixture` in
         `tests/FORTRAN66/test_fortran66_parser.py`.
+    - **NON-COMPLIANT with ISO/IEC 1539-1:2018 (Fortran 2018):**
+      - ASSIGN is a deleted feature per Annex B.2.
+      - Retained for historical FORTRAN 66 accuracy only.
 
 - **Control statements**
   - Implemented:
@@ -198,6 +201,9 @@ Mapping these families to the current grammar:
       - Tests: `test_assigned_goto_statement`, `test_assigned_goto_in_statement_body`,
         and `test_assign_goto_fixture` in
         `tests/FORTRAN66/test_fortran66_parser.py`.
+      - **NON-COMPLIANT with ISO/IEC 1539-1:2018 (Fortran 2018):**
+        - Assigned GO TO is a deleted feature per Annex B.2.
+        - Retained for historical FORTRAN 66 accuracy only.
     - Arithmetic IF: `arithmetic_if_stmt : IF (expr) l1, l2, l3`.
     - Logical IF: `logical_if_stmt : IF (logical_expr) statement_body`.
     - CALL: `call_stmt : CALL IDENTIFIER (LPAREN expr_list? RPAREN)?`.
@@ -357,6 +363,7 @@ The FORTRAN 66 grammar in this repository:
   per X3.9-1966 Section 7.1.3.3.
 - Implements GO TO assignment (`ASSIGN k TO i`) and assigned GO TO
   (`GO TO i, (k1, k2, ...)`) per X3.9-1966 Sections 7.1.1.3 and 7.1.2.1.2.
+  (NON-COMPLIANT: both are deleted features per ISO/IEC 1539-1:2018 Annex B.2)
 - Does **not** yet implement the DATA statement for initialization.
 - Still rejects some richer, spec-inspired fixtures, which are
   tracked as XPASS in the generic fixture harness.

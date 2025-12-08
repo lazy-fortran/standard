@@ -296,6 +296,10 @@ variable_list
 // syntax is: ASSIGN k TO i
 // where k is a statement label and i is an integer variable.
 // This stores the label k in variable i for use with assigned GO TO.
+//
+// NON-COMPLIANT: ASSIGN is a deleted feature per ISO/IEC 1539-1:2018
+// Annex B.2. Retained for historical FORTRAN 66 accuracy only.
+// See docs/fortran_66_audit.md for compliance details.
 assign_stmt
     : ASSIGN label TO variable
     ;
@@ -308,6 +312,10 @@ assign_stmt
 // where i is an integer variable containing a label (set by ASSIGN)
 // and (k1, k2, ..., km) is a list of valid target labels.
 // Branches to the label stored in variable i.
+//
+// NON-COMPLIANT: Assigned GO TO is a deleted feature per ISO/IEC
+// 1539-1:2018 Annex B.2. Retained for historical FORTRAN 66 accuracy only.
+// See docs/fortran_66_audit.md for compliance details.
 assigned_goto_stmt
     : GOTO variable COMMA LPAREN label_list RPAREN
     ;
