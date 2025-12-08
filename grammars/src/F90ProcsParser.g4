@@ -1,12 +1,21 @@
 // Fortran 90 Procedures and Subprograms
+// Reference: ISO/IEC 1539:1991 Section 12 (Procedures)
 // Delegate grammar for functions, subroutines, and procedure calls
 // Extracted from Fortran90Parser.g4 per issue #252
 parser grammar F90ProcsParser;
 
 // ====================================================================
-// ENHANCED PROCEDURES (F90 IMPROVEMENTS)
+// PROCEDURES - ISO/IEC 1539:1991 Section 12
 // ====================================================================
-// ISO/IEC 1539:1991 Section 12
+//
+// ISO/IEC 1539:1991 Section 12 defines procedures:
+// - Section 12.5.2: Function subprograms (R1213-R1218)
+// - Section 12.5.3: Subroutine subprograms (R1219-R1222)
+// - Section 12.4: Procedure references (R1208-R1212)
+// - R1214 (prefix) -> prefix-spec [prefix-spec]...
+// - R1215 (prefix-spec) -> type-spec | RECURSIVE
+// - R1216 (suffix) -> RESULT (result-name)
+//
 // Procedures with RECURSIVE prefix and RESULT clause.
 
 // Function statement (F90 enhancements)

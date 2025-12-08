@@ -1,12 +1,20 @@
 // Fortran 90 Expressions and Array Operations
+// Reference: ISO/IEC 1539:1991 Section 4.5 (Arrays) and Section 7 (Expressions)
 // Delegate grammar for expressions, primaries, and array constructors
 // Extracted from Fortran90Parser.g4 per issue #252
 parser grammar F90ExprsParser;
 
 // ====================================================================
-// ENHANCED EXPRESSIONS (F90 EXTENSIONS)
+// EXPRESSIONS - ISO/IEC 1539:1991 Section 7
 // ====================================================================
-// ISO/IEC 1539:1991 Section 7
+//
+// ISO/IEC 1539:1991 Section 7 defines expressions:
+// - R701 (primary) -> constant | designator | array-constructor |
+//                     structure-constructor | function-reference | (expr)
+// - R702 (level-1-expr) -> [defined-unary-op] primary
+// - R703-R713: Operator precedence and expression formation
+// - R714 (logical-expr) -> level-5-expr
+//
 // Expressions with new operators and array operations.
 
 // F90 expressions (enhanced with new operators and array operations)
