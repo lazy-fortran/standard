@@ -1,0 +1,13 @@
+        IF (SENSE LIGHT 1) 10, 20
+        IF (SENSE LIGHT 2) 30, 40
+        IF (SENSE LIGHT 3) 50, 60
+        IF (SENSE LIGHT 4) 70, 80
+10      CONTINUE
+20      CONTINUE
+30      CONTINUE
+40      CONTINUE
+50      CONTINUE
+60      CONTINUE
+70      CONTINUE
+80      CONTINUE
+        END

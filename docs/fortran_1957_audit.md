@@ -55,9 +55,15 @@ Mapping that Appendix‑B list to the current grammar:
     `arithmetic_if_stmt.f` / `arithmetic_if_control_flow.f`.
 
 - **Exception-checking IFs and sense switch/light control**
-  - Status: **not implemented.**
-  - Evidence: no ACCUMULATOR, QUOTIENT, DIVIDE, SENSE, SWITCH or LIGHT
-    tokens in `FORTRANLexer.g4`; no dedicated parser rules.
+  - Status: **implemented and tested.**
+  - Evidence: `SENSE`, `LIGHT`, `SWITCH`, `ACCUMULATOR`, `QUOTIENT`,
+    `DIVIDE`, `CHECK`, and `OVERFLOW` tokens defined in `FORTRANLexer.g4`.
+    Parser rules `if_stmt_sense_light`, `if_stmt_sense_switch`,
+    `if_stmt_accumulator_overflow`, `if_stmt_quotient_overflow`,
+    `if_stmt_divide_check`, and `sense_light_stmt` are implemented in
+    `FORTRANParser.g4` and wired into `statement_body`. Dedicated tests
+    in `tests/FORTRAN/test_fortran_historical_stub.py` (class
+    `TestFORTRANHardwareIF`) validate all forms with zero syntax errors.
 
 - **GO TO, computed GO TO, ASSIGN, assigned GO TO**
   - Status: **all implemented and tested.**
@@ -133,6 +139,13 @@ and the associated fixtures:
 - FREQUENCY as an optimization hint.
 - PAUSE is fully modeled via `pause_stmt` (accepts `PAUSE` or
   `PAUSE n`) and tested with zero syntax errors.
+- Hardware-specific IF statements (IBM 704):
+  - `IF (SENSE SWITCH i) n1, n2`: tests console sense switch i.
+  - `IF (SENSE LIGHT i) n1, n2`: tests and clears sense light i.
+  - `IF ACCUMULATOR OVERFLOW n1, n2`: tests accumulator overflow.
+  - `IF QUOTIENT OVERFLOW n1, n2`: tests MQ overflow.
+  - `IF DIVIDE CHECK n1, n2`: tests divide-check indicator.
+- `SENSE LIGHT i`: sets sense light i on (for later testing).
 
 Out-of-scope / not yet modeled:
 
