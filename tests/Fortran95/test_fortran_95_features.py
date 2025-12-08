@@ -185,3 +185,48 @@ class TestFortran95Parser:
         assert parser.getNumberOfSyntaxErrors() > 0, (
             "Bracket array constructor [...] should be rejected by F95 grammar"
         )
+
+    def test_intrinsic_function_calls(self):
+        """F95 intrinsic function tokens can be used in function references.
+
+        ISO/IEC 1539-1:1997 Section 13 defines intrinsic procedures.
+        The parser should accept calls like CEILING(x), FLOOR(y), etc.
+        (fixes #180).
+        """
+        intrinsic_calls = [
+            ("ceiling_call.f90", "function_reference_f95"),
+            ("floor_call.f90", "function_reference_f95"),
+            ("ceiling_kind_call.f90", "function_reference_f95"),
+            ("iand_call.f90", "function_reference_f95"),
+            ("transfer_call.f90", "function_reference_f95"),
+        ]
+
+        for fixture, rule in intrinsic_calls:
+            code = load_fixture(
+                "Fortran95",
+                "test_fortran_95_features",
+                fixture,
+            )
+            parser = self.create_parser_for_rule(code)
+            tree = getattr(parser, rule)()
+            assert tree is not None, f"Failed to parse {fixture}"
+            assert parser.getNumberOfSyntaxErrors() == 0, (
+                f"Syntax errors parsing {fixture}: expected 0, got "
+                f"{parser.getNumberOfSyntaxErrors()}"
+            )
+
+    def test_intrinsic_subroutine_call(self):
+        """F95 intrinsic subroutine tokens can be used in CALL statements.
+
+        ISO/IEC 1539-1:1997 Section 13 defines CPU_TIME as an intrinsic
+        subroutine. The parser should accept CALL CPU_TIME(t) (fixes #180).
+        """
+        code = load_fixture(
+            "Fortran95",
+            "test_fortran_95_features",
+            "cpu_time_call.f90",
+        )
+        parser = self.create_parser_for_rule(code)
+        tree = parser.call_stmt_f95()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
