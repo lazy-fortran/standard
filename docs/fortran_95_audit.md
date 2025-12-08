@@ -409,36 +409,86 @@ fixtures that exercise the integrated `program_unit_f95` entry point.
 
 ## 9. J3/98‑114 and semantic characteristics
 
-Specification context:
+Reference document: `validation/pdfs/Fortran95_J3_98-114_RFI.txt`
 
-- J3/98‑114 discusses Fortran 95 rules for dummy arguments and function
-  results with nonconstant bounds in the presence of explicit
-  interfaces, clarifying:
-  - When bounds expressions are part of the “characteristics” of a
-    function result.
-  - When it is valid to evaluate bounds expressions on the caller vs
-    callee side.
+### Specification context (ISO/IEC 1539‑1:1997 Section 12.2)
 
-Grammar implications:
+J3/98‑114 (dated 31 January 1998) is a Request for Interpretation that
+clarifies Fortran 95 rules for dummy arguments and function results with
+nonconstant bounds expressions in the presence of explicit interfaces:
 
-- The current grammar:
-  - Represents bounds through general `expr_f95` expressions in array
-    specifications and function result declarations.
-  - Does **not** attempt to model the “characteristics” concept or
-    enforce equality of corresponding bounds expressions between
-    interface and definition.
-- These constraints are inherently semantic and would require a
-  separate analysis phase operating on symbol tables and expression
-  trees, not on raw parse rules.
+- **Section 12.2.1.1** (Characteristics of dummy arguments): Defines which
+  properties of dummy arguments constitute their characteristics.
+- **Section 12.2.2** (Characteristics of function results): Requires the
+  values of nonconstant bounds expressions in an explicit interface to
+  match those in the corresponding function definition.
+- **RFI 000049 and RFI 000070**: Related interpretations that clarify when
+  bounds expressions may be evaluated on the calling vs callee side.
 
-Audit stance:
+The central question posed by J3/98‑114:
 
-- It is acceptable for the ANTLR grammar not to encode these semantics,
-  but the audit must state explicitly that:
-  - The grammar alone cannot guarantee compliance with the Fortran 95
-    rules described in J3/98‑114.
-  - Any future semantic analyzer or linter built on top of this grammar
-    must incorporate those rules separately.
+> If a bound of a function result array is not a constant expression,
+> is the exact dependence on the entities in the expression a
+> characteristic of the function result?
+
+### Grammar implications
+
+The current grammar:
+
+- Represents bounds through general `expr_f95` expressions in array
+  specifications and function result declarations.
+- Does **not** attempt to model the "characteristics" concept or
+  enforce equality of corresponding bounds expressions between
+  interface and definition.
+
+These constraints are inherently semantic and would require a separate
+analysis phase operating on symbol tables and expression trees, not on
+raw parse rules.
+
+### Semantic checks required for future tooling (Issue #183)
+
+A semantic analyzer built on top of this grammar must implement the
+following checks to comply with ISO/IEC 1539‑1:1997 Section 12.2:
+
+1. **Interface-definition bounds matching** (Section 12.2.2):
+   - For function results with nonconstant array bounds, verify that
+     bounds expressions in an explicit interface have the same
+     dependence on entities as in the function definition.
+   - Example: `FOO(G():H())` in interface must match `FOO(G():H())` in
+     definition, not `FOO(G()-1:H()-1)`.
+
+2. **Character length matching** (Section 12.2.2):
+   - For function results with nonconstant character length, verify
+     that length expressions in interface and definition are equivalent.
+
+3. **Dummy argument characteristics** (Section 12.2.1.1):
+   - Verify that dummy argument array bounds in explicit interfaces
+     match those in the corresponding procedure definition.
+   - Track which entities (dummy arguments, host-associated variables,
+     module variables) appear in bounds expressions.
+
+4. **Caller vs callee evaluation rules**:
+   - When bounds expressions may be evaluated on the calling side,
+     ensure the interface provides sufficient information.
+   - Detect cases where re-evaluation in the callee could produce
+     different values (e.g., impure functions in bounds expressions).
+
+### Compliance status
+
+**NON-COMPLIANT** with ISO/IEC 1539‑1:1997 Section 12.2 semantic rules.
+
+The grammar correctly parses all syntactic forms but leaves
+characteristic-matching validation to a later analysis phase. This is
+acceptable for a syntactic grammar but must be explicitly documented.
+
+### Audit stance
+
+- The ANTLR grammar alone cannot guarantee compliance with the
+  Fortran 95 rules described in J3/98‑114 and ISO/IEC 1539‑1:1997
+  Section 12.2.
+- Any future semantic analyzer or linter built on top of this grammar
+  must incorporate those rules separately using the checks enumerated
+  above.
 
 ## 10. Tests and coverage model
 
@@ -666,10 +716,15 @@ Existing issues:
 - #174 – Fortran 95: annotate grammar with J3 98‑114 and
   ISO/IEC 1539‑1:1997 references, and ensure every F95 gap discovered
   in the spec→grammar cross‑walk has a dedicated issue.
+- #183 – Fortran 95: track J3/98‑114 semantic rules for dummy arguments
+  and function results (semantic analyzer requirements documented in
+  Section 9).
 
 Outstanding work tracked by issues:
 
 - Making F95 intrinsic tokens usable as function and subroutine calls.
+- Implementing semantic checks for J3/98‑114 characteristics rules
+  (see Section 9 for enumerated requirements).
 
 Together with the Fortran 90 audit, this document completes the
 spec-aware audit chain up through Fortran 95 for issue #140, while
