@@ -525,7 +525,8 @@ variable_f90
     : identifier_or_keyword (substring_range)?                   // Simple variable
     | identifier_or_keyword LPAREN section_subscript_list RPAREN (substring_range)?
         // Array element/section
-    | variable_f90 PERCENT identifier_or_keyword (substring_range)?  // Derived type component
+    // Derived type component
+    | variable_f90 PERCENT identifier_or_keyword (substring_range)?
     | variable_f90 LPAREN section_subscript_list RPAREN (substring_range)?
         // Component array element
     ;
@@ -589,7 +590,8 @@ do_variable
 
 // Function statement (F90 enhancements)
 function_stmt
-    : (prefix)? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN (suffix)? NEWLINE?
+    : (prefix)? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN (suffix)?
+        NEWLINE?
     ;
 
 // Subroutine statement (F90 enhancements)
@@ -742,7 +744,9 @@ boz_literal_constant
 
 // Specification part (F90 enhancements)
 specification_part
-    : (NEWLINE* (use_stmt | import_stmt))* (NEWLINE* implicit_stmt_f90)? (NEWLINE* declaration_construct)* NEWLINE*
+    : (NEWLINE* (use_stmt | import_stmt))*
+        (NEWLINE* implicit_stmt_f90)?
+        (NEWLINE* declaration_construct)* NEWLINE*
     ;
 
 // IMPLICIT statement (F90)
