@@ -261,11 +261,14 @@ Mapping these families to the current grammar:
       - Effect: any conforming DATA statements are rejected.
     - EXTERNAL / INTRINSIC:
       - Lexer: `EXTERNAL` and `INTRINSIC` tokens exist.
-      - Parser: no `external_stmt` or `intrinsic_stmt` in
-        `FORTRAN66Parser.g4`; these tokens are not used in
-        `statement_body` or in a declaration context.
-      - Effect: declarations like `EXTERNAL F` or `INTRINSIC SIN`
-        are not accepted as first‑class non‑executable statements.
+      - Parser: `external_stmt` and `intrinsic_stmt` rules are
+        implemented in `FORTRAN66Parser.g4` per X3.9-1966 Section 7.2.
+        These are wired into `statement_body` as non-executable
+        declaration statements.
+      - Syntax: `EXTERNAL name, name, ...` and `INTRINSIC name, name, ...`
+      - Tests: covered by `test_external_statement`, `test_intrinsic_statement`,
+        `test_external_intrinsic_in_program`, and `test_external_intrinsic_fixture`
+        in `tests/FORTRAN66/test_fortran66_parser.py`.
 
 ## 5. Fixed-form model
 
@@ -336,17 +339,19 @@ The FORTRAN 66 grammar in this repository:
   EQUIVALENCE, COMMON, FORMAT, and basic I/O.
 - Uses a layout‑lenient fixed-form model, without enforcing strict
   80‑column semantics.
+- Implements `EXTERNAL` and `INTRINSIC` declaration statements per
+  X3.9-1966 Section 7.2.
 - Does **not** yet implement several standard FORTRAN 66 statements
-  and declarations such as DATA, EXTERNAL, INTRINSIC, and sequential
-  I/O control (`REWIND`, `BACKSPACE`, `ENDFILE`).
+  and declarations such as DATA and sequential I/O control
+  (`REWIND`, `BACKSPACE`, `ENDFILE`).
 - Still rejects some richer, spec-inspired fixtures, which are
   tracked as XPASS in the generic fixture harness.
 
 Future work should:
 
 - Add explicit grammar rules and tests for the missing standard
-  statements (DATA, EXTERNAL, INTRINSIC, REWIND/BACKSPACE/ENDFILE) if
-  full FORTRAN 66 coverage is desired.
+  statements (DATA, REWIND/BACKSPACE/ENDFILE) if full FORTRAN 66
+  coverage is desired.
 - Align the generic fixture parser entry rule and expectations for
   FORTRAN 66 with the dedicated `fortran66_program` rule.
 - Use the XPASS fixtures as a concrete checklist for closing the
