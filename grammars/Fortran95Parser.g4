@@ -36,6 +36,48 @@ options {
 // ====================================================================
 
 // ====================================================================
+// F95 IDENTIFIER-OR-KEYWORD (INTRINSIC PROCEDURE NAMES)
+// ====================================================================
+//
+// Fortran 95 intrinsic procedure names are recognized as keyword tokens
+// by the lexer. To allow these names to appear in expressions and calls,
+// we define a rule that accepts both IDENTIFIER and all F95 intrinsic
+// tokens.
+//
+// ISO/IEC 1539-1:1997 Section 13 defines the intrinsic procedures.
+// These tokens may appear wherever a function reference or variable is
+// allowed, enabling code like x = CEILING(y) or CALL CPU_TIME(t).
+//
+identifier_or_keyword_f95
+    : IDENTIFIER
+    // F90/F95 numeric intrinsics
+    | CEILING_INTRINSIC
+    | FLOOR_INTRINSIC
+    | MODULO_INTRINSIC
+    // F90/F95 bit manipulation intrinsics
+    | BIT_SIZE_INTRINSIC
+    | BTEST_INTRINSIC
+    | IAND_INTRINSIC
+    | IBCLR_INTRINSIC
+    | IBITS_INTRINSIC
+    | IBSET_INTRINSIC
+    | IEOR_INTRINSIC
+    | IOR_INTRINSIC
+    | ISHFT_INTRINSIC
+    | ISHFTC_INTRINSIC
+    | NOT_INTRINSIC
+    // F90/F95 data transfer intrinsic
+    | TRANSFER_INTRINSIC
+    // F95 timing intrinsics
+    | CPU_TIME_INTRINSIC
+    | SYSTEM_CLOCK_INTRINSIC
+    // Common keywords that can be used as identifiers in argument contexts
+    | KIND                         // KIND= keyword argument
+    | LEN                          // LEN= keyword argument
+    | SIZE                         // SIZE intrinsic / keyword argument
+    ;
+
+// ====================================================================
 // FORALL CONSTRUCTS (F95 MAJOR INNOVATION)
 // ====================================================================
 
@@ -223,12 +265,14 @@ primary_f95
     | LPAREN expr_f95 RPAREN
     ;
 
-// F95 variables (same as F90 but with F95 expressions)
+// F95 variables - uses identifier_or_keyword_f95 to allow intrinsic names
+// ISO/IEC 1539-1:1997 Section 6.1: A variable is a data object
 variable_f95
-    : IDENTIFIER (substring_range_f95)?                             
-    | IDENTIFIER LPAREN section_subscript_list_f95 RPAREN (substring_range_f95)?    
-    | variable_f95 PERCENT IDENTIFIER (substring_range_f95)?       
-    | variable_f95 LPAREN section_subscript_list_f95 RPAREN (substring_range_f95)?  
+    : identifier_or_keyword_f95 (substring_range_f95)?
+    | identifier_or_keyword_f95 LPAREN section_subscript_list_f95 RPAREN
+      (substring_range_f95)?
+    | variable_f95 PERCENT identifier_or_keyword_f95 (substring_range_f95)?
+    | variable_f95 LPAREN section_subscript_list_f95 RPAREN (substring_range_f95)?
     ;
 
 section_subscript_list_f95
@@ -313,8 +357,9 @@ component_spec_list_f95
     : component_spec_f95 (COMMA component_spec_f95)*
     ;
 
+// Component specification - allows intrinsic names as component names
 component_spec_f95
-    : IDENTIFIER EQUALS expr_f95
+    : identifier_or_keyword_f95 EQUALS expr_f95
     | expr_f95
     ;
 
@@ -456,8 +501,10 @@ call_stmt_f95
     : CALL procedure_designator_f95 (LPAREN actual_arg_spec_list_f95? RPAREN)?
     ;
 
+// Procedure designator - uses identifier_or_keyword_f95 for intrinsic names
+// ISO/IEC 1539-1:1997 Section 12.3: A procedure designator designates a procedure
 procedure_designator_f95
-    : IDENTIFIER
+    : identifier_or_keyword_f95
     | variable_f95
     ;
 
@@ -465,10 +512,12 @@ actual_arg_spec_list_f95
     : actual_arg_spec_f95 (COMMA actual_arg_spec_f95)*
     ;
 
+// Actual argument specification - keyword arguments can use intrinsic names
+// ISO/IEC 1539-1:1997 Section 12.4.1: Actual argument specification
 actual_arg_spec_f95
-    : IDENTIFIER EQUALS expr_f95
+    : identifier_or_keyword_f95 EQUALS expr_f95
     | expr_f95
-    | MULTIPLY IDENTIFIER
+    | MULTIPLY identifier_or_keyword_f95
     ;
 
 // Enhanced I/O statements (F95)
@@ -530,9 +579,10 @@ io_implied_do_f95
       (COMMA expr_f95)? RPAREN
     ;
 
-// Function reference (enhanced for F95)
+// Function reference - uses identifier_or_keyword_f95 to allow intrinsic names
+// ISO/IEC 1539-1:1997 Section 12.4: A function reference is a primary
 function_reference_f95
-    : IDENTIFIER LPAREN actual_arg_spec_list_f95? RPAREN
+    : identifier_or_keyword_f95 LPAREN actual_arg_spec_list_f95? RPAREN
     ;
 
 // ====================================================================

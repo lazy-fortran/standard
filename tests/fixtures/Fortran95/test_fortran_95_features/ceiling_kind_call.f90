@@ -1,0 +1,1 @@
+CEILING(x, KIND=8)
