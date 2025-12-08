@@ -69,6 +69,7 @@ statement_body
     | sense_light_stmt              // Appendix B row 11: SENSE LIGHT i
     | do_stmt_basic                 // Appendix B row 18: DO n i = m1,m2,m3
     | frequency_stmt                // Appendix B row 13: FREQUENCY n(i,j,...)
+    | format_stmt                   // Appendix B row 16: FORMAT (specification)
     | read_stmt_basic               // Appendix B rows 20-24: READ forms
     | write_stmt_basic              // Appendix B rows 25-27: WRITE forms
     | print_stmt                    // Appendix B row 28: PRINT n, list
@@ -280,6 +281,59 @@ print_stmt
 // List may be omitted per manual row 29 variant
 punch_stmt
     : PUNCH label (COMMA output_list)?
+    ;
+
+// ============================================================================
+// FORMAT STATEMENT
+// C28-6003 Chapter III (Input-Output) and Appendix B row 16
+// ============================================================================
+// The FORMAT statement defines the layout for formatted I/O operations.
+// Form: FORMAT (format-specification)
+// Edit descriptors include:
+//   Iw       - Integer (w = field width)
+//   Fw.d     - Real fixed-point (w = width, d = decimal places)
+//   Ew.d     - Real exponential (w = width, d = decimal places)
+//   nX       - Skip n positions
+//   nHtext   - Hollerith literal (n characters of text)
+//
+// FORMAT statements are non-executable and must have a statement label
+// so they can be referenced by READ, PRINT, PUNCH statements.
+// ============================================================================
+
+format_stmt
+    : FORMAT LPAREN format_specification RPAREN
+    ;
+
+// Format specification items - C28-6003 Chapter III
+format_specification
+    : format_item (COMMA format_item)*
+    ;
+
+// Individual format items - C28-6003 Chapter III
+// Note: This grammar accepts a simplified form where format descriptors
+// are matched as IDENTIFIER tokens (e.g., I5, F10) and Hollerith constants
+// are matched as HOLLERITH tokens.
+format_item
+    : format_repeat_count? format_descriptor  // e.g., 3I5, F10.2, E15.6
+    | HOLLERITH                               // e.g., 5HHELLO (literal text)
+    ;
+
+// Optional repeat count before format descriptor
+format_repeat_count
+    : INTEGER_LITERAL
+    ;
+
+// Format descriptor with optional decimal specification
+// C28-6003: I, F, E descriptors with field width and decimal places
+// Note: The lexer tokenizes F10.2 as IDENTIFIER (F10) followed by
+// REAL_LITERAL (.2). This rule matches both forms.
+format_descriptor
+    : IDENTIFIER format_decimal_part?
+    ;
+
+// Decimal part of format descriptor (e.g., .d in Fw.d)
+format_decimal_part
+    : REAL_LITERAL
     ;
 
 

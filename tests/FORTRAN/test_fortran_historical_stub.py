@@ -107,26 +107,32 @@ class TestFORTRANHistoricalStub:
         assert any(token.type == FORTRANLexer.PAUSE for token in tokens)
 
     def test_hollerith_constants(self):
-        """Test recognition of Hollerith constants (1957 string literals)."""
+        """Test recognition of Hollerith constants (1957 string literals).
+
+        Per IBM 704 manual (C28-6003), Hollerith constants were the ONLY
+        string-literal mechanism in the original 1957 FORTRAN. Format:
+          nHcharacters - where n is the count of characters following H
+        """
         # Hollerith constants were the ONLY string literals in 1957
         # Test individual Hollerith constants (they need to be separated)
         test_inputs = ["5HHELLO", "12HFORTRAN 1957"]
-        
+
         for test_input in test_inputs:
             input_stream = InputStream(test_input)
             lexer = FORTRANLexer(input_stream)
             tokens = []
-            
+
             while True:
                 token = lexer.nextToken()
                 if token.type == -1:
                     break
                 tokens.append(token)
-            
-            # Should recognize at least one Hollerith token
-            # HOLLERITH tokens not yet implemented in this stub
-            # For now, just check that lexer processes the input without errors
+
+            # Should recognize HOLLERITH token now that it is implemented
             assert len(tokens) > 0, f"No tokens found in: {test_input}"
+            assert any(
+                token.type == FORTRANLexer.HOLLERITH for token in tokens
+            ), f"HOLLERITH token not found in: {test_input}"
 
     def test_arithmetic_if_statement(self):
         """Test parsing of arithmetic IF (unique to early FORTRAN)."""
@@ -250,20 +256,52 @@ class TestFORTRANHistoricalStub:
             pytest.fail(f"DO loop parsing failed: {e}")
 
     def test_format_statement(self):
-        """Test parsing of FORMAT statements (revolutionary I/O feature)."""
+        """Test parsing of FORMAT statements (revolutionary I/O feature).
+
+        Per IBM 704 manual (C28-6003) Appendix B row 16, FORMAT was part of
+        the original 1957 FORTRAN specification. It defines I/O layout with:
+          Iw       - Integer (w = field width)
+          Fw.d     - Real fixed-point (w = width, d = decimal places)
+          Ew.d     - Real exponential notation
+          nHtext   - Hollerith literal (n characters of text)
+        """
         test_input = load_fixture(
             "FORTRAN",
             "test_fortran_historical_stub",
             "format_stmt.f",
         )
-        
+
         parser = self.create_parser(test_input)
-        
+
         try:
             tree = parser.program_unit_core()
             assert tree is not None
+            assert parser.getNumberOfSyntaxErrors() == 0
         except Exception as e:
             pytest.fail(f"FORMAT statement parsing failed: {e}")
+
+    def test_format_multiple_statements(self):
+        """Test parsing of multiple FORMAT statements with edit descriptors.
+
+        This tests various FORMAT statement forms including:
+        - Simple format descriptors: I5, F10.2, E15.6
+        - Repeat counts: 3I10, 2F15.4
+        - Hollerith constants: 5HHELLO, 10HRESULT IS:
+        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "format_tests_1957.f",
+        )
+
+        parser = self.create_parser(test_input)
+
+        try:
+            tree = parser.program_unit_core()
+            assert tree is not None
+            assert parser.getNumberOfSyntaxErrors() == 0
+        except Exception as e:
+            pytest.fail(f"Multiple FORMAT statements parsing failed: {e}")
 
     def test_historical_io_statements(self):
         """Test parsing of 1957 I/O statements."""
