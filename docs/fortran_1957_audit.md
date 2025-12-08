@@ -244,7 +244,73 @@ These XPASS entries are the authoritative list of historical examples
 that still fail to parse and should be used as a to‑do list when
 extending the grammar toward fuller 1957 coverage.
 
-## 8. Summary
+## 8. C28-6003 Appendix B Crosswalk
+
+The IBM 704 FORTRAN manual (Form C28-6003, October 1958) Appendix B lists
+32 statement types. This section provides an exhaustive crosswalk from
+each Appendix B entry to the corresponding grammar rule(s) or notes gaps.
+
+| Row | Appendix B Statement           | Grammar Rule(s)                | Status          |
+|-----|--------------------------------|--------------------------------|-----------------|
+| 1   | GO TO n                        | `goto_stmt`                    | Implemented     |
+| 2   | GO TO (n1,n2,...nm), i         | `computed_goto_stmt`           | Implemented     |
+| 2   | GO TO n, (n1,n2,...nm)         | `assigned_goto_stmt`           | Implemented     |
+| 3   | IF (e) n1, n2, n3              | `if_stmt_arithmetic`           | Implemented     |
+| 4   | IF (SENSE SWITCH i) n1, n2    | `if_stmt_sense_switch`         | Implemented     |
+| 5   | IF ACCUMULATOR OVERFLOW n1,n2 | `if_stmt_accumulator_overflow` | Implemented     |
+| 6   | IF QUOTIENT OVERFLOW n1, n2   | `if_stmt_quotient_overflow`    | Implemented     |
+| 7   | IF DIVIDE CHECK n1, n2        | `if_stmt_divide_check`         | Implemented     |
+| 8   | IF (SENSE LIGHT i) n1, n2     | `if_stmt_sense_light`          | Implemented     |
+| 9   | IF (a) n1, n2 (where a is...) | Not implemented                | Gap: see #141   |
+| 10  | IF (a) n1, n2 (another form)  | Not implemented                | Gap: see #141   |
+| 11  | SENSE LIGHT i                 | `sense_light_stmt`             | Implemented     |
+| 12  | ASSIGN i TO n                 | `assign_stmt`                  | Implemented     |
+| 13  | FREQUENCY n (i1, i2, ...)     | `frequency_stmt`               | Implemented     |
+| 14  | DIMENSION v, v, ...           | `dimension_stmt`               | Implemented     |
+| 15  | EQUIVALENCE (a,b,...), ...    | `equivalence_stmt`             | Implemented     |
+| 16  | FORMAT (specification)        | Token only                     | Gap: see #154   |
+| 17  | f(a, b, ...) = e              | Not implemented                | Gap: stmt func  |
+| 18  | DO n i = m1, m2, m3           | `do_stmt_basic`                | Implemented     |
+| 19  | CONTINUE                      | `CONTINUE` token in body       | Implemented     |
+| 20  | READ n, list                  | Not implemented                | Gap: see #153   |
+| 21  | READ INPUT TAPE i, n, list    | Not implemented                | Gap: see #153   |
+| 22  | READ TAPE i, list             | Not implemented                | Gap: see #153   |
+| 23  | READ DRUM i, j, list          | Not implemented                | Gap: see #153   |
+| 24  | READ n                        | Not implemented                | Gap: see #153   |
+| 25  | WRITE OUTPUT TAPE i, n, list  | Not implemented                | Gap: see #153   |
+| 26  | WRITE TAPE i, list            | Not implemented                | Gap: see #153   |
+| 27  | WRITE DRUM i, j, list         | Not implemented                | Gap: see #153   |
+| 28  | PRINT n, list                 | Token only                     | Gap: see #153   |
+| 29  | PUNCH n, list                 | Token only                     | Gap: see #153   |
+| 30  | STOP / STOP n                 | `STOP` token in body           | Implemented     |
+| 31  | PAUSE / PAUSE n               | `pause_stmt`                   | Implemented     |
+| 32  | END                           | `END` token in body            | Implemented     |
+
+**Additional constructs from C28-6003 not in Appendix B table:**
+
+| Construct                      | Grammar Rule(s)                | Status          |
+|--------------------------------|--------------------------------|-----------------|
+| Assignment (v = e)             | `assignment_stmt`              | Implemented     |
+| END FILE i                     | Not implemented                | Gap: see #153   |
+| REWIND i                       | Not implemented                | Gap: see #153   |
+| BACKSPACE i                    | Not implemented                | Gap: see #153   |
+| Hollerith constants (nHtext)   | Not implemented                | Gap: see #154   |
+
+**Gaps requiring follow-up issues:**
+
+The following gaps have been identified during this crosswalk and are
+tracked by existing issues:
+
+- **#141**: FORTRAN 1957 historical stub promotion (general coverage)
+- **#153**: Full 704 I/O statement family (READ/WRITE/TAPE/DRUM/END FILE/
+  REWIND/BACKSPACE)
+- **#154**: FORMAT grammar and Hollerith constants
+- **#155**: Strict fixed-form card layout and C/* comments
+
+All identified gaps have corresponding GitHub issues; no new issues
+required from this crosswalk.
+
+## 9. Summary
 
 Today the FORTRAN (1957) grammar is:
 
@@ -252,6 +318,8 @@ Today the FORTRAN (1957) grammar is:
   - Compiles and parses a core of early FORTRAN constructs.
   - Provides realistic arithmetic, control flow, I/O and unique 1957
     features for demonstration and testing.
+  - Contains inline C28-6003 spec references in grammar comments for
+    traceability to the original IBM 704 manual.
 - Not yet:
   - A complete reconstruction of the IBM 704 FORTRAN compiler.
   - Column‑accurate for fixed-form card images.

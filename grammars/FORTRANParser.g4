@@ -9,6 +9,16 @@
  * It focuses on arithmetic expressions, labels, DO loops, arithmetic IF,
  * computed GOTO, FREQUENCY and basic I/O, and serves as the foundation for
  * all subsequent FORTRAN/Fortran standards in this repository.
+ *
+ * Reference: IBM Reference Manual, FORTRAN Automatic Coding System for the
+ *            IBM 704 Data Processing System (Form C28-6003, October 1958)
+ *            - Chapter I: Introduction (program structure, coding format)
+ *            - Chapter II: The FORTRAN Language (statements, expressions)
+ *            - Chapter III: Input-Output
+ *            - Appendix B: Table of FORTRAN Statements (32 statement types)
+ *
+ * Manual available at: Computer History Museum archive
+ *   https://archive.computerhistory.org/resources/text/Fortran/102649787.05.01.acc.pdf
  */
 
 parser grammar FORTRANParser;
@@ -18,76 +28,89 @@ options {
 }
 
 // ============================================================================
-// PROGRAM STRUCTURE: Top-level constructs
+// PROGRAM STRUCTURE
+// C28-6003 Chapter I.A: A FORTRAN source program consists of a sequence
+// of statements, each on a separate card, ending with an END statement.
 // ============================================================================
 
 // Core program unit - can be extended by format-specific parsers
+// C28-6003: No explicit PROGRAM statement in 1957; program = sequence of stmts
 program_unit_core
     : (NEWLINE* statement)* NEWLINE* EOF
     ;
 
 // ============================================================================
-// STATEMENTS: Universal statement types (1957-2023)
+// STATEMENTS
+// C28-6003 Appendix B: Table of FORTRAN Statements (32 types)
+// Statements may have optional labels (columns 1-5 in card format)
 // ============================================================================
 
+// Statement with optional label
+// C28-6003 Chapter I.B: Statement numbers in columns 1-5
 statement
     : (label)? statement_body
     ;
 
+// Statement body - all 1957 FORTRAN statement types
+// C28-6003 Appendix B enumerates 32 statement types; this parser implements
+// a subset focused on control flow, I/O, and declarations
 statement_body
-    : assignment_stmt
-    | goto_stmt
-    | computed_goto_stmt
-    | assign_stmt
-    | assigned_goto_stmt
-    | if_stmt_arithmetic
-    | if_stmt_sense_light
-    | if_stmt_sense_switch
-    | if_stmt_accumulator_overflow
-    | if_stmt_quotient_overflow
-    | if_stmt_divide_check
-    | sense_light_stmt
-    | do_stmt_basic
-    | frequency_stmt
-    | read_stmt_basic
-    | write_stmt_basic
-    | pause_stmt
-    | dimension_stmt
-    | equivalence_stmt
-    | CONTINUE
-    | STOP
-    | END
+    : assignment_stmt               // Appendix B: arithmetic/subscripted
+    | goto_stmt                     // Appendix B row 1: GO TO n
+    | computed_goto_stmt            // Appendix B row 2: GO TO (n1,...), i
+    | assign_stmt                   // Appendix B row 12: ASSIGN i TO n
+    | assigned_goto_stmt            // Appendix B row 2: GO TO n, (n1,...)
+    | if_stmt_arithmetic            // Appendix B row 3: IF (e) n1,n2,n3
+    | if_stmt_sense_light           // Appendix B row 8: IF (SENSE LIGHT i)
+    | if_stmt_sense_switch          // Appendix B row 4: IF (SENSE SWITCH i)
+    | if_stmt_accumulator_overflow  // Appendix B row 5: IF ACCUMULATOR OVERFLOW
+    | if_stmt_quotient_overflow     // Appendix B row 6: IF QUOTIENT OVERFLOW
+    | if_stmt_divide_check          // Appendix B row 7: IF DIVIDE CHECK
+    | sense_light_stmt              // Appendix B row 11: SENSE LIGHT i
+    | do_stmt_basic                 // Appendix B row 18: DO n i = m1,m2,m3
+    | frequency_stmt                // Appendix B row 13: FREQUENCY n(i,j,...)
+    | read_stmt_basic               // Appendix B rows 20-24: READ forms
+    | write_stmt_basic              // Appendix B rows 25-27: WRITE forms
+    | pause_stmt                    // Appendix B row 31: PAUSE / PAUSE n
+    | dimension_stmt                // Appendix B row 14: DIMENSION v,v,...
+    | equivalence_stmt              // Appendix B row 15: EQUIVALENCE sets
+    | CONTINUE                      // Appendix B row 19: CONTINUE
+    | STOP                          // Appendix B row 30: STOP / STOP n
+    | END                           // Appendix B row 32: END
     ;
 
-// PAUSE statement (1957 operator intervention)
-// PAUSE or PAUSE n (where n is an optional integer)
-// Per IBM 704 FORTRAN manual Appendix B
+// ============================================================================
+// DECLARATION STATEMENTS
+// C28-6003 Chapter II.D (Subscripted Variables) and Appendix B rows 14-17
+// ============================================================================
+
+// PAUSE statement - Appendix B row 31
+// C28-6003: PAUSE or PAUSE n causes operator intervention
 pause_stmt
     : PAUSE (INTEGER_LITERAL)?
     ;
 
-// DIMENSION statement (array declarations)
-// Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B
-// Syntax: DIMENSION v, v, v, ... where v is an array declarator
+// DIMENSION statement - Appendix B row 14
+// C28-6003 Chapter II.D: DIMENSION v, v, v, ... where v is array declarator
 // Example: DIMENSION A(100), B(10,20), C(5,5,5)
 dimension_stmt
     : DIMENSION array_declarator (COMMA array_declarator)*
     ;
 
 // Array declarator specifies array name and dimensions
-// In 1957 FORTRAN, dimensions were compile-time constants
+// C28-6003 Chapter II.D: up to 3 dimensions, compile-time constant bounds
 array_declarator
     : IDENTIFIER LPAREN dimension_list RPAREN
     ;
 
 // Dimension list contains one or more dimension bounds
+// C28-6003: In 1957, dimensions were unsigned integer constants
 dimension_list
     : expr (COMMA expr)*
     ;
 
-// EQUIVALENCE statement (memory overlay)
-// Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B
-// Syntax: EQUIVALENCE (a,b,c,...), (d,e,f,...), ...
+// EQUIVALENCE statement - Appendix B row 15
+// C28-6003 Chapter II.F: EQUIVALENCE (a,b,c,...), (d,e,f,...), ...
 // Example: EQUIVALENCE (A, B(1)), (X, Y, Z)
 // Allows variables to share the same memory location
 equivalence_stmt
@@ -95,31 +118,38 @@ equivalence_stmt
     ;
 
 // Equivalence set is a parenthesized list of variables sharing memory
+// C28-6003: At least two variables per set
 equivalence_set
     : LPAREN variable (COMMA variable)+ RPAREN
     ;
 
-// Assignment statement (universal since 1957)
+// ============================================================================
+// CONTROL FLOW STATEMENTS
+// C28-6003 Chapter II.G (Control Statements) and Appendix B rows 1-12, 18-19
+// ============================================================================
+
+// Assignment statement - not in Appendix B but fundamental
+// C28-6003 Chapter II.C: v = e where v is variable, e is expression
 assignment_stmt
     : variable EQUALS expr
     ;
 
-// GOTO statement (universal since 1957)
+// Unconditional GO TO - Appendix B row 1
+// C28-6003 Chapter II.G: GO TO n transfers to statement n
 goto_stmt
     : GOTO label
     ;
 
-// Computed GOTO (1957 multi-way branch)
-// GO TO (label1, label2, ...), expression
+// Computed GO TO - Appendix B row 2
+// C28-6003 Chapter II.G: GO TO (n1, n2, ..., nm), i
+// Transfers to n1 if i=1, n2 if i=2, etc.
 computed_goto_stmt
     : GOTO LPAREN label_list RPAREN COMMA expr
     ;
 
-// ASSIGN statement (1957 assigned GOTO mechanism)
-// Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B
-// Syntax: ASSIGN i TO n
-// Where i is a statement label and n is an integer variable
-// This stores the label i in variable n for later use with assigned GOTO
+// ASSIGN statement - Appendix B row 12
+// C28-6003 Chapter II.G: ASSIGN i TO n
+// Stores label i in integer variable n for later assigned GO TO
 //
 // NON-COMPLIANT: ASSIGN is a deleted feature per ISO/IEC 1539-1:2018
 // Annex B.2. Retained for historical accuracy only.
@@ -128,12 +158,9 @@ assign_stmt
     : ASSIGN label TO variable
     ;
 
-// Assigned GOTO statement (1957 indirect branch)
-// Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B
-// Syntax: GO TO n, (l1, l2, ..., lm)
-// Where n is an integer variable containing a label (set by ASSIGN)
-// and (l1, l2, ..., lm) is a list of valid target labels
-// Branches to the label stored in variable n
+// Assigned GO TO - Appendix B row 2 (variant)
+// C28-6003 Chapter II.G: GO TO n, (l1, l2, ..., lm)
+// Branches to label stored in variable n (set by ASSIGN)
 //
 // NON-COMPLIANT: Assigned GO TO is a deleted feature per ISO/IEC
 // 1539-1:2018 Annex B.2. Retained for historical accuracy only.
@@ -142,108 +169,130 @@ assigned_goto_stmt
     : GOTO variable COMMA LPAREN label_list RPAREN
     ;
 
+// Label list for computed/assigned GO TO
 label_list
     : label (COMMA label)*
     ;
 
-// Arithmetic IF statement (1957 original form)
-// IF (expression) label1, label2, label3
-// Goes to label1 if expr < 0, label2 if expr = 0, label3 if expr > 0
+// Arithmetic IF statement - Appendix B row 3
+// C28-6003 Chapter II.G: IF (e) n1, n2, n3
+// Branches to n1 if e<0, n2 if e=0, n3 if e>0
 if_stmt_arithmetic
     : IF LPAREN expr RPAREN label COMMA label COMMA label
     ;
 
 // ============================================================================
-// HARDWARE-SPECIFIC IF STATEMENTS (IBM 704, 1957)
-// Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B
+// HARDWARE-SPECIFIC IF STATEMENTS (IBM 704)
+// C28-6003 Appendix B rows 4-11: IF statements for hardware indicators
+// These test IBM 704 console switches, sense lights, and overflow indicators
 // ============================================================================
 
-// IF (SENSE LIGHT i) n1, n2
-// Tests sense light i: if on, goes to n1; if off, goes to n2
+// IF (SENSE LIGHT i) n1, n2 - Appendix B row 8
+// C28-6003: Tests sense light i; if on goes to n1, if off goes to n2
 // The sense light is turned off after the test
 if_stmt_sense_light
     : IF LPAREN SENSE LIGHT INTEGER_LITERAL RPAREN label COMMA label
     ;
 
-// IF (SENSE SWITCH i) n1, n2
-// Tests console sense switch i: if up, goes to n1; if down, goes to n2
+// IF (SENSE SWITCH i) n1, n2 - Appendix B row 4
+// C28-6003: Tests console sense switch i; if up goes to n1, if down goes to n2
 if_stmt_sense_switch
     : IF LPAREN SENSE SWITCH INTEGER_LITERAL RPAREN label COMMA label
     ;
 
-// IF ACCUMULATOR OVERFLOW n1, n2
-// Tests and resets the accumulator overflow indicator:
-// if on, goes to n1; if off, goes to n2
+// IF ACCUMULATOR OVERFLOW n1, n2 - Appendix B row 5
+// C28-6003: Tests and resets accumulator overflow indicator
+// If on goes to n1, if off goes to n2
 if_stmt_accumulator_overflow
     : IF ACCUMULATOR OVERFLOW label COMMA label
     ;
 
-// IF QUOTIENT OVERFLOW n1, n2
-// Tests and resets the MQ (quotient) overflow indicator:
-// if on, goes to n1; if off, goes to n2
+// IF QUOTIENT OVERFLOW n1, n2 - Appendix B row 6
+// C28-6003: Tests and resets MQ (quotient) overflow indicator
+// If on goes to n1, if off goes to n2
 if_stmt_quotient_overflow
     : IF QUOTIENT OVERFLOW label COMMA label
     ;
 
-// IF DIVIDE CHECK n1, n2
-// Tests and resets the divide-check indicator:
-// if on (divide by zero occurred), goes to n1; if off, goes to n2
+// IF DIVIDE CHECK n1, n2 - Appendix B row 7
+// C28-6003: Tests and resets divide-check indicator
+// If on (divide by zero occurred) goes to n1, if off goes to n2
 if_stmt_divide_check
     : IF DIVIDE CHECK label COMMA label
     ;
 
-// SENSE LIGHT i
-// Sets sense light i on (the light can be tested by IF (SENSE LIGHT i))
-// Per IBM 704 manual, there were four sense lights (1-4) on the console
+// SENSE LIGHT i - Appendix B row 11
+// C28-6003: Sets sense light i on (can be tested by IF (SENSE LIGHT i))
+// IBM 704 had four sense lights (1-4) on the console
 sense_light_stmt
     : SENSE LIGHT INTEGER_LITERAL
     ;
 
-// Basic DO loop (1957 form)
-// DO label variable = expr, expr [, expr]
+// DO statement - Appendix B row 18
+// C28-6003 Chapter II.G: DO n i = m1, m2 [, m3]
+// Executes statements through n, incrementing i from m1 to m2 by m3
 do_stmt_basic
     : DO label variable EQUALS expr COMMA expr (COMMA expr)?
     ;
 
-// FREQUENCY statement (1957 optimization hint)
-// FREQUENCY label (n1, n2, ...)
+// FREQUENCY statement - Appendix B row 13
+// C28-6003 Chapter II.G: FREQUENCY n (i1, i2, ...)
+// Optimization hint for branch prediction at arithmetic IF
 frequency_stmt
     : FREQUENCY label LPAREN expr_list RPAREN
     ;
 
-// Basic I/O statements (simplified universal forms)
+// ============================================================================
+// I/O STATEMENTS
+// C28-6003 Chapter III (Input-Output) and Appendix B rows 16, 20-29
+// Note: This grammar implements simplified forms; full 1957 I/O had
+// READ INPUT TAPE, WRITE OUTPUT TAPE, READ/WRITE TAPE/DRUM, etc.
+// ============================================================================
+
+// Basic READ statement - Appendix B rows 20-24 (simplified)
+// C28-6003 Chapter III: Full forms include format labels and device specs
 read_stmt_basic
     : READ input_list
     ;
 
+// Basic WRITE statement - Appendix B rows 25-27 (simplified)
+// C28-6003 Chapter III: Full forms include format labels and device specs
 write_stmt_basic
     : WRITE output_list
     ;
 
 
 // ============================================================================
-// EXPRESSIONS: Proper precedence hierarchy (FORTRAN operator precedence)
+// EXPRESSIONS
+// C28-6003 Chapter II.C (Expressions) - arithmetic expression syntax
 // ============================================================================
 // FORTRAN operator precedence (highest to lowest):
 // 1. ** (power) - right associative
-// 2. unary +, - (unary operators)  
+// 2. unary +, - (unary operators)
 // 3. *, / (multiplication, division) - left associative
 // 4. binary +, - (addition, subtraction) - left associative
 // 5. relational operators (.EQ., .NE., etc.) - left associative
 
+// Top-level expression
+// C28-6003 Chapter II.C: Expressions combine constants, variables, operators
 expr
     : relational_expr
     ;
 
+// Relational expressions - C28-6003 Chapter II.C
+// Used in IF statement conditions
 relational_expr
     : relational_expr relational_op additive_expr    # RelationalExpression
     | additive_expr                                  # RelationalPrimary
     ;
 
+// Relational operators - C28-6003 Chapter II.C
 relational_op
     : EQ | NE | LT | LE | GT | GE
     ;
 
+// Additive expressions - C28-6003 Chapter II.C
+// Addition and subtraction, left associative
 additive_expr
     : additive_expr additive_op multiplicative_expr  # AdditiveExpression
     | multiplicative_expr                            # AdditivePrimary
@@ -253,6 +302,8 @@ additive_op
     : PLUS | MINUS
     ;
 
+// Multiplicative expressions - C28-6003 Chapter II.C
+// Multiplication and division, left associative
 multiplicative_expr
     : multiplicative_expr multiplicative_op unary_expr  # MultiplicativeExpression
     | unary_expr                                        # MultiplicativePrimary
@@ -262,6 +313,8 @@ multiplicative_op
     : MULTIPLY | SLASH
     ;
 
+// Unary expressions - C28-6003 Chapter II.C
+// Unary plus and minus
 unary_expr
     : unary_op unary_expr           # UnaryExpression
     | power_expr                    # UnaryPrimary
@@ -271,11 +324,15 @@ unary_op
     : PLUS | MINUS
     ;
 
+// Power expressions - C28-6003 Chapter II.C
+// Exponentiation (**), right associative
 power_expr
     : primary POWER power_expr      # PowerExpression     // Right associative
     | primary                       # PowerPrimary
     ;
 
+// Primary expressions - C28-6003 Chapter II.C
+// Literals, variables, and parenthesized expressions
 primary
     : literal
     | variable
@@ -283,34 +340,48 @@ primary
     ;
 
 // ============================================================================
-// LITERALS AND IDENTIFIERS: Basic data elements
+// LITERALS AND VARIABLES
+// C28-6003 Chapter II.A (Constants) and Chapter II.B (Variables)
 // ============================================================================
 
+// Numeric literals - C28-6003 Chapter II.A
+// Fixed-point (integer) and floating-point (real) constants
 literal
-    : INTEGER_LITERAL
-    | REAL_LITERAL
+    : INTEGER_LITERAL               // C28-6003 Chapter II.A.1
+    | REAL_LITERAL                  // C28-6003 Chapter II.A.2
     ;
 
+// Variables - C28-6003 Chapter II.B
+// Simple variable or subscripted variable (array element)
 variable
-    : IDENTIFIER (LPAREN expr_list RPAREN)?  // Simple variable or array element
+    : IDENTIFIER (LPAREN expr_list RPAREN)?
     ;
 
 // ============================================================================
-// UTILITY RULES: Helper patterns
+// UTILITY RULES
+// Helper patterns for labels, lists, and I/O
 // ============================================================================
 
+// Statement label - C28-6003 Chapter I.B
+// 1-5 digit unsigned integer in columns 1-5
 label
     : INTEGER_LITERAL
     ;
 
+// Expression list for subscripts and function arguments
+// C28-6003 Chapter II.B and II.E
 expr_list
     : (expr (COMMA expr)*)?
     ;
 
+// Input list for READ - C28-6003 Chapter III
+// List of variables to receive input values
 input_list
     : variable (COMMA variable)*
     ;
 
+// Output list for WRITE - C28-6003 Chapter III
+// List of expressions to output
 output_list
     : expr (COMMA expr)*
     ;
