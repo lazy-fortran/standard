@@ -196,22 +196,47 @@ Expressions:
 
 Specification:
 
-- Historically, FORTRAN II only provided a single “blank” COMMON area;
+- Historically, FORTRAN II only provided a single "blank" COMMON area;
   named COMMON blocks (`COMMON /BLOCK/ ...`) were introduced later
   (FORTRAN 66 era).
+- The 1958 IBM 704 FORTRAN II manual (C28-6000-2, Section 3.5) defines
+  COMMON as: `COMMON a1, a2, ..., an` where each `a` is a variable name
+  or array name.
 
 Implementation in this grammar:
 
-- `common_stmt` accepts both:
-  - `COMMON A, B, C` (blank COMMON).
-  - `COMMON /BLOCK/ X, Y` (named COMMON).
+The grammar provides **two modes** for COMMON handling (per issue #156):
 
-Implications:
+1. **Relaxed mode** (default):
+   - Entry points: `fortran_program`, `main_program`, `subroutine_subprogram`,
+     `function_subprogram`
+   - Uses `common_stmt` which accepts both blank and named COMMON:
+     - `COMMON A, B, C` (blank COMMON)
+     - `COMMON /BLOCK/ X, Y` (named COMMON)
+   - Recommended for practical compatibility with later standards.
 
-- The grammar is intentionally more generous than pure historical
-  FORTRAN II with respect to COMMON naming: it allows named COMMON
-  blocks as a convenience, even though that feature is associated with
-  later standards.
+2. **Strict 1958 mode**:
+   - Entry points: `fortran_program_strict`, `main_program_strict`,
+     `subroutine_subprogram_strict`, `function_subprogram_strict`
+   - Uses `common_stmt_strict` which accepts only blank COMMON:
+     - `COMMON A, B, C` (allowed)
+     - `COMMON /BLOCK/ X, Y` (syntax error)
+   - Recommended for historical audits requiring strict 1958 conformance.
+
+The strict mode entry points use `statement_body_strict` which routes to
+`common_stmt_strict` instead of `common_stmt`. All other statement types
+are shared between modes.
+
+Test coverage:
+
+- `tests/FORTRANII/test_fortran_ii_parser.py::TestStrictCommon` validates:
+  - Blank COMMON parses in both relaxed and strict modes.
+  - Named COMMON parses in relaxed mode but fails in strict mode.
+  - Strict mode fixtures parse correctly via `*_strict` entry points.
+- Fixtures in `tests/fixtures/FORTRANII/test_strict_common/`:
+  - `blank_common.f` - 1958-compliant blank COMMON (strict mode compatible)
+  - `named_common.f` - FORTRAN 66-style named COMMON (relaxed mode only)
+  - `main_blank_common.f` - Main program with blank COMMON
 
 ## 5. Fixed-form and labels
 
@@ -290,12 +315,13 @@ The six new FORTRAN II statement/subprogram forms added to FORTRAN I:
 | [type] FUNCTION name (args)     | `function_subprogram`        | Implemented     |
 | CALL name [(args)]              | `call_stmt`                  | Implemented     |
 | RETURN                          | `return_stmt`                | Implemented     |
-| COMMON list                     | `common_stmt`                | Implemented*    |
+| COMMON list                     | `common_stmt`, `common_stmt_strict` | Implemented |
 | END                             | `end_stmt`                   | Implemented     |
 
-*Note: `common_stmt` extends beyond strict FORTRAN II by accepting named
-COMMON blocks (`COMMON /name/ list`), which historically were introduced
-in FORTRAN 66. See issue #156 for design decision tracking.
+Note on COMMON: The grammar provides two modes (see Section 4):
+- `common_stmt` (relaxed): accepts both blank and named COMMON blocks.
+- `common_stmt_strict` (strict 1958): accepts only blank COMMON per C28-6000-2.
+Use `*_strict` entry points for historical audits. Issue #156 resolved.
 
 ### 8.2 Inherited FORTRAN I Statements (C28-6003 Appendix B)
 
@@ -359,7 +385,6 @@ tracked by existing issues:
 - **#153**: Full 704 I/O statement family (READ/WRITE/TAPE/DRUM/END FILE/
   REWIND/BACKSPACE)
 - **#154**: FORMAT grammar and Hollerith constants
-- **#156**: Reconcile COMMON semantics with 1958 spec (no named blocks)
 
 All identified gaps have corresponding GitHub issues; no new issues
 required from this crosswalk.
@@ -377,18 +402,15 @@ The FORTRAN II grammar in this repository:
     END.
 - Contains inline C28-6000-2 spec references in grammar comments for
   traceability to the original IBM FORTRAN II manual.
-- Extends COMMON to allow both blank and named forms, slightly beyond
-  strictly historical FORTRAN II.
-- Uses a layout‑lenient fixed-form model with explicit LABEL tokens,
+- Provides dual-mode COMMON handling (issue #156 resolved):
+  - Relaxed mode (default): accepts both blank and named COMMON blocks
+    for practical compatibility with later standards.
+  - Strict 1958 mode: enforces blank COMMON only per C28-6000-2 via
+    `*_strict` entry points for historical audits.
+- Uses a layout-lenient fixed-form model with explicit LABEL tokens,
   without strict 80-column enforcement.
 - Provides Hollerith support for FORMAT items but does not enforce
   length checks on the `nH...` form.
-
-Remaining design decisions (tracked separately):
-
-- Issue #156 tracks whether to reconcile COMMON semantics with the
-  strict 1958 spec (blank COMMON only) or continue accepting named
-  COMMON blocks as a forward-compatibility extension.
 
 Further work on this standard should reference this audit together with
 the open issues for expanding FORTRAN II coverage.

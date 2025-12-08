@@ -469,6 +469,169 @@ class TestFORTRANIIParser(unittest.TestCase):
                 )
 
 
+class TestStrictCommon(unittest.TestCase):
+    """Test strict 1958 COMMON mode (blank COMMON only, per issue #156)"""
+
+    def setUp(self):
+        """Set up test fixtures"""
+        if FORTRANIIParser is None:
+            self.skipTest("FORTRANIIParser not available")
+
+    def parse(self, text, rule_name):
+        """Helper to parse text using specified rule"""
+        input_stream = InputStream(text)
+        lexer = FORTRANIILexer(input_stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = FORTRANIIParser(token_stream)
+
+        rule_method = getattr(parser, rule_name)
+        return rule_method()
+
+    def test_blank_common_parses_in_relaxed_mode(self):
+        """Blank COMMON should parse in relaxed mode (common_stmt)"""
+        test_cases = [
+            "COMMON A, B, C",
+            "COMMON X",
+            "COMMON ARRAY(100)",
+            "COMMON A, B, ARR(10, 10)",
+        ]
+        for text in test_cases:
+            with self.subTest(text=text):
+                tree = self.parse(text, 'common_stmt')
+                self.assertIsNotNone(tree)
+                self.assertIn('COMMON', tree.getText())
+
+    def test_blank_common_parses_in_strict_mode(self):
+        """Blank COMMON should parse in strict mode (common_stmt_strict)"""
+        test_cases = [
+            "COMMON A, B, C",
+            "COMMON X",
+            "COMMON ARRAY(100)",
+            "COMMON A, B, ARR(10, 10)",
+        ]
+        for text in test_cases:
+            with self.subTest(text=text):
+                tree = self.parse(text, 'common_stmt_strict')
+                self.assertIsNotNone(tree)
+                self.assertIn('COMMON', tree.getText())
+
+    def test_named_common_parses_in_relaxed_mode(self):
+        """Named COMMON should parse in relaxed mode (common_stmt)"""
+        test_cases = [
+            "COMMON /BLOCK1/ A, B, C",
+            "COMMON /DATA/ X",
+            "COMMON /WORK/ ARRAY(100)",
+        ]
+        for text in test_cases:
+            with self.subTest(text=text):
+                tree = self.parse(text, 'common_stmt')
+                self.assertIsNotNone(tree)
+                self.assertIn('COMMON', tree.getText())
+
+    def test_named_common_fails_in_strict_mode(self):
+        """Named COMMON should NOT parse via common_stmt_strict
+
+        The strict mode rule only allows blank COMMON per the 1958 spec.
+        Named COMMON blocks (/name/) were introduced in FORTRAN 66.
+        """
+        test_cases = [
+            "COMMON /BLOCK1/ A, B, C",
+            "COMMON /DATA/ X",
+            "COMMON /WORK/ ARRAY(100)",
+        ]
+        for text in test_cases:
+            with self.subTest(text=text):
+                input_stream = InputStream(text)
+                lexer = FORTRANIILexer(input_stream)
+                token_stream = CommonTokenStream(lexer)
+                parser = FORTRANIIParser(token_stream)
+                tree = parser.common_stmt_strict()
+                errors = parser.getNumberOfSyntaxErrors()
+                self.assertGreater(
+                    errors, 0,
+                    f"Named COMMON '{text}' should fail in strict mode"
+                )
+
+    def test_strict_program_entry_point_exists(self):
+        """Verify strict mode entry points are available"""
+        import os
+        grammar_path = os.path.join('grammars', 'src', 'FORTRANIIParser.g4')
+        with open(grammar_path, 'r') as f:
+            content = f.read()
+
+        strict_rules = [
+            'fortran_program_strict',
+            'main_program_strict',
+            'subroutine_subprogram_strict',
+            'function_subprogram_strict',
+            'statement_list_strict',
+            'statement_strict',
+            'statement_body_strict',
+            'common_stmt_strict',
+        ]
+        for rule in strict_rules:
+            with self.subTest(rule=rule):
+                self.assertIn(
+                    rule, content,
+                    f"Grammar should define strict mode rule: {rule}"
+                )
+
+    def test_blank_common_fixture_parses_strict(self):
+        """Blank COMMON fixture should parse in strict mode"""
+        fixture = load_fixture(
+            "FORTRANII",
+            "test_strict_common",
+            "blank_common.f",
+        )
+        tree = self.parse(fixture, 'subroutine_subprogram_strict')
+        self.assertIsNotNone(tree)
+        self.assertIn('COMMON', tree.getText())
+        errors_count = tree.parser.getNumberOfSyntaxErrors()
+        self.assertEqual(errors_count, 0)
+
+    def test_named_common_fixture_fails_strict(self):
+        """Named COMMON fixture should fail in strict mode"""
+        fixture = load_fixture(
+            "FORTRANII",
+            "test_strict_common",
+            "named_common.f",
+        )
+        input_stream = InputStream(fixture)
+        lexer = FORTRANIILexer(input_stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = FORTRANIIParser(token_stream)
+        parser.subroutine_subprogram_strict()
+        errors = parser.getNumberOfSyntaxErrors()
+        self.assertGreater(
+            errors, 0,
+            "Named COMMON fixture should fail in strict 1958 mode"
+        )
+
+    def test_named_common_fixture_parses_relaxed(self):
+        """Named COMMON fixture should parse in relaxed mode"""
+        fixture = load_fixture(
+            "FORTRANII",
+            "test_strict_common",
+            "named_common.f",
+        )
+        tree = self.parse(fixture, 'subroutine_subprogram')
+        self.assertIsNotNone(tree)
+        errors_count = tree.parser.getNumberOfSyntaxErrors()
+        self.assertEqual(errors_count, 0)
+
+    def test_main_blank_common_parses_strict(self):
+        """Main program with blank COMMON should parse in strict mode"""
+        fixture = load_fixture(
+            "FORTRANII",
+            "test_strict_common",
+            "main_blank_common.f",
+        )
+        tree = self.parse(fixture, 'main_program_strict')
+        self.assertIsNotNone(tree)
+        errors_count = tree.parser.getNumberOfSyntaxErrors()
+        self.assertEqual(errors_count, 0)
+
+
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail
     unittest.main(verbosity=2)

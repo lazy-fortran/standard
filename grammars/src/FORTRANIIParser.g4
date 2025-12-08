@@ -111,6 +111,55 @@ type_spec
     ;
 
 // ============================================================================
+// STRICT 1958 MODE ENTRY POINTS
+// C28-6000-2: Historical mode enforcing blank COMMON only (no named blocks)
+// ============================================================================
+// These entry points use statement_body_strict and common_stmt_strict to
+// enforce the original 1958 FORTRAN II specification where only blank COMMON
+// was available. Named COMMON blocks (/name/) were introduced in FORTRAN 66.
+//
+// Use these rules for historical audits or when strict 1958 conformance is
+// required. The default entry points (fortran_program, main_program, etc.)
+// use relaxed mode that accepts named COMMON blocks for compatibility.
+// ============================================================================
+
+// Strict 1958 FORTRAN II program entry point
+fortran_program_strict
+    : (main_program_strict | subroutine_subprogram_strict
+      | function_subprogram_strict) EOF
+    ;
+
+// Strict main program - C28-6000-2 Part I, Chapter 1
+main_program_strict
+    : statement_list_strict end_stmt NEWLINE?
+    ;
+
+// Strict statement list - C28-6000-2 Part I, Chapter 2
+statement_list_strict
+    : statement_strict*
+    ;
+
+// Strict individual statement - C28-6000-2 Part I, Chapter 2
+statement_strict
+    : label? statement_body_strict NEWLINE?
+    | NEWLINE
+    ;
+
+// Strict subroutine definition - C28-6000-2 Part I, Chapter 3, Section 3.2
+subroutine_subprogram_strict
+    : SUBROUTINE IDENTIFIER parameter_list? NEWLINE
+      statement_list_strict
+      end_stmt NEWLINE?
+    ;
+
+// Strict function definition - C28-6000-2 Part I, Chapter 3, Section 3.3
+function_subprogram_strict
+    : type_spec? FUNCTION IDENTIFIER parameter_list NEWLINE
+      statement_list_strict
+      end_stmt NEWLINE?
+    ;
+
+// ============================================================================
 // STATEMENT TYPES
 // C28-6000-2 Part I, Chapter 1 and Appendix A: Summary of FORTRAN II Statements
 // ============================================================================
@@ -122,6 +171,7 @@ type_spec
 // function_subprogram rules.
 // ============================================================================
 
+// Relaxed mode statement body - allows named COMMON blocks
 statement_body
     : statement_function_stmt  // Appendix A: Statement function definition
     | assignment_stmt      // Appendix A: v = e (assignment)
@@ -140,6 +190,30 @@ statement_body
     | equivalence_stmt   // Appendix A: EQUIVALENCE (a,b,...), ...
     | frequency_stmt     // Appendix A: FREQUENCY n (i1, i2, ...)
     | common_stmt        // Appendix A: COMMON list (NEW in FORTRAN II)
+    | return_stmt        // Appendix A: RETURN (NEW in FORTRAN II)
+    | call_stmt          // Appendix A: CALL name (args) (NEW in FORTRAN II)
+    ;
+
+// Strict 1958 mode statement body - enforces blank COMMON only
+// Use statement_body_strict via strict entry points for historical audits.
+statement_body_strict
+    : statement_function_stmt  // Appendix A: Statement function definition
+    | assignment_stmt      // Appendix A: v = e (assignment)
+    | goto_stmt           // Appendix A: GO TO n
+    | computed_goto_stmt  // Appendix A: GO TO (n1, n2, ...), i
+    | arithmetic_if_stmt  // Appendix A: IF (e) n1, n2, n3
+    | do_stmt            // Appendix A: DO n i = m1, m2 [, m3]
+    | continue_stmt      // Appendix A: CONTINUE
+    | stop_stmt          // Appendix A: STOP [n]
+    | pause_stmt         // Appendix A: PAUSE [n]
+    | read_stmt          // Appendix A: READ forms
+    | print_stmt         // Appendix A: PRINT n, list
+    | punch_stmt         // Appendix A: PUNCH n, list
+    | format_stmt        // Appendix A: FORMAT (specification)
+    | dimension_stmt     // Appendix A: DIMENSION v, v, ...
+    | equivalence_stmt   // Appendix A: EQUIVALENCE (a,b,...), ...
+    | frequency_stmt     // Appendix A: FREQUENCY n (i1, i2, ...)
+    | common_stmt_strict // 1958 strict: blank COMMON only
     | return_stmt        // Appendix A: RETURN (NEW in FORTRAN II)
     | call_stmt          // Appendix A: CALL name (args) (NEW in FORTRAN II)
     ;
@@ -329,11 +403,30 @@ frequency_stmt
 
 // COMMON statement - C28-6000-2 Part I, Chapter 3, Section 3.5
 // Shared storage between program units (NEW in FORTRAN II)
-// Form: COMMON list or COMMON /name/ list
-// Note: Named COMMON blocks (/name/) are a forward-compatibility extension;
-// historically FORTRAN II only provided blank COMMON. See issue #156.
+//
+// Historical context:
+// The 1958 IBM 704 FORTRAN II manual (C28-6000-2) defines only blank COMMON:
+//   "COMMON a1, a2, ..., an"
+// where a1..an are variable names or array names. Named COMMON blocks
+// (COMMON /BLOCK/ list) were introduced in FORTRAN 66.
+//
+// This grammar provides two modes (see issue #156):
+// - common_stmt: Relaxed mode - accepts both blank and named COMMON for
+//   practical compatibility with later standards.
+// - common_stmt_strict: Strict 1958 mode - accepts only blank COMMON per
+//   the historical C28-6000-2 specification.
+//
+// Form (relaxed): COMMON list or COMMON /name/ list
+// Form (strict):  COMMON list only
 common_stmt
     : COMMON (SLASH IDENTIFIER SLASH)? variable_list
+    ;
+
+// Strict COMMON statement - C28-6000-2 Part I, Chapter 3, Section 3.5
+// Historical 1958 semantics: blank COMMON only, no named blocks.
+// Use this rule (via strict entry points) for historical audits.
+common_stmt_strict
+    : COMMON variable_list
     ;
 
 
