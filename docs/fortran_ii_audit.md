@@ -325,8 +325,8 @@ Use `*_strict` entry points for historical audits. Issue #156 resolved.
 
 ### 8.2 Inherited FORTRAN I Statements (C28-6003 Appendix B)
 
-All original FORTRAN (1957) statements remain available in FORTRAN II.
-These are inherited from `FORTRANParser.g4` or redefined in
+Most core FORTRAN (1957) statements remain available in FORTRAN II.
+These are either inherited from `FORTRANParser.g4` or redefined in
 `FORTRANIIParser.g4`:
 
 | Statement Form                       | Grammar Rule(s)                | Status          |
@@ -348,21 +348,22 @@ These are inherited from `FORTRANParser.g4` or redefined in
 | PRINT n, list                        | `print_stmt`                   | Implemented     |
 | PUNCH n, list                        | `punch_stmt`                   | Implemented     |
 
-### 8.3 FORTRAN I Features Inherited or Out of Scope
+### 8.3 FORTRAN I Features Not Included in FORTRAN II Statement Set
 
-The following FORTRAN I (C28-6003) features are either inherited from
-the FORTRAN I parser or are out of scope for the current grammar:
+The following FORTRAN I (C28-6003) features are either implemented only
+at the FORTRAN I level (not wired into the FORTRAN II `statement_body`)
+or are out of scope for the current grammar:
 
 | Statement Form                       | Grammar Rule(s)                | Status          |
 |--------------------------------------|--------------------------------|-----------------|
-| ASSIGN i TO n                        | (FORTRAN I: `assign_stmt`)     | Inherited       |
-| GO TO n, (n1, n2, ...)               | (FORTRAN I: `assigned_goto_stmt`) | Inherited    |
-| IF (SENSE SWITCH i) n1, n2           | (FORTRAN I: `if_stmt_sense_switch`) | Inherited     |
-| IF (SENSE LIGHT i) n1, n2            | (FORTRAN I: `if_stmt_sense_light`) | Inherited     |
-| IF ACCUMULATOR OVERFLOW n1, n2       | (FORTRAN I: see FORTRANParser) | Inherited       |
-| IF QUOTIENT OVERFLOW n1, n2          | (FORTRAN I: see FORTRANParser) | Inherited       |
-| IF DIVIDE CHECK n1, n2               | (FORTRAN I: see FORTRANParser) | Inherited       |
-| SENSE LIGHT i                        | (FORTRAN I: `sense_light_stmt`) | Inherited      |
+| ASSIGN i TO n                        | (FORTRAN I: `assign_stmt`)     | FORTRAN I only  |
+| GO TO n, (n1, n2, ...)               | (FORTRAN I: `assigned_goto_stmt`) | FORTRAN I only |
+| IF (SENSE SWITCH i) n1, n2           | (FORTRAN I: `if_stmt_sense_switch`) | FORTRAN I only |
+| IF (SENSE LIGHT i) n1, n2            | (FORTRAN I: `if_stmt_sense_light`) | FORTRAN I only |
+| IF ACCUMULATOR OVERFLOW n1, n2       | (FORTRAN I: see FORTRANParser) | FORTRAN I only  |
+| IF QUOTIENT OVERFLOW n1, n2          | (FORTRAN I: see FORTRANParser) | FORTRAN I only  |
+| IF DIVIDE CHECK n1, n2               | (FORTRAN I: see FORTRANParser) | FORTRAN I only  |
+| SENSE LIGHT i                        | (FORTRAN I: `sense_light_stmt`) | FORTRAN I only |
 | READ INPUT TAPE i, n, list           | Not implemented                | Out of scope    |
 | READ TAPE i, list                    | Not implemented                | Out of scope    |
 | READ DRUM i, j, list                 | Not implemented                | Out of scope    |
@@ -375,14 +376,16 @@ the FORTRAN I parser or are out of scope for the current grammar:
 
 ### 8.4 Implementation Status
 
-The following features from the original IBM 704 FORTRAN II spec have
+The following features from the original IBM 704 FORTRAN II context have
 been addressed:
 
-- **ASSIGN/assigned GO TO**: Implemented in FORTRAN I parser and inherited
-  by FORTRAN II (see `assign_stmt`, `assigned_goto_stmt` in FORTRANParser.g4)
+- **ASSIGN/assigned GO TO**: Implemented and tested in `FORTRANParser.g4`
+  as part of the FORTRAN I grammar (issue #141, closed). These constructs
+  are not yet wired into the FORTRAN II `statement_body` and therefore
+  remain FORTRAN I–only in this repository.
 - **FORMAT and Hollerith**: Implemented (issue #154, closed)
 - **Sense switch/light and hardware IFs**: Implemented in FORTRAN I parser
-  and inherited by FORTRAN II
+  and available via the FORTRAN I entry points
 
 The following enhancement remains open:
 
