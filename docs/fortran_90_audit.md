@@ -291,8 +291,8 @@ Gaps:
 
 `tests/Fortran90/test_fortran_90_comprehensive.py` (30 tests) confirms
 that the grammar can parse a broad set of Fortran 90 features when
-exercised in focused unit tests. However, the generic fixture harness
-still marks a number of F90 fixtures as XPASS, including:
+exercised in focused unit tests. The generic fixture harness still marks
+a number of F90 fixtures as XPASS, including:
 
 - `tests/fixtures/Fortran90/test_fortran_90_comprehensive/`:
   - `basic_program.f90`
@@ -307,7 +307,6 @@ still marks a number of F90 fixtures as XPASS, including:
   - `mathematics_module.f90`
   - `dynamic_arrays_program.f90`
   - `types_module.f90`
-  - `fixed_form_program.f`
   - `free_form_features_program.f90`
   - `advanced_features_module.f90`
   - `fortran95_features_program.f90`
@@ -396,4 +395,3 @@ Future work should:
   N692 §10.
 - Keep the grammar and tests in sync with the spec‑section annotations
   tracked by issue #173.
-
