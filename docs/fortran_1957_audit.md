@@ -228,20 +228,56 @@ As documented in `docs/fixed_form_support.md`:
 
 - The FORTRAN 1957 grammar uses a statement‑oriented, layout‑lenient
   model:
-  - No enforcement of strict 80‑column layout.
+  - No enforcement of strict 80‑column layout in the grammar itself.
   - Labels and statements are recognized based on tokens and rule
     order, not physical column numbers.
-  - Sequence numbers (columns 73–80) are not modeled.
+  - Sequence numbers (columns 73–80) are not modeled by the grammar.
 - Comments:
-  - Modern `!` comments are supported.
-  - Classic `C`/`*` column‑1 comments from historical examples are
-    present in fixtures, but those fixtures are documented as
-    intentionally exceeding the subset and are expected to fail.
+  - Modern `!` comments are supported by the grammar.
+  - Classic `C` column‑1 comments are handled by the strict fixed-form
+    preprocessor.
 
-Strict card-image semantics (labels in 1–5, continuation in 6, text in
-7–72, sequence numbers in 73–80) remain outside the current subset and
-would need new work (see issue `FORTRAN 1957: promote historical stub
-toward full IBM 704 coverage`).
+### Strict Fixed-Form Mode (tools/strict_fixed_form.py)
+
+An optional **strict fixed-form preprocessor** validates and converts
+authentic IBM 704 card-image source files according to C28-6003:
+
+- **Card layout validation** per C28-6003 Chapter I.B:
+  - Columns 1–5: Statement labels (numeric 1–32767 or blank)
+  - Column 6: Continuation mark (non-blank = continuation)
+  - Columns 7–72: Statement text
+  - Columns 73–80: Sequence/identification field (stripped)
+  - Column 1: `C` marks a comment card (historical; `*` generates warning)
+
+- **Usage**:
+  ```python
+  from tools.strict_fixed_form import (
+      validate_strict_fixed_form_1957,
+      convert_to_lenient_1957
+  )
+
+  # Validate strict 1957 card layout
+  result = validate_strict_fixed_form_1957(source)
+
+  # Convert to layout-lenient form for FORTRANParser
+  lenient, result = convert_to_lenient_1957(source, strip_comments=True)
+  ```
+
+- **Test fixtures** in `tests/fixtures/FORTRAN/test_strict_fixed_form/`:
+  - `valid_arithmetic.f`, `valid_do_loop.f`, `valid_if_goto.f`: Authentic
+    80-column card layouts with sequence numbers
+  - `valid_continuation.f`: Multi-card statement continuations
+  - `label_range.f`: Valid labels within 1957 range (1–32767)
+  - `invalid_label_alpha.f`, `invalid_continuation_labeled.f`: Invalid
+    layouts that strict mode correctly rejects
+
+- **Key historical differences from FORTRAN II**:
+  - Labels limited to 1–32767 (vs. 1–99999 for FORTRAN II per C28-6000-2)
+  - Only `C` in column 1 is historical for 1957; `*` was added in FORTRAN II
+
+The strict mode preprocessor enables historical audits requiring exact
+card-image conformance while keeping the lenient grammar parsing mode
+available for modern tooling. This implementation addresses issue #155.
 
 ## 7. Fixtures and XPASS status
 
@@ -316,9 +352,9 @@ tracked by existing issues:
 - **#141**: FORTRAN 1957 historical stub promotion (general coverage)
 - **#153**: Full 704 I/O statement family (READ/WRITE/TAPE/DRUM/END FILE/
   REWIND/BACKSPACE)
-- **#155**: Strict fixed-form card layout and C/* comments
 
-Note: Issue **#154** (FORMAT grammar and Hollerith constants) has been
+Note: Issues **#154** (FORMAT grammar and Hollerith constants) and
+**#155** (strict fixed-form card layout and C/* comments) have been
 resolved by this implementation.
 
 ## 9. Summary
@@ -333,9 +369,11 @@ Today the FORTRAN (1957) grammar is:
     traceability to the original IBM 704 manual.
   - Supports FORMAT statements with edit descriptors (Iw, Fw.d, Ew.d),
     repeat counts, and Hollerith constants (nHtext).
+  - Supports **strict fixed-form mode** via `tools/strict_fixed_form.py`
+    for validating authentic IBM 704 card-image source files with
+    80-column layout, C comments in column 1, and sequence numbers.
 - Not yet:
   - A complete reconstruction of the IBM 704 FORTRAN compiler.
-  - Column‑accurate for fixed-form card images.
   - Fully supportive of tape/drum I/O statements.
 
 Further work on this standard should reference this audit together with

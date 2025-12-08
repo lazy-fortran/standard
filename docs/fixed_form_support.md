@@ -46,13 +46,57 @@ every vendor implementation.
 - Fixed-form handling:
   - Uses a **statement‑oriented** lexer (`FORTRANLexer.g4`) with explicit
     `NEWLINE` tokens.
-  - **Does not** enforce columns 1–5 / 6 / 7–72 / 73–80.
-  - Comments use modern `!` syntax; classic `C`/`*` column‑1 comments
-    in fixtures under `tests/fixtures/FORTRAN/test_fortran_historical_stub`
-    intentionally exceed the implemented subset and are expected to
-    produce syntax errors (see `tests/test_fixture_parsing.py`).
-- Full punch‑card column semantics for 1957 FORTRAN remain outside the
-  current subset and are tracked conceptually under Issue #91.
+  - **Does not** enforce columns 1–5 / 6 / 7–72 / 73–80 in the grammar.
+  - Comments use modern `!` syntax in the grammar; classic `C` column‑1
+    comments are handled by the strict fixed-form preprocessor.
+
+#### Strict Fixed-Form Mode for FORTRAN 1957 (tools/strict_fixed_form.py)
+
+FORTRAN 1957 now provides an optional **strict fixed-form preprocessor** that
+validates and converts IBM 704 card-image source files according to the
+C28-6003 (Oct 1958) specification:
+
+- **Card layout validation** per C28-6003 Chapter I.B:
+  - Columns 1–5: Statement labels (numeric 1–32767 or blank)
+  - Column 6: Continuation mark (non-blank = continuation)
+  - Columns 7–72: Statement text
+  - Columns 73–80: Sequence/identification field (ignored)
+  - Column 1: `C` marks a comment card (historical; `*` generates warning)
+
+- **Usage**:
+  ```python
+  from tools.strict_fixed_form import (
+      validate_strict_fixed_form_1957,
+      convert_to_lenient_1957
+  )
+
+  # Validate strict 1957 card layout
+  result = validate_strict_fixed_form_1957(source)
+  if not result.valid:
+      for error in result.errors:
+          print(f"Line {error.line_number}: {error.message}")
+
+  # Convert to layout-lenient form for FORTRANParser
+  lenient, result = convert_to_lenient_1957(source, strip_comments=True)
+  ```
+
+- **Test fixtures** in `tests/fixtures/FORTRAN/test_strict_fixed_form/`:
+  - `valid_arithmetic.f`, `valid_do_loop.f`, `valid_if_goto.f`: Authentic
+    80-column card layouts with sequence numbers
+  - `valid_continuation.f`: Multi-card statement continuations
+  - `label_range.f`: Valid labels within 1957 range (1–32767)
+  - `invalid_label_alpha.f`, `invalid_continuation_labeled.f`: Invalid
+    layouts that strict mode correctly rejects
+  - `invalid_label_out_of_range.f`: Label exceeding 1957 limit
+  - `star_comment_warning.f`: Non-historical `*` comment generates warning
+
+- **Key differences from FORTRAN II strict mode**:
+  - Labels limited to 1–32767 (vs. 1–99999 for FORTRAN II)
+  - Only `C` in column 1 is historical for 1957 (`*` generates warning)
+
+The strict mode preprocessor enables historical audits requiring exact
+card-image conformance while keeping the lenient grammar parsing mode
+available for modern tooling.
 
 ### 2.2 FORTRAN II (1958)
 

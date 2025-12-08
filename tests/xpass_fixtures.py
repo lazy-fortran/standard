@@ -312,6 +312,95 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
         "fail strict validation. It produces {errors} syntax errors when parsed "
         "directly (Issue #143)."
     ),
+    # FORTRAN 1957 strict fixed-form fixtures require preprocessing via
+    # tools/strict_fixed_form.py before parsing; they cannot be parsed
+    # directly. These are tested by tests/FORTRAN/test_strict_fixed_form_1957.py.
+    (
+        "FORTRAN",
+        Path("FORTRAN/test_strict_fixed_form/valid_arithmetic.f"),
+    ): (
+        "FORTRAN 1957 strict fixed-form fixture {relpath} uses authentic "
+        "80-column card layout with sequence numbers in columns 73-80 and "
+        "C-comments in column 1. It requires preprocessing via "
+        "tools/strict_fixed_form.py (dialect=1957) before FORTRANParser. "
+        "It produces {errors} syntax errors when parsed directly (Issue #155)."
+    ),
+    (
+        "FORTRAN",
+        Path("FORTRAN/test_strict_fixed_form/valid_do_loop.f"),
+    ): (
+        "FORTRAN 1957 strict fixed-form fixture {relpath} uses authentic "
+        "80-column card layout with sequence numbers in columns 73-80 and "
+        "C-comments in column 1. It requires preprocessing via "
+        "tools/strict_fixed_form.py (dialect=1957) before FORTRANParser. "
+        "It produces {errors} syntax errors when parsed directly (Issue #155)."
+    ),
+    (
+        "FORTRAN",
+        Path("FORTRAN/test_strict_fixed_form/valid_continuation.f"),
+    ): (
+        "FORTRAN 1957 strict fixed-form fixture {relpath} demonstrates "
+        "multi-card statement continuations with column 6 continuation marks. "
+        "It requires preprocessing via tools/strict_fixed_form.py (dialect=1957) "
+        "before FORTRANParser. It produces {errors} syntax errors when parsed "
+        "directly (Issue #155)."
+    ),
+    (
+        "FORTRAN",
+        Path("FORTRAN/test_strict_fixed_form/valid_if_goto.f"),
+    ): (
+        "FORTRAN 1957 strict fixed-form fixture {relpath} uses authentic "
+        "80-column card layout with arithmetic IF and GO TO statements. "
+        "It requires preprocessing via tools/strict_fixed_form.py (dialect=1957) "
+        "before FORTRANParser. It produces {errors} syntax errors when parsed "
+        "directly (Issue #155)."
+    ),
+    (
+        "FORTRAN",
+        Path("FORTRAN/test_strict_fixed_form/label_range.f"),
+    ): (
+        "FORTRAN 1957 strict fixed-form fixture {relpath} tests label range "
+        "validation (1-32767). It requires preprocessing via "
+        "tools/strict_fixed_form.py (dialect=1957) before FORTRANParser. "
+        "It produces {errors} syntax errors when parsed directly (Issue #155)."
+    ),
+    (
+        "FORTRAN",
+        Path("FORTRAN/test_strict_fixed_form/star_comment_warning.f"),
+    ): (
+        "FORTRAN 1957 strict fixed-form fixture {relpath} uses *-comments "
+        "which were not historical in 1957 (generates warning). "
+        "It requires preprocessing via tools/strict_fixed_form.py (dialect=1957) "
+        "before FORTRANParser. It produces {errors} syntax errors when parsed "
+        "directly (Issue #155)."
+    ),
+    (
+        "FORTRAN",
+        Path("FORTRAN/test_strict_fixed_form/invalid_label_alpha.f"),
+    ): (
+        "FORTRAN 1957 strict fixed-form negative fixture {relpath} has "
+        "intentionally invalid alphabetic label field. It is expected to fail "
+        "both strict validation and direct parsing. It produces {errors} syntax "
+        "errors (Issue #155)."
+    ),
+    (
+        "FORTRAN",
+        Path("FORTRAN/test_strict_fixed_form/invalid_continuation_labeled.f"),
+    ): (
+        "FORTRAN 1957 strict fixed-form negative fixture {relpath} has "
+        "intentionally invalid label on continuation card. It is expected to "
+        "fail strict validation. It produces {errors} syntax errors when parsed "
+        "directly (Issue #155)."
+    ),
+    (
+        "FORTRAN",
+        Path("FORTRAN/test_strict_fixed_form/invalid_label_out_of_range.f"),
+    ): (
+        "FORTRAN 1957 strict fixed-form negative fixture {relpath} has "
+        "intentionally out-of-range label (>32767). It is expected to fail "
+        "strict validation. It produces {errors} syntax errors when parsed "
+        "directly (Issue #155)."
+    ),
     # FORTRAN 66 fixtures have been updated to parse correctly with the
     # enhanced grammar per issue #144. They are no longer marked as XPASS.
     # FORTRAN 77 multi-unit fixtures require fortran66_program entry rule
