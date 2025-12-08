@@ -49,6 +49,17 @@ FREQUENCY    : F R E Q U E N C Y ;   // Optimization hint (1957 only)
 ASSIGN       : A S S I G N ;         // Assign label to variable (assigned GOTO)
 TO           : T O ;                 // Used in ASSIGN i TO n
 
+// Hardware-specific IF statements (IBM 704, 1957)
+// Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B
+SENSE        : S E N S E ;           // SENSE LIGHT / IF (SENSE ...)
+LIGHT        : L I G H T ;           // SENSE LIGHT i
+SWITCH       : S W I T C H ;         // IF (SENSE SWITCH i) n1, n2
+ACCUMULATOR  : A C C U M U L A T O R ; // IF ACCUMULATOR OVERFLOW n1, n2
+QUOTIENT     : Q U O T I E N T ;     // IF QUOTIENT OVERFLOW n1, n2
+DIVIDE       : D I V I D E ;         // IF DIVIDE CHECK n1, n2
+CHECK        : C H E C K ;           // IF DIVIDE CHECK n1, n2
+OVERFLOW     : O V E R F L O W ;     // Used in overflow check IFs
+
 // Data Types (early FORTRAN)
 INTEGER      : I N T E G E R ;
 REAL         : R E A L ;
