@@ -274,7 +274,97 @@ The dedicated FORTRAN II rules (CALL, SUBROUTINE, FUNCTION, COMMON)
 work on both the targeted `test_fortran_ii_parser.py` tests and the
 generic fixture harness tests.
 
-## 8. Summary
+## 8. C28-6000-2 Appendix A Crosswalk
+
+The IBM FORTRAN II manual (Form C28-6000-2, 1958) Appendix A lists all
+FORTRAN II statements. This section provides an exhaustive crosswalk from
+each Appendix A entry to the corresponding grammar rule(s) or notes gaps.
+
+### 8.1 FORTRAN II New Statements (Chapter 3)
+
+The six new FORTRAN II statement/subprogram forms added to FORTRAN I:
+
+| Statement Form                  | Grammar Rule(s)              | Status          |
+|---------------------------------|------------------------------|-----------------|
+| SUBROUTINE name [(args)]        | `subroutine_subprogram`      | Implemented     |
+| [type] FUNCTION name (args)     | `function_subprogram`        | Implemented     |
+| CALL name [(args)]              | `call_stmt`                  | Implemented     |
+| RETURN                          | `return_stmt`                | Implemented     |
+| COMMON list                     | `common_stmt`                | Implemented*    |
+| END                             | `end_stmt`                   | Implemented     |
+
+*Note: `common_stmt` extends beyond strict FORTRAN II by accepting named
+COMMON blocks (`COMMON /name/ list`), which historically were introduced
+in FORTRAN 66. See issue #156 for design decision tracking.
+
+### 8.2 Inherited FORTRAN I Statements (C28-6003 Appendix B)
+
+All original FORTRAN (1957) statements remain available in FORTRAN II.
+These are inherited from `FORTRANParser.g4` or redefined in
+`FORTRANIIParser.g4`:
+
+| Statement Form                       | Grammar Rule(s)                | Status          |
+|--------------------------------------|--------------------------------|-----------------|
+| v = e (assignment)                   | `assignment_stmt`              | Implemented     |
+| GO TO n                              | `goto_stmt`                    | Implemented     |
+| GO TO (n1, n2, ..., nm), i           | `computed_goto_stmt`           | Implemented     |
+| IF (e) n1, n2, n3                    | `arithmetic_if_stmt`           | Implemented     |
+| DO n i = m1, m2 [, m3]               | `do_stmt`                      | Implemented     |
+| CONTINUE                             | `continue_stmt`                | Implemented     |
+| STOP [n]                             | `stop_stmt`                    | Implemented     |
+| PAUSE [n]                            | `pause_stmt`                   | Implemented     |
+| DIMENSION v, v, ...                  | `dimension_stmt`               | Implemented     |
+| EQUIVALENCE (a,b,...), ...           | `equivalence_stmt`             | Implemented     |
+| FREQUENCY n (i1, i2, ...)            | `frequency_stmt`               | Implemented     |
+| FORMAT (specification)               | `format_stmt`                  | Implemented     |
+| f(a, b, ...) = e (statement func)    | `statement_function_stmt`      | Implemented     |
+| READ n, list                         | `read_stmt`                    | Implemented     |
+| PRINT n, list                        | `print_stmt`                   | Implemented     |
+| PUNCH n, list                        | `punch_stmt`                   | Implemented     |
+
+### 8.3 FORTRAN I Features Not Yet Implemented in FORTRAN II Parser
+
+The following FORTRAN I (C28-6003) features are not directly implemented
+in the FORTRAN II parser. They are handled at the FORTRAN I level or
+remain as gaps:
+
+| Statement Form                       | Grammar Rule(s)                | Status          |
+|--------------------------------------|--------------------------------|-----------------|
+| ASSIGN i TO n                        | (FORTRAN I: `assign_stmt`)     | Gap: see #141   |
+| GO TO n, (n1, n2, ...)               | (FORTRAN I: `assigned_goto_stmt`) | Gap: see #141 |
+| IF (SENSE SWITCH i) n1, n2           | (FORTRAN I: `if_stmt_sense_switch`) | Inherited     |
+| IF (SENSE LIGHT i) n1, n2            | (FORTRAN I: `if_stmt_sense_light`) | Inherited     |
+| IF ACCUMULATOR OVERFLOW n1, n2       | (FORTRAN I: see FORTRANParser) | Inherited       |
+| IF QUOTIENT OVERFLOW n1, n2          | (FORTRAN I: see FORTRANParser) | Inherited       |
+| IF DIVIDE CHECK n1, n2               | (FORTRAN I: see FORTRANParser) | Inherited       |
+| SENSE LIGHT i                        | (FORTRAN I: `sense_light_stmt`) | Inherited      |
+| READ INPUT TAPE i, n, list           | Not implemented                | Gap: see #153   |
+| READ TAPE i, list                    | Not implemented                | Gap: see #153   |
+| READ DRUM i, j, list                 | Not implemented                | Gap: see #153   |
+| WRITE OUTPUT TAPE i, n, list         | Not implemented                | Gap: see #153   |
+| WRITE TAPE i, list                   | Not implemented                | Gap: see #153   |
+| WRITE DRUM i, j, list                | Not implemented                | Gap: see #153   |
+| END FILE i                           | Not implemented                | Gap: see #153   |
+| REWIND i                             | Not implemented                | Gap: see #153   |
+| BACKSPACE i                          | Not implemented                | Gap: see #153   |
+
+### 8.4 Gaps Requiring Follow-up Issues
+
+The following gaps have been identified during this crosswalk and are
+tracked by existing issues:
+
+- **#141**: FORTRAN 1957 historical stub promotion (general coverage,
+  includes ASSIGN/assigned GO TO)
+- **#143**: FORTRAN II strict fixed-form card layout semantics
+- **#153**: Full 704 I/O statement family (READ/WRITE/TAPE/DRUM/END FILE/
+  REWIND/BACKSPACE)
+- **#154**: FORMAT grammar and Hollerith constants
+- **#156**: Reconcile COMMON semantics with 1958 spec (no named blocks)
+
+All identified gaps have corresponding GitHub issues; no new issues
+required from this crosswalk.
+
+## 9. Summary
 
 The FORTRAN II grammar in this repository:
 
@@ -285,6 +375,8 @@ The FORTRAN II grammar in this repository:
     FORMAT.
   - SUBROUTINE and FUNCTION subprograms, CALL and RETURN, COMMON and
     END.
+- Contains inline C28-6000-2 spec references in grammar comments for
+  traceability to the original IBM FORTRAN II manual.
 - Extends COMMON to allow both blank and named forms, slightly beyond
   strictly historical FORTRAN II.
 - Uses a layout‑lenient fixed-form model with explicit LABEL tokens,
@@ -297,3 +389,6 @@ Remaining design decisions (tracked separately):
 - Issue #156 tracks whether to reconcile COMMON semantics with the
   strict 1958 spec (blank COMMON only) or continue accepting named
   COMMON blocks as a forward-compatibility extension.
+
+Further work on this standard should reference this audit together with
+the open issues for expanding FORTRAN II coverage.
