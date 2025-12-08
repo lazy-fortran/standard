@@ -244,6 +244,74 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     # FORTRAN II fixtures have been updated to parse correctly with the
     # enhanced grammar and fortran_program entry rule per issue #157.
     # They are no longer marked as XPASS.
+    #
+    # FORTRAN II strict fixed-form fixtures require preprocessing via
+    # tools/strict_fixed_form.py before parsing; they use authentic IBM 704
+    # card-image format which the layout-lenient grammar does not support
+    # directly. These are tested by tests/FORTRANII/test_strict_fixed_form.py.
+    (
+        "FORTRANII",
+        Path("FORTRANII/test_strict_fixed_form/valid_subroutine.f"),
+    ): (
+        "FORTRAN II strict fixed-form fixture {relpath} uses authentic "
+        "80-column IBM 704 card layout with sequence numbers in cols 73-80 and "
+        "C-comments in col 1. It requires preprocessing via "
+        "tools/strict_fixed_form.py before parsing. It produces {errors} syntax "
+        "errors when parsed directly (Issue #143)."
+    ),
+    (
+        "FORTRANII",
+        Path("FORTRANII/test_strict_fixed_form/valid_function.f"),
+    ): (
+        "FORTRAN II strict fixed-form fixture {relpath} uses authentic "
+        "80-column IBM 704 card layout. It requires preprocessing via "
+        "tools/strict_fixed_form.py. It produces {errors} syntax errors when "
+        "parsed directly (Issue #143)."
+    ),
+    (
+        "FORTRANII",
+        Path("FORTRANII/test_strict_fixed_form/valid_main.f"),
+    ): (
+        "FORTRAN II strict fixed-form fixture {relpath} uses authentic "
+        "80-column IBM 704 card layout. It requires preprocessing via "
+        "tools/strict_fixed_form.py. It produces {errors} syntax errors when "
+        "parsed directly (Issue #143)."
+    ),
+    (
+        "FORTRANII",
+        Path("FORTRANII/test_strict_fixed_form/valid_continuation.f"),
+    ): (
+        "FORTRAN II strict fixed-form fixture {relpath} demonstrates "
+        "continuation cards with col 6 marks. It requires preprocessing via "
+        "tools/strict_fixed_form.py. It produces {errors} syntax errors when "
+        "parsed directly (Issue #143)."
+    ),
+    (
+        "FORTRANII",
+        Path("FORTRANII/test_strict_fixed_form/star_comment.f"),
+    ): (
+        "FORTRAN II strict fixed-form fixture {relpath} uses *-comments in "
+        "col 1. It requires preprocessing via tools/strict_fixed_form.py. "
+        "It produces {errors} syntax errors when parsed directly (Issue #143)."
+    ),
+    (
+        "FORTRANII",
+        Path("FORTRANII/test_strict_fixed_form/invalid_label_alpha.f"),
+    ): (
+        "FORTRAN II strict fixed-form negative fixture {relpath} has "
+        "intentionally invalid alphabetic label field. It is expected to fail "
+        "both strict validation and direct parsing. It produces {errors} syntax "
+        "errors (Issue #143)."
+    ),
+    (
+        "FORTRANII",
+        Path("FORTRANII/test_strict_fixed_form/invalid_continuation_labeled.f"),
+    ): (
+        "FORTRAN II strict fixed-form negative fixture {relpath} has "
+        "intentionally invalid label on continuation card. It is expected to "
+        "fail strict validation. It produces {errors} syntax errors when parsed "
+        "directly (Issue #143)."
+    ),
     # FORTRAN 66 fixtures have been updated to parse correctly with the
     # enhanced grammar per issue #144. They are no longer marked as XPASS.
     # FORTRAN 77 multi-unit fixtures require fortran66_program entry rule
