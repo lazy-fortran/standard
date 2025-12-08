@@ -218,60 +218,28 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     # dialects are intentionally limited and do not yet have dedicated
     # GitHub issues for full historical coverage; the XPASS entries
     # simply document the expected rough edges.
+    #
+    # Note: Several FORTRAN 1957 fixtures (array_program_1957.f, format_stmt.f,
+    # format_tests_1957.f, historical_quadratic_program.f, io_operations_1957.f)
+    # now parse correctly after the FORMAT E-descriptor grammar fix (issue #141)
+    # and are no longer marked as XPASS.
     (
         "FORTRAN",
         Path("FORTRAN/test_comprehensive_validation/complex_program.f"),
     ): (
-        "Historical FORTRAN complex-program fixture {relpath} goes beyond the "
-        "simplified FORTRAN grammar and currently reports {errors} syntax "
-        "errors; this is a known limitation rather than a hard failure."
-    ),
-    (
-        "FORTRAN",
-        Path("FORTRAN/test_fortran_historical_stub/array_program_1957.f"),
-    ): (
-        "Historical FORTRAN 1957 array-program fixture {relpath} exercises "
-        "more of the original language than the simplified grammar accepts; "
-        "it is expected to report {errors} syntax errors here."
+        "Historical FORTRAN complex-program fixture {relpath} uses CALL "
+        "statements which were introduced in FORTRAN II (1958), not in the "
+        "1957 grammar. It is expected to report {errors} syntax errors with "
+        "the FORTRAN 1957 parser."
     ),
     (
         "FORTRAN",
         Path("FORTRAN/test_fortran_historical_stub/authentic_1957_program.f"),
     ): (
-        "Historical FORTRAN authentic-1957 program fixture {relpath} exceeds "
-        "the current stub grammar and currently yields {errors} syntax errors."
-    ),
-    (
-        "FORTRAN",
-        Path("FORTRAN/test_fortran_historical_stub/format_stmt.f"),
-    ): (
-        "Historical FORTRAN FORMAT-statement fixture {relpath} remains beyond "
-        "the scope of the simplified FORMAT grammar and reports {errors} "
-        "syntax errors."
-    ),
-    (
-        "FORTRAN",
-        Path("FORTRAN/test_fortran_historical_stub/format_tests_1957.f"),
-    ): (
-        "Historical FORTRAN 1957 FORMAT test fixture {relpath} intentionally "
-        "stretches the FORMAT grammar and still produces {errors} syntax "
-        "errors."
-    ),
-    (
-        "FORTRAN",
-        Path("FORTRAN/test_fortran_historical_stub/historical_quadratic_program.f"),
-    ): (
-        "Historical FORTRAN quadratic-program fixture {relpath} is more "
-        "complex than the stub grammar supports and is expected to yield "
-        "{errors} syntax errors."
-    ),
-    (
-        "FORTRAN",
-        Path("FORTRAN/test_fortran_historical_stub/io_operations_1957.f"),
-    ): (
-        "Historical FORTRAN I/O-operations fixture {relpath} exercises "
-        "1957-era I/O patterns beyond the simplified grammar and reports "
-        "{errors} syntax errors."
+        "Historical FORTRAN authentic-1957 program fixture {relpath} uses "
+        "column-1 C comments which are not yet supported in the layout-lenient "
+        "1957 lexer (see issue #155 for strict fixed-form mode). It currently "
+        "yields {errors} syntax errors."
     ),
     # FORTRAN II fixtures have been updated to parse correctly with the
     # enhanced grammar and fortran_program entry rule per issue #157.
