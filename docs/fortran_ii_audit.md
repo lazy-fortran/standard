@@ -256,11 +256,40 @@ From `docs/fixed_form_support.md`:
   - Column‑1 `C`/`*` comments and strict column ranges are not
     enforced.
 
-Implication:
+### 5.1 Strict Fixed-Form Mode (Issue #143 resolved)
 
-- The grammar accepts a wide variety of FORTRAN II code layouts as
-  long as the token sequence is valid, but does not attempt
-  card-image fidelity.
+The `tools/strict_fixed_form.py` module provides optional **strict fixed-form
+validation** for IBM 704 card-image source files per C28-6000-2:
+
+- **Card layout validation**:
+  - Columns 1–5: Statement labels (numeric 1–99999 or blank)
+  - Column 6: Continuation mark (non-blank = continuation)
+  - Columns 7–72: Statement text
+  - Columns 73–80: Sequence/identification field (ignored)
+  - Column 1: `C` or `*` marks a comment card
+
+- **Entry points**:
+  - `validate_strict_fixed_form(source)`: Validates card layout, returns
+    `ValidationResult` with errors and warnings
+  - `convert_to_lenient(source, strip_comments=True)`: Validates and converts
+    to layout-lenient form suitable for `FORTRANIIParser`
+
+- **Test coverage** in `tests/FORTRANII/test_strict_fixed_form.py`:
+  - Card parsing tests: blank, comment (C/*), statement, continuation
+  - Validation tests: invalid labels, continuation errors
+  - Conversion tests: comment handling, continuation joining
+  - Integration tests: converted output parses with FORTRANIIParser
+
+- **Fixtures** in `tests/fixtures/FORTRANII/test_strict_fixed_form/`:
+  - `valid_subroutine.f`, `valid_function.f`, `valid_main.f`: Authentic
+    80-column card layouts with sequence numbers
+  - `valid_continuation.f`: Multi-card statement continuations
+  - `invalid_label_alpha.f`, `invalid_continuation_labeled.f`: Invalid
+    layouts that strict mode correctly rejects
+
+This provides a two-mode approach:
+1. **Lenient mode** (default): Grammar accepts any token order
+2. **Strict mode**: Preprocessor validates card layout before parsing
 
 ## 6. Hollerith constants
 
@@ -386,10 +415,9 @@ been addressed:
 - **FORMAT and Hollerith**: Implemented (issue #154, closed)
 - **Sense switch/light and hardware IFs**: Implemented in FORTRAN I parser
   and available via the FORTRAN I entry points
-
-The following enhancement remains open:
-
-- **#143**: FORTRAN II strict fixed-form card layout semantics
+- **Strict fixed-form card layout**: Implemented via `tools/strict_fixed_form.py`
+  preprocessor (issue #143, closed). Validates IBM 704 card layout per
+  C28-6000-2 and converts to lenient form for parsing.
 
 The following features are explicitly out of scope for the current
 simplified grammar:
@@ -416,8 +444,10 @@ The FORTRAN II grammar in this repository:
     for practical compatibility with later standards.
   - Strict 1958 mode: enforces blank COMMON only per C28-6000-2 via
     `*_strict` entry points for historical audits.
-- Uses a layout-lenient fixed-form model with explicit LABEL tokens,
-  without strict 80-column enforcement.
+- Provides dual-mode fixed-form handling (issue #143 resolved):
+  - Lenient mode (default): Grammar accepts any valid token order
+  - Strict mode: Preprocessor validates IBM 704 card layout per C28-6000-2
+    before converting to lenient form for parsing
 - Provides Hollerith support for FORMAT items but does not enforce
   length checks on the `nH...` form.
 
