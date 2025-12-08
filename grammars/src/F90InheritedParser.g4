@@ -209,7 +209,42 @@ target_decl
 // ====================================================================
 // IMPLICIT STATEMENT (F90)
 // ====================================================================
+// ISO/IEC 1539:1991 Section 5.2 defines two forms:
+//   IMPLICIT NONE
+//   IMPLICIT implicit-spec-list
+// where implicit-spec is: type-spec (letter-spec-list)
+// and letter-spec is: letter or letter-letter (e.g., A-H).
+//
+// Fortran 90 extends the F77 IMPLICIT with:
+// - IMPLICIT NONE (disables implicit typing for a scoping unit)
+// - KIND selectors in type specifications
+//
+// Examples:
+//   IMPLICIT NONE
+//   IMPLICIT INTEGER (I-N), REAL (A-H, O-Z)
+//   IMPLICIT INTEGER(KIND=4) (I-N)
+//   IMPLICIT COMPLEX(8) (Z)
 
 implicit_stmt_f90
     : IMPLICIT NONE NEWLINE?
+    | IMPLICIT implicit_spec_list_f90 NEWLINE?
+    ;
+
+implicit_spec_list_f90
+    : implicit_spec_f90 (COMMA implicit_spec_f90)*
+    ;
+
+implicit_spec_f90
+    : intrinsic_type_spec_f90 LPAREN letter_spec_list_f90 RPAREN
+    ;
+
+letter_spec_list_f90
+    : letter_spec_f90 (COMMA letter_spec_f90)*
+    ;
+
+// Letter specification: single letter or letter range (A-Z)
+// ISO/IEC 1539:1991 Section 5.2
+letter_spec_f90
+    : IDENTIFIER                         // Single letter (e.g., A)
+    | IDENTIFIER MINUS IDENTIFIER        // Letter range (e.g., A-H)
     ;
