@@ -31,12 +31,16 @@ FORTRAN 66:
 In this grammar:
 
 - `main_program`
-  - Inherited from `FORTRAN66Parser.g4` as a `statement_list`. The
-    `PROGRAM` keyword is provided by the lexer, but there is no
-    dedicated `program_stmt` rule in `FORTRAN77Parser.g4`.
-  - Effect: programs can still be written without an explicit PROGRAM
-    line; explicit `PROGRAM name` is lexed but not modeled as a
-    distinct statement form.
+  - Redefined in `FORTRAN77Parser.g4` to allow an optional `PROGRAM`
+    statement followed by a sequence of statements and a terminating
+    `END` statement.
+  - Effect: programs can be written with or without an explicit
+    `PROGRAM name` line; when present, it is modeled explicitly by
+    `program_stmt`.
+
+- `program_stmt`
+  - New in `FORTRAN77Parser.g4` for FORTRAN 77:
+    `PROGRAM IDENTIFIER` at the start of a main program unit.
 
 - `subroutine_subprogram` / `function_subprogram`
   - Retained from FORTRAN II/66 via the imported parser.
@@ -374,14 +378,19 @@ Mapping that classification to the current grammar:
     - SAVE, EXTERNAL, and INTRINSIC have dedicated rules:
       `save_stmt`, `external_stmt`, `intrinsic_stmt`, with tests
       proving basic usage.
-  - Missing:
-    - IMPLICIT and PARAMETER statements:
-      - IMPLICIT is present only as the legacy token in FORTRAN I;
-        there is no FORTRAN 77‑style `IMPLICIT` statement rule.
-      - PARAMETER is defined as a token in `FORTRAN77Lexer.g4`, but
-        there is no `parameter_stmt` rule in `FORTRAN77Parser.g4`.
-      - Neither IMPLICIT nor PARAMETER are currently usable as
-        nonexecutable specification statements.
+    - IMPLICIT statement:
+      - Grammar: `implicit_stmt : IMPLICIT implicit_spec_list`
+      - Supports type specification with letter ranges per ANSI X3.9-1978
+        Section 8.4: `IMPLICIT INTEGER (I-N), REAL (A-H, O-Z)`
+      - Tests: `test_implicit_statement` and `test_implicit_statement_in_program`
+        exercise single and multiple type specs with letter ranges.
+      - Note: IMPLICIT NONE is NOT supported (Fortran 90 feature).
+    - PARAMETER statement:
+      - Grammar: `parameter_stmt : PARAMETER LPAREN parameter_assignment_list RPAREN`
+      - Supports named constant definitions per ANSI X3.9-1978 Section 8.5:
+        `PARAMETER (PI = 3.14159, MAXSIZE = 100)`
+      - Tests: `test_parameter_statement`, `test_parameter_with_expressions`,
+        and `test_parameter_statement_in_program` exercise various forms.
 
 - **DATA and FORMAT**
   - Implemented:
@@ -461,6 +470,11 @@ The FORTRAN 77 grammar in this repository:
     blocks.
   - Allowing floating-point DO loop control variables.
   - Adding SAVE, INTRINSIC, EXTERNAL and DATA declaration statements.
+  - Adding IMPLICIT statement for type specification by letter ranges
+    per ANSI X3.9-1978 Section 8.4 (note: IMPLICIT NONE is a Fortran 90
+    feature and is not supported).
+  - Adding PARAMETER statement for named constant definitions per
+    ANSI X3.9-1978 Section 8.5.
   - Enhancing WRITE with list-directed and format-identifier syntax.
 - Retains the earlier FORTRAN 66 statements (including COMMON,
   DIMENSION, EQUIVALENCE, arithmetic/logical IFs and BLOCK DATA).
