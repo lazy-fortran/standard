@@ -67,6 +67,17 @@ Mapping that Appendix‑B list to the current grammar:
     zero-error assertions in `tests/FORTRAN/test_fortran_historical_stub.py`
     using fixtures `assign_stmt.f`, `assigned_goto_stmt.f` and
     `assign_goto_combined.f`.
+  - **NON-COMPLIANT with ISO/IEC 1539-1:2018 (Fortran 2018):**
+    - ASSIGN and assigned GO TO are deleted features in Fortran 2018.
+    - Per ISO/IEC 1539-1:2018 Annex B.2 (Deleted features), ASSIGN,
+      assigned GO TO, and assigned FORMAT specifiers were removed from
+      the standard as of Fortran 95 (obsolescent) and deleted in
+      Fortran 2018.
+    - These constructs are historically accurate for IBM 704 FORTRAN
+      (1957) and are retained in this grammar for educational and
+      archival purposes only.
+    - Modern Fortran 2018/2023 grammars in this repository correctly
+      reject these constructs.
 
 - **DO loops**
   - Status: **implemented (basic 1957 form) and tested.**
@@ -113,8 +124,10 @@ and the associated fixtures:
 - Computed GOTO: `GO TO (n1, n2, n3), i`.
 - Unconditional GOTO: `GO TO n`.
 - ASSIGN: `ASSIGN i TO n` stores label `i` in variable `n`.
+  (NON-COMPLIANT: deleted feature per ISO/IEC 1539-1:2018 Annex B.2)
 - Assigned GOTO: `GO TO n, (l1, l2, ..., lm)` branches to the label
   stored in variable `n`.
+  (NON-COMPLIANT: deleted feature per ISO/IEC 1539-1:2018 Annex B.2)
 - DO loops using labeled termination (no `END DO`).
 - STOP and CONTINUE.
 - FREQUENCY as an optimization hint.

@@ -114,6 +114,10 @@ computed_goto_stmt
 // Syntax: ASSIGN i TO n
 // Where i is a statement label and n is an integer variable
 // This stores the label i in variable n for later use with assigned GOTO
+//
+// NON-COMPLIANT: ASSIGN is a deleted feature per ISO/IEC 1539-1:2018
+// Annex B.2. Retained for historical accuracy only.
+// See docs/fortran_1957_audit.md for compliance details.
 assign_stmt
     : ASSIGN label TO variable
     ;
@@ -124,6 +128,10 @@ assign_stmt
 // Where n is an integer variable containing a label (set by ASSIGN)
 // and (l1, l2, ..., lm) is a list of valid target labels
 // Branches to the label stored in variable n
+//
+// NON-COMPLIANT: Assigned GO TO is a deleted feature per ISO/IEC
+// 1539-1:2018 Annex B.2. Retained for historical accuracy only.
+// See docs/fortran_1957_audit.md for compliance details.
 assigned_goto_stmt
     : GOTO variable COMMA LPAREN label_list RPAREN
     ;
