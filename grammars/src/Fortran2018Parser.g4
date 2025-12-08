@@ -28,7 +28,7 @@ options {
 // FORTRAN 2018 PROGRAM STRUCTURE (ISO/IEC 1539-1:2018 Section 14)
 // ============================================================================
 
-// ISO/IEC 1539-1:2018 R503: program-unit
+// ISO/IEC 1539-1:2018 R502: program-unit
 // F2018 program unit (enhanced with teams and events)
 program_unit_f2018
     : NEWLINE* (main_program_f2018 | module_f2018 | submodule_f2008
@@ -49,33 +49,33 @@ module_f2018
       module_subprogram_part_f2018? end_module_stmt
     ;
 
-// ISO/IEC 1539-1:2018 R1529: external-subprogram
+// ISO/IEC 1539-1:2018 R503: external-subprogram
 // Enhanced external subprogram for F2018
 external_subprogram_f2018
     : function_subprogram_f2018
     | subroutine_subprogram_f2018
     ;
 
-// ISO/IEC 1539-1:2018 R1530: function-subprogram
+// ISO/IEC 1539-1:2018 R1529: function-subprogram
 // Enhanced function subprogram for F2018
 function_subprogram_f2018
     : function_stmt_f2018 specification_part_f2018? execution_part_f2018?
       internal_subprogram_part? end_function_stmt
     ;
 
-// ISO/IEC 1539-1:2018 R1536: subroutine-subprogram
+// ISO/IEC 1539-1:2018 R1534: subroutine-subprogram
 // Enhanced subroutine subprogram for F2018
 subroutine_subprogram_f2018
     : subroutine_stmt_f2018 specification_part_f2018? execution_part_f2018?
       internal_subprogram_part? end_subroutine_stmt
     ;
 
-// ISO/IEC 1539-1:2018 R1408: module-subprogram-part
+// ISO/IEC 1539-1:2018 R1407: module-subprogram-part
 module_subprogram_part_f2018
     : contains_stmt NEWLINE* (module_subprogram_f2018 NEWLINE*)*
     ;
 
-// ISO/IEC 1539-1:2018 R1409: module-subprogram
+// ISO/IEC 1539-1:2018 R1408: module-subprogram
 module_subprogram_f2018
     : function_subprogram_f2018
     | subroutine_subprogram_f2018
@@ -83,14 +83,14 @@ module_subprogram_f2018
     | module_function_subprogram_f2008
     ;
 
-// ISO/IEC 1539-1:2018 R1531: function-stmt
+// ISO/IEC 1539-1:2018 R1530: function-stmt
 // Enhanced function statement for F2018
 function_stmt_f2018
     : prefix? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN
       suffix? binding_spec? NEWLINE
     ;
 
-// ISO/IEC 1539-1:2018 R1537: subroutine-stmt
+// ISO/IEC 1539-1:2018 R1535: subroutine-stmt
 // Enhanced subroutine statement for F2018
 subroutine_stmt_f2018
     : prefix? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)?
@@ -134,25 +134,25 @@ use_stmt
       only_list NEWLINE
     ;
 
-// ISO/IEC 1539-1:2018 R1410: module-name
+// Intrinsic module names (e.g. ISO_FORTRAN_ENV, IEEE intrinsic modules)
 intrinsic_module_name
     : ieee_module_name
     | IDENTIFIER
     ;
 
-// ISO/IEC 1539-1:2018 R1412: only-list
+// ISO/IEC 1539-1:2018 R1412: only (elements of only-list)
 only_list
     : only_item_f2018 (COMMA only_item_f2018)*
     ;
 
-// ISO/IEC 1539-1:2018 R1413: only
+// ISO/IEC 1539-1:2018 R1412: only
 only_item_f2018
     : IDENTIFIER (POINTER_ASSIGN only_item_target_f2018)?
     | c_interop_type
     | OPERATOR LPAREN operator_token RPAREN
     ;
 
-// ISO/IEC 1539-1:2018 R1413: only (rename target)
+// ISO/IEC 1539-1:2018 R1413: only-use-name (rename target)
 only_item_target_f2018
     : IDENTIFIER
     | INT8
@@ -184,21 +184,21 @@ executable_construct_f2018
     : assignment_stmt                 // Inherit from F2003
     | call_stmt                       // Inherit from F2003
     | print_stmt                      // Inherit from F2003
-    | stop_stmt_f2018                 // Enhanced in F2018 (R1162)
-    | error_stop_stmt_f2018           // Enhanced in F2018 (R1163)
+    | stop_stmt_f2018                 // Enhanced in F2018 (R1160)
+    | error_stop_stmt_f2018           // Enhanced in F2018 (R1161)
     | select_type_construct           // Inherit from F2003
-    | select_rank_construct           // NEW in F2018 (R1148-R1153)
+    | select_rank_construct           // NEW in F2018 (R1148-R1151)
     | associate_construct             // Inherit from F2003
     | block_construct_f2008           // Inherit from F2008
     | allocate_stmt_f2008             // Inherit from F2008
     | collective_subroutine_call      // NEW in F2018 (Section 16.9.46-50)
-    | team_construct                  // NEW in F2018 (R1112-R1118)
-    | event_construct                 // NEW in F2018 (R1119-R1124)
+    | team_construct                  // NEW in F2018 (teams: R1111-R1115, R1175-R1178)
+    | event_construct                 // NEW in F2018 (events: R1170-R1173)
     | sync_construct                  // Inherit from F2008
     | wait_stmt                       // Inherit from F2003
     | flush_stmt                      // Inherit from F2003
     | if_construct                    // Inherit from F95
-    | do_construct_f2018              // Enhanced in F2018 (R1121-R1132)
+    | do_construct_f2018              // Enhanced in F2018 (R1119-R1132, DO CONCURRENT)
     | select_case_construct           // Inherit from F95
     | type_declaration_stmt_f2018     // F2018 allows mixed declarations
     | executable_construct_f2008      // Inherit F2008 constructs
@@ -220,26 +220,27 @@ select_rank_stmt
     : (IDENTIFIER COLON)? SELECT RANK_KEYWORD LPAREN expr_f90 RPAREN NEWLINE
     ;
 
-// ISO/IEC 1539-1:2018 R1150-R1151: rank-stmt with block
+// ISO/IEC 1539-1:2018 R1148: select-rank-construct
+// Helper rule grouping case statement and its block
 rank_construct
     : rank_case_stmt
       execution_part_f2018?
     ;
 
-// ISO/IEC 1539-1:2018 R1150: rank-stmt
-// R1151: scalar-int-constant-expr or * (assumed-rank) or DEFAULT
+// ISO/IEC 1539-1:2018 R1150: select-rank-case-stmt
+// R1150: RANK ( scalar-int-constant-expr ), RANK(*) or RANK DEFAULT
 rank_case_stmt
     : RANK_KEYWORD LPAREN rank_value RPAREN NEWLINE   // RANK (selector) or RANK (*)
     | RANK_KEYWORD DEFAULT NEWLINE                    // RANK DEFAULT
     ;
 
-// ISO/IEC 1539-1:2018 R1151: rank selector value
+// Rank selector value for R1150 (scalar-int-constant-expr or *)
 rank_value
     : expr_f90                     // Specific rank selector: scalar-int-constant-expr
     | MULTIPLY                     // Assumed-rank case: RANK (*)
     ;
 
-// ISO/IEC 1539-1:2018 R1153: end-select-rank-stmt
+// ISO/IEC 1539-1:2018 R1151: end-select-rank-stmt
 end_select_rank_stmt
     : END_SELECT (IDENTIFIER)? NEWLINE
     ;
@@ -316,68 +317,69 @@ source_image_spec
 // TEAM SUPPORT (ISO/IEC 1539-1:2018 Section 11.6)
 // ============================================================================
 
-// ISO/IEC 1539-1:2018 R1112: change-team-construct or form-team-stmt
+// ISO/IEC 1539-1:2018 R1111: change-team-construct
+// ISO/IEC 1539-1:2018 R1175: form-team-stmt
 team_construct
     : change_team_construct
     | form_team_stmt
     ;
 
-// ISO/IEC 1539-1:2018 R1112: change-team-construct
+// ISO/IEC 1539-1:2018 R1111: change-team-construct
 change_team_construct
     : change_team_stmt
       execution_part_f2018?
       end_team_stmt
     ;
 
-// ISO/IEC 1539-1:2018 R1113: change-team-stmt
+// ISO/IEC 1539-1:2018 R1112: change-team-stmt
 change_team_stmt
     : (IDENTIFIER COLON)? CHANGE_TEAM LPAREN team_value
       (COMMA coarray_association_list)?
       (COMMA sync_stat_list)? RPAREN NEWLINE
     ;
 
-// ISO/IEC 1539-1:2018 R1115: end-team-stmt
+// ISO/IEC 1539-1:2018 R1114: end-change-team-stmt (END TEAM ...)
 end_team_stmt
     : END_TEAM (LPAREN sync_stat_list? RPAREN)? (IDENTIFIER)? NEWLINE
     ;
 
-// ISO/IEC 1539-1:2018 R1116: form-team-stmt
+// ISO/IEC 1539-1:2018 R1175: form-team-stmt
 form_team_stmt
     : FORM_TEAM LPAREN team_number_expr COMMA team_variable
       (COMMA form_team_stat_list)? RPAREN NEWLINE
     ;
 
-// ISO/IEC 1539-1:2018 R1114: team-value
+// ISO/IEC 1539-1:2018 R1115: team-value
 team_value
     : expr_f90                     // Team expression
     ;
 
-// ISO/IEC 1539-1:2018 R1117: team-number
+// ISO/IEC 1539-1:2018 R1176: team-number
 team_number_expr
     : expr_f90                     // Team number
     ;
 
-// ISO/IEC 1539-1:2018 R1117: team-variable (of TEAM_TYPE)
+// ISO/IEC 1539-1:2018 R1177: team-variable (of TEAM_TYPE)
 team_variable
     : IDENTIFIER                   // Variable of TEAM_TYPE
     ;
 
-// ISO/IEC 1539-1:2018 R1114: coarray-association-list
+// ISO/IEC 1539-1:2018 R1113: coarray-association (list)
 coarray_association_list
     : coarray_association (COMMA coarray_association)*
     ;
 
-// ISO/IEC 1539-1:2018 R1114: coarray-association
+// ISO/IEC 1539-1:2018 R1113: coarray-association
 coarray_association
     : IDENTIFIER LBRACKET cosubscript_list RBRACKET ARROW variable_f2008
     ;
 
-// ISO/IEC 1539-1:2018 R1118: form-team-spec-list
+// ISO/IEC 1539-1:2018 R1178: form-team-spec-list
 form_team_stat_list
     : form_team_stat (COMMA form_team_stat)*
     ;
 
-// ISO/IEC 1539-1:2018 R1118: form-team-spec
+// ISO/IEC 1539-1:2018 R1178: form-team-spec
 form_team_stat
     : NEW_INDEX EQUALS expr_f90
     | STAT EQUALS variable_f90
@@ -394,19 +396,19 @@ team_declaration_stmt
 // EVENT SUPPORT (ISO/IEC 1539-1:2018 Section 11.6.8)
 // ============================================================================
 
-// ISO/IEC 1539-1:2018 R1119-R1124: Event statements
+// ISO/IEC 1539-1:2018 R1170-R1173: Event statements (with sync-stat R1165)
 event_construct
     : event_post_stmt
     | event_wait_stmt
     | event_query_stmt
     ;
 
-// ISO/IEC 1539-1:2018 R1119: event-post-stmt
+// ISO/IEC 1539-1:2018 R1170: event-post-stmt
 event_post_stmt
     : EVENT_POST LPAREN event_variable (COMMA event_stat_list)? RPAREN NEWLINE
     ;
 
-// ISO/IEC 1539-1:2018 R1120: event-wait-stmt
+// ISO/IEC 1539-1:2018 R1172: event-wait-stmt
 event_wait_stmt
     : EVENT_WAIT LPAREN event_variable (COMMA event_wait_spec_list)? RPAREN
       NEWLINE
@@ -418,28 +420,28 @@ event_query_stmt
       (COMMA event_stat_list)? RPAREN NEWLINE
     ;
 
-// ISO/IEC 1539-1:2018 R1121: event-variable
+// ISO/IEC 1539-1:2018 R1171: event-variable
 event_variable
     : IDENTIFIER                   // Variable of EVENT_TYPE
     ;
 
-// ISO/IEC 1539-1:2018 R1122: event-stat
+// ISO/IEC 1539-1:2018 R1165: sync-stat used in event statements (STAT= or ERRMSG=)
 event_stat_list
     : event_stat (COMMA event_stat)*
     ;
 
-// ISO/IEC 1539-1:2018 R1122: sync-stat (STAT= or ERRMSG=)
+// ISO/IEC 1539-1:2018 R1165: sync-stat (STAT= or ERRMSG=)
 event_stat
     : STAT EQUALS variable_f90
     | ERRMSG EQUALS variable_f90
     ;
 
-// ISO/IEC 1539-1:2018 R1123: event-wait-spec-list
+// ISO/IEC 1539-1:2018 R1173: event-wait-spec-list (sequence of event-wait-spec)
 event_wait_spec_list
     : event_wait_spec (COMMA event_wait_spec)*
     ;
 
-// ISO/IEC 1539-1:2018 R1123: event-wait-spec
+// ISO/IEC 1539-1:2018 R1173: event-wait-spec
 event_wait_spec
     : UNTIL_COUNT EQUALS expr_f90
     | event_stat
@@ -455,45 +457,45 @@ event_declaration_stmt
 // ENHANCED DO CONSTRUCTS (ISO/IEC 1539-1:2018 Section 11.1.7)
 // ============================================================================
 
-// ISO/IEC 1539-1:2018 R1121: do-construct
+// ISO/IEC 1539-1:2018 R1119: do-construct
+// Includes DO CONCURRENT via loop-control R1123
 do_construct_f2018
     : do_construct                    // Inherit standard DO from F95
     | do_concurrent_construct_f2018   // Enhanced in F2018
     ;
 
-// ISO/IEC 1539-1:2018 R1121: do-concurrent-construct
-// Enhanced DO CONCURRENT with locality specifiers
+// DO CONCURRENT factored out of do-construct (R1119)
+// Uses loop-control R1123 and adds locality specifiers
 do_concurrent_construct_f2018
     : do_concurrent_stmt_f2018
       execution_part_f2018?
       end_do_stmt
     ;
 
-// ISO/IEC 1539-1:2018 R1125: do-concurrent-stmt
-// R1125: do-concurrent-stmt is [do-construct-name:] DO [label] CONCURRENT
-//        concurrent-header concurrent-locality-list
+// Derived from R1120 do-stmt with loop-control using CONCURRENT (R1123),
+// plus concurrent-header (R1125) and concurrent-locality (R1129)
 do_concurrent_stmt_f2018
     : (IDENTIFIER COLON)? DO CONCURRENT concurrent_header_f2018
       concurrent_locality_list? NEWLINE
     ;
 
-// ISO/IEC 1539-1:2018 R1126: concurrent-header
-// R1126: concurrent-header is ( [integer-type-spec ::] concurrent-control-list
-//        [, scalar-mask-expr] )
+// ISO/IEC 1539-1:2018 R1125: concurrent-header
+// concurrent-header is
+// ( [integer-type-spec ::] concurrent-control-list [, scalar-mask-expr] )
 concurrent_header_f2018
     : LPAREN forall_triplet_spec_list (COMMA scalar_mask_expr)? RPAREN
     ;
 
-// ISO/IEC 1539-1:2018 R1129: concurrent-locality-list
+// List wrapper for R1129 concurrent-locality
 concurrent_locality_list
     : concurrent_locality+
     ;
 
-// ISO/IEC 1539-1:2018 R1129: locality-spec
-// R1130: LOCAL (variable-name-list)
-// R1131: LOCAL_INIT (variable-name-list)
-// R1132: SHARED (variable-name-list)
-// R1133: DEFAULT (NONE)
+// ISO/IEC 1539-1:2018 R1129: concurrent-locality
+// R1130: locality-spec is LOCAL (variable-name-list)
+//        or LOCAL_INIT (variable-name-list)
+//        or SHARED (variable-name-list)
+//        or DEFAULT (NONE)
 concurrent_locality
     : LOCAL LPAREN variable_name_list RPAREN
     | LOCAL_INIT LPAREN variable_name_list RPAREN
@@ -501,7 +503,7 @@ concurrent_locality
     | DEFAULT LPAREN NONE RPAREN
     ;
 
-// ISO/IEC 1539-1:2018 R1130-R1132: variable-name-list
+// Variable-name list used in locality-spec (R1130)
 variable_name_list
     : IDENTIFIER (COMMA IDENTIFIER)*
     ;
@@ -533,12 +535,12 @@ stop_code
 
 // ISO/IEC 1539-1:2018 R801: type-declaration-stmt
 type_declaration_stmt_f2018
-    : assumed_rank_declaration        // NEW in F2018 (R822: assumed-rank-spec)
+    : assumed_rank_declaration        // NEW in F2018 (R825: assumed-rank-spec)
     | type_declaration_stmt           // Inherit F2003 declarations
     | enhanced_intrinsic_declaration  // Inherit F2008 enhanced types
     ;
 
-// ISO/IEC 1539-1:2018 R822: assumed-rank-spec is ..
+// ISO/IEC 1539-1:2018 R825: assumed-rank-spec is ..
 // ISO/IEC 1539-1:2018 Section 8.5.8.7: Assumed-rank entity
 assumed_rank_declaration
     : type_spec COMMA DIMENSION LPAREN DOT_DOT RPAREN DOUBLE_COLON
@@ -607,7 +609,7 @@ execution_part
     : execution_part_f2018
     ;
 
-// ISO/IEC 1539-1:2018 R503: program-unit override
+// ISO/IEC 1539-1:2018 R502: program-unit override
 program_unit
     : program_unit_f2018
     ;
