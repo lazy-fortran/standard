@@ -88,7 +88,7 @@ STANDARD_CONFIGS: Dict[str, StandardConfig] = {
     "Fortran95": StandardConfig(
         lexer_name="Fortran95Lexer",
         parser_name="Fortran95Parser",
-        entry_rule="program_unit_f90",
+        entry_rule="program_unit_f95",
     ),
     "Fortran2003": StandardConfig(
         lexer_name="Fortran2003Lexer",
