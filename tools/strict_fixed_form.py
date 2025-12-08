@@ -1,35 +1,61 @@
 #!/usr/bin/env python3
 """
-Strict fixed-form preprocessor for FORTRAN II (1958).
+Strict fixed-form preprocessor for FORTRAN (1957) and FORTRAN II (1958).
 
 This module provides validation and transformation of strict IBM 704 card-image
-source files according to the FORTRAN II manual (Form C28-6000-2, 1958).
+source files according to the original FORTRAN manual (Form C28-6003, 1958) and
+FORTRAN II manual (Form C28-6000-2, 1958).
 
-Card layout per C28-6000-2 Part I, Chapter 2 (Coding for FORTRAN II):
-- Columns 1-5:  Statement labels (1-99999, right-justified)
+Card layout per C28-6003 Chapter I.B (Coding for FORTRAN) and
+C28-6000-2 Part I, Chapter 2 (Coding for FORTRAN II):
+- Columns 1-5:  Statement labels (numeric, right-justified)
+                FORTRAN 1957: 1-32767 (per C28-6003)
+                FORTRAN II:   1-99999 (per C28-6000-2)
 - Column 6:     Continuation mark (non-blank = continuation)
 - Columns 7-72: Statement text
-- Columns 73-80: Sequence/identification field (ignored)
-- Column 1:     C or * marks a comment card
+- Columns 73-80: Sequence/identification field (ignored by compiler)
+- Column 1:     Comment card markers:
+                FORTRAN 1957: C only (per C28-6003)
+                FORTRAN II:   C or * (per C28-6000-2)
 
 The preprocessor validates card layout and produces layout-lenient output
-suitable for parsing by FORTRANIIParser.
+suitable for parsing by FORTRANParser (1957) or FORTRANIIParser (1958).
 
-Reference: IBM FORTRAN II for the IBM 704 Data Processing System
-           (Form C28-6000-2, 1958)
+References:
+- FORTRAN Automatic Coding System for the IBM 704 (Form C28-6003, Oct 1958)
+- IBM FORTRAN II for the IBM 704 Data Processing System (Form C28-6000-2, 1958)
 """
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, Tuple
+from typing import List, Literal, Optional, Tuple
+
+
+FortranDialect = Literal["1957", "II"]
 
 
 class CardType(Enum):
-    """Card classification per C28-6000-2."""
+    """Card classification per C28-6003 and C28-6000-2."""
     BLANK = "blank"
     COMMENT = "comment"
     STATEMENT = "statement"
     CONTINUATION = "continuation"
+
+
+DIALECT_CONFIG = {
+    "1957": {
+        "comment_markers": ("C",),
+        "label_max": 32767,
+        "reference": "C28-6003",
+        "parser": "FORTRANParser",
+    },
+    "II": {
+        "comment_markers": ("C", "*"),
+        "label_max": 99999,
+        "reference": "C28-6000-2",
+        "parser": "FORTRANIIParser",
+    },
+}
 
 
 @dataclass
@@ -86,27 +112,35 @@ class ValidationResult:
 
 class StrictFixedFormProcessor:
     """
-    Validates and processes strict IBM 704 fixed-form FORTRAN II source.
+    Validates and processes strict IBM 704 fixed-form FORTRAN source.
 
-    C28-6000-2 Chapter 2 defines the card layout:
+    Supports both FORTRAN 1957 (C28-6003) and FORTRAN II (C28-6000-2).
+
+    Card layout (common to both standards):
     - Each card has 80 columns
-    - Labels in columns 1-5 must be numeric (1-99999) or blank
+    - Labels in columns 1-5 must be numeric or blank
+      (1957: 1-32767, II: 1-99999)
     - Column 6 non-blank indicates continuation of previous statement
     - Statement text occupies columns 7-72
     - Columns 73-80 are for sequence numbers (ignored by compiler)
-    - C or * in column 1 marks the entire card as a comment
+    - Comment card markers in column 1:
+      (1957: C only, II: C or *)
     """
 
-    def __init__(self, strict_width: bool = True, allow_tabs: bool = False):
+    def __init__(self, strict_width: bool = True, allow_tabs: bool = False,
+                 dialect: FortranDialect = "II"):
         """
         Initialize the processor.
 
         Args:
             strict_width: Enforce exactly 80 columns per card (pad short lines)
             allow_tabs: Allow tab characters (not historical but common)
+            dialect: FORTRAN dialect ("1957" or "II")
         """
         self.strict_width = strict_width
         self.allow_tabs = allow_tabs
+        self.dialect = dialect
+        self.config = DIALECT_CONFIG[dialect]
 
     def parse_card(self, line: str, line_number: int) -> Card:
         """
@@ -136,7 +170,8 @@ class StrictFixedFormProcessor:
             )
 
         col1 = raw[0] if raw else " "
-        if col1.upper() in ("C", "*"):
+        all_comment_markers = ("C", "*")
+        if col1.upper() in all_comment_markers:
             return Card(
                 line_number=line_number,
                 raw_text=raw,
@@ -171,7 +206,10 @@ class StrictFixedFormProcessor:
     def validate_cards(self, cards: List[Card]) -> Tuple[List[ValidationError],
                                                          List[ValidationError]]:
         """
-        Validate a list of parsed cards against C28-6000-2 rules.
+        Validate a list of parsed cards against dialect-specific rules.
+
+        For FORTRAN 1957: C28-6003 rules (labels 1-32767, C comments only)
+        For FORTRAN II: C28-6000-2 rules (labels 1-99999, C/* comments)
 
         Args:
             cards: List of parsed Card objects
@@ -181,9 +219,21 @@ class StrictFixedFormProcessor:
         """
         errors = []
         warnings = []
+        label_max = self.config["label_max"]
+        comment_markers = self.config["comment_markers"]
 
         for card in cards:
             if card.card_type in (CardType.BLANK, CardType.COMMENT):
+                if card.card_type == CardType.COMMENT:
+                    col1 = card.raw_text[0].upper() if card.raw_text else ""
+                    if col1 == "*" and "*" not in comment_markers:
+                        warnings.append(ValidationError(
+                            line_number=card.line_number,
+                            column=1,
+                            message="Star (*) comment not historical for "
+                                    "FORTRAN 1957; use C in column 1",
+                            severity="warning"
+                        ))
                 continue
 
             if card.label is not None:
@@ -192,15 +242,17 @@ class StrictFixedFormProcessor:
                         line_number=card.line_number,
                         column=1,
                         message=f"Invalid label in columns 1-5: "
-                                f"expected numeric (1-99999), got '{card.label}'"
+                                f"expected numeric (1-{label_max}), "
+                                f"got '{card.label}'"
                     ))
                 elif card.label:
                     label_val = int(card.label)
-                    if label_val < 1 or label_val > 99999:
+                    if label_val < 1 or label_val > label_max:
                         errors.append(ValidationError(
                             line_number=card.line_number,
                             column=1,
-                            message=f"Label {label_val} out of range (1-99999)"
+                            message=f"Label {label_val} out of range "
+                                    f"(1-{label_max})"
                         ))
                 if card.continuation:
                     errors.append(ValidationError(
@@ -330,9 +382,38 @@ class StrictFixedFormProcessor:
 
 def validate_strict_fixed_form(source: str,
                                strict_width: bool = True,
-                               allow_tabs: bool = False) -> ValidationResult:
+                               allow_tabs: bool = False,
+                               dialect: FortranDialect = "II") -> ValidationResult:
     """
-    Validate source code as strict IBM 704 fixed-form FORTRAN II.
+    Validate source code as strict IBM 704 fixed-form FORTRAN.
+
+    Args:
+        source: Source code text
+        strict_width: Enforce 80-column cards
+        allow_tabs: Allow tab characters
+        dialect: FORTRAN dialect ("1957" or "II")
+
+    Returns:
+        ValidationResult with validation status, errors, and parsed cards
+    """
+    processor = StrictFixedFormProcessor(strict_width=strict_width,
+                                         allow_tabs=allow_tabs,
+                                         dialect=dialect)
+    return processor.process(source)
+
+
+def validate_strict_fixed_form_1957(source: str,
+                                    strict_width: bool = True,
+                                    allow_tabs: bool = False) -> ValidationResult:
+    """
+    Validate source code as strict IBM 704 fixed-form FORTRAN 1957.
+
+    Convenience wrapper for validate_strict_fixed_form with dialect="1957".
+
+    Per C28-6003 (FORTRAN for the IBM 704):
+    - Labels must be 1-32767
+    - Only C in column 1 marks a comment card
+    - * comments generate a warning (not historical)
 
     Args:
         source: Source code text
@@ -342,17 +423,45 @@ def validate_strict_fixed_form(source: str,
     Returns:
         ValidationResult with validation status, errors, and parsed cards
     """
-    processor = StrictFixedFormProcessor(strict_width=strict_width,
-                                          allow_tabs=allow_tabs)
-    return processor.process(source)
+    return validate_strict_fixed_form(source, strict_width, allow_tabs,
+                                      dialect="1957")
 
 
 def convert_to_lenient(source: str,
                        strict_width: bool = True,
                        allow_tabs: bool = False,
-                       strip_comments: bool = False) -> Tuple[str, ValidationResult]:
+                       strip_comments: bool = False,
+                       dialect: FortranDialect = "II") -> Tuple[str, ValidationResult]:
     """
     Validate and convert strict fixed-form source to layout-lenient form.
+
+    Args:
+        source: Source code text
+        strict_width: Enforce 80-column cards
+        allow_tabs: Allow tab characters
+        strip_comments: If True, omit comment lines from output
+        dialect: FORTRAN dialect ("1957" or "II")
+
+    Returns:
+        Tuple of (lenient_source, validation_result)
+    """
+    processor = StrictFixedFormProcessor(strict_width=strict_width,
+                                         allow_tabs=allow_tabs,
+                                         dialect=dialect)
+    result = processor.process(source)
+    lenient = processor.to_lenient_form(result, strip_comments=strip_comments)
+    return lenient, result
+
+
+def convert_to_lenient_1957(source: str,
+                            strict_width: bool = True,
+                            allow_tabs: bool = False,
+                            strip_comments: bool = False
+                            ) -> Tuple[str, ValidationResult]:
+    """
+    Validate and convert FORTRAN 1957 strict fixed-form to lenient form.
+
+    Convenience wrapper for convert_to_lenient with dialect="1957".
 
     Args:
         source: Source code text
@@ -363,17 +472,27 @@ def convert_to_lenient(source: str,
     Returns:
         Tuple of (lenient_source, validation_result)
     """
-    processor = StrictFixedFormProcessor(strict_width=strict_width,
-                                          allow_tabs=allow_tabs)
-    result = processor.process(source)
-    lenient = processor.to_lenient_form(result, strip_comments=strip_comments)
-    return lenient, result
+    return convert_to_lenient(source, strict_width, allow_tabs,
+                              strip_comments, dialect="1957")
 
 
 if __name__ == "__main__":
-    sample = """\
+    sample_1957 = """\
 C     THIS IS A COMMENT CARD
-C     FORTRAN II SAMPLE PROGRAM
+C     FORTRAN 1957 SAMPLE PROGRAM (IBM 704)
+      READ 100, A, B                                                    00000010
+C     COMPUTE SUM
+      C = A + B                                                         00000020
+      PRINT 200, C                                                      00000030
+      STOP                                                              00000040
+  100 FORMAT (2F10.2)                                                   00000050
+  200 FORMAT (F15.4)                                                    00000060
+      END                                                               00000070
+"""
+
+    sample_ii = """\
+C     THIS IS A COMMENT CARD
+*     FORTRAN II SAMPLE PROGRAM (IBM 704)
       SUBROUTINE SWAP(X, Y)                                             00000010
 C     SWAP TWO VALUES
       TEMP = X                                                          00000020
@@ -383,26 +502,29 @@ C     SWAP TWO VALUES
       END                                                               00000060
 """
 
-    print("Strict Fixed-Form Validator for FORTRAN II")
-    print("=" * 60)
-    print("\nSample input:")
-    print(sample)
+    for name, sample, dialect in [("FORTRAN 1957", sample_1957, "1957"),
+                                  ("FORTRAN II", sample_ii, "II")]:
+        print(f"Strict Fixed-Form Validator for {name}")
+        print("=" * 60)
+        print(f"\nSample input ({dialect}):")
+        print(sample)
 
-    result = validate_strict_fixed_form(sample)
+        result = validate_strict_fixed_form(sample, dialect=dialect)
 
-    print(f"\nValidation result: {'VALID' if result.valid else 'INVALID'}")
-    print(f"Cards parsed: {len(result.cards)}")
+        print(f"\nValidation result: {'VALID' if result.valid else 'INVALID'}")
+        print(f"Cards parsed: {len(result.cards)}")
 
-    if result.errors:
-        print("\nErrors:")
-        for err in result.errors:
-            print(f"  Line {err.line_number}, Col {err.column}: {err.message}")
+        if result.errors:
+            print("\nErrors:")
+            for err in result.errors:
+                print(f"  Line {err.line_number}, Col {err.column}: {err.message}")
 
-    if result.warnings:
-        print("\nWarnings:")
-        for warn in result.warnings:
-            print(f"  Line {warn.line_number}, Col {warn.column}: {warn.message}")
+        if result.warnings:
+            print("\nWarnings:")
+            for warn in result.warnings:
+                print(f"  Line {warn.line_number}, Col {warn.column}: {warn.message}")
 
-    lenient, _ = convert_to_lenient(sample)
-    print("\nConverted to lenient form:")
-    print(lenient)
+        lenient, _ = convert_to_lenient(sample, dialect=dialect)
+        print("\nConverted to lenient form:")
+        print(lenient)
+        print("\n")
