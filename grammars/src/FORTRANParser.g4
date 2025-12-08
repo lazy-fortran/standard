@@ -310,11 +310,15 @@ format_specification
     ;
 
 // Individual format items - C28-6003 Chapter III
-// Note: This grammar accepts a simplified form where format descriptors
-// are matched as IDENTIFIER tokens (e.g., I5, F10) and Hollerith constants
-// are matched as HOLLERITH tokens.
+// Note: This grammar accepts format descriptors in several forms due to
+// lexer tokenization behaviors:
+// - IDENTIFIER (e.g., I5, F10) for simple descriptors
+// - REAL_LITERAL (e.g., 2E15 as scientific notation) for E descriptors
+//   with repeat counts where lexer greedily matches nEm as real literal
+// - HOLLERITH (e.g., 5HHELLO) for literal text
 format_item
-    : format_repeat_count? format_descriptor  // e.g., 3I5, F10.2, E15.6
+    : format_repeat_count? format_descriptor  // e.g., 3I5, F10.2
+    | format_e_descriptor                     // e.g., 2E15.6 (lexed as REAL_LITERAL)
     | HOLLERITH                               // e.g., 5HHELLO (literal text)
     ;
 
@@ -329,6 +333,17 @@ format_repeat_count
 // REAL_LITERAL (.2). This rule matches both forms.
 format_descriptor
     : IDENTIFIER format_decimal_part?
+    ;
+
+// E format descriptor special handling
+// C28-6003: Ew.d format for exponential notation
+// When a repeat count precedes an E descriptor (e.g., 2E15.6), the lexer
+// tokenizes "2E15" as a REAL_LITERAL (scientific notation) because it
+// matches the pattern DIGIT+ EXPONENT. The ".6" is then tokenized as
+// a separate REAL_LITERAL (.DIGIT+). This rule accepts both tokens
+// to correctly parse E descriptors with repeat counts.
+format_e_descriptor
+    : REAL_LITERAL format_decimal_part?
     ;
 
 // Decimal part of format descriptor (e.g., .d in Fw.d)
