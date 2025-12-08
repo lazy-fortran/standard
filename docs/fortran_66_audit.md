@@ -222,13 +222,20 @@ Mapping these families to the current grammar:
         `format_item` and `format_descriptor`, plus the `HOLLERITH`
         token for Hollerith constants; the FORMAT grammar is shared
         with FORTRAN II.
-  - Not implemented:
+  - Implemented:
     - REWIND, BACKSPACE, ENDFILE:
-      - The standard defines these as auxiliary I/O statements
-        (7.1.3.3) with specific syntax and semantics for file
-        positioning. The current lexer/parser do not define
-        `REWIND`, `BACKSPACE` or `ENDFILE` tokens or rules.
-      - Effect: REWIND/BACKSPACE/ENDFILE in source will be rejected.
+      - Per X3.9-1966 Section 7.1.3.3, these auxiliary I/O statements
+        control sequential file positioning.
+      - Lexer: `REWIND`, `BACKSPACE`, `ENDFILE` tokens defined in
+        `FORTRAN66Lexer.g4`.
+      - Parser: `rewind_stmt`, `backspace_stmt`, `endfile_stmt` rules
+        defined in `FORTRAN66Parser.g4`, wired into `statement_body`.
+      - Syntax: `REWIND u`, `BACKSPACE u`, `ENDFILE u` where u is an
+        unsigned integer expression identifying the I/O unit.
+      - Tests: covered by `test_rewind_statement`, `test_backspace_statement`,
+        `test_endfile_statement`, `test_auxiliary_io_in_statement_body`,
+        and `test_auxiliary_io_fixture` in
+        `tests/FORTRAN66/test_fortran66_parser.py`.
 
 - **Non‑executable (declarative) statements**
   - Implemented:
@@ -341,17 +348,16 @@ The FORTRAN 66 grammar in this repository:
   80‑column semantics.
 - Implements `EXTERNAL` and `INTRINSIC` declaration statements per
   X3.9-1966 Section 7.2.
-- Does **not** yet implement several standard FORTRAN 66 statements
-  and declarations such as DATA and sequential I/O control
-  (`REWIND`, `BACKSPACE`, `ENDFILE`).
+- Implements auxiliary I/O statements (`REWIND`, `BACKSPACE`, `ENDFILE`)
+  per X3.9-1966 Section 7.1.3.3.
+- Does **not** yet implement the DATA statement for initialization.
 - Still rejects some richer, spec-inspired fixtures, which are
   tracked as XPASS in the generic fixture harness.
 
 Future work should:
 
-- Add explicit grammar rules and tests for the missing standard
-  statements (DATA, REWIND/BACKSPACE/ENDFILE) if full FORTRAN 66
-  coverage is desired.
+- Add explicit grammar rules and tests for the missing DATA statement
+  if full FORTRAN 66 coverage is desired.
 - Align the generic fixture parser entry rule and expectations for
   FORTRAN 66 with the dedicated `fortran66_program` rule.
 - Use the XPASS fixtures as a concrete checklist for closing the

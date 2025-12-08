@@ -223,8 +223,36 @@ statement_body
     | type_declaration  // Variable type declarations
     | external_stmt     // External procedure declaration (X3.9-1966 Section 7.2)
     | intrinsic_stmt    // Intrinsic function specification (X3.9-1966 Section 7.2)
+    | rewind_stmt       // Sequential file positioning (X3.9-1966 Section 7.1.3.3)
+    | backspace_stmt    // Sequential file positioning (X3.9-1966 Section 7.1.3.3)
+    | endfile_stmt      // Sequential file positioning (X3.9-1966 Section 7.1.3.3)
     | return_stmt       // Return from subprogram
     | call_stmt         // Call subroutine
+    ;
+
+// ====================================================================
+// FORTRAN 66 (1966) - AUXILIARY I/O STATEMENTS
+// ====================================================================
+// Per ANSI X3.9-1966 Section 7.1.3.3, auxiliary I/O statements control
+// sequential file positioning. The syntax is: statement-keyword u
+// where u is an unsigned integer expression identifying the I/O unit.
+
+// REWIND statement - position file to beginning (X3.9-1966 Section 7.1.3.3)
+// Example: REWIND 5
+rewind_stmt
+    : REWIND integer_expr
+    ;
+
+// BACKSPACE statement - position file back one record (X3.9-1966 Section 7.1.3.3)
+// Example: BACKSPACE 5
+backspace_stmt
+    : BACKSPACE integer_expr
+    ;
+
+// ENDFILE statement - write end-of-file mark (X3.9-1966 Section 7.1.3.3)
+// Example: ENDFILE 5
+endfile_stmt
+    : ENDFILE integer_expr
     ;
 
 // ====================================================================

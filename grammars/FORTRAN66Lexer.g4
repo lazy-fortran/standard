@@ -78,6 +78,12 @@ BLOCKDATA       : B L O C K D A T A ;  // BLOCK DATA program unit
 EXTERNAL        : E X T E R N A L ;    // External procedure declaration
 INTRINSIC       : I N T R I N S I C ;  // Intrinsic function specification
 
+// Auxiliary I/O statements (ANSI X3.9-1966 Section 7.1.3.3)
+// Sequential file positioning statements
+REWIND          : R E W I N D ;        // Position file to beginning
+BACKSPACE       : B A C K S P A C E ;  // Position file back one record
+ENDFILE         : E N D F I L E ;      // Write end-of-file mark
+
 // Standardized statement labels (1-99999, no leading zeros)
 // This was formalized in FORTRAN 66 to ensure portability
 
