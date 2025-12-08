@@ -489,14 +489,6 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
         "{errors} syntax errors; full historical coverage is out of scope for "
         "the simplified grammar."
     ),
-    (
-        "FORTRAN77",
-        Path("FORTRAN77/test_fortran77_parser_extra/nested_if_block.f"),
-    ): (
-        "FORTRAN 77 nested-IF fixture {relpath} exercises complex structured "
-        "programming patterns that still cause {errors} syntax errors in the "
-        "current FORTRAN 77 grammar."
-    ),
     # Fortran2003 negative / fixed-form fixtures that intentionally exercise
     # error paths or comment-handling edge cases. These are tied to specific
     # Fortran 2003 issues in the audit document.

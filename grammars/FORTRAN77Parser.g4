@@ -150,6 +150,12 @@ executable_construct
 // FORTRAN 77 (1977) - ENHANCED I/O
 // ====================================================================
 
+// Enhanced PRINT statement with list-directed I/O (NEW in FORTRAN 77)
+// FORTRAN 77 added PRINT *, list form for list-directed output
+print_stmt
+    : PRINT format_identifier (COMMA output_item_list)?
+    ;
+
 // Enhanced WRITE statement (NEW in FORTRAN 77)
 write_stmt
     : WRITE LPAREN control_info_list RPAREN output_item_list?
@@ -176,6 +182,7 @@ output_item_list
 
 output_item
     : expr
+    | character_expr  // String literals in output (NEW in FORTRAN 77)
     | implied_do
     ;
 
@@ -288,6 +295,23 @@ variable_list
 // ====================================================================
 // FORTRAN 77 (1977) - ENHANCED EXPRESSIONS
 // ====================================================================
+
+// Override literal to accept LABEL tokens as integers due to lexer
+// token precedence: LABEL is defined before INTEGER_LITERAL in
+// FORTRANIILexer and matches first for 1-5 digit numbers
+literal
+    : INTEGER_LITERAL
+    | LABEL                     // Accept LABEL as integer (token precedence)
+    | REAL_LITERAL
+    | STRING_LITERAL            // NEW in FORTRAN 77
+    | logical_literal           // From FORTRAN IV via FORTRAN 66
+    ;
+
+// Logical literals from FORTRAN IV (imported via FORTRAN 66)
+logical_literal
+    : DOT_TRUE
+    | DOT_FALSE
+    ;
 
 // Character expressions (NEW in FORTRAN 77)
 character_expr
