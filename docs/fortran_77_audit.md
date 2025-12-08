@@ -111,16 +111,35 @@ Tests:
 
 - `test_character_expressions` parses simple CHARACTER expressions such
   as `HELLO` and `FIRST // SECOND` using the `character_expr` rule.
-- `test_character_string_processing` contains stubbed tests for
-  `'HELLO'` and `'HELLO' // ' WORLD'` but currently passes (i.e. does
-  nothing) because of earlier concerns about `STRING_LITERAL`. These
-  can be turned into real parser tests now that the lexer rule exists.
+- `test_character_string_processing` now parses STRING_LITERAL
+  expressions including `'HELLO'`, `'HELLO' // ' WORLD'`,
+  `'IT''S A TEST'` (doubled apostrophes), and multi-operand
+  concatenations.
+- `test_character_substring_operations` exercises substring syntax
+  `NAME(1:5)`, `STR(I:J)`, and open-ended forms like `LINE(1:)`.
+- `test_character_concatenation_combinations` tests mixed-operand
+  concatenations such as `'PREFIX' // NAME` and `NAME(1:5) // SUFFIX`.
+- `test_character_function_references` verifies character function
+  references like `TRIM(NAME)` and `FMT(X, Y, Z)`.
+- `test_string_literal_edge_cases` covers edge cases including empty
+  strings `''`, whitespace-only `' '`, multiple embedded apostrophes
+  `'A''B''C'`, and compound concatenations.
+- `test_character_expression_fixture` parses a comprehensive fixture
+  file `character_expressions.f` that combines character declarations,
+  assignments, concatenations, substrings, and I/O operations.
 
-Limitations:
+Fixture coverage:
 
-- The generic fixture parser (`tests/test_fixture_parsing.py`) does not
-  yet exercise complex character expressions in FORTRAN 77 fixtures.
-  Only targeted unit tests in `tests/FORTRAN77` cover this area.
+- `tests/fixtures/FORTRAN77/test_fortran77_parser/character_expressions.f`
+  exercises character constants, embedded apostrophes (doubled quotes),
+  character declarations, character assignment, and character
+  expressions in I/O and IF constructs per ANSI X3.9-1978.
+
+Note: Concatenation (`//`) and substring (`(start:end)`) operations
+work when parsed via the `character_expr` rule directly (as in the
+unit tests), but the `main_program` entry rule's `assignment_stmt`
+uses `expr` which does not yet include `character_expr`. This is a
+grammar integration gap, not a test gap.
 
 ## 4. Structured IF and DO constructs
 
@@ -453,8 +472,6 @@ Future work should:
 
 - Add parser rules and tests for OPEN/CLOSE/INQUIRE/BACKSPACE/
   REWIND/ENDFILE if full FORTRAN 77 coverage is desired.
-- Turn the `test_character_string_processing` stubs into real tests
-  and add more fixtures with CHARACTER expressions and strings.
 - Resolve the XPASS nested IF fixture by refining the block IF
   constructs or adjusting the fixture expectations, and reflect any
   changes back into this audit.
