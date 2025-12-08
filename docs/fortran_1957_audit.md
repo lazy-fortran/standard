@@ -92,13 +92,10 @@ Mapping that Appendix‑B list to the current grammar:
     have no parser rules.
 
 - **PAUSE, STOP, CONTINUE**
-  - Status:
-    - `STOP`, `CONTINUE`: **implemented as standalone statements.**
-    - `PAUSE`: **lexer-only / partial.**
-  - Evidence: `CONTINUE` and `STOP` appear in `statement_body`.
-    `PAUSE` is a token and is tested lexically and via fixtures, but
-    there is no `pause_stmt` rule and tests do not assert zero syntax
-    errors for PAUSE fixtures.
+  - Status: **all implemented and tested.**
+  - Evidence: `CONTINUE`, `STOP` and `PAUSE` appear in `statement_body`.
+    `pause_stmt` accepts `PAUSE` or `PAUSE n` per the IBM 704 manual,
+    and tests assert `getNumberOfSyntaxErrors() == 0`.
 
 - **FREQUENCY**
   - Status: **implemented and tested.**
@@ -117,10 +114,8 @@ and the associated fixtures:
 - DO loops using labeled termination (no `END DO`).
 - STOP and CONTINUE.
 - FREQUENCY as an optimization hint.
-- PAUSE is recognized lexically and used in fixtures, but currently
-  lacks a dedicated `pause_stmt` rule; PAUSE tests focus on token
-  recognition and parse-tree construction rather than zero-error
-  parsing.
+- PAUSE is fully modeled via `pause_stmt` (accepts `PAUSE` or
+  `PAUSE n`) and tested with zero syntax errors.
 
 Out-of-scope / not yet modeled:
 
@@ -177,9 +172,7 @@ Implemented / partially implemented:
   - Fully modeled via `frequency_stmt` and tested with zero syntax
     errors.
 - `PAUSE`:
-  - Recognized by the lexer and exercised in fixtures, but there is no
-    explicit `pause_stmt` rule; tests only assert that parsing does not
-    crash and do not assert zero syntax errors.
+  - Fully modeled via `pause_stmt` and tested with zero syntax errors.
 
 Not fully implemented:
 

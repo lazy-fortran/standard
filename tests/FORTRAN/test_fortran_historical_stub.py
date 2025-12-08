@@ -417,11 +417,14 @@ class TestFORTRANHistoricalAccuracy:
             "test_fortran_historical_stub",
             "pause_test_1957.f",
         )
-        
+
         parser = self.create_parser(pause_test)
         try:
             tree = parser.program_unit_core()
             assert tree is not None
+            # PAUSE is explicitly modelled in the grammar via pause_stmt,
+            # so this should parse with zero syntax errors.
+            assert parser.getNumberOfSyntaxErrors() == 0
         except Exception as e:
             pytest.fail(f"1957 PAUSE statement failed: {e}")
         
