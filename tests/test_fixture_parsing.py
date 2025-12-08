@@ -20,7 +20,8 @@ import pytest
 # Make grammars and fixture utilities importable
 ROOT = Path(__file__).resolve().parent
 GRAMMARS = ROOT.parent / "grammars"
-sys.path.insert(0, str(GRAMMARS))
+sys.path.insert(0, str(GRAMMARS / "generated" / "early"))
+sys.path.insert(0, str(GRAMMARS / "generated" / "modern"))
 sys.path.append(str(ROOT))
 
 from fixture_utils import load_fixture  # noqa: E402
