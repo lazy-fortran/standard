@@ -431,14 +431,21 @@ Gaps:
 
 - DT edit descriptors:
   - The syntax of `DT` edit descriptors (inside FORMAT) is not modeled;
-    they are treated as opaque strings, so the grammar does not enforce
-    the detailed rules for DT descriptors from the standard.
+    they are treated as opaque character strings, so the grammar does not
+    enforce the detailed rules for DT descriptors from the standard.
+  - This is an **intentional design decision**: format-specification
+    content (including DT descriptors) is accepted as part of character
+    literals but not structurally parsed.
+  - See issue #185 for the documented decision and test coverage.
 
-Gap issues (should exist or be opened):
+Gap issues (resolved):
 
-- An issue explicitly documenting that **DT edit descriptors** are
-  left as syntactic strings and that only the generic level of defined
-  derived‑type I/O is modeled.
+- Issue #185 explicitly documents that **DT edit descriptors** are left as
+  opaque character strings and that only the generic level of defined
+  derived-type I/O (READ(FORMATTED)/WRITE(UNFORMATTED) in `generic_spec`)
+  is modeled structurally. Tests in
+  `tests/Fortran2003/test_issue185_dt_edit_descriptors.py` verify that
+  FORMAT strings containing DT descriptors are accepted correctly.
 
 ---
 
@@ -657,9 +664,9 @@ Existing umbrella issues relevant to this audit:
 Additional issues (either existing or to be opened) should cover:
 
 - SELECT TYPE guard/tokenization accuracy for `TYPE IS`/`CLASS IS`.
-- DT edit descriptor syntactic coverage (or explicit decision to leave
-  them opaque).
-- Semantic‑level checks for C interoperability, IEEE arithmetic, PDTs,
+- #185 – **DT edit descriptors** (resolved): documented decision to keep
+  them as opaque character strings, with test coverage added.
+- Semantic-level checks for C interoperability, IEEE arithmetic, PDTs,
   and procedure pointer characteristics.
 
 When those issues and their follow‑ups are addressed, Fortran 2003 in
