@@ -256,47 +256,93 @@ common_stmt
     ;
 
 
-// Expression evaluation (1957 mathematical focus)
-// Full operator precedence with parentheses override
-// ** (exponentiation) was included from day one!
+// ====================================================================
+// EXPRESSION EVALUATION - Proper Precedence Hierarchy
+// ====================================================================
+// FORTRAN II implements proper operator precedence (highest to lowest):
+//   1. ** (power) - RIGHT ASSOCIATIVE
+//   2. unary +, - (unary operators)
+//   3. *, / (multiplication, division) - left associative
+//   4. binary +, - (addition, subtraction) - left associative
+//
+// Per IBM FORTRAN II manual (Form C28-6000-2, 1958), expression syntax
+// matches 1957 FORTRAN mathematical expressions. The hierarchy ensures:
+// - 2**3**4 parses as 2**(3**4) per right-associativity of **
+// - -2**2 parses as -(2**2) = -4, not (-2)**2 = 4
+// - 2+3*4 parses as 2+(3*4) = 14, not (2+3)*4 = 20
+//
+// Note: FORTRAN II does not include relational_expr at the top of expr.
+// Relational expressions (.EQ., .NE., etc.) were primarily used with
+// arithmetic IF in early FORTRAN; FORTRAN 66 introduces logical types
+// where relational expressions appear in logical_expr context instead.
+// ====================================================================
+
+// Arithmetic expression - top of the precedence hierarchy for FORTRAN II
+// Does not include relational operators (those are added in FORTRAN 66
+// within the logical expression context)
 expr
-    : expr POWER expr                    # PowerExpr        // ** (right associative)
-    | expr (MULTIPLY | SLASH) expr      # MultDivExpr      // *, /
-    | expr (PLUS | MINUS) expr           # AddSubExpr       // +, -
-    | PLUS expr                          # UnaryPlusExpr    // +expr
-    | MINUS expr                         # UnaryMinusExpr   // -expr
-    | primary                            # PrimaryExpr      // Literals, variables, etc.
+    : additive_expr
     ;
 
-// Primary expressions
+// Addition and subtraction - lowest arithmetic precedence
+additive_expr
+    : additive_expr additive_op multiplicative_expr
+    | multiplicative_expr
+    ;
+
+additive_op
+    : PLUS | MINUS
+    ;
+
+// Multiplication and division
+multiplicative_expr
+    : multiplicative_expr multiplicative_op unary_expr
+    | unary_expr
+    ;
+
+multiplicative_op
+    : MULTIPLY | SLASH
+    ;
+
+// Unary operators (higher precedence than binary +/-)
+unary_expr
+    : unary_op unary_expr
+    | power_expr
+    ;
+
+unary_op
+    : PLUS | MINUS
+    ;
+
+// Exponentiation - highest precedence, RIGHT ASSOCIATIVE
+// 2**3**4 = 2**(3**4) = 2**81 = 2417851639229258349412352
+// NOT (2**3)**4 = 8**4 = 4096
+power_expr
+    : primary POWER power_expr    // Right associative: a**b**c = a**(b**c)
+    | primary
+    ;
+
+// Primary expressions - atoms of the expression grammar
 primary
-    : literal                            // Numeric constants
-    | variable                           // Variables and array elements
-    | function_reference                 // Built-in function calls
-    | LPAREN expr RPAREN                // Parenthesized expressions
+    : literal
+    | variable
+    | LPAREN expr RPAREN
     ;
 
-// Literals (1957 supported integers and reals only)
+// Literals (integers and reals)
+// Note: LABEL tokens (1-5 digit integers starting with 1-9) are lexically
+// identical to integer literals in expression context, so we accept both.
 literal
-    : INTEGER_LITERAL                    // e.g., 123, -456
-    | REAL_LITERAL                       // e.g., 3.14, 2.5E-3
+    : INTEGER_LITERAL
+    | LABEL              // LABEL tokens are valid integer literals in expressions
+    | REAL_LITERAL
     ;
 
-// Variables and array references
-// 1957 variables: max 6 characters, implicit typing (I-N integer, else real)
+// Variables and array/function references
+// In FORTRAN II, SIN(X) and A(I) are syntactically identical;
+// semantic analysis distinguishes functions from arrays
 variable
-    : IDENTIFIER (LPAREN subscript_list RPAREN)?  // Variable or array element
-    ;
-
-// Array subscript list
-subscript_list
-    : expr (COMMA expr)*
-    ;
-
-// Function references (1957 - built-in mathematical functions only)
-// User-defined functions used statement function syntax
-function_reference
-    : IDENTIFIER LPAREN expr_list RPAREN
+    : IDENTIFIER (LPAREN expr_list RPAREN)?
     ;
 
 
