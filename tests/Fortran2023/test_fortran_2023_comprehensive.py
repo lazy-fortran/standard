@@ -27,7 +27,7 @@ import pytest
 from pathlib import Path
 
 # Add grammars directory to Python path for generated parsers
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../grammars'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../grammars/generated/modern'))
 sys.path.append(str(Path(__file__).parent.parent))
 
 from fixture_utils import load_fixture

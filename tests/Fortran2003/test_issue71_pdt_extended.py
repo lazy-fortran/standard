@@ -16,7 +16,7 @@ import pytest
 from antlr4 import InputStream, CommonTokenStream
 
 sys.path.append(str(Path(__file__).parent.parent))
-sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
+sys.path.append(str(Path(__file__).parent.parent.parent / "grammars/generated/modern"))
 
 from Fortran2003Lexer import Fortran2003Lexer
 from Fortran2003Parser import Fortran2003Parser

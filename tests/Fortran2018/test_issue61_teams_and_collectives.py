@@ -15,7 +15,7 @@ import pytest
 from antlr4 import CommonTokenStream, InputStream
 
 sys.path.append(str(Path(__file__).parent.parent))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../grammars"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../grammars/generated/modern"))
 
 from Fortran2018Lexer import Fortran2018Lexer  # type: ignore
 from Fortran2018Parser import Fortran2018Parser  # type: ignore
