@@ -179,7 +179,7 @@ Semantic limitations (not enforced by grammar):
 
 ## 4. PURE and ELEMENTAL procedures
 
-Specification:
+Specification (ISO/IEC 1539‑1:1997 Section 12.6):
 
 - Fortran 95 introduces PURE and ELEMENTAL procedures with:
   - Restrictions on side effects, argument usage and references to
@@ -189,22 +189,33 @@ Specification:
 
 Grammar implementation:
 
-- F90 already has:
+- F90 forward extension:
   - `prefix_spec : RECURSIVE | PURE | ELEMENTAL | type_spec_f90`.
   - `function_stmt` / `subroutine_stmt` rules that accept this prefix.
-- Fortran 95 adds explicit PURE/ELEMENTAL forms:
-  - `pure_function_stmt`:
-    - `PURE (prefix_spec)* FUNCTION IDENTIFIER (...) (suffix)?`.
-  - `pure_subroutine_stmt`:
-    - `PURE (prefix_spec)* SUBROUTINE IDENTIFIER (...)`.
-  - `elemental_function_stmt` / `elemental_subroutine_stmt`:
-    - Same pattern with `ELEMENTAL` instead of `PURE`.
+  - This is a deliberate forward extension documented in
+    `docs/fortran_90_audit.md` section 9 and the F90 grammar comments.
+- Fortran 95 grammar provides proper standard‑compliant handling via:
+  - `prefix_f95`: `prefix_spec_f95+` combining RECURSIVE, PURE,
+    ELEMENTAL and type specifications.
+  - `function_stmt_f95`:
+    - `(prefix_f95)? FUNCTION IDENTIFIER (...) (suffix)?`.
+  - `subroutine_stmt_f95`:
+    - `(prefix_f95)? SUBROUTINE IDENTIFIER (...)`.
+  - `function_subprogram_f95`, `subroutine_subprogram_f95`: complete
+    subprogram rules using the F95 procedure statements.
+- Program entry point:
+  - `program_unit_f95` integrates F95 procedure subprograms alongside
+    F95 constructs (FORALL, enhanced WHERE) into the program structure.
+  - Full F95 programs with PURE/ELEMENTAL procedures parse via this
+    entry point.
 - Tests:
   - `test_pure_and_elemental_procedures` parses
     `pure_function_stmt.f90` and `elemental_subroutine_stmt.f90` using
-    these F95‑specific entry rules.
+    the `function_stmt_f95` and `subroutine_stmt_f95` entry rules.
+  - The generic fixture harness (`tests/test_fixture_parsing.py`) uses
+    `program_unit_f95` for Fortran95 fixtures.
 
-Gaps and historical notes:
+Historical notes:
 
 - **Historical attribution** (resolved in issue #182):
   - PURE and ELEMENTAL are accepted in the F90 grammar (via `prefix_spec`)
@@ -212,19 +223,13 @@ Gaps and historical notes:
     code, even though they are Fortran 95 language features. This is now
     explicitly documented in the F90 grammar comments and in
     `docs/fortran_90_audit.md` section 9.
-- **Integration into program units**:
-  - The new `pure_*` and `elemental_*` rules are not used by F90’s
-    `function_subprogram` / `subroutine_subprogram` rules; instead,
-    F90’s generic `function_stmt` / `subroutine_stmt` remain the entry
-    points.
-  - In practice, PURE/ELEMENTAL procedure headers are parsed by the F90
-    rules, with the F95‑specific ones being exercised only via
-    targeted tests.
-- **Semantic constraints**:
-  - No syntactic checks exist for the “no side‑effects” or
-    specification‑expression restrictions described in the standard and
-    clarified in J3/98‑114. Those constraints are out of scope for this
-    grammar and need to be enforced by later stages.
+
+Semantic constraints (not enforced by grammar):
+
+- No syntactic checks exist for the "no side‑effects" or
+  specification‑expression restrictions described in the standard and
+  clarified in J3/98‑114. Those constraints are out of scope for this
+  grammar and need to be enforced by later stages.
 
 ## 5. Type declarations and default initialization
 
@@ -358,7 +363,7 @@ These limitations should be covered by Fortran 95 issues dedicated to:
 
 Specification:
 
-- Fortran 95 retains Fortran 90’s overall program‑unit structure:
+- Fortran 95 retains Fortran 90's overall program‑unit structure:
   - Main program, external subroutines/functions, modules, BLOCK DATA.
   - F95 constructs (FORALL, enhanced WHERE, PURE/ELEMENTAL, default
     initialization, etc.) are allowed in the same general contexts as
@@ -369,37 +374,38 @@ Grammar implementation:
 - The F95 parser **imports** the Fortran 90 parser:
   - `parser grammar Fortran95Parser;`
   - `import Fortran90Parser;`
-- F90’s `program_unit_f90`, `specification_part`, `execution_part`,
-  `declaration_construct`, `executable_construct` and `construct`
-  remain the only entry points for complete programs.
-- F95 adds:
-  - `executable_construct_f95` / `executable_stmt_f95` / `construct_f95`
-    bundling FORALL and enhanced WHERE with F90‑style statements.
-  - F95‑specific type, expression and I/O rules discussed above.
+- F95 provides a dedicated `program_unit_f95` entry point that integrates
+  F95 constructs into the program structure (resolved in issue #179):
+  - `program_unit_f95`: top‑level entry for F95 programs.
+  - `main_program_f95`, `module_f95`, `external_subprogram_f95`: F95
+    program unit variants using `specification_part_f95` and
+    `execution_part_f95`.
+  - `function_subprogram_f95`, `subroutine_subprogram_f95`: complete
+    subprogram rules with F95 procedure statements (`function_stmt_f95`,
+    `subroutine_stmt_f95`) supporting PURE/ELEMENTAL prefixes.
+- F95 execution and specification parts:
+  - `execution_part_f95` reaches F95 constructs via
+    `executable_construct_f95` → `construct_f95` → `forall_construct`,
+    `where_construct_f95`.
+  - `specification_part_f95` reaches F95 type rules via
+    `declaration_construct_f95` → `type_declaration_stmt_f95`,
+    `derived_type_def_f95`.
 
-Gaps:
+Test coverage:
 
-- **No `program_unit_f95` entry rule**:
-  - There is no F95‑specific program unit wrapper that delegates to the
-    F90 entry but augments `execution_part` and `declaration_construct`
-    with F95 features.
-- **F95 constructs unreachable from full‑program parsing**:
-  - `forall_stmt`, `forall_construct`, `where_construct_f95`,
-    `where_stmt_f95`, F95 I/O rules and F95 type rules are only usable
-    when directly invoking their rules, not when parsing whole F95
-    programs via a single entry point.
-- **Test coverage mirrors this limitation**:
-  - `tests/Fortran95/test_fortran_95_features.py` deliberately describes
-    itself as a “minimal test suite” and only parses isolated F95
-    constructs (FORALL, WHERE, PURE/ELEMENTAL headers, array
-    constructors, and intrinsic tokens).
-  - There are no Fortran 95 fixtures wired into the generic fixture
-    harness (`tests/test_fixture_parsing.py`), and thus no assurance
-    that realistic F95 programs parse successfully.
+- `tests/Fortran95/test_fortran_95_features.py` validates individual F95
+  constructs (FORALL, WHERE, PURE/ELEMENTAL headers, array constructors,
+  intrinsic tokens) via focused entry rules.
+- The generic fixture harness (`tests/test_fixture_parsing.py`) uses
+  `program_unit_f95` as the entry rule for Fortran95 fixtures.
+- Many F95 fragment fixtures (bare tokens, partial constructs) are
+  expected to fail with `program_unit_f95` entry since they are not
+  complete program units; these are documented as XPASS entries
+  referencing issue #148.
 
-Issue #148 (“Fortran 95: expand minimal feature tests to full‑program
-coverage”) already tracks the fixture/test side of this. Additional
-issues are required to cover the grammar‑integration work.
+Issue #148 ("Fortran 95: expand minimal feature tests to full‑program
+coverage") tracks expanding the F95 test suite with complete program
+fixtures that exercise the integrated `program_unit_f95` entry point.
 
 ## 9. J3/98‑114 and semantic characteristics
 
@@ -468,19 +474,25 @@ The Fortran 95 layer in this repository:
 - **Implements**:
   - Core FORALL and enhanced WHERE syntax, including nested constructs
     and scalar mask expressions.
-  - PURE and ELEMENTAL procedure headers.
+  - PURE and ELEMENTAL procedure prefixes via `prefix_f95` and dedicated
+    `function_stmt_f95` / `subroutine_stmt_f95` rules.
   - F95‑flavored type and array‑specification rules and an array
-    constructor rule.
-  - A set of F90/F95 “modern intrinsic” tokens in the lexer.
-- **Does not yet fully integrate** these features into the F90
-  program‑unit and execution‑part structure, and does not allow F95
-  intrinsics to be used as intrinsic calls.
+    constructor rule (standard `(/ ... /)` form only).
+  - A set of F90/F95 "modern intrinsic" tokens in the lexer.
+  - A `program_unit_f95` entry point that integrates F95 constructs into
+    the program structure via `execution_part_f95`, `specification_part_f95`,
+    `function_subprogram_f95` and `subroutine_subprogram_f95`.
+- **Remaining gaps**:
+  - F95 intrinsic tokens are recognized by the lexer but not yet fully
+    usable as intrinsic calls in all contexts.
 - **Historical notes** (all resolved):
   - (Resolved in #182: PURE/ELEMENTAL in F90 grammar is now documented as a
     deliberate forward extension, with clear comments in the grammar files
     and a dedicated section in the F90 audit.)
   - (Resolved: Square‑bracket array constructors were removed from the
     F95 grammar; only the standard `(/ ... /)` form is now accepted.)
+  - (Resolved in #179: F95 constructs are now integrated into program
+    structure via `program_unit_f95` entry point.)
 
 Existing issues:
 
@@ -492,15 +504,9 @@ Existing issues:
   ISO/IEC 1539‑1:1997 references, and ensure every F95 gap discovered
   in the spec→grammar cross‑walk has a dedicated issue.
 
-New and updated issues (filed/updated as part of this audit) should
-cover at least:
+Outstanding work tracked by issues:
 
-- Integration of F95 constructs into a proper `program_unit_f95` entry
-  and the execution/specification parts.
 - Making F95 intrinsic tokens usable as function and subroutine calls.
-- (Resolved in #182: PURE/ELEMENTAL historical mismatch documented in F90
-  grammar comments and F90 audit section 9.)
-- (Resolved: #181 – bracket array constructors removed from F95 grammar.)
 
 Together with the Fortran 90 audit, this document completes the
 spec‑aware audit chain up through Fortran 95 for issue #140, while
