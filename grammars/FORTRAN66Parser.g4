@@ -207,6 +207,8 @@ statement_body
     : assignment_stmt      // Variable = Expression
     | goto_stmt           // Unconditional jump to labeled statement
     | computed_goto_stmt  // Multi-way branch based on integer expression
+    | assign_stmt         // GO TO assignment: ASSIGN k TO i (X3.9-1966 7.1.1.3)
+    | assigned_goto_stmt  // Assigned GO TO: GO TO i, (k1,...) (X3.9-1966 7.1.2.1.2)
     | arithmetic_if_stmt  // Three-way branch based on expression sign
     | logical_if_stmt     // Two-way branch based on logical expression
     | do_stmt            // Counted loop with mandatory label
@@ -285,6 +287,29 @@ identifier_list
 // Variable list for declarations
 variable_list
     : variable (COMMA variable)*
+    ;
+
+// ====================================================================
+// FORTRAN 66 (1966) - GO TO ASSIGNMENT STATEMENT
+// ====================================================================
+// Per ANSI X3.9-1966 Section 7.1.1.3, the GO TO assignment statement
+// syntax is: ASSIGN k TO i
+// where k is a statement label and i is an integer variable.
+// This stores the label k in variable i for use with assigned GO TO.
+assign_stmt
+    : ASSIGN label TO variable
+    ;
+
+// ====================================================================
+// FORTRAN 66 (1966) - ASSIGNED GO TO STATEMENT
+// ====================================================================
+// Per ANSI X3.9-1966 Section 7.1.2.1.2, the assigned GO TO statement
+// syntax is: GO TO i, (k1, k2, ..., km)
+// where i is an integer variable containing a label (set by ASSIGN)
+// and (k1, k2, ..., km) is a list of valid target labels.
+// Branches to the label stored in variable i.
+assigned_goto_stmt
+    : GOTO variable COMMA LPAREN label_list RPAREN
     ;
 
 // ====================================================================

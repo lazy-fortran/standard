@@ -1,0 +1,12 @@
+      INTEGER N
+      ASSIGN 100 TO N
+      GOTO N, (100, 200, 300)
+100   PRINT 1, 1
+      ASSIGN 200 TO N
+      GOTO N, (100, 200, 300)
+200   PRINT 1, 2
+      ASSIGN 300 TO N
+      GOTO N, (100, 200, 300)
+300   STOP
+1     FORMAT (I5)
+      END

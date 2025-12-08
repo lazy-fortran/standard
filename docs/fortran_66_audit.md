@@ -177,19 +177,27 @@ Mapping these families to the current grammar:
     - Implemented: logical variables participate in `assignment_stmt`
       and `logical_expr`; tests cover logical variables and literals.
   - GO TO assignment (`ASSIGN k TO i`):
-    - Not implemented:
-      - Lexer: `ASSIGN` exists in `FORTRANLexer.g4` (inherited), but
-        there is no dedicated GO TO assignment token.
-      - Parser: neither `FORTRANIIParser.g4` nor `FORTRAN66Parser.g4`
-        defines a GO TO assignment rule; `statement_body` has no
-        `assign_stmt` / `goto_assign_stmt` entry.
-      - Effect: any conforming FORTRAN 66 code that uses GO TO
-        assignment will fail to parse.
+    - Implemented:
+      - Lexer: `ASSIGN` and `TO` tokens exist in `FORTRANLexer.g4`
+        (inherited through the lexer chain).
+      - Parser: `assign_stmt : ASSIGN label TO variable` rule defined
+        in `FORTRAN66Parser.g4` per X3.9-1966 Section 7.1.1.3.
+      - `statement_body` includes `assign_stmt` as an alternative.
+      - Tests: `test_assign_statement`, `test_assign_in_statement_body`,
+        and `test_assign_goto_fixture` in
+        `tests/FORTRAN66/test_fortran66_parser.py`.
 
 - **Control statements**
   - Implemented:
     - Unconditional GO TO: `goto_stmt : GOTO label`.
     - Computed GO TO: `computed_goto_stmt : GOTO LPAREN label_list RPAREN COMMA expr`.
+    - Assigned GO TO (`GO TO i, (k1, k2, ...)`):
+      - `assigned_goto_stmt : GOTO variable COMMA LPAREN label_list RPAREN`
+        defined in `FORTRAN66Parser.g4` per X3.9-1966 Section 7.1.2.1.2.
+      - `statement_body` includes `assigned_goto_stmt` as an alternative.
+      - Tests: `test_assigned_goto_statement`, `test_assigned_goto_in_statement_body`,
+        and `test_assign_goto_fixture` in
+        `tests/FORTRAN66/test_fortran66_parser.py`.
     - Arithmetic IF: `arithmetic_if_stmt : IF (expr) l1, l2, l3`.
     - Logical IF: `logical_if_stmt : IF (logical_expr) statement_body`.
     - CALL: `call_stmt : CALL IDENTIFIER (LPAREN expr_list? RPAREN)?`.
@@ -200,11 +208,8 @@ Mapping these families to the current grammar:
     - STOP / PAUSE:
       - Implemented as `stop_stmt` and `pause_stmt` rules inherited
         from FORTRAN II, with `integer_expr?` argument.
-  - Not implemented / not fully aligned with X3.9‑1966:
-    - Assigned GO TO (`GO TO i, (k1, k2, ...)`) is not modeled;
-      only the computed GO TO form with `GO TO (k1, k2, ...), i`
-      exists.
-    - STOP/PAUSE octal restrictions and “only octal digits 0–7” rule
+  - Not fully aligned with X3.9‑1966:
+    - STOP/PAUSE octal restrictions and "only octal digits 0–7" rule
       are not enforced; the grammar treats their arguments as generic
       integer expressions.
 
@@ -350,6 +355,8 @@ The FORTRAN 66 grammar in this repository:
   X3.9-1966 Section 7.2.
 - Implements auxiliary I/O statements (`REWIND`, `BACKSPACE`, `ENDFILE`)
   per X3.9-1966 Section 7.1.3.3.
+- Implements GO TO assignment (`ASSIGN k TO i`) and assigned GO TO
+  (`GO TO i, (k1, k2, ...)`) per X3.9-1966 Sections 7.1.1.3 and 7.1.2.1.2.
 - Does **not** yet implement the DATA statement for initialization.
 - Still rejects some richer, spec-inspired fixtures, which are
   tracked as XPASS in the generic fixture harness.
