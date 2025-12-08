@@ -48,7 +48,7 @@ end program test"""
     token_stream2 = CommonTokenStream(lexer2)
     parser2 = Fortran2018Parser(token_stream2)
     
-    error_listener2 = TestErrorListener()
+    error_listener2 = ParseErrorListener()
     parser2.removeErrorListeners() 
     parser2.addErrorListener(error_listener2)
     
