@@ -19,6 +19,15 @@ try:
     from FORTRAN77Lexer import FORTRAN77Lexer  # type: ignore
     from FORTRAN77Parser import FORTRAN77Parser  # type: ignore
     from fixture_utils import load_fixture
+    from shared_fortran_tests import (
+        STATEMENT_FUNCTION_SIMPLE_CASES,
+        STATEMENT_FUNCTION_MULTI_ARG_CASES,
+        STATEMENT_FUNCTION_IN_BODY_CASES,
+        ARRAY_ELEMENT_LITERAL_INDEX_CASES,
+        ARRAY_ELEMENT_EXPR_INDEX_CASES,
+        ARRAY_ELEMENT_ASSIGNMENT_CASES,
+        STATEMENT_BODY_DISAMBIGUATION_CASES,
+    )
 except ImportError as e:
     print(f"Import error: {e}")
     FORTRAN77Parser = None
@@ -329,40 +338,21 @@ END IF"""
 
     def test_statement_function_simple(self):
         """Test simple statement function definition (F77 Section 8)"""
-        test_cases = [
-            "F(X) = X * X",
-            "AREA(R) = 3.14159 * R * R",
-            "SQUARE(N) = N ** 2",
-            "DOUBLE(X) = 2.0 * X",
-        ]
-
-        for text in test_cases:
+        for text in STATEMENT_FUNCTION_SIMPLE_CASES:
             with self.subTest(stmt_func=text):
                 tree = self.parse(text, 'statement_function_stmt')
                 self.assertIsNotNone(tree)
 
     def test_statement_function_multiple_args(self):
         """Test statement function with multiple arguments"""
-        test_cases = [
-            "SUM(A, B) = A + B",
-            "AREA(L, W) = L * W",
-            "AVG(X, Y, Z) = (X + Y + Z) / 3.0",
-            "DIST(X1, Y1, X2, Y2) = SQRT((X2-X1)**2 + (Y2-Y1)**2)",
-        ]
-
-        for text in test_cases:
+        for text in STATEMENT_FUNCTION_MULTI_ARG_CASES:
             with self.subTest(stmt_func=text):
                 tree = self.parse(text, 'statement_function_stmt')
                 self.assertIsNotNone(tree)
 
     def test_statement_function_in_statement_body(self):
         """Test statement function as statement_body alternative"""
-        test_cases = [
-            "F(X) = X * X",
-            "AREA(L, W) = L * W",
-        ]
-
-        for text in test_cases:
+        for text in STATEMENT_FUNCTION_IN_BODY_CASES:
             with self.subTest(stmt=text):
                 tree = self.parse(text, 'statement_body')
                 self.assertIsNotNone(tree)
@@ -389,14 +379,7 @@ END IF"""
 
     def test_array_element_not_statement_function_literal_index(self):
         """Verify array element with literal index is NOT a statement function"""
-        test_cases = [
-            "A(1) = 2.0",
-            "B(100) = X",
-            "MAT(1, 2) = 3.0",
-            "ARR(1, 2, 3) = Y",
-        ]
-
-        for text in test_cases:
+        for text in ARRAY_ELEMENT_LITERAL_INDEX_CASES:
             with self.subTest(array_assignment=text):
                 input_stream = InputStream(text)
                 lexer = FORTRAN77Lexer(input_stream)
@@ -410,14 +393,7 @@ END IF"""
 
     def test_array_element_not_statement_function_expr_index(self):
         """Verify array element with expression index is NOT a statement function"""
-        test_cases = [
-            "A(I+1) = X",
-            "B(2*J) = Y",
-            "C(I-1, J+1) = Z",
-            "D(N/2) = W",
-        ]
-
-        for text in test_cases:
+        for text in ARRAY_ELEMENT_EXPR_INDEX_CASES:
             with self.subTest(array_assignment=text):
                 input_stream = InputStream(text)
                 lexer = FORTRAN77Lexer(input_stream)
@@ -431,15 +407,7 @@ END IF"""
 
     def test_array_element_parses_as_assignment_stmt(self):
         """Verify array element assignments parse correctly as assignment_stmt"""
-        test_cases = [
-            "A(1) = 2.0",
-            "B(I+1) = X * Y",
-            "MAT(1, 2) = 3.0",
-            "C(I-1, J+1) = Z",
-            "ARR(N/2) = W + 1.0",
-        ]
-
-        for text in test_cases:
+        for text in ARRAY_ELEMENT_ASSIGNMENT_CASES:
             with self.subTest(array_assignment=text):
                 input_stream = InputStream(text)
                 lexer = FORTRAN77Lexer(input_stream)
@@ -454,15 +422,7 @@ END IF"""
 
     def test_statement_body_disambiguates_array_vs_function(self):
         """Verify statement_body correctly parses array elements as assignments"""
-        test_cases = [
-            ("F(X) = X * X", "Statement_function_stmt"),
-            ("A(1) = 2.0", "Assignment_stmt"),
-            ("B(I+1) = X", "Assignment_stmt"),
-            ("SUM(A, B) = A + B", "Statement_function_stmt"),
-            ("MAT(1, 2) = 3.0", "Assignment_stmt"),
-        ]
-
-        for text, expected_type in test_cases:
+        for text, expected_type in STATEMENT_BODY_DISAMBIGUATION_CASES:
             with self.subTest(stmt=text, expected=expected_type):
                 input_stream = InputStream(text)
                 lexer = FORTRAN77Lexer(input_stream)
