@@ -1,18 +1,19 @@
-C     This is a fixed-form Fortran program
+!     This is a fixed-form Fortran 90 program
+!     Using F90 constructs: free-form comments and DO...END DO
       PROGRAM TESTPROG
       INTEGER I, N
       PARAMETER (N=10)
-      DIMENSION A(N)
+      REAL A(N)
 
-C     Initialize array
-      DO 100 I=1,N
+!     Initialize array using F90 DO...END DO
+      DO I=1,N
           A(I) = I * 2
-  100 CONTINUE
+      END DO
 
-C     Print results
-      DO 200 I=1,N
-          WRITE(*,*) 'A(', I, ') = ', A(I)
-  200 CONTINUE
+!     Print results using F90 list-directed PRINT
+      DO I=1,N
+          PRINT *, A(I)
+      END DO
 
       END
 
