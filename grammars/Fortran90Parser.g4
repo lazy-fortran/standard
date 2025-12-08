@@ -28,9 +28,9 @@ options {
 // - Enhanced control flow and I/O
 // - RECURSIVE procedures
 //
-// NOTE: PURE and ELEMENTAL are Fortran 95 (ISO/IEC 1539-1:1997) features,
-// not Fortran 90 features. They are accepted here as a forward extension
-// for practical parsing of mixed-standard code. See issue #182.
+// NOTE: PURE and ELEMENTAL are Fortran 95 features (ISO/IEC 1539-1:1997),
+// NOT Fortran 90 features. They are properly defined in Fortran95Parser.g4.
+// F90 prefix_spec only supports RECURSIVE per ISO/IEC 1539:1991 Section 12.5.2.
 //
 // INHERITANCE ARCHITECTURE (IN THIS REPO):
 // FORTRAN / FORTRANII / FORTRAN66 / FORTRAN77
@@ -559,9 +559,11 @@ substring_range
 // ====================================================================
 
 // Array constructor (F90 revolutionary feature)
+// ISO/IEC 1539:1991 Section 4.5
+// NOTE: Square bracket syntax [ ... ] is Fortran 2003 (ISO/IEC 1539-1:2004),
+// defined in Fortran2003Parser.g4, NOT here.
 array_constructor_f90
     : LPAREN SLASH ac_spec SLASH RPAREN     // F90 syntax: (/ ... /)
-    | LSQUARE ac_spec RSQUARE               // F2003 syntax: [ ... ] (backported)
     ;
 
 // Array constructor specification
@@ -604,15 +606,16 @@ subroutine_stmt
     ;
 
 // Procedure prefix (F90 enhancements)
+// ISO/IEC 1539:1991 Section 12.5.2
 prefix
     : prefix_spec+
     ;
 
 prefix_spec
     : RECURSIVE                     // F90 recursive procedures
-    | PURE                          // F95 forward extension (see #182)
-    | ELEMENTAL                     // F95 forward extension (see #182)
     | type_spec_f90                 // Function return type
+    // NOTE: PURE and ELEMENTAL are Fortran 95 features, not F90.
+    // They are defined in Fortran95Parser.g4 prefix_spec_f95.
     ;
 
 // Function suffix (F90 RESULT clause)

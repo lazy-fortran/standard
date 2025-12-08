@@ -89,15 +89,12 @@ OPERATOR        : ('o'|'O') ('p'|'P') ('e'|'E') ('r'|'R')
 ASSIGNMENT      : ('a'|'A') ('s'|'S') ('s'|'S') ('i'|'I') ('g'|'G') 
                   ('n'|'N') ('m'|'M') ('e'|'E') ('n'|'N') ('t'|'T') ;
 
-// Procedure enhancements
-// RECURSIVE is a genuine F90 feature (ISO/IEC 1539:1991)
-// PURE and ELEMENTAL are F95 features (ISO/IEC 1539-1:1997) accepted here
-// as forward extensions for parsing mixed-standard code (see issue #182)
+// Procedure enhancements (ISO/IEC 1539:1991 Section 12.5.2)
+// RECURSIVE is a genuine F90 feature introduced in ISO/IEC 1539:1991.
+// NOTE: PURE and ELEMENTAL are Fortran 95 features (ISO/IEC 1539-1:1997),
+// defined in Fortran95Lexer.g4, NOT here.
 RECURSIVE       : ('r'|'R') ('e'|'E') ('c'|'C') ('u'|'U') ('r'|'R')
                   ('s'|'S') ('i'|'I') ('v'|'V') ('e'|'E') ;
-PURE            : ('p'|'P') ('u'|'U') ('r'|'R') ('e'|'E') ;
-ELEMENTAL       : ('e'|'E') ('l'|'L') ('e'|'E') ('m'|'M') ('e'|'E')
-                  ('n'|'N') ('t'|'T') ('a'|'A') ('l'|'L') ;
 RESULT          : ('r'|'R') ('e'|'E') ('s'|'S') ('u'|'U') ('l'|'L') ('t'|'T') ;
 
 // Derived types (F90 major innovation)  
@@ -193,9 +190,8 @@ DOUBLE_COLON    : '::' ;
 POINTER_ASSIGN  : '=>' ;
 PERCENT         : '%' ;
 SLASH           : '/' ;    // For array constructors (/ ... /)
-// Square brackets for array constructors (F2003, commonly backported)
-LSQUARE         : '[' ;
-RSQUARE         : ']' ;
+// NOTE: Square brackets for array constructors [ ... ] are a Fortran 2003
+// feature (ISO/IEC 1539-1:2004), defined in Fortran2003Lexer.g4, NOT here.
 
 // F90 array intrinsic keywords
 LBOUND          : L B O U N D ;

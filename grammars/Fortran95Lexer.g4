@@ -18,7 +18,7 @@ import Fortran90Lexer;  // F90 unified format support
 // MAJOR F95 ENHANCEMENTS:
 // - FORALL construct and statements (advanced array operations)
 // - Enhanced WHERE constructs with ELSEWHERE
-// - PURE and ELEMENTAL procedure enhancements
+// - PURE and ELEMENTAL procedure prefixes (NEW in F95)
 // - Derived type default initialization
 // - Pointer improvements
 // - Minor I/O enhancements
@@ -44,9 +44,12 @@ END_FORALL      : ('e'|'E') ('n'|'N') ('d'|'D') WS+
 // WHERE and END_WHERE are inherited from F90
 // ELSEWHERE is inherited from F90 but enhanced in F95
 
-// Procedure enhancements (F95 clarifications)
-// PURE and ELEMENTAL are inherited from F90 but enhanced in F95
-// RECURSIVE is inherited from F90
+// Procedure enhancements (F95 - ISO/IEC 1539-1:1997 Section 12.6)
+// PURE and ELEMENTAL are NEW in Fortran 95, NOT inherited from F90.
+// RECURSIVE is inherited from F90 (ISO/IEC 1539:1991).
+PURE            : ('p'|'P') ('u'|'U') ('r'|'R') ('e'|'E') ;
+ELEMENTAL       : ('e'|'E') ('l'|'L') ('e'|'E') ('m'|'M') ('e'|'E')
+                  ('n'|'N') ('t'|'T') ('a'|'A') ('l'|'L') ;
 
 // Default initialization keyword (F95 derived type enhancement)
 // Uses existing ASSIGN token - no new token needed
@@ -113,7 +116,7 @@ SYSTEM_CLOCK_INTRINSIC : ('s'|'S') ('y'|'Y') ('s'|'S') ('t'|'T') ('e'|'E') ('m'|
 // MAJOR F95 FEATURES TARGETED (IN THIS LEXER):
 // ✅ FORALL constructs and statements (added in F95)
 // ✅ Enhanced WHERE/ELSEWHERE constructs and nesting (F95 refinements)
-// ✅ Enhanced PURE/ELEMENTAL user procedures (F95 additions)
+// ✅ PURE/ELEMENTAL procedure prefixes (NEW in F95)
 // ✅ Modern intrinsic functions from the F90/F95 core
 //    (CEILING, FLOOR, MODULO, bit intrinsics, TRANSFER, etc.)
 // ✅ CPU_TIME intrinsic (new in F95) and related timing intrinsics

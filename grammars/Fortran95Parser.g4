@@ -22,7 +22,7 @@ options {
 // MAJOR F95 ENHANCEMENTS IMPLEMENTED:
 // - FORALL construct and statements (advanced array operations)
 // - Enhanced WHERE constructs with multiple ELSEWHERE
-// - Enhanced PURE and ELEMENTAL procedure semantics
+// - PURE and ELEMENTAL procedure prefixes (NEW in F95)
 // - Derived type default initialization
 // - Pointer association enhancements
 // - Extended intrinsic functions
@@ -78,12 +78,12 @@ external_subprogram_f95
     ;
 
 function_subprogram_f95
-    : function_stmt specification_part_f95? execution_part_f95?
+    : function_stmt_f95 specification_part_f95? execution_part_f95?
       internal_subprogram_part_f95? end_function_stmt
     ;
 
 subroutine_subprogram_f95
-    : subroutine_stmt specification_part_f95? execution_part_f95?
+    : subroutine_stmt_f95 specification_part_f95? execution_part_f95?
       internal_subprogram_part_f95? end_subroutine_stmt
     ;
 
@@ -327,26 +327,34 @@ component_def_stmt_f95
 // ====================================================================
 // ENHANCED PROCEDURE SPECIFICATIONS (F95 IMPROVEMENTS)
 // ====================================================================
+//
+// Fortran 95 (ISO/IEC 1539-1:1997 Section 12.6) introduces PURE and
+// ELEMENTAL procedure prefixes. These are NOT available in Fortran 90.
 
-// Enhanced PURE procedures (F95 clarifications)
-pure_function_stmt
-    : PURE (prefix_spec)* FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN 
-      (suffix)?
+// F95 procedure prefix - extends F90 prefix_spec with PURE and ELEMENTAL
+// ISO/IEC 1539-1:1997 Section 12.6
+prefix_f95
+    : prefix_spec_f95+
     ;
 
-pure_subroutine_stmt
-    : PURE (prefix_spec)* SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)?
+prefix_spec_f95
+    : RECURSIVE                     // F90 recursive procedures
+    | PURE                          // F95 pure procedures
+    | ELEMENTAL                     // F95 elemental procedures
+    | type_spec_f95                 // Function return type
     ;
 
-// Enhanced ELEMENTAL procedures (F95 clarifications)
-elemental_function_stmt
-    : ELEMENTAL (prefix_spec)* FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? 
-      RPAREN (suffix)?
+// F95 function statement with PURE/ELEMENTAL support
+// ISO/IEC 1539-1:1997 Section 12.6
+function_stmt_f95
+    : (prefix_f95)? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN (suffix)?
+        NEWLINE?
     ;
 
-elemental_subroutine_stmt
-    : ELEMENTAL (prefix_spec)* SUBROUTINE IDENTIFIER 
-      (LPAREN dummy_arg_name_list? RPAREN)?
+// F95 subroutine statement with PURE/ELEMENTAL support
+// ISO/IEC 1539-1:1997 Section 12.6
+subroutine_stmt_f95
+    : (prefix_f95)? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? NEWLINE?
     ;
 
 // ====================================================================
@@ -719,7 +727,7 @@ function_reference_f95
 // MAJOR F95 FEATURES TARGETED:
 // ✅ FORALL constructs and statements (advanced array operations)
 // ✅ Enhanced WHERE constructs with multiple ELSEWHERE
-// ✅ Enhanced PURE and ELEMENTAL procedure support
+// ✅ PURE and ELEMENTAL procedure prefixes (NEW in F95)
 // ✅ Derived type default initialization
 // ✅ Enhanced pointer association
 // ✅ Extended intrinsic function support
@@ -739,7 +747,7 @@ function_reference_f95
 // VALIDATION NOTES:
 // ✅ Ready for targeted testing with representative F95 code
 // ✅ FORALL and enhanced WHERE constructs are implemented
-// ✅ Default initialization and PURE/ELEMENTAL forms are supported
+// ✅ Default initialization and PURE/ELEMENTAL prefixes are supported
 //
 // This parser extends the F90 grammar with the F95 constructs listed
 // above and serves as the bridge between F90 and F2003 in the
