@@ -85,6 +85,11 @@ STANDARD_CONFIGS: Dict[str, StandardConfig] = {
         parser_name="Fortran90Parser",
         entry_rule="program_unit_f90",
     ),
+    "Fortran95": StandardConfig(
+        lexer_name="Fortran95Lexer",
+        parser_name="Fortran95Parser",
+        entry_rule="program_unit_f90",
+    ),
     "Fortran2003": StandardConfig(
         lexer_name="Fortran2003Lexer",
         parser_name="Fortran2003Parser",
@@ -504,6 +509,198 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
         "produce {errors} syntax errors (Issue #70; see "
         "docs/fortran_2003_audit.md section 7 and "
         "tests/Fortran2003/test_issue70_c_interop_extended.py)."
+    ),
+    # Fortran 95 fragment fixtures from test_fortran_95_features are designed
+    # to be parsed via dedicated entry rules (forall_stmt, where_construct_f95,
+    # etc.) in tests/Fortran95/test_fortran_95_features.py, not via the
+    # program_unit_f90 entry rule used by the generic fixture harness.
+    # Issue #148 tracks expanding F95 test coverage; these XPASS entries
+    # document the known integration gap where F95 constructs are not yet
+    # wired into F90's execution_part structure.
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/array_constructor.f90"),
+    ): (
+        "Fortran 95 array-constructor fragment fixture {relpath} is tested via "
+        "array_constructor_f95 entry rule; produces {errors} syntax errors with "
+        "program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/bit_size.f90"),
+    ): (
+        "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
+        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/btest.f90"),
+    ): (
+        "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
+        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/ceiling.f90"),
+    ): (
+        "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
+        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/ceiling_call.f90"),
+    ): (
+        "Fortran 95 function reference fragment fixture {relpath} is tested via "
+        "function_reference_f95 entry rule; produces {errors} syntax errors with "
+        "program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/ceiling_kind_call.f90"),
+    ): (
+        "Fortran 95 function reference fragment fixture {relpath} is tested via "
+        "function_reference_f95 entry rule; produces {errors} syntax errors with "
+        "program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/cpu_time.f90"),
+    ): (
+        "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
+        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/cpu_time_call.f90"),
+    ): (
+        "Fortran 95 call statement fragment fixture {relpath} is tested via "
+        "call_stmt_f95 entry rule; produces {errors} syntax errors with "
+        "program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/elemental_subroutine_stmt.f90"),
+    ): (
+        "Fortran 95 ELEMENTAL subroutine header fragment fixture {relpath} is "
+        "tested via elemental_subroutine_stmt entry rule; produces {errors} "
+        "syntax errors with program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/end_forall.f90"),
+    ): (
+        "Fortran 95 END FORALL fragment fixture {relpath} is tested via "
+        "end_forall_stmt entry rule; produces {errors} syntax errors with "
+        "program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/floor.f90"),
+    ): (
+        "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
+        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/floor_call.f90"),
+    ): (
+        "Fortran 95 function reference fragment fixture {relpath} is tested via "
+        "function_reference_f95 entry rule; produces {errors} syntax errors with "
+        "program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/forall_construct.f90"),
+    ): (
+        "Fortran 95 FORALL construct fragment fixture {relpath} is tested via "
+        "forall_construct entry rule; F95 constructs are not yet integrated into "
+        "F90 execution_part and produce {errors} syntax errors with "
+        "program_unit_f90 entry (Issue #148; see docs/fortran_95_audit.md)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/forall_header.f90"),
+    ): (
+        "Fortran 95 FORALL header fragment fixture {relpath} is tested via "
+        "forall_header entry rule; produces {errors} syntax errors with "
+        "program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/forall_stmt.f90"),
+    ): (
+        "Fortran 95 FORALL statement fragment fixture {relpath} is tested via "
+        "forall_stmt entry rule; F95 constructs are not yet integrated into F90 "
+        "execution_part and produce {errors} syntax errors with program_unit_f90 "
+        "entry (Issue #148; see docs/fortran_95_audit.md)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/iand.f90"),
+    ): (
+        "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
+        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/iand_call.f90"),
+    ): (
+        "Fortran 95 function reference fragment fixture {relpath} is tested via "
+        "function_reference_f95 entry rule; produces {errors} syntax errors with "
+        "program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/ibits.f90"),
+    ): (
+        "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
+        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/modulo.f90"),
+    ): (
+        "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
+        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/pure_function_stmt.f90"),
+    ): (
+        "Fortran 95 PURE function header fragment fixture {relpath} is tested via "
+        "pure_function_stmt entry rule; produces {errors} syntax errors with "
+        "program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/system_clock.f90"),
+    ): (
+        "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
+        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/transfer.f90"),
+    ): (
+        "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
+        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/transfer_call.f90"),
+    ): (
+        "Fortran 95 function reference fragment fixture {relpath} is tested via "
+        "function_reference_f95 entry rule; produces {errors} syntax errors with "
+        "program_unit_f90 entry (Issue #148)."
+    ),
+    (
+        "Fortran95",
+        Path("Fortran95/test_fortran_95_features/where_construct.f90"),
+    ): (
+        "Fortran 95 WHERE construct fragment fixture {relpath} is tested via "
+        "where_construct_f95 entry rule; F95 constructs are not yet integrated "
+        "into F90 execution_part and produce {errors} syntax errors with "
+        "program_unit_f90 entry (Issue #148; see docs/fortran_95_audit.md)."
     ),
 }
 
