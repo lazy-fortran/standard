@@ -630,6 +630,151 @@ class TestFORTRANHistoricalAccuracy:
         return parser
 
 
+class TestFORTRANHardwareIF:
+    """Test IBM 704 hardware-specific IF statements.
+
+    Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B,
+    the original FORTRAN supported hardware-specific IF statements
+    for testing sense switches, sense lights, and overflow conditions.
+    """
+
+    def create_parser(self, input_text):
+        """Create parser for FORTRAN input text."""
+        input_stream = InputStream(input_text)
+        lexer = FORTRANLexer(input_stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = FORTRANParser(token_stream)
+        return parser
+
+    def test_sense_switch_if_tokens(self):
+        """Test that lexer recognizes SENSE and SWITCH tokens."""
+        test_input = "SENSE SWITCH"
+        input_stream = InputStream(test_input)
+        lexer = FORTRANLexer(input_stream)
+        tokens = []
+        while True:
+            token = lexer.nextToken()
+            if token.type == -1:
+                break
+            tokens.append(token)
+        assert any(token.type == FORTRANLexer.SENSE for token in tokens)
+        assert any(token.type == FORTRANLexer.SWITCH for token in tokens)
+
+    def test_sense_light_if_tokens(self):
+        """Test that lexer recognizes SENSE and LIGHT tokens."""
+        test_input = "SENSE LIGHT"
+        input_stream = InputStream(test_input)
+        lexer = FORTRANLexer(input_stream)
+        tokens = []
+        while True:
+            token = lexer.nextToken()
+            if token.type == -1:
+                break
+            tokens.append(token)
+        assert any(token.type == FORTRANLexer.SENSE for token in tokens)
+        assert any(token.type == FORTRANLexer.LIGHT for token in tokens)
+
+    def test_overflow_if_tokens(self):
+        """Test that lexer recognizes ACCUMULATOR, QUOTIENT, DIVIDE, CHECK, OVERFLOW."""
+        test_input = "ACCUMULATOR QUOTIENT DIVIDE CHECK OVERFLOW"
+        input_stream = InputStream(test_input)
+        lexer = FORTRANLexer(input_stream)
+        tokens = []
+        while True:
+            token = lexer.nextToken()
+            if token.type == -1:
+                break
+            tokens.append(token)
+        assert any(token.type == FORTRANLexer.ACCUMULATOR for token in tokens)
+        assert any(token.type == FORTRANLexer.QUOTIENT for token in tokens)
+        assert any(token.type == FORTRANLexer.DIVIDE for token in tokens)
+        assert any(token.type == FORTRANLexer.CHECK for token in tokens)
+        assert any(token.type == FORTRANLexer.OVERFLOW for token in tokens)
+
+    def test_sense_switch_if_statement(self):
+        """Test parsing of IF (SENSE SWITCH i) n1, n2.
+
+        Per IBM 704 FORTRAN manual, tests console sense switch i:
+        if up, goes to n1; if down, goes to n2.
+        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "sense_switch_if.f",
+        )
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_sense_light_if_statement(self):
+        """Test parsing of IF (SENSE LIGHT i) n1, n2.
+
+        Per IBM 704 FORTRAN manual, tests sense light i:
+        if on, goes to n1; if off, goes to n2.
+        The sense light is turned off after the test.
+        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "sense_light_if.f",
+        )
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_sense_light_statement(self):
+        """Test parsing of SENSE LIGHT i (sets sense light on).
+
+        Per IBM 704 manual, there were four sense lights (1-4) on the console.
+        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "sense_light_stmt.f",
+        )
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_overflow_check_if_statements(self):
+        """Test parsing of overflow-check IF statements.
+
+        Per IBM 704 FORTRAN manual:
+        - IF ACCUMULATOR OVERFLOW n1, n2: tests accumulator overflow indicator
+        - IF QUOTIENT OVERFLOW n1, n2: tests MQ overflow indicator
+        - IF DIVIDE CHECK n1, n2: tests divide-check indicator
+        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "overflow_check_if.f",
+        )
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_hardware_if_combined(self):
+        """Test combined use of all hardware-specific IF statements.
+
+        This tests a realistic program demonstrating sense switches, sense lights,
+        and overflow checks working together as they would have in 1957 IBM 704
+        FORTRAN programs.
+        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "hardware_if_combined.f",
+        )
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+
 if __name__ == '__main__':
     """Run FORTRAN historical stub tests."""
     print("Running FORTRAN (1957) Historical Stub Tests...")
@@ -637,6 +782,6 @@ if __name__ == '__main__':
     print("Testing the world's first high-level programming language")
     print("Implementation Status: HISTORICAL DOCUMENTATION STUB")
     print("="*60)
-    
+
     # Run the tests
     pytest.main([__file__, '-v'])

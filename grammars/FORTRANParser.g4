@@ -41,6 +41,12 @@ statement_body
     | assign_stmt
     | assigned_goto_stmt
     | if_stmt_arithmetic
+    | if_stmt_sense_light
+    | if_stmt_sense_switch
+    | if_stmt_accumulator_overflow
+    | if_stmt_quotient_overflow
+    | if_stmt_divide_check
+    | sense_light_stmt
     | do_stmt_basic
     | frequency_stmt
     | read_stmt_basic
@@ -145,6 +151,52 @@ label_list
 // Goes to label1 if expr < 0, label2 if expr = 0, label3 if expr > 0
 if_stmt_arithmetic
     : IF LPAREN expr RPAREN label COMMA label COMMA label
+    ;
+
+// ============================================================================
+// HARDWARE-SPECIFIC IF STATEMENTS (IBM 704, 1957)
+// Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B
+// ============================================================================
+
+// IF (SENSE LIGHT i) n1, n2
+// Tests sense light i: if on, goes to n1; if off, goes to n2
+// The sense light is turned off after the test
+if_stmt_sense_light
+    : IF LPAREN SENSE LIGHT INTEGER_LITERAL RPAREN label COMMA label
+    ;
+
+// IF (SENSE SWITCH i) n1, n2
+// Tests console sense switch i: if up, goes to n1; if down, goes to n2
+if_stmt_sense_switch
+    : IF LPAREN SENSE SWITCH INTEGER_LITERAL RPAREN label COMMA label
+    ;
+
+// IF ACCUMULATOR OVERFLOW n1, n2
+// Tests and resets the accumulator overflow indicator:
+// if on, goes to n1; if off, goes to n2
+if_stmt_accumulator_overflow
+    : IF ACCUMULATOR OVERFLOW label COMMA label
+    ;
+
+// IF QUOTIENT OVERFLOW n1, n2
+// Tests and resets the MQ (quotient) overflow indicator:
+// if on, goes to n1; if off, goes to n2
+if_stmt_quotient_overflow
+    : IF QUOTIENT OVERFLOW label COMMA label
+    ;
+
+// IF DIVIDE CHECK n1, n2
+// Tests and resets the divide-check indicator:
+// if on (divide by zero occurred), goes to n1; if off, goes to n2
+if_stmt_divide_check
+    : IF DIVIDE CHECK label COMMA label
+    ;
+
+// SENSE LIGHT i
+// Sets sense light i on (the light can be tested by IF (SENSE LIGHT i))
+// Per IBM 704 manual, there were four sense lights (1-4) on the console
+sense_light_stmt
+    : SENSE LIGHT INTEGER_LITERAL
     ;
 
 // Basic DO loop (1957 form)
