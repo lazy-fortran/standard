@@ -40,10 +40,10 @@ In this repository:
     - `function_subprogram` (`function_text.f`).
     - A subroutine-style program (`subroutine_program.f`).
 
-The generic fixture harness (`tests/test_fixture_parsing.py`) still
-uses the imported `program_unit_core` entry rule from `FORTRANParser`
-for FORTRANII, which is one reason some FORTRAN II fixtures remain
-XPASS even though targeted subprogram tests succeed.
+The generic fixture harness (`tests/test_fixture_parsing.py`) now uses
+the `fortran_program` entry rule for FORTRANII (per issue #157), and
+all three FORTRAN II fixtures parse successfully with zero syntax
+errors.
 
 ## 2. Spec-based statement coverage
 
@@ -257,31 +257,22 @@ Limitations:
   the tests treat Hollerith handling primarily as “token is
   recognized” rather than as strict, length-checked semantics.
 
-## 7. Known gaps and XPASS fixtures
+## 7. Fixture status
 
-`tests/test_fixture_parsing.py` marks several FORTRAN II fixtures as
-XPASS with messages indicating that they exceed the current grammar:
+All three FORTRAN II fixtures now parse successfully:
 
 - `FORTRANII/test_fortran_ii_parser/function_text.f`
 - `FORTRANII/test_fortran_ii_parser/subroutine_program.f`
 - `FORTRANII/test_fortran_ii_parser/subroutine_text.f`
 
-The XPASS reasons explain that these fixtures:
+The generic fixture harness uses the `fortran_program` entry rule
+(updated per issue #157), which correctly routes programs through
+`main_program`, `subroutine_subprogram`, or `function_subprogram`
+rules as appropriate.
 
-- Represent richer historical usage than the simplified grammar
-  accepts.
-- Exceed what is described as the “current stub” for FORTRAN II in the
-  generic fixture harness.
-
-Taken together with the targeted `test_fortran_ii_parser.py` tests,
-this means:
-
-- The dedicated FORTRAN II rules (CALL, SUBROUTINE, FUNCTION, COMMON)
-  work on the focused examples.
-- The generic “one size fits all” fixture parser, which still uses
-  `program_unit_core` as its entry rule for FORTRANII, does not
-  successfully parse some of the richer subprogram fixtures and treats
-  them as expected failures.
+The dedicated FORTRAN II rules (CALL, SUBROUTINE, FUNCTION, COMMON)
+work on both the targeted `test_fortran_ii_parser.py` tests and the
+generic fixture harness tests.
 
 ## 8. Summary
 
@@ -300,13 +291,9 @@ The FORTRAN II grammar in this repository:
   without strict 80-column enforcement.
 - Provides Hollerith support for FORMAT items but does not enforce
   length checks on the `nH...` form.
-- Still rejects several richer FORTRAN II fixtures in the generic
-  fixture harness, indicating remaining integration or coverage gaps.
 
-Future work should:
+Remaining design decisions (tracked separately):
 
-- Align the fixture harness entry rule for FORTRAN II with the
-  dedicated `fortran_program` or subprogram rules.
-- Tighten the implementation and tests until the XPASS fixtures parse
-  with zero syntax errors or any unsupported constructs are explicitly
-  documented as out of scope.
+- Issue #156 tracks whether to reconcile COMMON semantics with the
+  strict 1958 spec (blank COMMON only) or continue accepting named
+  COMMON blocks as a forward-compatibility extension.
