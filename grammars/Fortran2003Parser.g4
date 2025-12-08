@@ -581,10 +581,11 @@ type_spec_or_star
     ;
 
 // SELECT TYPE construct for runtime type selection
-// NOTE: This rule models the standard `SELECT TYPE (selector)` form
-// using the existing SELECT, TYPE and DEFAULT tokens imported from
-// earlier standards. The `IS` keyword in guards is treated as an
-// IDENTIFIER token (`is`) in this simplified grammar.
+// ISO/IEC 1539-1:2004 Section 8.1.5 - SELECT TYPE construct
+//
+// NOTE: This rule models the standard SELECT TYPE (selector) form using
+// the existing SELECT, TYPE and DEFAULT tokens imported from earlier
+// standards.
 select_type_construct
     : select_type_stmt NEWLINE*
       (type_guard_stmt execution_part_f2003?)*
@@ -592,6 +593,7 @@ select_type_construct
     ;
 
 // SELECT TYPE (selector [=> expr])
+// ISO/IEC 1539-1:2004 R822: select-type-stmt
 select_type_stmt
     : (IDENTIFIER COLON)? SELECT TYPE LPAREN
       (IDENTIFIER POINTER_ASSIGN)? selector_expr RPAREN
@@ -601,11 +603,23 @@ selector_expr
     : primary
     ;
 
-// TYPE IS (type-spec) [, selector-name]
-// CLASS IS (type-spec-or-derived) [, selector-name]
-// CLASS DEFAULT [, selector-name]
+// ISO/IEC 1539-1:2004 R823: type-guard-stmt
+//   TYPE IS ( type-spec ) [ select-construct-name ]
+//   CLASS IS ( derived-type-spec ) [ select-construct-name ]
+//   CLASS DEFAULT [ select-construct-name ]
 //
-// In this grammar, `IS` is tokenized as an IDENTIFIER with text "is".
+// DESIGN DECISION (Issue #184): The IS keyword in type guards is parsed
+// as an IDENTIFIER token rather than a dedicated keyword. This is a
+// deliberate grammar simplification that:
+//   1. Works correctly for all case variations (is, IS, Is) since ANTLR
+//      lexer rules are case-insensitive by design
+//   2. Handles varied whitespace between TYPE/CLASS and IS naturally
+//   3. Allows is to remain a valid variable name in other contexts
+//   4. Follows the principle of minimal keyword reservation
+//
+// The grammar expects the IDENTIFIER to have text matching /[iI][sS]/
+// but does not enforce this at the parser level - the lexer tokenizes
+// any case of is as a valid IDENTIFIER.
 type_guard_stmt
     : TYPE IDENTIFIER LPAREN type_spec_or_derived RPAREN (IDENTIFIER)? NEWLINE
     | CLASS IDENTIFIER LPAREN type_spec_or_derived RPAREN (IDENTIFIER)? NEWLINE
