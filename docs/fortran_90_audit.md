@@ -325,9 +325,36 @@ integration gaps:
   - Unified fixed/free‑form parsing on mixed‑format sources.
 
 These fixtures collectively define the **current outer edge** of the
-Fortran 90 grammar’s practical coverage.
+Fortran 90 grammar's practical coverage.
 
-## 9. Summary
+## 9. PURE and ELEMENTAL: forward extensions from Fortran 95
+
+The F90 grammar accepts the PURE and ELEMENTAL keywords as procedure
+prefixes (via `prefix_spec` in `Fortran90Parser.g4`), even though these
+features are defined in the **Fortran 95** standard (ISO/IEC 1539‑1:1997),
+not in Fortran 90 (ISO/IEC 1539:1991).
+
+This is a **deliberate forward extension** for practical parsing of
+mixed-standard codebases. Many real‑world Fortran programs use PURE and
+ELEMENTAL procedures in code that is otherwise compatible with F90
+compilers, and accepting these keywords at the F90 grammar level avoids
+forcing users to explicitly select the F95 grammar for such programs.
+
+The grammar comments in `Fortran90Lexer.g4` and `Fortran90Parser.g4`
+explicitly document this forward extension and reference issue #182.
+The F95 grammar (`Fortran95Parser.g4`) provides additional F95‑specific
+procedure rules (`pure_function_stmt`, `elemental_subroutine_stmt`, etc.)
+that are used by targeted tests but not yet integrated into the main
+program‑unit entry points.
+
+For users who require strict historical accuracy:
+
+- A pure F90 parser (without F95 extensions) would need to remove PURE
+  and ELEMENTAL from `prefix_spec` in `Fortran90Parser.g4`.
+- The current design prioritizes practical usability over strict historical
+  conformance, which is documented in this audit and in the grammar comments.
+
+## 10. Summary
 
 The Fortran 90 grammar in this repository:
 
