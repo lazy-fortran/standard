@@ -273,14 +273,31 @@ class TestFORTRANHistoricalStub:
             "test_fortran_historical_stub",
             "io_statements.f",
         )
-        
+
         parser = self.create_parser(test_input)
-        
+
         try:
             tree = parser.program_unit_core()
             assert tree is not None
+            assert parser.getNumberOfSyntaxErrors() == 0
         except Exception as e:
             pytest.fail(f"I/O statement parsing failed: {e}")
+
+    def test_read_format_only_statement(self):
+        """Test parsing of READ n (format label only, no list).
+
+        Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B
+        row 24, READ n reads input using FORMAT statement n with
+        FORMAT-implied list of variables.
+        """
+        test_input = """        READ 100
+        READ 200
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
 
     def test_frequency_statement(self):
         """Test parsing of FREQUENCY statement (unique optimization hint)."""
