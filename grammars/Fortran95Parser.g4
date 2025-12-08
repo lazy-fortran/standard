@@ -279,10 +279,11 @@ logical_literal_f95
 // F95 ARRAY OPERATIONS (ENHANCED)
 // ====================================================================
 
-// Enhanced array constructor (F95 improvements)
+// F95 array constructor - ISO/IEC 1539-1:1997 Section 4.5
+// NOTE: Only (/ ... /) form is standard Fortran 95.
+// Square bracket syntax [ ... ] is a Fortran 2003 feature (ISO/IEC 1539-1:2004).
 array_constructor_f95
-    : LBRACKET ac_spec_f95 RBRACKET
-    | LPAREN SLASH ac_spec_f95 SLASH RPAREN
+    : LPAREN SLASH ac_spec_f95 SLASH RPAREN
     ;
 
 ac_spec_f95
