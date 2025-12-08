@@ -166,17 +166,119 @@ END IF"""
         self.assertIsNotNone(tree)
     
     def test_character_string_processing(self):
-        """Test character string processing capabilities"""
+        """Test character string processing capabilities (FORTRAN 77)
+
+        Per ANSI X3.9-1978 sections 4.7, 5.3, 5.7, and 6, FORTRAN 77 supports:
+        - Character constants as apostrophe-delimited strings
+        - Doubled apostrophes for embedded quotes
+        - Concatenation via //
+        - Substring operations via (start:end)
+        """
         string_operations = [
             "'HELLO'",
-            "'HELLO' // ' WORLD'"
+            "'HELLO' // ' WORLD'",
+            "'IT''S A TEST'",
+            "'X' // 'Y' // 'Z'",
         ]
-        
+
         for text in string_operations:
             with self.subTest(string_op=text):
-                # Skip for now due to missing STRING_LITERAL token
-                pass
+                tree = self.parse(text, 'character_expr')
+                self.assertIsNotNone(tree)
 
+    def test_character_substring_operations(self):
+        """Test character substring operations (FORTRAN 77)
+
+        Per ANSI X3.9-1978 section 5.7, a substring is a contiguous portion
+        of a character datum designated by a substring name of the form:
+            character-variable-name (e1:e2)
+        where e1 and e2 are integer expressions for starting and ending
+        positions. The starting position e1 is mandatory; the ending
+        position e2 may be omitted to indicate the remainder of the string.
+        """
+        substring_expressions = [
+            "NAME(1:5)",
+            "STR(I:J)",
+            "TEXT(1:LEN)",
+            "WORD(START:END)",
+            "LINE(1:)",
+        ]
+
+        for text in substring_expressions:
+            with self.subTest(substring=text):
+                tree = self.parse(text, 'character_expr')
+                self.assertIsNotNone(tree)
+
+    def test_character_concatenation_combinations(self):
+        """Test character concatenation with mixed operand types (FORTRAN 77)
+
+        Per ANSI X3.9-1978 section 6.2, concatenation is performed by the
+        operator //. The result is a character string whose value is the
+        value of the left operand followed by the value of the right operand.
+        """
+        concat_expressions = [
+            "A // B",
+            "'PREFIX' // NAME",
+            "FIRST // ' ' // LAST",
+            "NAME(1:5) // SUFFIX",
+            "'(' // CODE // ')'",
+            "A // B // C // D",
+        ]
+
+        for text in concat_expressions:
+            with self.subTest(concat=text):
+                tree = self.parse(text, 'character_expr')
+                self.assertIsNotNone(tree)
+
+    def test_character_function_references(self):
+        """Test character function references in expressions (FORTRAN 77)
+
+        Per ANSI X3.9-1978, character functions return character values
+        and can be used as primaries in character expressions.
+        """
+        function_expressions = [
+            "TRIM(NAME)",
+            "CONCAT(A, B)",
+            "UPPER(STR)",
+            "FMT(X, Y, Z)",
+        ]
+
+        for text in function_expressions:
+            with self.subTest(func_ref=text):
+                tree = self.parse(text, 'character_expr')
+                self.assertIsNotNone(tree)
+
+    def test_string_literal_edge_cases(self):
+        """Test STRING_LITERAL edge cases per ANSI X3.9-1978 section 4.7
+
+        Character constants may contain any characters from the FORTRAN
+        character set. An apostrophe within a character constant is
+        represented by two consecutive apostrophes.
+        """
+        edge_cases = [
+            "''",
+            "' '",
+            "'   '",
+            "'A''B''C'",
+            "'DON''T PANIC'",
+            "'LINE1' // '/' // 'LINE2'",
+        ]
+
+        for text in edge_cases:
+            with self.subTest(edge_case=text):
+                tree = self.parse(text, 'character_expr')
+                self.assertIsNotNone(tree)
+
+    def test_character_expression_fixture(self):
+        """Test CHARACTER expressions from fixture file"""
+        fixture_text = load_fixture(
+            "FORTRAN77",
+            "test_fortran77_parser",
+            "character_expressions.f",
+        )
+
+        tree = self.parse(fixture_text, 'main_program')
+        self.assertIsNotNone(tree)
 
     def test_proper_inheritance(self):
         """Test that FORTRAN77 properly inherits from FORTRAN66"""
