@@ -610,18 +610,25 @@ function results with nonconstant bounds in explicit interfaces. These
 rules are **not enforced by the grammar** as they require semantic analysis
 of symbol tables and expression trees. The grammar correctly parses the
 syntactic forms but leaves characteristic-matching validation to a later
-analysis phase.
+analysis phase and is therefore **NON-COMPLIANT** with the full semantic
+requirements of J3/98-114 until a dedicated analysis phase is implemented.
 
 ### Gaps and Unimplemented Rules
 
-The following F95 features are **not yet implemented** or have limitations:
+The following F95 features are **not yet implemented** or have limitations
+and are therefore **NON-COMPLIANT** with the corresponding ISO sections
+until they are addressed:
 
-1. **Automatic deallocation** (Section 6.3.3): Semantic behavior, not syntax.
-2. **NULL() intrinsic** (Section 13.10.79): Lexer token not defined.
-3. **FORALL index variable restrictions**: Semantic, not syntactic.
+1. **Automatic deallocation** (Section 6.3.3): Semantic behavior, not syntax –
+   **NON-COMPLIANT** (semantic deallocation rules not modeled).
+2. **NULL() intrinsic** (Section 13.10.79): Lexer token not defined –
+   **NON-COMPLIANT** (intrinsic missing from token set).
+3. **FORALL index variable restrictions**: Semantic, not syntactic –
+   **NON-COMPLIANT** (index restrictions not enforced).
 4. **Initialization expression restrictions** (Section 7.1.6): Grammar accepts
    any expression; the constraint that initialization expressions must be
-   constant is semantic.
+   constant is semantic – **NON-COMPLIANT** (initialization expression
+   constraints not modeled).
 
 ## 12. Summary and issue mapping
 
@@ -672,4 +679,3 @@ unintentionally divergent from the standard.
 The spec-grammar cross-walk in Section 11 provides a comprehensive
 mapping from ISO/IEC 1539-1:1997 syntax rules to grammar implementation,
 fulfilling the requirements of issue #174.
-
