@@ -1,95 +1,185 @@
-// FORTRAN 77 (1977) - Structured Programming Revolution  
-// Added CHARACTER data type, IF-THEN-ELSE, and PROGRAM statement
+// FORTRAN 77 Lexer - ISO 1539:1980 / ANSI X3.9-1978
+// Reference: ISO 1539:1980 (also published as ANSI X3.9-1978)
+//
+// This lexer implements tokens for FORTRAN 77 as defined in the ISO/ANSI
+// standard. Section references in this file use the ISO 1539:1980 numbering.
+//
+// Standard Structure Overview:
+//   Section 1: Scope
+//   Section 2: Processor Characteristics
+//   Section 3: Program Form and Source Format (3.1-3.5)
+//   Section 4: Data Types and Constants (4.1-4.8)
+//   Section 5: Arrays and Substrings (5.1-5.7)
+//   Section 6: Expressions (6.1-6.7)
+//   Section 7: Executable and Nonexecutable Statements (7.1-7.2)
+//   Section 8: Specification Statements (8.1-8.9)
+//   Section 9: DATA Statement (9.1-9.3)
+//   Section 10: Assignment Statements (10.1-10.4)
+//   Section 11: Control Statements (11.1-11.12)
+//   Section 12: Input/Output Statements (12.1-12.10)
+//   Section 13: Format Specification (13.1-13.5)
+//   Section 14: Main Program (14.1)
+//   Section 15: Functions and Subroutines (15.1-15.10)
+//   Section 16: Block Data Subprogram (16.1-16.3)
+//   Section 17: Association (17.1-17.4)
+//   Section 18: Scope and Definition (18.1-18.3)
 lexer grammar FORTRAN77Lexer;
 
 import FORTRAN66Lexer;  // Import FORTRAN 66 (1966) constructs
 
 // ====================================================================
-// FORTRAN 77 (1977) HISTORICAL OVERVIEW  
+// FORTRAN 77 (ISO 1539:1980) HISTORICAL OVERVIEW
 // ====================================================================
 //
-// FORTRAN 77 (officially X3.9-1978) was a revolutionary update that added:
-// - CHARACTER data type with string processing
-// - Block IF-THEN-ELSE-ENDIF structured programming
-// - PARAMETER statement for compile-time constants
-// - PROGRAM statement for main program units
-// - SAVE statement for persistent local variables
-// - LIST-directed I/O improvements
-// - Comments could use * in column 1 (in addition to C)
+// FORTRAN 77 was a revolutionary update that added structured programming:
+// - CHARACTER data type with string processing (Section 4.8)
+// - Block IF-THEN-ELSE-ENDIF constructs (Section 11.6-11.9)
+// - PARAMETER statement for named constants (Section 8.6)
+// - PROGRAM statement for main program units (Section 14.1)
+// - SAVE statement for persistent local variables (Section 8.7)
+// - Enhanced I/O: list-directed, OPEN/CLOSE/INQUIRE (Sections 12.4, 12.10)
 //
 // Historical Context:
-// - Final drafts circulated in 1977
-// - Formally approved in April 1978
-// - Last version with uppercase-only character set
+// - ISO 1539:1980 (also ANSI X3.9-1978)
+// - Last version requiring uppercase character set (Section 3.1)
 // - Dominated scientific computing for decades
 //
 
 // ====================================================================
-// FORTRAN 77 (1977) MAJOR NEW FEATURES
+// FORTRAN 77 KEYWORDS - ISO 1539:1980 Section References
 // ====================================================================
 
-// Program unit identification (added in FORTRAN 77, 1977)
+// --------------------------------------------------------------------
+// Program Units - ISO 1539:1980 Sections 14-16
+// --------------------------------------------------------------------
+// PROGRAM statement (Section 14.1): Identifies the main program unit
+// Syntax: PROGRAM program-name
 PROGRAM         : P R O G R A M ;
 
-// Entry point in subprograms (FORTRAN 77 Section 15.7)
+// ENTRY statement (Section 15.7): Alternate entry point in subprograms
+// Syntax: ENTRY entry-name [ ( dummy-arg-list ) ]
 ENTRY           : E N T R Y ;
 
-// CHARACTER data type (added in FORTRAN 77, 1977)
+// --------------------------------------------------------------------
+// CHARACTER Data Type - ISO 1539:1980 Section 4.8
+// --------------------------------------------------------------------
+// CHARACTER type (Section 4.8.1): String data type for text processing
+// Section 4.8.2 defines character constants (literals)
 CHARACTER       : C H A R A C T E R ;
 
-// Structured programming keywords (added in FORTRAN 77, 1977)
+// --------------------------------------------------------------------
+// Block IF Construct - ISO 1539:1980 Sections 11.6-11.9
+// --------------------------------------------------------------------
+// Block IF provides structured conditional execution:
+// - IF statement (Section 11.6): IF (logical-expr) THEN
+// - ELSE IF statement (Section 11.7): ELSE IF (logical-expr) THEN
+// - ELSE statement (Section 11.8): ELSE
+// - END IF statement (Section 11.9): END IF
 THEN            : T H E N ;
 ELSE            : E L S E ;
 ELSEIF          : E L S E I F ;
 ENDIF           : E N D I F ;
 
-// Compile-time constants (added in FORTRAN 77, 1977)
+// --------------------------------------------------------------------
+// Specification Statements - ISO 1539:1980 Section 8
+// --------------------------------------------------------------------
+// PARAMETER statement (Section 8.6): Named constants
+// Syntax: PARAMETER (name = constant-expr, ...)
 PARAMETER       : P A R A M E T E R ;
 
-// Variable persistence (added in FORTRAN 77, 1977)
+// SAVE statement (Section 8.7): Variable persistence across calls
+// Syntax: SAVE [ save-list ]
 SAVE            : S A V E ;
 
-// Additional statements enhanced in FORTRAN 77
+// DATA statement (Section 9): Compile-time initialization
+// Inherited from FORTRAN 66 but enhanced syntax
 DATA            : D A T A ;
+
+// EXTERNAL statement (Section 8.8): External procedure declaration
+// Inherited from FORTRAN 66, Section 7.2.4
 EXTERNAL        : E X T E R N A L ;
+
+// INTRINSIC statement (Section 8.9): Intrinsic function declaration
+// Syntax: INTRINSIC name-list
 INTRINSIC       : I N T R I N S I C ;
 
-// Enhanced loop control (common extension)
-// Standard FORTRAN 77 terminated DO loops using labeled statements.
-// ENDDO is a widely used extension and is included here for convenience.
+// --------------------------------------------------------------------
+// DO Loop Extensions
+// --------------------------------------------------------------------
+// Standard FORTRAN 77 (Section 11.10) terminates DO loops on labeled
+// statements. ENDDO is a widely-used vendor extension not in ISO 1539:1980.
 ENDDO           : E N D D O ;
 
-// I/O enhancements (OPEN, CLOSE, INQUIRE new in FORTRAN 77)
-// Note: REWIND, BACKSPACE, ENDFILE are inherited from FORTRAN 66
+// --------------------------------------------------------------------
+// File I/O Statements - ISO 1539:1980 Section 12.10
+// --------------------------------------------------------------------
+// OPEN statement (Section 12.10.1): Connect file to unit
+// CLOSE statement (Section 12.10.2): Disconnect file from unit
+// INQUIRE statement (Section 12.10.3): Query file/unit properties
+// Note: REWIND, BACKSPACE, ENDFILE inherited from FORTRAN 66 (Section 12.9)
 OPEN            : O P E N ;
 CLOSE           : C L O S E ;
 INQUIRE         : I N Q U I R E ;
 
 // ====================================================================
-// FORTRAN 77 STRING PROCESSING
+// CHARACTER EXPRESSIONS - ISO 1539:1980 Section 6.2
 // ====================================================================
 
-// String concatenation operator (FORTRAN 77 innovation)
+// --------------------------------------------------------------------
+// String Concatenation Operator - ISO 1539:1980 Section 6.2.2
+// --------------------------------------------------------------------
+// Concatenation operator (//): Joins two character operands
+// Result length is sum of operand lengths
 CONCAT          : '//' ;
 
-// String literals (FORTRAN 77 innovation)
-STRING_LITERAL  : '\'' (~'\'' | '\'\'')* '\'' ;  // 'text' with '' for embedded quotes
+// --------------------------------------------------------------------
+// Character Constants - ISO 1539:1980 Section 4.8.2
+// --------------------------------------------------------------------
+// Character constant: sequence of characters enclosed in apostrophes
+// Embedded apostrophes represented by two consecutive apostrophes
+STRING_LITERAL  : '\'' (~'\'' | '\'\'')* '\'' ;
 
-// ====================================================================  
-// FORTRAN 77 (1977) HISTORICAL SIGNIFICANCE
+// ====================================================================
+// ISO 1539:1980 SPEC-GRAMMAR MAPPING (LEXER)
 // ====================================================================
 //
-// FORTRAN 77 was transformational because:
-// 1. Introduced structured programming with IF-THEN-ELSE
-// 2. Added CHARACTER data type for text processing
-// 3. Provided PARAMETER for named constants
-// 4. Established modern program structure with PROGRAM statement
-// 5. Enhanced I/O with file handling capabilities
-// 6. Became the stable foundation for scientific computing
+// This section summarizes the mapping from ISO 1539:1980 sections to
+// lexer tokens defined in this file.
 //
-// This version remained dominant until Fortran 90 (1990) - a 13-year reign
-// that established FORTRAN as the primary scientific programming language.
+// Section 3 (Source Form):
+//   - Section 3.1: Character set -> inherited from FORTRAN66Lexer
+//   - Section 3.2: Lines -> NEWLINE (inherited)
+//   - Section 3.4: Statement labels -> LABEL (inherited)
 //
-// Notable: Last version requiring uppercase; Fortran 90 added lowercase support
+// Section 4 (Data Types and Constants):
+//   - Section 4.1-4.7: Inherited types (INTEGER, REAL, etc.)
+//   - Section 4.8: CHARACTER type -> CHARACTER token
+//   - Section 4.8.2: Character constants -> STRING_LITERAL token
+//
+// Section 6 (Expressions):
+//   - Section 6.2.2: Concatenation operator -> CONCAT token
+//
+// Section 8 (Specification Statements):
+//   - Section 8.6: PARAMETER statement -> PARAMETER token
+//   - Section 8.7: SAVE statement -> SAVE token
+//   - Section 8.8: EXTERNAL statement -> EXTERNAL token (inherited)
+//   - Section 8.9: INTRINSIC statement -> INTRINSIC token
+//
+// Section 9 (DATA Statement):
+//   - Section 9.1: DATA statement -> DATA token
+//
+// Section 11 (Control Statements):
+//   - Section 11.6-11.9: Block IF -> THEN, ELSE, ELSEIF, ENDIF tokens
+//
+// Section 12 (I/O Statements):
+//   - Section 12.10.1: OPEN statement -> OPEN token
+//   - Section 12.10.2: CLOSE statement -> CLOSE token
+//   - Section 12.10.3: INQUIRE statement -> INQUIRE token
+//
+// Section 14 (Main Program):
+//   - Section 14.1: PROGRAM statement -> PROGRAM token
+//
+// Section 15 (Subprograms):
+//   - Section 15.7: ENTRY statement -> ENTRY token
 //
 // ====================================================================
