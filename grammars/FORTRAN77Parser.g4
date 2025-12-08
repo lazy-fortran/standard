@@ -99,6 +99,12 @@ statement_body
     | save_stmt         // NEW: SAVE statement
     | intrinsic_stmt    // NEW: INTRINSIC statement
     | external_stmt     // NEW: EXTERNAL statement
+    | open_stmt         // NEW: OPEN statement (F77 Section 12.10.1)
+    | close_stmt        // NEW: CLOSE statement (F77 Section 12.10.2)
+    | inquire_stmt      // NEW: INQUIRE statement (F77 Section 12.10.3)
+    | rewind_stmt       // Inherited from F66 (F77 Section 12.9)
+    | backspace_stmt    // Inherited from F66 (F77 Section 12.9)
+    | endfile_stmt      // Inherited from F66 (F77 Section 12.9)
     ;
 
 // Block IF construct (NEW in FORTRAN 77)
@@ -159,6 +165,12 @@ executable_construct
     | punch_stmt
     | do_stmt
     | block_if_construct
+    | open_stmt             // File I/O (F77 Section 12.10.1)
+    | close_stmt            // File I/O (F77 Section 12.10.2)
+    | inquire_stmt          // File I/O (F77 Section 12.10.3)
+    | rewind_stmt           // File positioning (F77 Section 12.9)
+    | backspace_stmt        // File positioning (F77 Section 12.9)
+    | endfile_stmt          // File positioning (F77 Section 12.9)
     ;
 
 // ====================================================================
@@ -410,6 +422,204 @@ real_variable
 
 real_expr
     : expr  // Expression that evaluates to real (semantic constraint)
+    ;
+
+// ====================================================================
+// FORTRAN 77 (1977) - FILE CONTROL STATEMENTS
+// ====================================================================
+// Per ISO 1539:1980 (FORTRAN 77) Sections 12.9 and 12.10, file control
+// statements manage external file connections and positioning.
+//
+// Section 12.9: REWIND, BACKSPACE, ENDFILE (inherited from FORTRAN 66)
+// Section 12.10.1: OPEN statement (NEW in FORTRAN 77)
+// Section 12.10.2: CLOSE statement (NEW in FORTRAN 77)
+// Section 12.10.3: INQUIRE statement (NEW in FORTRAN 77)
+//
+// Note: rewind_stmt, backspace_stmt, endfile_stmt are inherited from
+// FORTRAN66Parser and accept the enhanced FORTRAN 77 control specifiers.
+
+// OPEN statement (NEW in FORTRAN 77, ISO 1539:1980 Section 12.10.1)
+// Syntax: OPEN ( [UNIT=]u [, olist] )
+// Connects an external file to a unit for subsequent I/O operations.
+// The olist may include: FILE, STATUS, ACCESS, FORM, RECL, BLANK, IOSTAT, ERR
+open_stmt
+    : OPEN LPAREN connect_spec_list RPAREN
+    ;
+
+// CLOSE statement (NEW in FORTRAN 77, ISO 1539:1980 Section 12.10.2)
+// Syntax: CLOSE ( [UNIT=]u [, clist] )
+// Terminates the connection of an external file to a unit.
+// The clist may include: STATUS, IOSTAT, ERR
+close_stmt
+    : CLOSE LPAREN close_spec_list RPAREN
+    ;
+
+// INQUIRE statement (NEW in FORTRAN 77, ISO 1539:1980 Section 12.10.3)
+// Syntax: INQUIRE ( [UNIT=]u, ilist ) or INQUIRE ( FILE=fn, ilist )
+// Obtains information about a file or unit connection.
+// The ilist may include many inquiry specifiers for file properties.
+inquire_stmt
+    : INQUIRE LPAREN inquire_spec_list RPAREN
+    ;
+
+// Connect specifiers for OPEN statement
+// Per ISO 1539:1980 Section 12.10.1, specifiers may appear in any order
+// but each specifier may appear at most once.
+connect_spec_list
+    : connect_spec (COMMA connect_spec)*
+    ;
+
+connect_spec
+    : unit_spec                                     // [UNIT=]u
+    | file_spec                                     // FILE=fn
+    | status_spec                                   // STATUS=sta
+    | access_spec                                   // ACCESS=acc
+    | form_spec                                     // FORM=fm
+    | recl_spec                                     // RECL=rl
+    | blank_spec                                    // BLANK=blnk
+    | iostat_spec                                   // IOSTAT=ios
+    | err_spec                                      // ERR=s
+    ;
+
+// Close specifiers for CLOSE statement
+close_spec_list
+    : close_spec (COMMA close_spec)*
+    ;
+
+close_spec
+    : unit_spec                                     // [UNIT=]u
+    | status_spec                                   // STATUS=sta
+    | iostat_spec                                   // IOSTAT=ios
+    | err_spec                                      // ERR=s
+    ;
+
+// Inquiry specifiers for INQUIRE statement
+inquire_spec_list
+    : inquire_spec (COMMA inquire_spec)*
+    ;
+
+inquire_spec
+    : unit_spec                                     // [UNIT=]u
+    | file_spec                                     // FILE=fn
+    | iostat_spec                                   // IOSTAT=ios
+    | err_spec                                      // ERR=s
+    | exist_spec                                    // EXIST=ex
+    | opened_spec                                   // OPENED=od
+    | number_spec                                   // NUMBER=num
+    | named_spec                                    // NAMED=nmd
+    | name_spec                                     // NAME=fn
+    | access_spec                                   // ACCESS=acc
+    | sequential_spec                               // SEQUENTIAL=seq
+    | direct_spec                                   // DIRECT=dir
+    | form_spec                                     // FORM=fm
+    | formatted_spec                                // FORMATTED=fmt
+    | unformatted_spec                              // UNFORMATTED=unf
+    | recl_spec                                     // RECL=rl
+    | nextrec_spec                                  // NEXTREC=nr
+    | blank_spec                                    // BLANK=blnk
+    ;
+
+// Individual specifier rules
+
+// Unit specifier: [UNIT=]u where u is an integer expression
+// If UNIT= keyword is omitted, must be first specifier
+unit_spec
+    : IDENTIFIER EQUALS integer_expr                // UNIT=u (keyword form)
+    | integer_expr                                  // u (positional form)
+    ;
+
+// FILE specifier: FILE=fn where fn is a character expression
+file_spec
+    : IDENTIFIER EQUALS character_expr              // FILE=filename
+    ;
+
+// STATUS specifier: STATUS=sta where sta is a character expression
+// Valid values: OLD, NEW, SCRATCH, UNKNOWN
+status_spec
+    : IDENTIFIER EQUALS character_expr              // STATUS=value
+    ;
+
+// ACCESS specifier: ACCESS=acc where acc is a character expression
+// Valid values: SEQUENTIAL, DIRECT
+access_spec
+    : IDENTIFIER EQUALS character_expr              // ACCESS=value
+    ;
+
+// FORM specifier: FORM=fm where fm is a character expression
+// Valid values: FORMATTED, UNFORMATTED
+form_spec
+    : IDENTIFIER EQUALS character_expr              // FORM=value
+    ;
+
+// RECL specifier: RECL=rl where rl is a positive integer expression
+recl_spec
+    : IDENTIFIER EQUALS integer_expr                // RECL=length
+    ;
+
+// BLANK specifier: BLANK=blnk where blnk is a character expression
+// Valid values: NULL, ZERO
+blank_spec
+    : IDENTIFIER EQUALS character_expr              // BLANK=value
+    ;
+
+// IOSTAT specifier: IOSTAT=ios where ios is an integer variable
+iostat_spec
+    : IDENTIFIER EQUALS variable                    // IOSTAT=var
+    ;
+
+// ERR specifier: ERR=s where s is a statement label
+err_spec
+    : IDENTIFIER EQUALS label                       // ERR=label
+    ;
+
+// EXIST specifier: EXIST=ex where ex is a logical variable (INQUIRE only)
+exist_spec
+    : IDENTIFIER EQUALS variable                    // EXIST=var
+    ;
+
+// OPENED specifier: OPENED=od where od is a logical variable (INQUIRE only)
+opened_spec
+    : IDENTIFIER EQUALS variable                    // OPENED=var
+    ;
+
+// NUMBER specifier: NUMBER=num where num is an integer variable (INQUIRE only)
+number_spec
+    : IDENTIFIER EQUALS variable                    // NUMBER=var
+    ;
+
+// NAMED specifier: NAMED=nmd where nmd is a logical variable (INQUIRE only)
+named_spec
+    : IDENTIFIER EQUALS variable                    // NAMED=var
+    ;
+
+// NAME specifier: NAME=fn where fn is a character variable (INQUIRE only)
+name_spec
+    : IDENTIFIER EQUALS variable                    // NAME=var
+    ;
+
+// SEQUENTIAL specifier: SEQUENTIAL=seq (INQUIRE only)
+sequential_spec
+    : IDENTIFIER EQUALS variable                    // SEQUENTIAL=var
+    ;
+
+// DIRECT specifier: DIRECT=dir (INQUIRE only)
+direct_spec
+    : IDENTIFIER EQUALS variable                    // DIRECT=var
+    ;
+
+// FORMATTED specifier: FORMATTED=fmt (INQUIRE only)
+formatted_spec
+    : IDENTIFIER EQUALS variable                    // FORMATTED=var
+    ;
+
+// UNFORMATTED specifier: UNFORMATTED=unf (INQUIRE only)
+unformatted_spec
+    : IDENTIFIER EQUALS variable                    // UNFORMATTED=var
+    ;
+
+// NEXTREC specifier: NEXTREC=nr where nr is an integer variable (INQUIRE only)
+nextrec_spec
+    : IDENTIFIER EQUALS variable                    // NEXTREC=var
     ;
 
 // ====================================================================
