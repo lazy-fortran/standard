@@ -90,10 +90,13 @@ ASSIGNMENT      : ('a'|'A') ('s'|'S') ('s'|'S') ('i'|'I') ('g'|'G')
                   ('n'|'N') ('m'|'M') ('e'|'E') ('n'|'N') ('t'|'T') ;
 
 // Procedure enhancements
-RECURSIVE       : ('r'|'R') ('e'|'E') ('c'|'C') ('u'|'U') ('r'|'R') 
+// RECURSIVE is a genuine F90 feature (ISO/IEC 1539:1991)
+// PURE and ELEMENTAL are F95 features (ISO/IEC 1539-1:1997) accepted here
+// as forward extensions for parsing mixed-standard code (see issue #182)
+RECURSIVE       : ('r'|'R') ('e'|'E') ('c'|'C') ('u'|'U') ('r'|'R')
                   ('s'|'S') ('i'|'I') ('v'|'V') ('e'|'E') ;
 PURE            : ('p'|'P') ('u'|'U') ('r'|'R') ('e'|'E') ;
-ELEMENTAL       : ('e'|'E') ('l'|'L') ('e'|'E') ('m'|'M') ('e'|'E') 
+ELEMENTAL       : ('e'|'E') ('l'|'L') ('e'|'E') ('m'|'M') ('e'|'E')
                   ('n'|'N') ('t'|'T') ('a'|'A') ('l'|'L') ;
 RESULT          : ('r'|'R') ('e'|'E') ('s'|'S') ('u'|'U') ('l'|'L') ('t'|'T') ;
 
