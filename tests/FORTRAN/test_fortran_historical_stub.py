@@ -223,7 +223,7 @@ class TestFORTRANHistoricalStub:
             "test_fortran_historical_stub",
             "frequency_stmt.f",
         )
-        
+
         parser = self.create_parser(test_input)
 
         try:
@@ -234,6 +234,70 @@ class TestFORTRANHistoricalStub:
             assert parser.getNumberOfSyntaxErrors() == 0
         except Exception as e:
             pytest.fail(f"FREQUENCY statement parsing failed: {e}")
+
+    def test_dimension_statement(self):
+        """Test parsing of DIMENSION statement (array declarations).
+
+        Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B,
+        DIMENSION declares array names and their dimensions.
+        Syntax: DIMENSION v, v, v, ... where v is IDENTIFIER(dimensions)
+        """
+        test_input = """        DIMENSION A(100), B(10,20), C(5,5,5)
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_dimension_statement_expressions(self):
+        """Test DIMENSION with expression bounds (1957 supported variables)."""
+        test_input = """        DIMENSION X(N), Y(M,N), Z(I+1)
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_equivalence_statement(self):
+        """Test parsing of EQUIVALENCE statement (memory overlay).
+
+        Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B,
+        EQUIVALENCE allows variables to share the same memory location.
+        Syntax: EQUIVALENCE (a,b,c,...), (d,e,f,...), ...
+        """
+        test_input = """        EQUIVALENCE (X, Y, Z), (A, B)
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_equivalence_with_array_elements(self):
+        """Test EQUIVALENCE with array subscripts (memory overlay at specific indices)."""
+        test_input = """        DIMENSION A(100), B(10,20)
+        EQUIVALENCE (A(1), B(1,1)), (X, Y)
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_dimension_and_equivalence_combined(self):
+        """Test DIMENSION and EQUIVALENCE used together in typical 1957 pattern."""
+        test_input = """        DIMENSION A(100), B(10,20), C(5,5,5)
+        EQUIVALENCE (A(1), B(1,1)), (X, Y, Z)
+        A(1) = 1.0
+        X = 2.0
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
 
     def test_mathematical_expressions(self):
         """Test parsing of mathematical expressions (core FORTRAN innovation)."""

@@ -44,6 +44,8 @@ statement_body
     | read_stmt_basic
     | write_stmt_basic
     | pause_stmt
+    | dimension_stmt
+    | equivalence_stmt
     | CONTINUE
     | STOP
     | END
@@ -54,6 +56,39 @@ statement_body
 // Per IBM 704 FORTRAN manual Appendix B
 pause_stmt
     : PAUSE (INTEGER_LITERAL)?
+    ;
+
+// DIMENSION statement (array declarations)
+// Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B
+// Syntax: DIMENSION v, v, v, ... where v is an array declarator
+// Example: DIMENSION A(100), B(10,20), C(5,5,5)
+dimension_stmt
+    : DIMENSION array_declarator (COMMA array_declarator)*
+    ;
+
+// Array declarator specifies array name and dimensions
+// In 1957 FORTRAN, dimensions were compile-time constants
+array_declarator
+    : IDENTIFIER LPAREN dimension_list RPAREN
+    ;
+
+// Dimension list contains one or more dimension bounds
+dimension_list
+    : expr (COMMA expr)*
+    ;
+
+// EQUIVALENCE statement (memory overlay)
+// Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B
+// Syntax: EQUIVALENCE (a,b,c,...), (d,e,f,...), ...
+// Example: EQUIVALENCE (A, B(1)), (X, Y, Z)
+// Allows variables to share the same memory location
+equivalence_stmt
+    : EQUIVALENCE equivalence_set (COMMA equivalence_set)*
+    ;
+
+// Equivalence set is a parenthesized list of variables sharing memory
+equivalence_set
+    : LPAREN variable (COMMA variable)+ RPAREN
     ;
 
 // Assignment statement (universal since 1957)
