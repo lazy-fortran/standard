@@ -684,8 +684,24 @@ Existing umbrella issues relevant to this audit:
 
 - #140 – **Standard audits** (this document is the F2003 slice).
 - #175 – **Fortran 2003: annotate grammar with J3/03‑007 sections**:
-  - Should use this audit as the canonical spec→grammar cross‑walk and
-    ensure every F2003 gap identified here has its own issue.
+  - **RESOLVED**: The grammar files `Fortran2003Parser.g4` and
+    `Fortran2003Lexer.g4` have been annotated with comprehensive
+    ISO/IEC 1539-1:2004 section references throughout.
+  - Parser annotations cover:
+    - Program structure (Section 2.1, 11)
+    - Derived types and OOP (Section 4.5)
+    - Parameterized derived types (Section 4.5.3)
+    - Type-bound procedures (Section 4.5.4)
+    - Type extension and polymorphism (Section 4.5.6)
+    - ASSOCIATE and BLOCK constructs (Section 8.1.3, 8.1.4)
+    - SELECT TYPE (Section 8.1.5)
+    - Procedure pointers and interfaces (Section 12.3.2)
+    - Enhanced I/O (Section 9)
+    - C interoperability (Section 15)
+    - IEEE arithmetic modules (Section 14)
+    - Expressions (Section 7)
+  - Lexer annotations cover all F2003-specific keywords organized by
+    their ISO standard sections.
 
 Additional issues (either existing or to be opened) should cover:
 
