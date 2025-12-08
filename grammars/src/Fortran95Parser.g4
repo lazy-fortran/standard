@@ -1,5 +1,7 @@
 // Fortran 95 (1995) Parser - Enhanced Modern Foundation
 // Building on F90 with FORALL, WHERE enhancements, and Pure Procedures
+// Reference: ISO/IEC 1539-1:1997 (Fortran 95)
+//            J3/98-114 (Fortran 95 Request for Interpretation)
 parser grammar Fortran95Parser;
 
 import Fortran90Parser;  // F90 unified format support
@@ -9,23 +11,27 @@ options {
 }
 
 // ====================================================================
-// FORTRAN 95 PARSER OVERVIEW  
+// FORTRAN 95 PARSER OVERVIEW
 // ====================================================================
 //
-// Fortran 95 (ISO 1539-1:1997) builds incrementally on Fortran 90,
+// This parser implements syntax rules for Fortran 95 as defined in:
+//   ISO/IEC 1539-1:1997 (Fortran 95 International Standard)
+//   J3/98-114 (Fortran 95 Request for Interpretation)
+//
+// Fortran 95 (ISO/IEC 1539-1:1997) builds incrementally on Fortran 90,
 // adding several important enhancements while maintaining complete
 // backward compatibility.
 //
 // This parser inherits unified format support (fixed/free) from F90
 // and adds F95-specific language constructs.
 //
-// MAJOR F95 ENHANCEMENTS IMPLEMENTED:
-// - FORALL construct and statements (advanced array operations)
-// - Enhanced WHERE constructs with multiple ELSEWHERE
-// - PURE and ELEMENTAL procedure prefixes (NEW in F95)
-// - Derived type default initialization
-// - Pointer association enhancements
-// - Extended intrinsic functions
+// MAJOR F95 ENHANCEMENTS IMPLEMENTED (with ISO section refs):
+// - FORALL construct and statements (Section 7.5.4)
+// - Enhanced WHERE constructs with multiple ELSEWHERE (Section 7.5.3)
+// - PURE and ELEMENTAL procedure prefixes (Section 12.6)
+// - Derived type default initialization (Section 4.4.1)
+// - Pointer association enhancements (Section 6.3.1)
+// - Extended intrinsic functions (Section 13)
 //
 // INHERITANCE ARCHITECTURE (IN THIS REPO):
 // FORTRAN / FORTRANII / FORTRAN66 / FORTRAN77
@@ -36,13 +42,22 @@ options {
 // ====================================================================
 
 // ====================================================================
-// FORTRAN 95 PROGRAM ENTRY POINT (ISO/IEC 1539-1:1997)
+// FORTRAN 95 PROGRAM ENTRY POINT (ISO/IEC 1539-1:1997 Section 11)
 // ====================================================================
+//
+// Section 11 of ISO/IEC 1539-1:1997 defines the structure of Fortran
+// program units: main programs, external subprograms, modules, and
+// block data program units.
 //
 // This entry point integrates F95 constructs (FORALL, enhanced WHERE,
 // F95 type rules and I/O) into the program structure. It reuses the F90
 // program unit structure but augments execution_part and construct
 // rules to reach F95-specific constructs.
+//
+// ISO/IEC 1539-1:1997 Section 11.1: Program units and scoping
+// - R201 (program) -> main-program | external-subprogram | module
+// - R1101 (main-program) -> [program-stmt] [specification-part]
+//                           [execution-part] [internal-subprogram-part]
 //
 // Issue #179: integrate F95 constructs into program and execution structure.
 
@@ -50,17 +65,18 @@ program_unit_f95
     : NEWLINE* (main_program_f95 | module_f95 | external_subprogram_f95) NEWLINE*
     ;
 
-// Main program with F95-integrated execution part
+// Main program (ISO/IEC 1539-1:1997 Section 11.1, R1101)
 main_program_f95
     : program_stmt specification_part_f95? execution_part_f95?
       internal_subprogram_part? end_program_stmt
     ;
 
-// Module with F95 specification and subprogram parts
+// Module (ISO/IEC 1539-1:1997 Section 11.3, R1104)
 module_f95
     : module_stmt specification_part_f95? module_subprogram_part_f95? end_module_stmt
     ;
 
+// Module subprogram part (ISO/IEC 1539-1:1997 Section 11.3.1, R1107)
 module_subprogram_part_f95
     : contains_stmt NEWLINE* (module_subprogram_f95 NEWLINE*)*
     ;
@@ -70,23 +86,26 @@ module_subprogram_f95
     | subroutine_subprogram_f95
     ;
 
-// External subprogram with F95-integrated execution part
+// External subprogram (ISO/IEC 1539-1:1997 Section 11.2, R1102)
 external_subprogram_f95
     : function_subprogram_f95
     | subroutine_subprogram_f95
     | module_f95
     ;
 
+// Function subprogram (ISO/IEC 1539-1:1997 Section 12.5.2, R1216)
 function_subprogram_f95
     : function_stmt_f95 specification_part_f95? execution_part_f95?
       internal_subprogram_part_f95? end_function_stmt
     ;
 
+// Subroutine subprogram (ISO/IEC 1539-1:1997 Section 12.5.3, R1220)
 subroutine_subprogram_f95
     : subroutine_stmt_f95 specification_part_f95? execution_part_f95?
       internal_subprogram_part_f95? end_subroutine_stmt
     ;
 
+// Internal subprogram part (ISO/IEC 1539-1:1997 Section 12.5.1, R1213)
 internal_subprogram_part_f95
     : contains_stmt NEWLINE* (internal_subprogram_f95 NEWLINE*)*
     ;
@@ -100,8 +119,18 @@ internal_subprogram_f95
 // F95 SPECIFICATION PART (ISO/IEC 1539-1:1997 Section 11.1)
 // ====================================================================
 //
+// The specification part (R204) precedes the execution part and contains
+// declarations that specify the properties of data objects, procedure
+// interfaces, and derived type definitions.
+//
+// ISO/IEC 1539-1:1997 Section 11.1:
+// - R204 (specification-part) -> [use-stmt]... [implicit-part]
+//                                [declaration-construct]...
+// - R207 (declaration-construct) -> derived-type-def | interface-block
+//                                   | type-declaration-stmt | ...
+//
 // The specification part may include F95-specific type declarations and
-// derived type definitions with default initialization.
+// derived type definitions with default initialization (Section 4.4.1).
 
 specification_part_f95
     : (NEWLINE* (use_stmt | import_stmt))*
@@ -109,6 +138,7 @@ specification_part_f95
       (NEWLINE* declaration_construct_f95)* NEWLINE*
     ;
 
+// Declaration construct (ISO/IEC 1539-1:1997 Section 11.1, R207)
 declaration_construct_f95
     : type_declaration_stmt_f95
     | derived_type_def_f95
@@ -138,8 +168,15 @@ declaration_construct_f95
 // F95 EXECUTION PART (ISO/IEC 1539-1:1997 Section 11.1)
 // ====================================================================
 //
+// The execution part (R208) contains executable statements and constructs
+// that control program execution and perform computations.
+//
+// ISO/IEC 1539-1:1997 Section 11.1:
+// - R208 (execution-part) -> executable-construct [execution-part-construct]...
+// - R214 (executable-construct) -> action-stmt | construct
+//
 // The execution part includes F95 executable constructs such as FORALL
-// and enhanced WHERE alongside the F90 constructs.
+// (Section 7.5.4) and enhanced WHERE (Section 7.5.3) alongside the F90 constructs.
 
 execution_part_f95
     : (NEWLINE* executable_construct_f95)* NEWLINE*
@@ -158,13 +195,20 @@ execution_part_f95
 // These tokens may appear wherever a function reference or variable is
 // allowed, enabling code like x = CEILING(y) or CALL CPU_TIME(t).
 //
+// Intrinsic procedures by category (Section 13):
+// - Numeric functions: CEILING, FLOOR, MODULO (Section 13.10)
+// - Bit manipulation: BIT_SIZE, BTEST, IAND, IBCLR, IBITS, IBSET,
+//                     IEOR, IOR, ISHFT, ISHFTC, NOT (Section 13.10)
+// - Data transfer: TRANSFER (Section 13.10.112)
+// - Timing subroutines: CPU_TIME, SYSTEM_CLOCK (Section 13.11)
+//
 identifier_or_keyword_f95
     : IDENTIFIER
-    // F90/F95 numeric intrinsics
+    // F90/F95 numeric intrinsics (Section 13.10)
     | CEILING_INTRINSIC
     | FLOOR_INTRINSIC
     | MODULO_INTRINSIC
-    // F90/F95 bit manipulation intrinsics
+    // F90/F95 bit manipulation intrinsics (Section 13.10)
     | BIT_SIZE_INTRINSIC
     | BTEST_INTRINSIC
     | IAND_INTRINSIC
@@ -176,9 +220,9 @@ identifier_or_keyword_f95
     | ISHFT_INTRINSIC
     | ISHFTC_INTRINSIC
     | NOT_INTRINSIC
-    // F90/F95 data transfer intrinsic
+    // F90/F95 data transfer intrinsic (Section 13.10.112)
     | TRANSFER_INTRINSIC
-    // F95 timing intrinsics
+    // F95 timing intrinsics (Section 13.11)
     | CPU_TIME_INTRINSIC
     | SYSTEM_CLOCK_INTRINSIC
     // Common keywords that can be used as identifiers in argument contexts
@@ -188,51 +232,72 @@ identifier_or_keyword_f95
     ;
 
 // ====================================================================
-// FORALL CONSTRUCTS (F95 MAJOR INNOVATION)
+// FORALL CONSTRUCTS (ISO/IEC 1539-1:1997 Section 7.5.4)
 // ====================================================================
+//
+// FORALL is a major F95 innovation for parallel array assignment.
+//
+// ISO/IEC 1539-1:1997 Section 7.5.4 defines:
+// - R736 (forall-construct) -> forall-construct-stmt [forall-body-construct]...
+//                              end-forall-stmt
+// - R738 (forall-construct-stmt) -> [forall-construct-name :] FORALL forall-header
+// - R740 (forall-stmt) -> FORALL forall-header forall-assignment-stmt
+// - R741 (forall-header) -> (forall-triplet-spec-list [, scalar-mask-expr])
+// - R742 (forall-triplet-spec) -> index-name = subscript : subscript [: stride]
+//
+// Semantic constraints (Section 7.5.4, not enforced by grammar):
+// - scalar-mask-expr must be scalar logical
+// - Index variables have no storage association
+// - All operations must be assignment-like (no side effects)
 
-// FORALL construct (F95 advanced array operations)
-// ISO/IEC 1539-1:1997 Section 7.5.4
+// FORALL construct (ISO/IEC 1539-1:1997 Section 7.5.4.1, R736)
 forall_construct
     : forall_construct_stmt NEWLINE
       (NEWLINE* forall_body_construct)* NEWLINE* end_forall_stmt
     ;
 
+// FORALL construct statement (Section 7.5.4.1, R738)
 forall_construct_stmt
     : (IDENTIFIER COLON)? FORALL forall_header
     ;
 
-// FORALL statement (single statement form)
+// FORALL statement - single statement form (Section 7.5.4.2, R740)
 forall_stmt
     : FORALL forall_header forall_assignment_stmt NEWLINE?
     ;
 
-// FORALL header with triplet specifications
+// FORALL header with triplet specifications (Section 7.5.4, R741)
 forall_header
     : LPAREN forall_triplet_spec_list (COMMA scalar_mask_expr)? RPAREN
     ;
 
+// Forall triplet spec list (Section 7.5.4, part of R741)
 forall_triplet_spec_list
     : forall_triplet_spec (COMMA forall_triplet_spec)*
     ;
 
+// Forall triplet specification (Section 7.5.4, R742)
+// index-name = subscript : subscript [ : stride ]
 forall_triplet_spec
     : IDENTIFIER EQUALS expr_f95 COLON expr_f95 (COLON expr_f95)?
-        // index=start:end:stride
     ;
 
+// Scalar mask expression (Section 7.5.4, part of R741)
+// Must be a scalar logical expression (semantic constraint, not syntax)
 scalar_mask_expr
-    : expr_f95                      // Must be scalar logical expression
+    : expr_f95
     ;
 
-// FORALL body can contain assignments, WHERE, or nested FORALL
+// FORALL body construct (Section 7.5.4.1, R737)
+// forall-body-construct -> forall-assignment-stmt | where-construct | forall-construct
 forall_body_construct
     : forall_assignment_stmt NEWLINE?
     | where_construct
     | forall_construct
     ;
 
-// FORALL assignment statements
+// FORALL assignment statement (Section 7.5.4.1, R739)
+// forall-assignment-stmt -> assignment-stmt | pointer-assignment-stmt
 forall_assignment_stmt
     : assignment_stmt_f95
     | pointer_assignment_stmt
@@ -240,68 +305,112 @@ forall_assignment_stmt
     | forall_stmt                 // Nested FORALL statement
     ;
 
+// END FORALL statement (Section 7.5.4.1, R743)
 end_forall_stmt
     : END_FORALL (IDENTIFIER)? NEWLINE?
     ;
 
 // ====================================================================
-// ENHANCED WHERE CONSTRUCTS (F95 IMPROVEMENTS)
+// ENHANCED WHERE CONSTRUCTS (ISO/IEC 1539-1:1997 Section 7.5.3)
 // ====================================================================
+//
+// WHERE provides masked array assignment. F95 enhances F90 WHERE with:
+// - Multiple ELSEWHERE clauses with optional masks
+// - Clearer nesting rules
+//
+// ISO/IEC 1539-1:1997 Section 7.5.3 defines:
+// - R727 (where-construct) -> where-construct-stmt [where-body-construct]...
+//                             [masked-elsewhere-stmt [where-body-construct]...]...
+//                             [elsewhere-stmt [where-body-construct]...]
+//                             end-where-stmt
+// - R728 (where-construct-stmt) -> [where-construct-name :] WHERE (mask-expr)
+// - R732 (masked-elsewhere-stmt) -> ELSEWHERE (mask-expr) [where-construct-name]
+// - R733 (elsewhere-stmt) -> ELSEWHERE [where-construct-name]
+// - R734 (end-where-stmt) -> END WHERE [where-construct-name]
+// - R735 (where-stmt) -> WHERE (mask-expr) where-assignment-stmt
+//
+// Semantic constraints (Section 7.5.3, not enforced by grammar):
+// - mask-expr must be a logical array expression
+// - All arrays in mask and body must be conformable
 
-// Enhanced WHERE construct (F95 allows multiple ELSEWHERE)
-// ISO/IEC 1539-1:1997 Section 7.5.3
+// WHERE construct (ISO/IEC 1539-1:1997 Section 7.5.3, R727)
 where_construct_f95
     : where_construct_stmt_f95 NEWLINE (NEWLINE* where_body_construct_f95)*
       NEWLINE* end_where_stmt
     ;
 
+// WHERE construct statement (Section 7.5.3, R728)
 where_construct_stmt_f95
     : (IDENTIFIER COLON)? WHERE LPAREN logical_expr_f95 RPAREN
     ;
 
+// WHERE body construct (Section 7.5.3, R729)
+// where-body-construct -> where-assignment-stmt | where-construct
 where_body_construct_f95
     : where_assignment_stmt_f95 NEWLINE?
     | where_construct_f95         // Nested WHERE
     | elsewhere_part_f95
     ;
 
+// ELSEWHERE part (Section 7.5.3, R731-R733)
 elsewhere_part_f95
     : elsewhere_stmt_f95 NEWLINE (NEWLINE* elsewhere_assignment_stmt_f95)*
     ;
 
+// ELSEWHERE statement - with optional mask (Section 7.5.3, R732/R733)
 elsewhere_stmt_f95
     : ELSEWHERE (LPAREN logical_expr_f95 RPAREN)? (IDENTIFIER)?
     ;
 
+// WHERE assignment statement (Section 7.5.3, R730)
+// where-assignment-stmt -> assignment-stmt
 where_assignment_stmt_f95
     : assignment_stmt_f95
     | pointer_assignment_stmt
     | where_stmt
     ;
 
+// ELSEWHERE body assignment (follows R730)
 elsewhere_assignment_stmt_f95
     : assignment_stmt_f95 NEWLINE?
     | pointer_assignment_stmt NEWLINE?
     | where_stmt NEWLINE?
     ;
 
-// Simple WHERE statement (enhanced for F95)
+// WHERE statement - single statement form (Section 7.5.3.2, R735)
 where_stmt_f95
     : WHERE LPAREN logical_expr_f95 RPAREN assignment_stmt_f95
     ;
 
 // ====================================================================
-// ENHANCED TYPE DECLARATIONS (F95 DEFAULT INITIALIZATION)
+// ENHANCED TYPE DECLARATIONS (ISO/IEC 1539-1:1997 Section 4.4.1)
 // ====================================================================
+//
+// Fortran 95 introduces default initialization for derived type components.
+//
+// ISO/IEC 1539-1:1997 Section 4.4.1 defines:
+// - R424 (derived-type-def) -> derived-type-stmt [private-sequence-stmt]...
+//                              [component-def-stmt]... end-type-stmt
+// - R429 (component-decl) -> component-name [(component-array-spec)]
+//                            [*char-length] [= initialization-expr]
+//
+// Section 5.1 (Type declaration statements):
+// - R501 (type-declaration-stmt) -> type-spec [[, attr-spec]... ::]
+//                                   entity-decl-list
+// - R504 (entity-decl) -> object-name [(array-spec)] [*char-length]
+//                         [= initialization-expr]
+//
+// Default initialization allows derived type components to have default
+// values that are used when no explicit value is provided.
 
-// F95 type declaration with default initialization
+// F95 type declaration (Section 5.1, R501)
 type_declaration_stmt_f95
     : type_spec_f95 (COMMA attr_spec_f95)* DOUBLE_COLON? entity_decl_list_f95
     ;
 
-// Enhanced entity declaration (F95 default initialization)
+// Entity declaration with default initialization (Section 5.1, R504)
 entity_decl_f95
-    : IDENTIFIER (LPAREN array_spec_f95 RPAREN)? (MULTIPLY char_length)? 
+    : IDENTIFIER (LPAREN array_spec_f95 RPAREN)? (MULTIPLY char_length)?
       (ASSIGN initialization_expr)?
     ;
 
@@ -309,59 +418,80 @@ entity_decl_list_f95
     : entity_decl_f95 (COMMA entity_decl_f95)*
     ;
 
-// Initialization expression (F95 default initialization)
+// Initialization expression (Section 7.1.6)
+// Must be a constant expression or structure constructor with constant components
 initialization_expr
-    : expr_f95                    // Must be initialization expression
+    : expr_f95
     ;
 
-// Enhanced derived type with default initialization
+// Derived type definition (Section 4.4.1, R424)
 derived_type_def_f95
     : derived_type_stmt component_def_stmt_f95* end_type_stmt
     ;
 
+// Component definition statement (Section 4.4.1, R425/R426)
 component_def_stmt_f95
     : type_declaration_stmt_f95   // Can have default initialization
     | private_sequence_stmt
     ;
 
 // ====================================================================
-// ENHANCED PROCEDURE SPECIFICATIONS (F95 IMPROVEMENTS)
+// ENHANCED PROCEDURE SPECIFICATIONS (ISO/IEC 1539-1:1997 Section 12.6)
 // ====================================================================
 //
-// Fortran 95 (ISO/IEC 1539-1:1997 Section 12.6) introduces PURE and
-// ELEMENTAL procedure prefixes. These are NOT available in Fortran 90.
+// Fortran 95 introduces PURE and ELEMENTAL procedure prefixes.
+// These are NOT available in Fortran 90.
+//
+// ISO/IEC 1539-1:1997 Section 12.6 defines:
+// - PURE procedures (Section 12.6): Have no side effects, can be used in
+//   specification expressions and FORALL constructs.
+// - ELEMENTAL procedures (Section 12.6): Scalar procedures that can be
+//   applied element-wise to array arguments. ELEMENTAL implies PURE.
+//
+// Syntax (Section 12.5.2, R1216-R1217):
+// - R1216 (function-subprogram) -> function-stmt [specification-part]
+//                                  [execution-part] [internal-subprogram-part]
+//                                  end-function-stmt
+// - R1217 (function-stmt) -> [prefix] FUNCTION function-name (...)
+// - R1224 (prefix) -> prefix-spec [prefix-spec]...
+// - R1225 (prefix-spec) -> RECURSIVE | PURE | ELEMENTAL | type-spec
 
-// F95 procedure prefix - extends F90 prefix_spec with PURE and ELEMENTAL
-// ISO/IEC 1539-1:1997 Section 12.6
+// F95 procedure prefix (Section 12.5.2, R1224)
 prefix_f95
     : prefix_spec_f95+
     ;
 
+// Prefix specification (Section 12.5.2, R1225)
 prefix_spec_f95
-    : RECURSIVE                     // F90 recursive procedures
-    | PURE                          // F95 pure procedures
-    | ELEMENTAL                     // F95 elemental procedures
-    | type_spec_f95                 // Function return type
+    : RECURSIVE                     // F90 recursive procedures (12.5.2.1)
+    | PURE                          // F95 pure procedures (12.6)
+    | ELEMENTAL                     // F95 elemental procedures (12.6)
+    | type_spec_f95                 // Function return type (5.1)
     ;
 
-// F95 function statement with PURE/ELEMENTAL support
-// ISO/IEC 1539-1:1997 Section 12.6
+// Function statement (Section 12.5.2, R1217)
 function_stmt_f95
     : (prefix_f95)? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN (suffix)?
         NEWLINE?
     ;
 
-// F95 subroutine statement with PURE/ELEMENTAL support
-// ISO/IEC 1539-1:1997 Section 12.6
+// Subroutine statement (Section 12.5.3, R1221)
 subroutine_stmt_f95
     : (prefix_f95)? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? NEWLINE?
     ;
 
 // ====================================================================
-// F95 EXPRESSIONS (ENHANCED)
+// F95 EXPRESSIONS (ISO/IEC 1539-1:1997 Section 7)
 // ====================================================================
+//
+// ISO/IEC 1539-1:1997 Section 7 defines the expression syntax.
+// - R702 (expr) -> [expr defined-binary-op] level-5-expr
+// - Section 7.1 covers expression formation rules
+// - Section 7.2 covers primaries (literals, variables, function refs, etc.)
+//
+// The expression rules follow F90 with F95 enhancements for FORALL and WHERE.
 
-// F95 expressions (enhanced with FORALL and improved WHERE)
+// F95 expressions (Section 7.1, R702)
 expr_f95
     : expr_f95 DOT_EQV expr_f95                          # EquivalenceExprF95
     | expr_f95 DOT_NEQV expr_f95                         # NotEquivalenceExprF95
@@ -382,7 +512,9 @@ expr_f95
     | primary_f95                                        # PrimaryExprF95
     ;
 
-// F95 primary expressions (enhanced with new constructs)
+// F95 primary expressions (Section 7.2, R701)
+// primary -> constant | constant-subobject | variable | array-constructor |
+//            structure-constructor | function-reference | (expr)
 primary_f95
     : literal_f95
     | variable_f95
@@ -392,8 +524,9 @@ primary_f95
     | LPAREN expr_f95 RPAREN
     ;
 
-// F95 variables - uses identifier_or_keyword_f95 to allow intrinsic names
-// ISO/IEC 1539-1:1997 Section 6.1: A variable is a data object
+// F95 variables (ISO/IEC 1539-1:1997 Section 6.1, R601)
+// variable -> designator (scalar-variable | array-element | array-section | substring)
+// Uses identifier_or_keyword_f95 to allow intrinsic procedure names
 variable_f95
     : identifier_or_keyword_f95 (substring_range_f95)?
     | identifier_or_keyword_f95 LPAREN section_subscript_list_f95 RPAREN
@@ -425,10 +558,16 @@ logical_expr_f95
     ;
 
 // ====================================================================
-// F95 LITERALS (ENHANCED)
+// F95 LITERALS (ISO/IEC 1539-1:1997 Section 4)
 // ====================================================================
+//
+// Literals (constants) are defined in Section 4 of ISO/IEC 1539-1:1997.
+// - R402 (literal-constant) -> int-literal | real-literal | complex-literal |
+//                              logical-literal | char-literal | boz-literal
+// - Section 4.3 covers integer and real literals
+// - Section 4.4.4 covers boz-literal-constants (binary/octal/hex)
 
-// F95 literals (same as F90 with possible extensions)
+// F95 literals (Section 4.3, R402)
 literal_f95
     : INTEGER_LITERAL_KIND          // Integer with kind (123_int32)
     | INTEGER_LITERAL               // Traditional integer literal
@@ -447,59 +586,83 @@ logical_literal_f95
     ;
 
 // ====================================================================
-// F95 ARRAY OPERATIONS (ENHANCED)
+// F95 ARRAY OPERATIONS (ISO/IEC 1539-1:1997 Section 4.5)
 // ====================================================================
-
-// F95 array constructor - ISO/IEC 1539-1:1997 Section 4.5
+//
+// Array constructors are defined in Section 4.5 of ISO/IEC 1539-1:1997.
+//
+// ISO/IEC 1539-1:1997 Section 4.5 defines:
+// - R431 (array-constructor) -> (/ ac-spec /)
+// - R432 (ac-spec) -> type-spec :: | [type-spec ::] ac-value-list
+// - R434 (ac-value) -> expr | ac-implied-do
+// - R435 (ac-implied-do) -> (ac-value-list, ac-implied-do-control)
+//
 // NOTE: Only (/ ... /) form is standard Fortran 95.
 // Square bracket syntax [ ... ] is a Fortran 2003 feature (ISO/IEC 1539-1:2004).
+
+// Array constructor (Section 4.5, R431)
 array_constructor_f95
     : LPAREN SLASH ac_spec_f95 SLASH RPAREN
     ;
 
+// Array constructor specification (Section 4.5, R432)
 ac_spec_f95
     : ac_value_list_f95
     ;
 
+// Array constructor value list (Section 4.5, R433)
 ac_value_list_f95
     : ac_value_f95 (COMMA ac_value_f95)*
     ;
 
+// Array constructor value (Section 4.5, R434)
 ac_value_f95
     : expr_f95
     | ac_implied_do_f95
     ;
 
+// Array constructor implied-DO (Section 4.5, R435)
 ac_implied_do_f95
-    : LPAREN ac_value_list_f95 COMMA do_variable EQUALS expr_f95 COMMA expr_f95 
+    : LPAREN ac_value_list_f95 COMMA do_variable EQUALS expr_f95 COMMA expr_f95
       (COMMA expr_f95)? RPAREN
     ;
 
-// Enhanced structure constructor (F95 default initialization)
+// Structure constructor (Section 4.4.6, R430)
+// Fortran 95 allows default initialization for missing components
 structure_constructor_f95
     : type_name LPAREN component_spec_list_f95? RPAREN
     ;
 
+// Component specification list (Section 4.4.6)
 component_spec_list_f95
     : component_spec_f95 (COMMA component_spec_f95)*
     ;
 
-// Component specification - allows intrinsic names as component names
+// Component specification - allows keyword arguments and positional
 component_spec_f95
     : identifier_or_keyword_f95 EQUALS expr_f95
     | expr_f95
     ;
 
 // ====================================================================
-// ENHANCED TYPE AND ARRAY SPECIFICATIONS (F95)
+// ENHANCED TYPE AND ARRAY SPECIFICATIONS (ISO/IEC 1539-1:1997 Section 5)
 // ====================================================================
+//
+// Type specifications are defined in Section 5 of ISO/IEC 1539-1:1997.
+//
+// ISO/IEC 1539-1:1997 Section 5 defines:
+// - R502 (type-spec) -> type-spec | derived-type-spec
+// - R503 (attr-spec) -> access-spec | ALLOCATABLE | DIMENSION | ...
+// - R509 (array-spec) -> explicit-shape-spec-list | assumed-shape-spec-list |
+//                        deferred-shape-spec-list | assumed-size-spec
 
-// Enhanced type specification (F95)
+// Type specification (Section 5.1, R502)
 type_spec_f95
     : intrinsic_type_spec_f95
     | derived_type_spec_f95
     ;
 
+// Intrinsic type specification (Section 5.1, R502)
 intrinsic_type_spec_f95
     : INTEGER (kind_selector_f95)?
     | REAL (kind_selector_f95)?
@@ -509,20 +672,23 @@ intrinsic_type_spec_f95
     | CHARACTER (char_selector_f95)?
     ;
 
+// Derived type specification (Section 5.1, R502)
 derived_type_spec_f95
     : TYPE LPAREN type_name RPAREN
     ;
 
+// Kind selector (Section 5.1, R506)
 kind_selector_f95
     : LPAREN (KIND ASSIGN)? expr_f95 RPAREN
     ;
 
+// Character selector (Section 5.1, R507)
 char_selector_f95
     : LPAREN (LEN ASSIGN)? expr_f95 (COMMA (KIND ASSIGN)? expr_f95)? RPAREN
     | LPAREN expr_f95 RPAREN
     ;
 
-// Enhanced array specification (F95)
+// Array specification (Section 5.1.2, R509)
 array_spec_f95
     : explicit_shape_spec_list_f95
     | assumed_shape_spec_list_f95
@@ -530,36 +696,43 @@ array_spec_f95
     | assumed_size_spec_f95
     ;
 
+// Explicit shape specification list (Section 5.1.2.1, R510)
 explicit_shape_spec_list_f95
     : explicit_shape_spec_f95 (COMMA explicit_shape_spec_f95)*
     ;
 
+// Explicit shape specification (Section 5.1.2.1, R511)
 explicit_shape_spec_f95
     : expr_f95 (COLON expr_f95)?
     ;
 
+// Assumed shape specification list (Section 5.1.2.2, R512)
 assumed_shape_spec_list_f95
     : assumed_shape_spec_f95 (COMMA assumed_shape_spec_f95)*
     ;
 
+// Assumed shape specification (Section 5.1.2.2, R513)
 assumed_shape_spec_f95
     : COLON
     | expr_f95 COLON
     ;
 
+// Deferred shape specification list (Section 5.1.2.3, R515)
 deferred_shape_spec_list_f95
     : deferred_shape_spec_f95 (COMMA deferred_shape_spec_f95)*
     ;
 
+// Deferred shape specification (Section 5.1.2.3, R516)
 deferred_shape_spec_f95
     : COLON
     ;
 
+// Assumed size specification (Section 5.1.2.4, R517)
 assumed_size_spec_f95
     : (explicit_shape_spec_f95 COMMA)* MULTIPLY
     ;
 
-// Enhanced attribute specifications (F95)
+// Attribute specification (Section 5.1, R503)
 attr_spec_f95
     : PARAMETER
     | DIMENSION LPAREN array_spec_f95 RPAREN
@@ -576,15 +749,24 @@ attr_spec_f95
     ;
 
 // ====================================================================
-// ENHANCED PROGRAM CONSTRUCTS (F95)
+// ENHANCED PROGRAM CONSTRUCTS (ISO/IEC 1539-1:1997 Section 8)
 // ====================================================================
+//
+// Executable constructs are defined in Section 8 of ISO/IEC 1539-1:1997.
+//
+// ISO/IEC 1539-1:1997 Section 8 defines:
+// - R214 (executable-construct) -> action-stmt | construct
+// - R215 (action-stmt) -> assignment-stmt | call-stmt | goto-stmt | ...
+// - R216 (construct) -> if-construct | case-construct | do-construct |
+//                       where-construct | forall-construct
 
-// Enhanced executable constructs (F95)
+// Executable construct (Section 8.1, R214)
 executable_construct_f95
     : executable_stmt_f95
     | construct_f95
     ;
 
+// Executable statement (Section 8.1, R215 action-stmt)
 executable_stmt_f95
     : assignment_stmt_f95
     | pointer_assignment_stmt
@@ -603,67 +785,84 @@ executable_stmt_f95
     | deallocate_stmt
     | nullify_stmt
     | where_stmt_f95
-    | forall_stmt                 // F95 addition
+    | forall_stmt                 // F95 addition (Section 7.5.4)
     ;
 
+// Construct (Section 8.1, R216)
 construct_f95
     : if_construct
     | select_case_construct
     | do_construct_f95
-    | where_construct_f95         // F95 enhanced
-    | forall_construct            // F95 addition
+    | where_construct_f95         // F95 enhanced (Section 7.5.3)
+    | forall_construct            // F95 addition (Section 7.5.4)
     ;
 
-// F95 DO construct (inherits from F90 with minor enhancements)
+// DO construct (Section 8.1.4, inherits from F90)
 do_construct_f95
-    : do_construct_f90            // Inherit F90 DO construct
+    : do_construct_f90
     ;
 
-// F95 assignment statements
+// Assignment statement (Section 7.5.1, R735)
 assignment_stmt_f95
     : variable_f95 EQUALS expr_f95
     ;
 
-// Enhanced procedure calls (F95)
+// CALL statement (Section 12.4.2, R1210)
 call_stmt_f95
     : CALL procedure_designator_f95 (LPAREN actual_arg_spec_list_f95? RPAREN)?
     ;
 
-// Procedure designator - uses identifier_or_keyword_f95 for intrinsic names
-// ISO/IEC 1539-1:1997 Section 12.3: A procedure designator designates a procedure
+// Procedure designator (Section 12.3, R1206)
+// Uses identifier_or_keyword_f95 to allow intrinsic procedure names
 procedure_designator_f95
     : identifier_or_keyword_f95
     | variable_f95
     ;
 
+// Actual argument specification list (Section 12.4.1)
 actual_arg_spec_list_f95
     : actual_arg_spec_f95 (COMMA actual_arg_spec_f95)*
     ;
 
-// Actual argument specification - keyword arguments can use intrinsic names
-// ISO/IEC 1539-1:1997 Section 12.4.1: Actual argument specification
+// Actual argument specification (Section 12.4.1, R1207)
+// actual-arg-spec -> [keyword =] actual-arg
 actual_arg_spec_f95
     : identifier_or_keyword_f95 EQUALS expr_f95
     | expr_f95
     | MULTIPLY identifier_or_keyword_f95
     ;
 
-// Enhanced I/O statements (F95)
+// ====================================================================
+// ENHANCED I/O STATEMENTS (ISO/IEC 1539-1:1997 Section 9)
+// ====================================================================
+//
+// I/O statements are defined in Section 9 of ISO/IEC 1539-1:1997.
+//
+// ISO/IEC 1539-1:1997 Section 9 defines:
+// - R908 (read-stmt) -> READ (io-control-spec-list) [input-item-list] |
+//                       READ format [, input-item-list]
+// - R909 (write-stmt) -> WRITE (io-control-spec-list) [output-item-list]
+// - R912 (io-control-spec) -> [UNIT=]io-unit | [FMT=]format | ...
+
+// READ statement (Section 9.4, R908)
 read_stmt_f95
     : READ LPAREN io_control_spec_list_f95 RPAREN (input_item_list_f95)?
     | READ namelist_name
     | READ format (COMMA input_item_list_f95)?
     ;
 
+// WRITE statement (Section 9.4, R909)
 write_stmt_f95
     : WRITE LPAREN io_control_spec_list_f95 RPAREN (output_item_list_f95)?
     | WRITE namelist_name
     ;
 
+// I/O control specification list (Section 9.4)
 io_control_spec_list_f95
     : io_control_spec_f95 (COMMA io_control_spec_f95)*
     ;
 
+// I/O control specification (Section 9.4, R912)
 io_control_spec_f95
     : UNIT EQUALS expr_f95
     | FMT EQUALS format_spec_f95
@@ -677,6 +876,7 @@ io_control_spec_f95
     | expr_f95
     ;
 
+// Format specification (Section 9.4)
 format_spec_f95
     : expr_f95
     | MULTIPLY
@@ -684,31 +884,37 @@ format_spec_f95
     | namelist_name
     ;
 
+// Input item list (Section 9.4.1, R914)
 input_item_list_f95
     : input_item_f95 (COMMA input_item_f95)*
     ;
 
+// Input item (Section 9.4.1, R915)
 input_item_f95
     : variable_f95
     | io_implied_do_f95
     ;
 
+// Output item list (Section 9.4.2, R916)
 output_item_list_f95
     : output_item_f95 (COMMA output_item_f95)*
     ;
 
+// Output item (Section 9.4.2, R917)
 output_item_f95
     : expr_f95
     | io_implied_do_f95
     ;
 
+// I/O implied-DO (Section 9.4, R918)
 io_implied_do_f95
-    : LPAREN output_item_list_f95 COMMA do_variable EQUALS expr_f95 COMMA expr_f95 
+    : LPAREN output_item_list_f95 COMMA do_variable EQUALS expr_f95 COMMA expr_f95
       (COMMA expr_f95)? RPAREN
     ;
 
-// Function reference - uses identifier_or_keyword_f95 to allow intrinsic names
-// ISO/IEC 1539-1:1997 Section 12.4: A function reference is a primary
+// Function reference (Section 12.4, R1209)
+// function-reference -> function-name ( [actual-arg-spec-list] )
+// Uses identifier_or_keyword_f95 to allow intrinsic procedure names
 function_reference_f95
     : identifier_or_keyword_f95 LPAREN actual_arg_spec_list_f95? RPAREN
     ;
@@ -724,13 +930,13 @@ function_reference_f95
 // The list below outlines the intended coverage of this grammar, based
 // on the implementation rather than a formal conformance audit.
 //
-// MAJOR F95 FEATURES TARGETED:
-// ✅ FORALL constructs and statements (advanced array operations)
-// ✅ Enhanced WHERE constructs with multiple ELSEWHERE
-// ✅ PURE and ELEMENTAL procedure prefixes (NEW in F95)
-// ✅ Derived type default initialization
-// ✅ Enhanced pointer association
-// ✅ Extended intrinsic function support
+// MAJOR F95 FEATURES TARGETED (with ISO section references):
+// ✅ FORALL constructs and statements (Section 7.5.4)
+// ✅ Enhanced WHERE constructs with multiple ELSEWHERE (Section 7.5.3)
+// ✅ PURE and ELEMENTAL procedure prefixes (Section 12.6)
+// ✅ Derived type default initialization (Section 4.4.1)
+// ✅ Enhanced pointer association (Section 6.3.1)
+// ✅ Extended intrinsic function support (Section 13)
 // ✅ All F90 features through inheritance
 //
 // BACKWARD COMPATIBILITY:
@@ -743,6 +949,21 @@ function_reference_f95
 // ✅ Ready for parameterized derived types
 // ✅ Prepared for C interoperability
 // ✅ Extension points for IEEE arithmetic
+//
+// ISO/IEC 1539-1:1997 SPEC-GRAMMAR MAPPING (PARSER):
+// Section 4 (Types)        -> type_spec_f95, literal_f95, derived_type_def_f95
+// Section 5 (Declarations) -> type_declaration_stmt_f95, array_spec_f95, attr_spec_f95
+// Section 6 (Variables)    -> variable_f95, section_subscript_f95
+// Section 7 (Expressions)  -> expr_f95, primary_f95, forall_*, where_*_f95
+// Section 8 (Constructs)   -> executable_construct_f95, construct_f95
+// Section 9 (I/O)          -> read_stmt_f95, write_stmt_f95, io_control_spec_f95
+// Section 11 (Programs)    -> program_unit_f95, main_program_f95, module_f95
+// Section 12 (Procedures)  -> function_stmt_f95, subroutine_stmt_f95, prefix_f95
+// Section 13 (Intrinsics)  -> identifier_or_keyword_f95 (token aliasing)
+//
+// J3/98-114 (Request for Interpretation):
+// - Dummy argument and function result characteristics are semantic
+//   constraints, not enforced by this grammar (see docs/fortran_95_audit.md)
 //
 // VALIDATION NOTES:
 // ✅ Ready for targeted testing with representative F95 code
