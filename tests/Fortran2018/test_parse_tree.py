@@ -14,11 +14,11 @@ from Fortran2018Parser import Fortran2018Parser  # type: ignore
 from antlr4.error.ErrorListener import ErrorListener  # type: ignore
 from fixture_utils import load_fixture
 
-class TestErrorListener(ErrorListener):
+class ParseErrorListener(ErrorListener):
     def __init__(self):
         super().__init__()
         self.errors = []
-        
+
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         self.errors.append(f"Line {line}:{column}: {msg}")
 
@@ -38,45 +38,39 @@ def print_tree(node, indent=0):
 def test_if_parse_tree():
     code = load_fixture(
         "Fortran2018",
-        "test_if_construct",
-        "if_construct_only.f90",
+        "test_parse_tree",
+        "if_construct_program.f90",
     )
-    
+
     print(f"Testing IF construct parse tree:")
     print(f"Code: {repr(code)}")
     print("=" * 50)
-    
+
     input_stream = InputStream(code)
     lexer = Fortran2018Lexer(input_stream)
     token_stream = CommonTokenStream(lexer)
     parser = Fortran2018Parser(token_stream)
-    
-    error_listener = TestErrorListener()
+
+    error_listener = ParseErrorListener()
     parser.removeErrorListeners()
     parser.addErrorListener(error_listener)
-    
-    try:
-        tree = parser.if_construct()
-        
-        print("Parse tree structure:")
-        print_tree(tree)
-        
-        print(f"\nErrors: {len(error_listener.errors)}")
-        for error in error_listener.errors:
-            print(f"  {error}")
-            
-        # Check if we have a valid tree
-        if tree and hasattr(tree, 'children'):
-            print(f"\n✅ Parse tree created with {len(tree.children)} children")
-            return len(error_listener.errors) == 0
-        else:
-            print(f"\n❌ No parse tree created")
-            return False
-            
-    except Exception as e:
-        print(f"❌ Parse failed with exception: {e}")
-        return False
+
+    tree = parser.program_unit_f2018()
+
+    print("Parse tree structure:")
+    print_tree(tree)
+
+    print(f"\nErrors: {len(error_listener.errors)}")
+    for error in error_listener.errors:
+        print(f"  {error}")
+
+    assert tree is not None, "Parse tree should not be None"
+    assert hasattr(tree, 'children'), "Parse tree should have children attribute"
+    assert len(error_listener.errors) == 0, (
+        f"Expected no parse errors, got: {error_listener.errors}"
+    )
+    print(f"\nParse tree created with {len(tree.children)} children")
 
 if __name__ == "__main__":
-    success = test_if_parse_tree()
-    print(f"\nOverall success: {'✅' if success else '❌'}")
+    test_if_parse_tree()
+    print("\nOverall success")
