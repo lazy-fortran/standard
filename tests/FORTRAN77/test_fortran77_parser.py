@@ -5,7 +5,6 @@ Tests for FORTRAN 77 structured programming features: CHARACTER, IF-THEN-ELSE
 """
 
 import sys
-import os
 import unittest
 from pathlib import Path
 
@@ -19,28 +18,24 @@ try:
     from FORTRAN77Lexer import FORTRAN77Lexer  # type: ignore
     from FORTRAN77Parser import FORTRAN77Parser  # type: ignore
     from fixture_utils import load_fixture
-    from shared_fortran_tests import (
-        STATEMENT_FUNCTION_SIMPLE_CASES,
-        STATEMENT_FUNCTION_MULTI_ARG_CASES,
-        STATEMENT_FUNCTION_IN_BODY_CASES,
-        ARRAY_ELEMENT_LITERAL_INDEX_CASES,
-        ARRAY_ELEMENT_EXPR_INDEX_CASES,
-        ARRAY_ELEMENT_ASSIGNMENT_CASES,
-        STATEMENT_BODY_DISAMBIGUATION_CASES,
-    )
+    from shared_fortran_tests import StatementFunctionTestMixin
 except ImportError as e:
     print(f"Import error: {e}")
     FORTRAN77Parser = None
 
 
-class TestFORTRAN77Parser(unittest.TestCase):
+class TestFORTRAN77Parser(StatementFunctionTestMixin, unittest.TestCase):
     """Test FORTRAN 77 (1977) parser rules - Structured Programming Revolution"""
-    
+
+    LexerClass = FORTRAN77Lexer
+    ParserClass = FORTRAN77Parser
+    fixture_standard = "FORTRAN77"
+
     def setUp(self):
         """Set up test fixtures"""
         if FORTRAN77Parser is None:
             self.skipTest("FORTRAN77Parser not available")
-    
+
     def parse(self, text, rule_name='main_program'):
         """Helper to parse text using specified rule"""
         input_stream = InputStream(text)
@@ -292,8 +287,7 @@ END IF"""
     def test_proper_inheritance(self):
         """Test that FORTRAN77 properly inherits from FORTRAN66"""
         # Read the grammar file
-        import os
-        grammar_path = os.path.join('grammars', 'FORTRAN77Parser.g4')
+        grammar_path = ROOT.parent / "grammars" / "FORTRAN77Parser.g4"
         with open(grammar_path, 'r') as f:
             content = f.read()
         
@@ -333,109 +327,14 @@ END IF"""
                 self.assertIn(expected_type, tree.getText())
 
     # ====================================================================
-    # FORTRAN 77 STATEMENT FUNCTION STATEMENT (F77 Section 8)
+    # FORTRAN 77 STATEMENT FUNCTION TESTS
     # ====================================================================
-
-    def test_statement_function_simple(self):
-        """Test simple statement function definition (F77 Section 8)"""
-        for text in STATEMENT_FUNCTION_SIMPLE_CASES:
-            with self.subTest(stmt_func=text):
-                tree = self.parse(text, 'statement_function_stmt')
-                self.assertIsNotNone(tree)
-
-    def test_statement_function_multiple_args(self):
-        """Test statement function with multiple arguments"""
-        for text in STATEMENT_FUNCTION_MULTI_ARG_CASES:
-            with self.subTest(stmt_func=text):
-                tree = self.parse(text, 'statement_function_stmt')
-                self.assertIsNotNone(tree)
-
-    def test_statement_function_in_statement_body(self):
-        """Test statement function as statement_body alternative"""
-        for text in STATEMENT_FUNCTION_IN_BODY_CASES:
-            with self.subTest(stmt=text):
-                tree = self.parse(text, 'statement_body')
-                self.assertIsNotNone(tree)
-
-    def test_statement_function_fixture(self):
-        """Test program with statement function definitions"""
-        program = load_fixture(
-            "FORTRAN77",
-            "test_fortran77_parser",
-            "statement_function.f",
-        )
-
-        tree = self.parse(program, 'main_program')
-        self.assertIsNotNone(tree)
-
+    # Note: Statement function tests, negative tests (array element
+    # assignments), and disambiguation tests are provided by the
+    # StatementFunctionTestMixin inherited from shared_fortran_tests.py.
+    # FORTRAN 77 (X3.9-1978 Section 8) uses identical semantics to
+    # FORTRAN 66 (X3.9-1966 Section 7.2) for statement functions.
     # ====================================================================
-    # NEGATIVE TESTS: array element assignments vs statement_function_stmt
-    # ====================================================================
-    # Per F77 Section 8, statement function dummy arguments must be simple
-    # identifiers, not arbitrary expressions. Array element assignments
-    # like A(1) = expr or A(I+1, J) = expr should NOT parse as statement
-    # functions; they must parse as assignment_stmt instead.
-    # ====================================================================
-
-    def test_array_element_not_statement_function_literal_index(self):
-        """Verify array element with literal index is NOT a statement function"""
-        for text in ARRAY_ELEMENT_LITERAL_INDEX_CASES:
-            with self.subTest(array_assignment=text):
-                input_stream = InputStream(text)
-                lexer = FORTRAN77Lexer(input_stream)
-                token_stream = CommonTokenStream(lexer)
-                parser = FORTRAN77Parser(token_stream)
-                parser.statement_function_stmt()
-                self.assertGreater(
-                    parser.getNumberOfSyntaxErrors(), 0,
-                    f"'{text}' should NOT parse as statement_function_stmt"
-                )
-
-    def test_array_element_not_statement_function_expr_index(self):
-        """Verify array element with expression index is NOT a statement function"""
-        for text in ARRAY_ELEMENT_EXPR_INDEX_CASES:
-            with self.subTest(array_assignment=text):
-                input_stream = InputStream(text)
-                lexer = FORTRAN77Lexer(input_stream)
-                token_stream = CommonTokenStream(lexer)
-                parser = FORTRAN77Parser(token_stream)
-                parser.statement_function_stmt()
-                self.assertGreater(
-                    parser.getNumberOfSyntaxErrors(), 0,
-                    f"'{text}' should NOT parse as statement_function_stmt"
-                )
-
-    def test_array_element_parses_as_assignment_stmt(self):
-        """Verify array element assignments parse correctly as assignment_stmt"""
-        for text in ARRAY_ELEMENT_ASSIGNMENT_CASES:
-            with self.subTest(array_assignment=text):
-                input_stream = InputStream(text)
-                lexer = FORTRAN77Lexer(input_stream)
-                token_stream = CommonTokenStream(lexer)
-                parser = FORTRAN77Parser(token_stream)
-                tree = parser.assignment_stmt()
-                self.assertIsNotNone(tree)
-                self.assertEqual(
-                    parser.getNumberOfSyntaxErrors(), 0,
-                    f"'{text}' should parse as assignment_stmt without errors"
-                )
-
-    def test_statement_body_disambiguates_array_vs_function(self):
-        """Verify statement_body correctly parses array elements as assignments"""
-        for text, expected_type in STATEMENT_BODY_DISAMBIGUATION_CASES:
-            with self.subTest(stmt=text, expected=expected_type):
-                input_stream = InputStream(text)
-                lexer = FORTRAN77Lexer(input_stream)
-                token_stream = CommonTokenStream(lexer)
-                parser = FORTRAN77Parser(token_stream)
-                tree = parser.statement_body()
-                self.assertIsNotNone(tree)
-                child = tree.getChild(0)
-                child_type = type(child).__name__
-                self.assertIn(
-                    expected_type, child_type,
-                    f"'{text}' should parse as {expected_type}, got {child_type}"
-                )
 
 
 if __name__ == "__main__":
