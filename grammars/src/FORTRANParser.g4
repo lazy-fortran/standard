@@ -253,9 +253,12 @@ frequency_stmt
 
 // READ statement - Appendix B rows 20-24
 // C28-6003 Chapter III.A: READ n, list - read using format n
+// Row 20: READ n, list - formatted input with variable list
+// Row 24: READ n - formatted input with FORMAT-implied list
 // Simple form (READ list) also accepted for compatibility
 read_stmt_basic
-    : READ label COMMA input_list       // READ n, list (formatted)
+    : READ label COMMA input_list       // READ n, list (row 20, formatted)
+    | READ label                        // READ n (row 24, format-only)
     | READ input_list                   // READ list (simple form)
     ;
 
