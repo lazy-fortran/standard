@@ -26,10 +26,10 @@ from pathlib import Path
 # Add tests root (for fixture_utils) and grammars directory to path for imports
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT))
-sys.path.append(str(ROOT.parent / "grammars"))
+sys.path.append(str(ROOT.parent / "grammars/generated/early"))
 
 # Keep original relative grammars path for compatibility
-sys.path.insert(0, 'grammars')
+sys.path.insert(0, 'grammars/generated/early')
 
 from fixture_utils import load_fixture
 
@@ -437,8 +437,8 @@ class TestFORTRANHistoricalAccuracy:
     def test_educational_documentation(self):
         """Verify comprehensive documentation is present."""
         # Read the lexer file and verify documentation
-        lexer_path = os.path.join(os.path.dirname(__file__), 
-                                  '../../grammars/FORTRANLexer.g4')
+        lexer_path = os.path.join(os.path.dirname(__file__),
+                                  '../../grammars/src/FORTRANLexer.g4')
         
         with open(lexer_path, 'r') as f:
             content = f.read()

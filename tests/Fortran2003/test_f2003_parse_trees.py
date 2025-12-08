@@ -10,7 +10,7 @@ import pytest
 from pathlib import Path
 
 # Add grammars directory to path
-sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
+sys.path.append(str(Path(__file__).parent.parent.parent / "grammars/generated/modern"))
 
 from antlr4 import *
 

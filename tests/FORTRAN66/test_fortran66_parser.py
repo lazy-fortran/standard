@@ -12,7 +12,7 @@ from pathlib import Path
 # Add tests root (for fixture_utils) and grammars directory to path for imports
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT))
-sys.path.append(str(ROOT.parent / "grammars"))
+sys.path.append(str(ROOT.parent / "grammars/generated/early"))
 
 try:
     from antlr4 import InputStream, CommonTokenStream  # type: ignore

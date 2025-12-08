@@ -12,9 +12,9 @@ from pathlib import Path
 # Add tests root (for fixture_utils) and grammars directory to path for imports
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT))
-sys.path.append(str(ROOT.parent / "grammars"))
+sys.path.append(str(ROOT.parent / "grammars/generated/early"))
 
-sys.path.insert(0, 'grammars')
+sys.path.insert(0, 'grammars/generated/early')
 
 try:
     from antlr4 import InputStream, CommonTokenStream
@@ -140,7 +140,7 @@ class TestFORTRANIIParser(unittest.TestCase):
         """Verify FORTRAN II grammar is a real implementation, not a stub"""
         # Read the grammar file to check for stub indicators
         import os
-        grammar_path = os.path.join('grammars', 'FORTRANIIParser.g4')
+        grammar_path = os.path.join('grammars', 'src', 'FORTRANIIParser.g4')
         with open(grammar_path, 'r') as f:
             content = f.read()
 
@@ -176,7 +176,7 @@ class TestFORTRANIIParser(unittest.TestCase):
         """Test that FORTRAN II expression grammar has proper precedence"""
         # Verify the grammar file contains proper precedence hierarchy rules
         import os
-        grammar_path = os.path.join('grammars', 'FORTRANIIParser.g4')
+        grammar_path = os.path.join('grammars', 'src', 'FORTRANIIParser.g4')
         with open(grammar_path, 'r') as f:
             content = f.read()
 

@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 
 # Add grammars directory to path for imports
-sys.path.insert(0, 'grammars')
+sys.path.insert(0, 'grammars/generated/early')
 
 from antlr4 import InputStream, CommonTokenStream
 from FORTRANLexer import FORTRANLexer

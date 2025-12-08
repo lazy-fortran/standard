@@ -7,7 +7,7 @@ from pathlib import Path
 # Ensure we can import fixture utilities and grammars
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT))
-sys.path.append(str(ROOT.parent / "grammars"))
+sys.path.append(str(ROOT.parent / "grammars/generated/modern"))
 
 from antlr4 import *  # type: ignore
 from antlr4.error.ErrorListener import ErrorListener  # type: ignore
