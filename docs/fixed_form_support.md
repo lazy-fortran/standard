@@ -65,9 +65,44 @@ every vendor implementation.
     and an optional `NEWLINE`, reflecting the punch‑card structure.
   - Layout is still **logical**, not column‑sensitive; any indentation
     that keeps tokens in the right order is accepted.
-  - Column‑1 `C`/`*` comments and strict label column ranges are not
-    enforced; code relying on those details may fall outside the
-    supported subset.
+
+#### Strict Fixed-Form Mode (tools/strict_fixed_form.py)
+
+FORTRAN II now provides an optional **strict fixed-form preprocessor** that
+validates and converts IBM 704 card-image source files according to the
+C28-6000-2 (1958) specification:
+
+- **Card layout validation** per C28-6000-2 Part I, Chapter 2:
+  - Columns 1–5: Statement labels (numeric 1–99999 or blank)
+  - Column 6: Continuation mark (non-blank = continuation)
+  - Columns 7–72: Statement text
+  - Columns 73–80: Sequence/identification field (ignored)
+  - Column 1: `C` or `*` marks a comment card
+
+- **Usage**:
+  ```python
+  from tools.strict_fixed_form import validate_strict_fixed_form, convert_to_lenient
+
+  # Validate strict card layout
+  result = validate_strict_fixed_form(source)
+  if not result.valid:
+      for error in result.errors:
+          print(f"Line {error.line_number}: {error.message}")
+
+  # Convert to layout-lenient form for parsing
+  lenient, result = convert_to_lenient(source, strip_comments=True)
+  ```
+
+- **Test fixtures** in `tests/fixtures/FORTRANII/test_strict_fixed_form/`:
+  - `valid_subroutine.f`, `valid_function.f`, `valid_main.f`: Authentic
+    80-column card layouts with sequence numbers
+  - `valid_continuation.f`: Multi-card statement continuations
+  - `invalid_label_alpha.f`, `invalid_continuation_labeled.f`: Invalid
+    layouts that strict mode correctly rejects
+
+The strict mode preprocessor enables historical audits requiring exact
+card-image conformance while keeping the lenient grammar parsing mode
+available for modern tooling.
 
 ### 2.3 FORTRAN 66 (1966) and FORTRAN 77 (1977)
 
