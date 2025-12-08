@@ -98,7 +98,6 @@ statement_body
     | save_stmt         // NEW: SAVE statement
     | intrinsic_stmt    // NEW: INTRINSIC statement
     | external_stmt     // NEW: EXTERNAL statement
-    | data_stmt         // NEW: DATA statement
     ;
 
 // Block IF construct (NEW in FORTRAN 77)
