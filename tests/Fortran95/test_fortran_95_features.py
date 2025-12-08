@@ -105,14 +105,19 @@ class TestFortran95Parser:
         return parser
 
     def test_pure_and_elemental_procedures(self):
-        """PURE and ELEMENTAL procedure headers parse."""
+        """PURE and ELEMENTAL procedure headers parse.
+
+        NOTE: PURE and ELEMENTAL are Fortran 95 features (ISO/IEC 1539-1:1997),
+        NOT Fortran 90 features. They are parsed via function_stmt_f95 and
+        subroutine_stmt_f95 rules with prefix_f95 including PURE/ELEMENTAL.
+        """
         pure_fun = load_fixture(
             "Fortran95",
             "test_fortran_95_features",
             "pure_function_stmt.f90",
         )
         parser = self.create_parser_for_rule(pure_fun)
-        tree = parser.pure_function_stmt()
+        tree = parser.function_stmt_f95()
         assert tree is not None
         assert parser.getNumberOfSyntaxErrors() == 0
 
@@ -122,7 +127,7 @@ class TestFortran95Parser:
             "elemental_subroutine_stmt.f90",
         )
         parser = self.create_parser_for_rule(elemental_sub)
-        tree = parser.elemental_subroutine_stmt()
+        tree = parser.subroutine_stmt_f95()
         assert tree is not None
         assert parser.getNumberOfSyntaxErrors() == 0
 
