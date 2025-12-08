@@ -500,3 +500,142 @@ annotations required by #176 are in place, Fortran 2008 will have a
 complete, spec‑aware grammar audit comparable in depth to the Fortran
 90/95/2003 audits already in this repository.
 
+---
+
+## Appendix A. ISO/IEC 1539-1:2010 Grammar Cross-Walk
+
+This appendix provides a direct mapping from ISO/IEC 1539-1:2010 syntax
+rules to grammar rules in `Fortran2008Lexer.g4` and `Fortran2008Parser.g4`.
+
+### A.1 Program Structure (Section 11)
+
+| ISO Rule | ISO Description | Grammar Rule |
+|----------|-----------------|--------------|
+| R202 | program-unit | `program_unit_f2008` |
+| R1101 | main-program | `main_program_f2008` |
+| R1104 | module | `module_f2008` |
+| R1116 | submodule | `submodule_f2008` |
+| R1117 | submodule-stmt | `submodule_stmt` |
+| R1118 | parent-identifier | `parent_identifier` |
+| R1119 | end-submodule-stmt | `end_submodule_stmt` |
+| R1227 | external-subprogram | `external_subprogram_f2008` |
+| R1223 | function-subprogram | `function_subprogram_f2008` |
+| R1231 | subroutine-subprogram | `subroutine_subprogram_f2008` |
+| R1224 | function-stmt | `function_stmt_f2008` |
+| R1232 | subroutine-stmt | `subroutine_stmt_f2008` |
+
+### A.2 Specification and Execution Parts (Section 2)
+
+| ISO Rule | ISO Description | Grammar Rule |
+|----------|-----------------|--------------|
+| R204 | specification-part | `specification_part_f2008` |
+| R207 | declaration-construct | `declaration_construct_f2008` |
+| R208 | execution-part | `execution_part_f2008` |
+| R213 | executable-construct | `executable_construct_f2008` |
+
+### A.3 Coarrays (Sections 5.3.6, 6.6, 8.5)
+
+| ISO Rule | ISO Description | Grammar Rule |
+|----------|-----------------|--------------|
+| R509 | coarray-spec | `coarray_spec` |
+| R624 | image-selector | `coarray_spec` (reused) |
+| R625 | cosubscript-list | `cosubscript_list` |
+| R858 | sync-all-stmt | `sync_all_stmt` |
+| R859 | sync-images-stmt | `sync_images_stmt` |
+| R860 | image-set | `image_set` |
+| R862 | sync-memory-stmt | `sync_memory_stmt` |
+| R863 | sync-stat | `sync_stat` |
+| R503 | entity-decl (coarray) | `entity_decl` |
+| R601 | designator (coindexed) | `lhs_expression` |
+
+### A.4 DO CONCURRENT (Section 8.1.6.6)
+
+| ISO Rule | ISO Description | Grammar Rule |
+|----------|-----------------|--------------|
+| R818 | loop-control (CONCURRENT) | `do_concurrent_stmt` |
+| R819 | concurrent-header | `concurrent_header` |
+| R820 | concurrent-spec | `forall_triplet_spec_list` |
+| R821 | concurrent-control | `forall_triplet_spec` |
+
+### A.5 BLOCK Construct (Section 8.1.4)
+
+| ISO Rule | ISO Description | Grammar Rule |
+|----------|-----------------|--------------|
+| R807 | block-construct | `block_construct_f2008` |
+| R808 | block-stmt | (inline in rule) |
+| R809 | end-block-stmt | (inline in rule) |
+
+### A.6 Separate Module Procedures (Section 12.6.2.5)
+
+| ISO Rule | ISO Description | Grammar Rule |
+|----------|-----------------|--------------|
+| R1108 | module-subprogram | `module_subprogram` |
+| R1237 | separate-module-subprogram | `module_subroutine_subprogram_f2008`, `module_function_subprogram_f2008` |
+| R1238 | mp-subprogram-stmt | `module_subroutine_stmt_f2008`, `module_function_stmt_f2008` |
+
+### A.7 Type Declarations (Section 5)
+
+| ISO Rule | ISO Description | Grammar Rule |
+|----------|-----------------|--------------|
+| R502 | attr-spec | `attr_spec` |
+| R544 | contiguous-stmt | `contiguous_stmt` |
+| -- | ISO_FORTRAN_ENV kinds | `enhanced_intrinsic_declaration` |
+
+### A.8 ALLOCATE Statement (Section 6.7.1)
+
+| ISO Rule | ISO Description | Grammar Rule |
+|----------|-----------------|--------------|
+| R626 | allocate-stmt | `allocate_stmt_f2008` |
+| R627 | allocation-list | `allocation_list_f2008` |
+| R628 | allocation | `allocation_f2008` |
+
+### A.9 ERROR STOP (Section 8.4)
+
+| ISO Rule | ISO Description | Grammar Rule |
+|----------|-----------------|--------------|
+| R856 | error-stop-stmt | `error_stop_stmt` |
+| R857 | stop-code | (inline in rule) |
+
+### A.10 Intrinsic Procedures (Section 13.7)
+
+| ISO Section | Procedure | Grammar Rule |
+|-------------|-----------|--------------|
+| 13.7.22-27 | BESSEL_J0/J1/JN, BESSEL_Y0/Y1/YN | `bessel_function_call` |
+| 13.7.52 | ERF | `math_function_call` |
+| 13.7.53 | ERFC | `math_function_call` |
+| 13.7.58 | FINDLOC | `array_function_call` |
+| 13.7.61 | GAMMA | `math_function_call` |
+| 13.7.108 | LOG_GAMMA | `math_function_call` |
+| 13.7.119 | NORM2 | `array_function_call` |
+| 13.7.121 | NUM_IMAGES | `image_function_call` |
+| 13.7.127 | PARITY | `array_function_call` |
+| 13.7.163 | STORAGE_SIZE | `image_function_call` |
+| 13.7.165 | THIS_IMAGE | `image_function_call` |
+
+### A.11 Lexer Tokens
+
+| ISO Reference | Token | Lexer Rule |
+|---------------|-------|------------|
+| Section 6.6 | `[` | `LBRACKET` |
+| Section 6.6 | `]` | `RBRACKET` |
+| Section 11.2.3 | SUBMODULE | `SUBMODULE` |
+| Section 11.2.3 | END SUBMODULE | `END_SUBMODULE` |
+| Section 8.1.6.6 | CONCURRENT | `CONCURRENT` |
+| Section 5.3.7 | CONTIGUOUS | `CONTIGUOUS` |
+| Section 8.4 | ERROR STOP | `ERROR_STOP` |
+| Section 8.5 | SYNC | `SYNC` |
+| Section 8.5.3 | ALL | `ALL` |
+| Section 8.5.4 | IMAGES | `IMAGES` |
+| Section 8.5.5 | MEMORY | `MEMORY` |
+| Section 13.7.165 | THIS_IMAGE | `THIS_IMAGE` |
+| Section 13.7.121 | NUM_IMAGES | `NUM_IMAGES` |
+| Section 13.7.22-27 | BESSEL_* | `BESSEL_J0`, `BESSEL_J1`, etc. |
+| Section 13.7.52-53 | ERF, ERFC | `ERF`, `ERFC` |
+| Section 13.7.61, 108 | GAMMA, LOG_GAMMA | `GAMMA`, `LOG_GAMMA` |
+| Section 13.7.119 | NORM2 | `NORM2` |
+| Section 13.7.127 | PARITY | `PARITY` |
+| Section 13.7.58 | FINDLOC | `FINDLOC` |
+| Section 13.7.163 | STORAGE_SIZE | `STORAGE_SIZE` |
+| Section 13.8.2 | INT8/16/32/64 | `INT8`, `INT16`, `INT32`, `INT64` |
+| Section 13.8.2 | REAL32/64/128 | `REAL32`, `REAL64`, `REAL128` |
+
