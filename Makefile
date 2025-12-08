@@ -8,6 +8,10 @@ GRAMMAR_DIR = grammars
 TEST_DIR = tests
 PYTEST = python -m pytest
 
+# Detect whether a Java runtime is available for ANTLR regeneration.
+# If Java is not available, existing generated lexer/parser sources are used.
+JAVA_AVAILABLE := $(shell java -version >/dev/null 2>&1 && echo yes || echo no)
+
 # Grammar inheritance chain (build order matters!)
 GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023 LazyFortran2025
 
@@ -37,79 +41,123 @@ LazyFortran2025: $(GRAMMAR_DIR)/LazyFortran2025Lexer.py
 # FORTRAN I (1957) - Foundation
 $(GRAMMAR_DIR)/FORTRANLexer.py: $(GRAMMAR_DIR)/FORTRANLexer.g4 $(GRAMMAR_DIR)/FORTRANParser.g4
 	@echo "Building FORTRAN I (1957)..."
-	cd $(GRAMMAR_DIR) && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRANLexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRANParser.g4
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+		cd $(GRAMMAR_DIR) && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRANLexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRANParser.g4; \
+	else \
+		echo "Java runtime not available; using existing FORTRAN I (1957) lexer/parser sources"; \
+	fi
 
 # FORTRAN II (1958) - Independent Compilation
 $(GRAMMAR_DIR)/FORTRANIILexer.py: $(GRAMMAR_DIR)/FORTRANIILexer.g4 $(GRAMMAR_DIR)/FORTRANIIParser.g4 FORTRAN
 	@echo "Building FORTRAN II (1958)..."
-	cd $(GRAMMAR_DIR) && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRANIILexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRANIIParser.g4
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+		cd $(GRAMMAR_DIR) && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRANIILexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRANIIParser.g4; \
+	else \
+		echo "Java runtime not available; using existing FORTRAN II (1958) lexer/parser sources"; \
+	fi
 
 # FORTRAN 66 (1966) - First FORTRAN Standard with merged FORTRAN IV features
 $(GRAMMAR_DIR)/FORTRAN66Lexer.py: $(GRAMMAR_DIR)/FORTRAN66Lexer.g4 $(GRAMMAR_DIR)/FORTRAN66Parser.g4 FORTRANII
 	@echo "Building FORTRAN 66 (1966)..."
-	cd $(GRAMMAR_DIR) && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRAN66Lexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRAN66Parser.g4
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+		cd $(GRAMMAR_DIR) && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRAN66Lexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRAN66Parser.g4; \
+	else \
+		echo "Java runtime not available; using existing FORTRAN 66 (1966) lexer/parser sources"; \
+	fi
 
 # FORTRAN 77 (1977) - Structured Programming  
 $(GRAMMAR_DIR)/FORTRAN77Lexer.py: $(GRAMMAR_DIR)/FORTRAN77Lexer.g4 $(GRAMMAR_DIR)/FORTRAN77Parser.g4 FORTRAN66
 	@echo "Building FORTRAN 77 (1977)..."
-	cd $(GRAMMAR_DIR) && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRAN77Lexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRAN77Parser.g4
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+		cd $(GRAMMAR_DIR) && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRAN77Lexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . FORTRAN77Parser.g4; \
+	else \
+		echo "Java runtime not available; using existing FORTRAN 77 (1977) lexer/parser sources"; \
+	fi
 
 # Fortran 90 (1990) - Modern Foundation
 $(GRAMMAR_DIR)/Fortran90Lexer.py: $(GRAMMAR_DIR)/Fortran90Lexer.g4 $(GRAMMAR_DIR)/Fortran90Parser.g4 FORTRAN77
 	@echo "Building Fortran 90 (1990)..."
-	cd $(GRAMMAR_DIR) && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran90Lexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran90Parser.g4
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+		cd $(GRAMMAR_DIR) && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran90Lexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran90Parser.g4; \
+	else \
+		echo "Java runtime not available; using existing Fortran 90 (1990) lexer/parser sources"; \
+	fi
 
 # Fortran 95 (1995) - Minor Update
 $(GRAMMAR_DIR)/Fortran95Lexer.py: $(GRAMMAR_DIR)/Fortran95Lexer.g4 $(GRAMMAR_DIR)/Fortran95Parser.g4 Fortran90
 	@echo "Building Fortran 95 (1995)..."
-	cd $(GRAMMAR_DIR) && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran95Lexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran95Parser.g4
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+		cd $(GRAMMAR_DIR) && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran95Lexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran95Parser.g4; \
+	else \
+		echo "Java runtime not available; using existing Fortran 95 (1995) lexer/parser sources"; \
+	fi
 
 # Fortran 2003 (2003) - Object-Oriented Programming
 $(GRAMMAR_DIR)/Fortran2003Lexer.py: $(GRAMMAR_DIR)/Fortran2003Lexer.g4 $(GRAMMAR_DIR)/Fortran2003Parser.g4 Fortran95
 	@echo "Building Fortran 2003 (2003)..."
-	cd $(GRAMMAR_DIR) && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2003Lexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2003Parser.g4
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+		cd $(GRAMMAR_DIR) && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2003Lexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2003Parser.g4; \
+	else \
+		echo "Java runtime not available; using existing Fortran 2003 (2003) lexer/parser sources"; \
+	fi
 
 # Fortran 2008 (2008) - Enhanced Parallel Programming
 $(GRAMMAR_DIR)/Fortran2008Lexer.py: $(GRAMMAR_DIR)/Fortran2008Lexer.g4 $(GRAMMAR_DIR)/Fortran2008Parser.g4 Fortran2003
 	@echo "Building Fortran 2008 (2008)..."
-	cd $(GRAMMAR_DIR) && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2008Lexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2008Parser.g4
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+		cd $(GRAMMAR_DIR) && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2008Lexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2008Parser.g4; \
+	else \
+		echo "Java runtime not available; using existing Fortran 2008 (2008) lexer/parser sources"; \
+	fi
 
 # Fortran 2018 (2018) - Modern Fortran Revolution
 $(GRAMMAR_DIR)/Fortran2018Lexer.py: $(GRAMMAR_DIR)/Fortran2018Lexer.g4 $(GRAMMAR_DIR)/Fortran2018Parser.g4 Fortran2008
 	@echo "Building Fortran 2018 (2018)..."
-	cd $(GRAMMAR_DIR) && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2018Lexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2018Parser.g4
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+		cd $(GRAMMAR_DIR) && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2018Lexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2018Parser.g4; \
+	else \
+		echo "Java runtime not available; using existing Fortran 2018 (2018) lexer/parser sources"; \
+	fi
 
 # Fortran 2023 (2023) - Latest ISO Standard
 $(GRAMMAR_DIR)/Fortran2023Lexer.py: $(GRAMMAR_DIR)/Fortran2023Lexer.g4 $(GRAMMAR_DIR)/Fortran2023Parser.g4 Fortran2018
 	@echo "Building Fortran 2023 (2023)..."
-	cd $(GRAMMAR_DIR) && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2023Lexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2023Parser.g4
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+		cd $(GRAMMAR_DIR) && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2023Lexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . Fortran2023Parser.g4; \
+	else \
+		echo "Java runtime not available; using existing Fortran 2023 (2023) lexer/parser sources"; \
+	fi
 
 # Lazy Fortran 2025 (future standard) - Relaxed syntax on top of Fortran 2023
 $(GRAMMAR_DIR)/LazyFortran2025Lexer.py: $(GRAMMAR_DIR)/LazyFortran2025Lexer.g4 $(GRAMMAR_DIR)/LazyFortran2025Parser.g4 Fortran2023
 	@echo "Building Lazy Fortran 2025..."
-	cd $(GRAMMAR_DIR) && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . LazyFortran2025Lexer.g4 && \
-	$(ANTLR4) $(ANTLR4_PYTHON) -lib . LazyFortran2025Parser.g4
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+		cd $(GRAMMAR_DIR) && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . LazyFortran2025Lexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . LazyFortran2025Parser.g4; \
+	else \
+		echo "Java runtime not available; using existing Lazy Fortran 2025 lexer/parser sources"; \
+	fi
 
 
 # ====================================================================
