@@ -38,7 +38,7 @@ module interface_dtio
 end module interface_dtio
 
 program test_dt_interface
-  use interface_dtio
+  use interface_dtio, only: person_t
   implicit none
 
   type(person_t) :: p1, p2

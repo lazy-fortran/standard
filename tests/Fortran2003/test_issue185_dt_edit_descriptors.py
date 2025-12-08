@@ -125,10 +125,10 @@ class TestFortran2003DTEditDescriptors:
         code = """
 program test_dt
   implicit none
-  type :: t
+  type :: t_t
     integer :: x
-  end type t
-  type(t) :: v
+  end type t_t
+  type(t_t) :: v
   write(*, '(DT)') v
 end program test_dt
 """
@@ -141,10 +141,10 @@ end program test_dt
         code = """
 program test_dt
   implicit none
-  type :: t
+  type :: t_t
     integer :: x
-  end type t
-  type(t) :: v
+  end type t_t
+  type(t_t) :: v
   write(*, '(DT"mytype")') v
 end program test_dt
 """
@@ -157,10 +157,10 @@ end program test_dt
         code = '''
 program test_dt
   implicit none
-  type :: t
+  type :: t_t
     integer :: x
-  end type t
-  type(t) :: v
+  end type t_t
+  type(t_t) :: v
   write(*, "(DT'mytype')") v
 end program test_dt
 '''
@@ -173,10 +173,10 @@ end program test_dt
         code = """
 program test_dt
   implicit none
-  type :: t
+  type :: t_t
     integer :: x
-  end type t
-  type(t) :: v
+  end type t_t
+  type(t_t) :: v
   write(*, '(DT(10,2))') v
 end program test_dt
 """
@@ -189,10 +189,10 @@ end program test_dt
         code = """
 program test_dt
   implicit none
-  type :: t
+  type :: t_t
     integer :: x
-  end type t
-  type(t) :: v
+  end type t_t
+  type(t_t) :: v
   write(*, '(DT"fmt"(5,3,1))') v
 end program test_dt
 """
@@ -205,10 +205,10 @@ end program test_dt
         code = """
 program test_dt
   implicit none
-  type :: t
+  type :: t_t
     integer :: x
-  end type t
-  type(t) :: v1, v2
+  end type t_t
+  type(t_t) :: v1, v2
   write(*, '(DT,1X,DT)') v1, v2
 end program test_dt
 """
@@ -221,10 +221,10 @@ end program test_dt
         code = """
 program test_dt
   implicit none
-  type :: t
+  type :: t_t
     integer :: x
-  end type t
-  type(t) :: v1, v2
+  end type t_t
+  type(t_t) :: v1, v2
   write(*, '(2DT)') v1, v2
 end program test_dt
 """
@@ -237,10 +237,10 @@ end program test_dt
         code = """
 program test_dt
   implicit none
-  type :: t
+  type :: t_t
     integer :: x
-  end type t
-  type(t) :: v
+  end type t_t
+  type(t_t) :: v
   integer :: ios
   read(10, '(DT)', iostat=ios) v
 end program test_dt
@@ -254,11 +254,11 @@ end program test_dt
         code = """
 program test_dt
   implicit none
-  type :: t
+  type :: t_t
     integer :: x
-  end type t
-  type(t) :: v
-  write(*, '(A,DT"val"(10),I5,DT,F8.2)') 'x=', v, 42, v, 3.14
+  end type t_t
+  type(t_t) :: v
+  write(*, '(A,DT"val"(10),I5,DT,F8.2)') 'x=', v, 42, v, 3.14d0
 end program test_dt
 """
         tree, errors, _ = parse_f2003(code)
