@@ -342,10 +342,19 @@ forcing users to explicitly select the F95 grammar for such programs.
 
 The grammar comments in `Fortran90Lexer.g4` and `Fortran90Parser.g4`
 explicitly document this forward extension and reference issue #182.
-The F95 grammar (`Fortran95Parser.g4`) provides additional F95‑specific
-procedure rules (`pure_function_stmt`, `elemental_subroutine_stmt`, etc.)
-that are used by targeted tests but not yet integrated into the main
-program‑unit entry points.
+
+The Fortran 95 grammar (`Fortran95Parser.g4`) provides the proper
+standard‑compliant handling of PURE/ELEMENTAL via dedicated entry rules:
+
+- `program_unit_f95`: top‑level entry integrating F95 constructs.
+- `function_stmt_f95`, `subroutine_stmt_f95`: procedure statements with
+  full `prefix_f95` support (RECURSIVE, PURE, ELEMENTAL, type spec).
+- `function_subprogram_f95`, `subroutine_subprogram_f95`: complete
+  subprogram rules using the F95 procedure statements.
+
+These F95 rules are exercised by `tests/Fortran95/test_fortran_95_features.py`
+and referenced via the `program_unit_f95` entry rule in the generic fixture
+harness (`tests/test_fixture_parsing.py`).
 
 For users who require strict historical accuracy:
 
