@@ -31,8 +31,9 @@ fortran_program
     ;
 
 // Main program (inherited from FORTRAN I)
+// A main program is a sequence of statements ending with END.
 main_program
-    : statement_list
+    : statement_list end_stmt NEWLINE?
     ;
 
 // Statement list allowing empty lines (punch cards could be blank)
@@ -56,14 +57,14 @@ label
 subroutine_subprogram
     : SUBROUTINE IDENTIFIER parameter_list? NEWLINE
       statement_list
-      END
+      end_stmt NEWLINE?
     ;
 
 // Function definition (NEW in FORTRAN II)
 function_subprogram
     : type_spec? FUNCTION IDENTIFIER parameter_list NEWLINE
       statement_list
-      END
+      end_stmt NEWLINE?
     ;
 
 // Parameter list for subprograms
@@ -79,6 +80,9 @@ type_spec
 
 // All statement types available in 1957 FORTRAN
 // This was a remarkably small language by today's standards!
+// NOTE: end_stmt is NOT included here - it is handled separately as a
+// program unit terminator in main_program, subroutine_subprogram, and
+// function_subprogram rules.
 statement_body
     : assignment_stmt      // Variable = Expression (mathematical notation!)
     | goto_stmt           // Unconditional jump to labeled statement
@@ -96,7 +100,6 @@ statement_body
     | equivalence_stmt   // Variable memory overlay
     | frequency_stmt     // Optimization hints (unique to 1957!)
     | common_stmt        // Global variable declarations
-    | end_stmt          // End of program
     | return_stmt       // Return from subprogram
     | call_stmt         // NEW in FORTRAN II: Call subroutine
     ;

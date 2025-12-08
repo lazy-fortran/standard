@@ -67,7 +67,7 @@ STANDARD_CONFIGS: Dict[str, StandardConfig] = {
     "FORTRANII": StandardConfig(
         lexer_name="FORTRANIILexer",
         parser_name="FORTRANIIParser",
-        entry_rule="program_unit_core",
+        entry_rule="fortran_program",
     ),
     "FORTRAN66": StandardConfig(
         lexer_name="FORTRAN66Lexer",
@@ -427,29 +427,9 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
         "strict subset accepted by the stub grammar and is expected to report "
         "{errors} syntax errors."
     ),
-    (
-        "FORTRANII",
-        Path("FORTRANII/test_fortran_ii_parser/function_text.f"),
-    ): (
-        "FORTRAN II function-text fixture {relpath} documents constructs that "
-        "are not yet fully accepted by the simplified FORTRAN II grammar and "
-        "currently produce {errors} syntax errors."
-    ),
-    (
-        "FORTRANII",
-        Path("FORTRANII/test_fortran_ii_parser/subroutine_program.f"),
-    ): (
-        "FORTRAN II subroutine-program fixture {relpath} exceeds the current "
-        "stub grammar and is expected to yield {errors} syntax errors."
-    ),
-    (
-        "FORTRANII",
-        Path("FORTRANII/test_fortran_ii_parser/subroutine_text.f"),
-    ): (
-        "FORTRAN II subroutine-text fixture {relpath} represents richer "
-        "historical usage than the simplified grammar accepts and currently "
-        "reports {errors} syntax errors."
-    ),
+    # FORTRAN II fixtures have been updated to parse correctly with the
+    # enhanced grammar and fortran_program entry rule per issue #157.
+    # They are no longer marked as XPASS.
     # FORTRAN 66 fixtures have been updated to parse correctly with the
     # enhanced grammar per issue #144. They are no longer marked as XPASS.
     # Fortran2003 negative / fixed-form fixtures that intentionally exercise
