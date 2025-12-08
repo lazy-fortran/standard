@@ -358,6 +358,76 @@ class TestFORTRAN66Parser(unittest.TestCase):
         tree = self.parse(program, 'main_program')
         self.assertIsNotNone(tree)
 
+    # ====================================================================
+    # FORTRAN 66 AUXILIARY I/O STATEMENTS (X3.9-1966 Section 7.1.3.3)
+    # ====================================================================
+
+    def test_rewind_statement(self):
+        """Test REWIND statement (X3.9-1966 Section 7.1.3.3)"""
+        test_cases = [
+            "REWIND 5",
+            "REWIND 1",
+            "REWIND 10",
+            "REWIND I",
+        ]
+
+        for text in test_cases:
+            with self.subTest(rewind_stmt=text):
+                tree = self.parse(text, 'rewind_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_backspace_statement(self):
+        """Test BACKSPACE statement (X3.9-1966 Section 7.1.3.3)"""
+        test_cases = [
+            "BACKSPACE 5",
+            "BACKSPACE 1",
+            "BACKSPACE 10",
+            "BACKSPACE N",
+        ]
+
+        for text in test_cases:
+            with self.subTest(backspace_stmt=text):
+                tree = self.parse(text, 'backspace_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_endfile_statement(self):
+        """Test ENDFILE statement (X3.9-1966 Section 7.1.3.3)"""
+        test_cases = [
+            "ENDFILE 5",
+            "ENDFILE 1",
+            "ENDFILE 10",
+            "ENDFILE IUNIT",
+        ]
+
+        for text in test_cases:
+            with self.subTest(endfile_stmt=text):
+                tree = self.parse(text, 'endfile_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_auxiliary_io_in_statement_body(self):
+        """Test auxiliary I/O statements as statement_body alternatives"""
+        test_cases = [
+            "REWIND 5",
+            "BACKSPACE 5",
+            "ENDFILE 5",
+        ]
+
+        for text in test_cases:
+            with self.subTest(stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree)
+
+    def test_auxiliary_io_fixture(self):
+        """Test program with auxiliary I/O statements"""
+        program = load_fixture(
+            "FORTRAN66",
+            "test_fortran66_parser",
+            "auxiliary_io.f",
+        )
+
+        tree = self.parse(program, 'main_program')
+        self.assertIsNotNone(tree)
+
 
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail

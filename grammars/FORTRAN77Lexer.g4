@@ -56,12 +56,11 @@ INTRINSIC       : I N T R I N S I C ;
 // ENDDO is a widely used extension and is included here for convenience.
 ENDDO           : E N D D O ;
 
-// I/O enhancements
+// I/O enhancements (OPEN, CLOSE, INQUIRE new in FORTRAN 77)
+// Note: REWIND, BACKSPACE, ENDFILE are inherited from FORTRAN 66
 OPEN            : O P E N ;
 CLOSE           : C L O S E ;
 INQUIRE         : I N Q U I R E ;
-BACKSPACE       : B A C K S P A C E ;
-REWIND          : R E W I N D ;
 
 // ====================================================================
 // FORTRAN 77 STRING PROCESSING
