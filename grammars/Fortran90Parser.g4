@@ -42,9 +42,7 @@ options {
 
 // F90 program unit (major enhancement - adds modules)
 program_unit_f90
-    : main_program
-    | module                        // F90 major innovation
-    | external_subprogram           // Enhanced from shared core
+    : NEWLINE* (main_program | module | external_subprogram) NEWLINE*
     ;
 
 // Main program structure (enhanced with F90 features)
@@ -54,11 +52,11 @@ main_program
     ;
 
 program_stmt
-    : PROGRAM IDENTIFIER
+    : PROGRAM IDENTIFIER NEWLINE*
     ;
 
 end_program_stmt
-    : END (PROGRAM (IDENTIFIER)?)?
+    : END (PROGRAM (IDENTIFIER)?)? NEWLINE*
     ;
 
 // ====================================================================
@@ -71,16 +69,16 @@ module
     ;
 
 module_stmt
-    : MODULE IDENTIFIER
+    : MODULE IDENTIFIER NEWLINE*
     ;
 
 end_module_stmt
-    : END_MODULE (IDENTIFIER)?
+    : END_MODULE (IDENTIFIER)? NEWLINE*
     ;
 
 // Module subprogram section
 module_subprogram_part
-    : contains_stmt module_subprogram+
+    : contains_stmt NEWLINE* (module_subprogram NEWLINE*)*
     ;
 
 module_subprogram
@@ -89,7 +87,7 @@ module_subprogram
     ;
 
 contains_stmt
-    : CONTAINS
+    : CONTAINS NEWLINE?
     ;
 
 // USE statement (F90 module import)
@@ -142,7 +140,7 @@ interface_stmt
 generic_spec
     : IDENTIFIER                            // Generic procedure name
     | OPERATOR LPAREN operator_token RPAREN // Operator overloading
-    | ASSIGNMENT LPAREN ASSIGN RPAREN       // Assignment overloading
+    | ASSIGNMENT LPAREN EQUALS RPAREN       // Assignment overloading
     ;
 
 interface_specification
@@ -165,12 +163,12 @@ end_interface_stmt
 
 // Derived type definition (user-defined structures)
 derived_type_def
-    : derived_type_stmt component_def_stmt* end_type_stmt
+    : derived_type_stmt NEWLINE* (component_def_stmt NEWLINE*)* end_type_stmt
     ;
 
 derived_type_stmt
-    : TYPE type_name
-    | TYPE DOUBLE_COLON type_name
+    : TYPE type_name NEWLINE?
+    | TYPE DOUBLE_COLON type_name NEWLINE?
     ;
 
 type_name
@@ -183,12 +181,12 @@ component_def_stmt
     ;
 
 private_sequence_stmt
-    : PRIVATE
-    | SEQUENCE
+    : PRIVATE NEWLINE?
+    | SEQUENCE NEWLINE?
     ;
 
 end_type_stmt
-    : END_TYPE (type_name)?
+    : END_TYPE (type_name)? NEWLINE?
     ;
 
 // Structure constructor (F90 derived type initialization)
@@ -201,7 +199,7 @@ component_spec_list
     ;
 
 component_spec
-    : IDENTIFIER ASSIGN expr_f90    // Named component
+    : IDENTIFIER EQUALS expr_f90    // Named component
     | expr_f90                      // Positional component
     ;
 
@@ -211,7 +209,7 @@ component_spec
 
 // F90 type declaration statement (major enhancements)
 type_declaration_stmt_f90
-    : type_spec_f90 (COMMA attr_spec_f90)* DOUBLE_COLON? entity_decl_list_f90
+    : type_spec_f90 (COMMA attr_spec_f90)* DOUBLE_COLON? entity_decl_list_f90 NEWLINE?
     ;
 
 // Type specification (enhanced for F90)
@@ -237,12 +235,12 @@ derived_type_spec_f90
 
 // Kind selector for type parameters (F90 innovation)
 kind_selector
-    : LPAREN (KIND ASSIGN)? expr_f90 RPAREN
+    : LPAREN (KIND EQUALS)? expr_f90 RPAREN
     ;
 
 // Character length and kind selector (F90 enhancement)
 char_selector
-    : LPAREN (LEN ASSIGN)? expr_f90 (COMMA (KIND ASSIGN)? expr_f90)? RPAREN
+    : LPAREN (LEN EQUALS)? expr_f90 (COMMA (KIND EQUALS)? expr_f90)? RPAREN
     | LPAREN expr_f90 RPAREN        // Legacy F77 style
     ;
 
@@ -314,8 +312,8 @@ entity_decl_list_f90
     ;
 
 entity_decl_f90
-    : IDENTIFIER (LPAREN array_spec_f90 RPAREN)? (MULTIPLY char_length)? 
-      (ASSIGN expr_f90)?
+    : identifier_or_keyword (LPAREN array_spec_f90 RPAREN)? (MULTIPLY char_length)?
+      (EQUALS expr_f90)?
     ;
 
 char_length
@@ -376,7 +374,7 @@ pointer_object
 
 // Status variable for allocation/deallocation
 stat_variable
-    : STAT ASSIGN variable_f90
+    : STAT EQUALS variable_f90
     ;
 
 // ====================================================================
@@ -385,7 +383,7 @@ stat_variable
 
 // SELECT CASE construct (F90 major innovation)
 select_case_construct
-    : select_case_stmt case_construct* end_select_stmt
+    : select_case_stmt NEWLINE (NEWLINE* case_construct)* NEWLINE* end_select_stmt
     ;
 
 select_case_stmt
@@ -393,7 +391,7 @@ select_case_stmt
     ;
 
 case_construct
-    : case_stmt execution_part?
+    : case_stmt NEWLINE execution_part?
     ;
 
 case_stmt
@@ -417,7 +415,7 @@ case_value_range
     ;
 
 end_select_stmt
-    : END_SELECT (IDENTIFIER)?
+    : END_SELECT (IDENTIFIER)? NEWLINE?
     ;
 
 // WHERE construct (F90 array-oriented conditional)
@@ -452,9 +450,9 @@ do_stmt_f90
     ;
 
 loop_control
-    : (COMMA)? variable_f90 ASSIGN expr_f90 COMMA expr_f90 (COMMA expr_f90)?    
+    : (COMMA)? variable_f90 EQUALS expr_f90 COMMA expr_f90 (COMMA expr_f90)?
         // Counted loop
-    | (COMMA)? WHILE LPAREN logical_expr_f90 RPAREN                           
+    | (COMMA)? WHILE LPAREN logical_expr_f90 RPAREN
         // WHILE loop
     ;
 
@@ -507,10 +505,11 @@ primary_f90
     | LPAREN expr_f90 RPAREN
     ;
 
-// F90 intrinsic functions (SIZE, SHAPE, etc.)
+// F90 intrinsic functions (SIZE, SHAPE, RESHAPE, etc.)
 intrinsic_function_f90
     : SIZE LPAREN actual_arg_spec_list RPAREN         // SIZE array intrinsic
-    | SHAPE_INTRINSIC LPAREN actual_arg_spec_list RPAREN     // SHAPE array intrinsic  
+    | SHAPE_INTRINSIC LPAREN actual_arg_spec_list RPAREN     // SHAPE array intrinsic
+    | RESHAPE_INTRINSIC LPAREN actual_arg_spec_list RPAREN   // RESHAPE array intrinsic
     | LBOUND LPAREN actual_arg_spec_list RPAREN       // LBOUND array intrinsic
     | UBOUND LPAREN actual_arg_spec_list RPAREN       // UBOUND array intrinsic
     | ALLOCATED LPAREN variable_f90 RPAREN            // ALLOCATED status
@@ -523,11 +522,11 @@ intrinsic_function_f90
 
 // F90 variables (enhanced with derived type components and array sections)
 variable_f90
-    : IDENTIFIER (substring_range)?                             // Simple variable
-    | IDENTIFIER LPAREN section_subscript_list RPAREN (substring_range)?    
+    : identifier_or_keyword (substring_range)?                   // Simple variable
+    | identifier_or_keyword LPAREN section_subscript_list RPAREN (substring_range)?
         // Array element/section
-    | variable_f90 PERCENT IDENTIFIER (substring_range)?       // Derived type component
-    | variable_f90 LPAREN section_subscript_list RPAREN (substring_range)?  
+    | variable_f90 PERCENT identifier_or_keyword (substring_range)?  // Derived type component
+    | variable_f90 LPAREN section_subscript_list RPAREN (substring_range)?
         // Component array element
     ;
 
@@ -554,9 +553,10 @@ substring_range
 // ARRAY OPERATIONS (F90 MAJOR INNOVATION)
 // ====================================================================
 
-// Array constructor (F90 revolutionary feature)  
+// Array constructor (F90 revolutionary feature)
 array_constructor_f90
     : LPAREN SLASH ac_spec SLASH RPAREN     // F90 syntax: (/ ... /)
+    | LSQUARE ac_spec RSQUARE               // F2003 syntax: [ ... ] (backported)
     ;
 
 // Array constructor specification
@@ -575,7 +575,7 @@ ac_value
 
 // Implied DO in array constructor (F90 feature)
 ac_implied_do
-    : LPAREN ac_value_list COMMA do_variable ASSIGN expr_f90 COMMA expr_f90 
+    : LPAREN ac_value_list COMMA do_variable EQUALS expr_f90 COMMA expr_f90
       (COMMA expr_f90)? RPAREN
     ;
 
@@ -589,12 +589,12 @@ do_variable
 
 // Function statement (F90 enhancements)
 function_stmt
-    : (prefix)? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN (suffix)?
+    : (prefix)? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN (suffix)? NEWLINE?
     ;
 
-// Subroutine statement (F90 enhancements)  
+// Subroutine statement (F90 enhancements)
 subroutine_stmt
-    : (prefix)? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)?
+    : (prefix)? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? NEWLINE?
     ;
 
 // Procedure prefix (F90 enhancements)
@@ -611,11 +611,24 @@ prefix_spec
 
 // Function suffix (F90 RESULT clause)
 suffix
-    : RESULT LPAREN IDENTIFIER RPAREN
+    : RESULT LPAREN identifier_or_keyword RPAREN
     ;
 
 dummy_arg_name_list
-    : IDENTIFIER (COMMA IDENTIFIER)*
+    : identifier_or_keyword (COMMA identifier_or_keyword)*
+    ;
+
+// Keywords that can be used as identifiers in certain contexts
+identifier_or_keyword
+    : IDENTIFIER
+    | DATA         // DATA can be used as a variable name
+    | SIZE         // SIZE can be used as a variable name
+    | KIND         // KIND can be used as a parameter name
+    | LEN          // LEN can be used as a parameter name
+    | RESULT       // RESULT can be used as a variable name
+    | STAT         // STAT can be used as a variable name
+    | SUM_INTRINSIC  // SUM can be used as a variable/result name
+    | PRODUCT_INTRINSIC  // PRODUCT can be used as a result name
     ;
 
 // Enhanced procedure call (F90 keyword arguments)
@@ -634,7 +647,7 @@ actual_arg_spec_list
     ;
 
 actual_arg_spec
-    : IDENTIFIER ASSIGN expr_f90    // Keyword argument
+    : IDENTIFIER EQUALS expr_f90    // Keyword argument
     | expr_f90                      // Positional argument
     | MULTIPLY IDENTIFIER           // Alternate return (F77 compatibility)
     ;
@@ -671,15 +684,15 @@ io_control_spec_list
     ;
 
 io_control_spec
-    : UNIT ASSIGN expr_f90          // Unit specification
-    | FMT ASSIGN format_spec        // Format specification
-    | IOSTAT ASSIGN variable_f90    // I/O status
-    | ERR ASSIGN label              // Error handling
-    | END ASSIGN label              // End-of-file handling
-    | EOR ASSIGN label              // End-of-record handling (F90)
-    | ADVANCE ASSIGN expr_f90       // Non-advancing I/O (F90)
-    | SIZE ASSIGN variable_f90      // Characters transferred (F90)
-    | REC ASSIGN expr_f90           // Record number (direct access)
+    : UNIT EQUALS expr_f90          // Unit specification
+    | FMT EQUALS format_spec        // Format specification
+    | IOSTAT EQUALS variable_f90    // I/O status
+    | ERR EQUALS label              // Error handling
+    | END EQUALS label              // End-of-file handling
+    | EOR EQUALS label              // End-of-record handling (F90)
+    | ADVANCE EQUALS expr_f90       // Non-advancing I/O (F90)
+    | SIZE EQUALS variable_f90      // Characters transferred (F90)
+    | REC EQUALS expr_f90           // Record number (direct access)
     | expr_f90                      // Positional unit
     ;
 
@@ -729,7 +742,12 @@ boz_literal_constant
 
 // Specification part (F90 enhancements)
 specification_part
-    : (use_stmt | import_stmt)* (declaration_construct)*
+    : (NEWLINE* (use_stmt | import_stmt))* (NEWLINE* implicit_stmt_f90)? (NEWLINE* declaration_construct)* NEWLINE*
+    ;
+
+// IMPLICIT statement (F90)
+implicit_stmt_f90
+    : IMPLICIT NONE NEWLINE?
     ;
 
 import_stmt
@@ -785,11 +803,11 @@ intent_stmt
     ;
 
 public_stmt
-    : PUBLIC (DOUBLE_COLON access_id_list)?
+    : PUBLIC (DOUBLE_COLON access_id_list)? NEWLINE?
     ;
 
 private_stmt
-    : PRIVATE (DOUBLE_COLON access_id_list)?
+    : PRIVATE (DOUBLE_COLON access_id_list)? NEWLINE?
     ;
 
 access_id_list
@@ -827,7 +845,7 @@ target_decl
 
 // Execution part (enhanced for F90)
 execution_part
-    : executable_construct*
+    : (NEWLINE* executable_construct)* NEWLINE*
     ;
 
 executable_construct
@@ -846,12 +864,19 @@ executable_stmt
     | continue_stmt
     | read_stmt_f90                 // Enhanced I/O
     | write_stmt_f90                // Enhanced I/O
+    | print_stmt_f90                // F77-inherited print statement
     | allocate_stmt                 // F90 memory management
     | deallocate_stmt               // F90 memory management
     | nullify_stmt                  // F90 pointer nullification
     | where_stmt                    // F90 array conditional
     | pointer_assignment_stmt       // F90 pointer assignment
     | assignment_stmt_f90           // Last resort to avoid ENDIF conflict
+    ;
+
+// PRINT statement (F77 inherited)
+print_stmt_f90
+    : PRINT MULTIPLY (COMMA output_item_list)? NEWLINE?   // PRINT *, list
+    | PRINT format_spec (COMMA output_item_list)? NEWLINE?  // PRINT format, list
     ;
 
 // Construct (F90 enhanced control structures)
@@ -864,7 +889,7 @@ construct
 
 // F90 assignment statements
 assignment_stmt_f90
-    : variable_f90 ASSIGN expr_f90
+    : variable_f90 EQUALS expr_f90 NEWLINE?
     ;
 
 // F90 pointer assignment (major innovation)
@@ -879,7 +904,7 @@ where_stmt
 
 // Internal subprogram part (F90 feature)
 internal_subprogram_part
-    : contains_stmt internal_subprogram+
+    : contains_stmt NEWLINE* (internal_subprogram NEWLINE*)*
     ;
 
 internal_subprogram
@@ -905,11 +930,11 @@ subroutine_subprogram
     ;
 
 end_function_stmt
-    : END (FUNCTION (IDENTIFIER)?)?
+    : END (FUNCTION (IDENTIFIER)?)? NEWLINE?
     ;
 
 end_subroutine_stmt
-    : END (SUBROUTINE (IDENTIFIER)?)?
+    : END (SUBROUTINE (IDENTIFIER)?)? NEWLINE?
     ;
 
 // Function reference (enhanced for F90)
@@ -951,7 +976,7 @@ output_item
     ;
 
 io_implied_do
-    : LPAREN output_item_list COMMA do_variable ASSIGN expr_f90 COMMA expr_f90 
+    : LPAREN output_item_list COMMA do_variable EQUALS expr_f90 COMMA expr_f90
       (COMMA expr_f90)? RPAREN
     ;
 
@@ -975,7 +1000,7 @@ parameter_list
     ;
 
 parameter_assignment
-    : IDENTIFIER ASSIGN expr_f90
+    : IDENTIFIER EQUALS expr_f90
     ;
 
 data_stmt
