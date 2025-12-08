@@ -323,6 +323,61 @@ END IF"""
                 self.assertIsNotNone(tree)
                 self.assertIn(expected_type, tree.getText())
 
+    # ====================================================================
+    # FORTRAN 77 STATEMENT FUNCTION STATEMENT (F77 Section 8)
+    # ====================================================================
+
+    def test_statement_function_simple(self):
+        """Test simple statement function definition (F77 Section 8)"""
+        test_cases = [
+            "F(X) = X * X",
+            "AREA(R) = 3.14159 * R * R",
+            "SQUARE(N) = N ** 2",
+            "DOUBLE(X) = 2.0 * X",
+        ]
+
+        for text in test_cases:
+            with self.subTest(stmt_func=text):
+                tree = self.parse(text, 'statement_function_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_statement_function_multiple_args(self):
+        """Test statement function with multiple arguments"""
+        test_cases = [
+            "SUM(A, B) = A + B",
+            "AREA(L, W) = L * W",
+            "AVG(X, Y, Z) = (X + Y + Z) / 3.0",
+            "DIST(X1, Y1, X2, Y2) = SQRT((X2-X1)**2 + (Y2-Y1)**2)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(stmt_func=text):
+                tree = self.parse(text, 'statement_function_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_statement_function_in_statement_body(self):
+        """Test statement function as statement_body alternative"""
+        test_cases = [
+            "F(X) = X * X",
+            "AREA(L, W) = L * W",
+        ]
+
+        for text in test_cases:
+            with self.subTest(stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree)
+
+    def test_statement_function_fixture(self):
+        """Test program with statement function definitions"""
+        program = load_fixture(
+            "FORTRAN77",
+            "test_fortran77_parser",
+            "statement_function.f",
+        )
+
+        tree = self.parse(program, 'main_program')
+        self.assertIsNotNone(tree)
+
 
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail
