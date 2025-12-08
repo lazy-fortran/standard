@@ -71,6 +71,8 @@ statement_body
     | frequency_stmt                // Appendix B row 13: FREQUENCY n(i,j,...)
     | read_stmt_basic               // Appendix B rows 20-24: READ forms
     | write_stmt_basic              // Appendix B rows 25-27: WRITE forms
+    | print_stmt                    // Appendix B row 28: PRINT n, list
+    | punch_stmt                    // Appendix B row 29: PUNCH n, list
     | pause_stmt                    // Appendix B row 31: PAUSE / PAUSE n
     | dimension_stmt                // Appendix B row 14: DIMENSION v,v,...
     | equivalence_stmt              // Appendix B row 15: EQUIVALENCE sets
@@ -249,16 +251,32 @@ frequency_stmt
 // READ INPUT TAPE, WRITE OUTPUT TAPE, READ/WRITE TAPE/DRUM, etc.
 // ============================================================================
 
-// Basic READ statement - Appendix B rows 20-24 (simplified)
-// C28-6003 Chapter III: Full forms include format labels and device specs
+// READ statement - Appendix B rows 20-24
+// C28-6003 Chapter III.A: READ n, list - read using format n
+// Simple form (READ list) also accepted for compatibility
 read_stmt_basic
-    : READ input_list
+    : READ label COMMA input_list       // READ n, list (formatted)
+    | READ input_list                   // READ list (simple form)
     ;
 
-// Basic WRITE statement - Appendix B rows 25-27 (simplified)
+// WRITE statement - Appendix B rows 25-27 (simplified)
 // C28-6003 Chapter III: Full forms include format labels and device specs
 write_stmt_basic
     : WRITE output_list
+    ;
+
+// PRINT statement - Appendix B row 28
+// C28-6003 Chapter III.E: PRINT n, list - print to line printer using format n
+// List may be omitted per manual row 28 variant
+print_stmt
+    : PRINT label (COMMA output_list)?
+    ;
+
+// PUNCH statement - Appendix B row 29
+// C28-6003 Chapter III.E: PUNCH n, list - punch to cards using format n
+// List may be omitted per manual row 29 variant
+punch_stmt
+    : PUNCH label (COMMA output_list)?
     ;
 
 

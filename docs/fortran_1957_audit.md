@@ -92,13 +92,16 @@ Mapping that Appendix‑B list to the current grammar:
 
 - **Formatted I/O (FORMAT, READ/WRITE variants, PRINT, PUNCH)**
   - Status:
-    - `READ`/`WRITE`: **implemented in a simplified form only.**
-    - `FORMAT`, `PRINT`, `PUNCH` and tape-specific forms:
-      **partial / not implemented.**
-  - Evidence: `read_stmt_basic` / `write_stmt_basic` accept only
-    `READ input_list` / `WRITE output_list` (no format labels or
-    devices). `FORMAT`, `PRINT`, `PUNCH` exist as tokens but have no
-    corresponding parser rules; richer FORMAT/I/O fixtures are XPASS.
+    - `READ n, list` and `READ list`: **implemented and tested.**
+    - `PRINT n` and `PRINT n, list`: **implemented and tested.**
+    - `PUNCH n` and `PUNCH n, list`: **implemented and tested.**
+    - `FORMAT` statement: **token only, parser rule not implemented.**
+    - Tape-specific forms: **not implemented.**
+  - Evidence: `read_stmt_basic` accepts both `READ label COMMA input_list`
+    (formatted) and `READ input_list` (simple). `print_stmt` and
+    `punch_stmt` rules implement `PRINT/PUNCH n [, list]` forms per
+    C28-6003 rows 28-29. `write_stmt_basic` accepts `WRITE output_list`.
+    The fixture `io_statements.f` now parses with zero errors.
 
 - **Unformatted I/O (`READ TAPE`, `READ DRUM`, `WRITE TAPE`, `WRITE DRUM`)**
   - Status: **not implemented.**
@@ -172,22 +175,25 @@ Out-of-scope / not explicitly audited:
 
 Implemented (core subset):
 
-- Simplified `READ` and `WRITE` forms (`read_stmt_basic`,
-  `write_stmt_basic`) without devices or explicit FORMAT labels.
+- `READ n, list` (formatted read) and `READ list` (simple read) via
+  `read_stmt_basic` rule.
+- `PRINT n` and `PRINT n, list` (line printer output) via `print_stmt`.
+- `PUNCH n` and `PUNCH n, list` (card punch output) via `punch_stmt`.
+- `WRITE output_list` (simple output) via `write_stmt_basic`.
 - Basic use of `FORMAT` in fixtures, but without a dedicated
   `format_stmt` rule in `FORTRANParser.g4`.
 
 Known limitations (from fixtures and comments):
 
-- Several more ambitious FORMAT and I/O fixtures under
+- Several FORMAT and tape/drum I/O fixtures under
   `tests/fixtures/FORTRAN/test_fortran_historical_stub` are currently
   XPASS in `tests/test_fixture_parsing.py` and still produce syntax
-  errors. These include richer FORMAT tests and full historical
-  programs using more complex I/O.
+  errors. These include richer FORMAT tests requiring the FORMAT
+  statement parser rule.
 - FORMAT grammar does not attempt to fully reconstruct all edit
   descriptors and edge cases from IBM manuals.
-- `PRINT`, `PUNCH`, tape/drum I/O forms and `END FILE`/`REWIND`/
-  `BACKSPACE` are not modeled as full statements in the 1957 parser.
+- Tape/drum I/O forms and `END FILE`/`REWIND`/`BACKSPACE` are not
+  modeled as full statements in the 1957 parser.
 
 ## 5. Hollerith, DIMENSION/EQUIVALENCE and other 1957-specific features
 
@@ -272,16 +278,16 @@ each Appendix B entry to the corresponding grammar rule(s) or notes gaps.
 | 17  | f(a, b, ...) = e              | Not implemented                | Gap: stmt func  |
 | 18  | DO n i = m1, m2, m3           | `do_stmt_basic`                | Implemented     |
 | 19  | CONTINUE                      | `CONTINUE` token in body       | Implemented     |
-| 20  | READ n, list                  | Not implemented                | Gap: see #153   |
+| 20  | READ n, list                  | `read_stmt_basic`              | Implemented     |
 | 21  | READ INPUT TAPE i, n, list    | Not implemented                | Gap: see #153   |
 | 22  | READ TAPE i, list             | Not implemented                | Gap: see #153   |
 | 23  | READ DRUM i, j, list          | Not implemented                | Gap: see #153   |
-| 24  | READ n                        | Not implemented                | Gap: see #153   |
+| 24  | READ n                        | `read_stmt_basic` (via row 20) | Implemented     |
 | 25  | WRITE OUTPUT TAPE i, n, list  | Not implemented                | Gap: see #153   |
 | 26  | WRITE TAPE i, list            | Not implemented                | Gap: see #153   |
 | 27  | WRITE DRUM i, j, list         | Not implemented                | Gap: see #153   |
-| 28  | PRINT n, list                 | Token only                     | Gap: see #153   |
-| 29  | PUNCH n, list                 | Token only                     | Gap: see #153   |
+| 28  | PRINT n, list                 | `print_stmt`                   | Implemented     |
+| 29  | PUNCH n, list                 | `punch_stmt`                   | Implemented     |
 | 30  | STOP / STOP n                 | `STOP` token in body           | Implemented     |
 | 31  | PAUSE / PAUSE n               | `pause_stmt`                   | Implemented     |
 | 32  | END                           | `END` token in body            | Implemented     |

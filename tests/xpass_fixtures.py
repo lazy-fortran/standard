@@ -228,14 +228,6 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ),
     (
         "FORTRAN",
-        Path("FORTRAN/test_fortran_historical_stub/arithmetic_if_control_flow.f"),
-    ): (
-        "Historical FORTRAN arithmetic-IF control-flow fixture {relpath} "
-        "still produces {errors} syntax errors with the current stub "
-        "grammar; the example is retained for documentation."
-    ),
-    (
-        "FORTRAN",
         Path("FORTRAN/test_fortran_historical_stub/array_program_1957.f"),
     ): (
         "Historical FORTRAN 1957 array-program fixture {relpath} exercises "
@@ -279,22 +271,6 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ): (
         "Historical FORTRAN I/O-operations fixture {relpath} exercises "
         "1957-era I/O patterns beyond the simplified grammar and reports "
-        "{errors} syntax errors."
-    ),
-    (
-        "FORTRAN",
-        Path("FORTRAN/test_fortran_historical_stub/io_statements.f"),
-    ): (
-        "Historical FORTRAN I/O-statements fixture {relpath} goes beyond what "
-        "the current stub grammar handles and therefore produces {errors} "
-        "syntax errors."
-    ),
-    (
-        "FORTRAN",
-        Path("FORTRAN/test_fortran_historical_stub/pause_test_1957.f"),
-    ): (
-        "Historical FORTRAN PAUSE-test fixture {relpath} remains outside the "
-        "strict subset accepted by the stub grammar and is expected to report "
         "{errors} syntax errors."
     ),
     # FORTRAN II fixtures have been updated to parse correctly with the
