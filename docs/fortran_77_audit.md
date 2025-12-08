@@ -396,12 +396,23 @@ Mapping that classification to the current grammar:
     - FORMAT: via the inherited FORMAT machinery from FORTRAN 66.
 
 - **Statement functions**
-  - Partially implemented:
-    - Statement functions are handled implicitly by the combination
-      of assignment syntax and function references, but there is no
-      separate `statement_function_stmt` rule that enforces the
-      standard’s constraints. This remains an underspecified area,
-      similar to FORTRAN 66.
+  - Implemented:
+    - Parser: `statement_function_stmt` rule defined in
+      `FORTRANIIParser.g4` (inherited through the grammar chain).
+    - Syntax: `name(dummy-arg-list) = expression` where dummy-arg-list
+      is a non-empty comma-separated list of identifier dummy arguments.
+    - Wired into `statement_body` in FORTRAN77Parser.g4 as a distinct
+      alternative, enabling syntactic differentiation from array
+      element assignment.
+    - Tests: covered by `test_statement_function_simple`,
+      `test_statement_function_multiple_args`,
+      `test_statement_function_in_statement_body`, and
+      `test_statement_function_fixture` in
+      `tests/FORTRAN77/test_fortran77_parser.py`.
+    - Semantic constraint: per ANSI X3.9-1978 Section 8, statement
+      functions must appear after specification statements and before
+      executable statements; this constraint is not enforced at the
+      syntax level.
 
 ## 7. Fixed-form handling
 

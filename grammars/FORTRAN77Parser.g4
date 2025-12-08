@@ -72,7 +72,8 @@ character_length
 
 // Override statement body to include structured constructs
 statement_body
-    : assignment_stmt      // Variable = Expression
+    : statement_function_stmt  // Statement function definition (F77 Section 8)
+    | assignment_stmt      // Variable = Expression
     | goto_stmt           // Unconditional jump to labeled statement
     | computed_goto_stmt  // Multi-way branch based on integer expression
     | arithmetic_if_stmt  // Three-way branch based on expression sign

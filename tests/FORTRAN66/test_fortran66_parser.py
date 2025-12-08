@@ -615,6 +615,74 @@ class TestFORTRAN66Parser(unittest.TestCase):
                 tree = self.parse(text, 'block_data_subprogram')
                 self.assertIsNotNone(tree)
 
+    # ====================================================================
+    # FORTRAN 66 STATEMENT FUNCTION STATEMENT (X3.9-1966 Section 7.2)
+    # ====================================================================
+
+    def test_statement_function_simple(self):
+        """Test simple statement function definition (X3.9-1966 Section 7.2)"""
+        test_cases = [
+            "F(X) = X * X",
+            "AREA(R) = 3.14159 * R * R",
+            "SQUARE(N) = N ** 2",
+            "DOUBLE(X) = 2.0 * X",
+        ]
+
+        for text in test_cases:
+            with self.subTest(stmt_func=text):
+                tree = self.parse(text, 'statement_function_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_statement_function_multiple_args(self):
+        """Test statement function with multiple arguments"""
+        test_cases = [
+            "SUM(A, B) = A + B",
+            "AREA(L, W) = L * W",
+            "AVG(X, Y, Z) = (X + Y + Z) / 3.0",
+            "DIST(X1, Y1, X2, Y2) = SQRT((X2-X1)**2 + (Y2-Y1)**2)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(stmt_func=text):
+                tree = self.parse(text, 'statement_function_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_statement_function_complex_expr(self):
+        """Test statement function with complex expressions"""
+        test_cases = [
+            "POLY(X) = X**3 + 2.0*X**2 + 3.0*X + 4.0",
+            "HYPOT(A, B) = SQRT(A**2 + B**2)",
+            "COMBINE(X, Y) = SIN(X) + COS(Y)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(stmt_func=text):
+                tree = self.parse(text, 'statement_function_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_statement_function_in_statement_body(self):
+        """Test statement function as statement_body alternative"""
+        test_cases = [
+            "F(X) = X * X",
+            "AREA(L, W) = L * W",
+        ]
+
+        for text in test_cases:
+            with self.subTest(stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree)
+
+    def test_statement_function_fixture(self):
+        """Test program with statement function definitions"""
+        program = load_fixture(
+            "FORTRAN66",
+            "test_fortran66_parser",
+            "statement_function.f",
+        )
+
+        tree = self.parse(program, 'main_program')
+        self.assertIsNotNone(tree)
+
 
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail
