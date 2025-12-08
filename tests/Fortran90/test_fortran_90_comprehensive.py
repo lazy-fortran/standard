@@ -206,11 +206,14 @@ class TestFortran90Lexer:
             assert tokens[0].type == expected_token
 
     def test_procedure_enhancement_keywords(self):
-        """Test F90 procedure enhancement keywords."""
+        """Test F90 procedure enhancement keywords.
+
+        NOTE: PURE and ELEMENTAL are Fortran 95 features (ISO/IEC 1539-1:1997),
+        NOT Fortran 90 features. They are defined in Fortran95Lexer.g4.
+        """
         proc_keywords = {
             'RECURSIVE': Fortran90Lexer.RECURSIVE,
-            'PURE': Fortran90Lexer.PURE,
-            'ELEMENTAL': Fortran90Lexer.ELEMENTAL,
+            # PURE and ELEMENTAL are F95 features, NOT F90
             'RESULT': Fortran90Lexer.RESULT,
             'INTENT': Fortran90Lexer.INTENT,
             'IN': Fortran90Lexer.IN,
@@ -219,7 +222,7 @@ class TestFortran90Lexer:
             'OPTIONAL': Fortran90Lexer.OPTIONAL,
             'PRESENT': Fortran90Lexer.PRESENT
         }
-        
+
         for keyword, expected_token in proc_keywords.items():
             tokens = self.get_tokens(keyword)
             assert len(tokens) >= 1

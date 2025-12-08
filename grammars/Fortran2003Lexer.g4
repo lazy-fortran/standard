@@ -235,7 +235,9 @@ CONTINUATION
 // Override inherited NEWLINE to work properly with continuations
 NEWLINE : [\r\n]+ ;
 
-// Array constructor brackets (F90+ feature)
+// Array constructor brackets (Fortran 2003 feature - ISO/IEC 1539-1:2004)
+// Square bracket array constructor syntax [ ... ] was introduced in F2003.
+// F90/F95 only support the (/ ... /) syntax.
 LSQUARE : '[' ;
 RSQUARE : ']' ;
 
