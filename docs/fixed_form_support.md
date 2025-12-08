@@ -100,10 +100,39 @@ fixed-form and free-form syntax in a single lexer/parser per standard.
   - Accept both traditional `.f` and modern `.f90` layouts.
   - Model labels and statements at the token/rule level, not via
     positional column constraints.
-- The fixture `tests/fixtures/Fortran90/test_comprehensive_parsing/fixed_form_program.f`
-  is intentionally kept as a **known limitation** in
-  `tests/test_fixture_parsing.py` to document remaining gaps in F90
-  fixed-form integration; those rough edges are covered by Issue #91.
+
+### 3.1 Fortran 90 Fixed-form Supported Subset
+
+The Fortran 90 grammar supports a **documented fixed-form subset** that
+uses F90 constructs rather than legacy F77 constructs. This reflects the
+revolutionary nature of F90, which introduced free-form source as the
+primary format while maintaining backward compatibility.
+
+**Supported in F90 fixed-form:**
+- Free-form `!` comments (anywhere on the line)
+- Column-1 `C`/`c`/`*` comments (following a newline, not at file start)
+- `DO ... END DO` loop constructs
+- `IF ... THEN ... END IF` constructs
+- `SELECT CASE ... END SELECT` constructs
+- `WHERE ... END WHERE` constructs
+- `PRINT *, list` list-directed output
+- All F90 type declarations, modules, interfaces, etc.
+
+**Not supported in F90 grammar (legacy F77 constructs):**
+- Column-1 `C`/`c`/`*` comments at the very start of a file (no preceding
+  newline) - these require a leading blank line
+- Labeled `DO label var=start,end` loops with terminal `label CONTINUE`
+  (use `DO ... END DO` instead)
+- `WRITE(*,*)` shorthand for list-directed I/O (use `PRINT *,` or
+  `WRITE(UNIT=..., FMT=...)` with explicit keyword specifiers)
+- Column-6 continuation marks (use `&` free-form continuation)
+- Statement labels in columns 1-5 (labels work but column enforcement is
+  not strict)
+
+The fixture `tests/fixtures/Fortran90/test_comprehensive_parsing/fixed_form_program.f`
+demonstrates valid F90 fixed-form source using the supported constructs.
+This approach aligns with F90 being a transitional standard that strongly
+encouraged adoption of free-form source and modern control structures.
 
 ## 4. Fortran 2003 Fixed-form (Unified Grammar)
 
