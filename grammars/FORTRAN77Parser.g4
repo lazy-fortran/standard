@@ -44,6 +44,42 @@ program_stmt
     ;
 
 // ====================================================================
+// FORTRAN 77 (1977) - ENTRY STATEMENT
+// ====================================================================
+// Per ISO 1539:1980 Section 15.7, the ENTRY statement provides an
+// alternate entry point into a FUNCTION or SUBROUTINE subprogram.
+//
+// Syntax: ENTRY entry-name [ ( [ dummy-arg-list ] ) ]
+//
+// Constraints:
+// - ENTRY may only appear in a FUNCTION or SUBROUTINE subprogram
+// - ENTRY must not appear within a DO loop, IF block, or ELSE block
+// - The entry-name is a separate procedure name for the entry point
+// - Dummy arguments may differ from the main subprogram arguments
+//
+// Example:
+//   SUBROUTINE CALC(A, B, C)
+//   ...
+//   ENTRY SETVAL(X, Y)      ! Alternate entry point
+//   ...
+//   ENTRY RESET             ! Entry point with no arguments
+//   ...
+//   END
+
+entry_stmt
+    : ENTRY IDENTIFIER entry_dummy_arg_list?
+    ;
+
+entry_dummy_arg_list
+    : LPAREN entry_dummy_arg? (COMMA entry_dummy_arg)* RPAREN
+    ;
+
+entry_dummy_arg
+    : IDENTIFIER
+    | MULTIPLY                // Alternate return specifier (*)
+    ;
+
+// ====================================================================
 // FORTRAN 77 (1977) - ENHANCED TYPE SYSTEM
 // ====================================================================
 
@@ -96,6 +132,7 @@ statement_body
     | end_stmt          // End of program
     | return_stmt       // Return from subprogram
     | call_stmt         // Call subroutine
+    | entry_stmt        // NEW: ENTRY statement (F77 Section 15.7)
     | save_stmt         // NEW: SAVE statement
     | intrinsic_stmt    // NEW: INTRINSIC statement
     | external_stmt     // NEW: EXTERNAL statement
