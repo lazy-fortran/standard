@@ -31,12 +31,16 @@ FORTRAN 66:
 In this grammar:
 
 - `main_program`
-  - Inherited from `FORTRAN66Parser.g4` as a `statement_list`. The
-    `PROGRAM` keyword is provided by the lexer, but there is no
-    dedicated `program_stmt` rule in `FORTRAN77Parser.g4`.
-  - Effect: programs can still be written without an explicit PROGRAM
-    line; explicit `PROGRAM name` is lexed but not modeled as a
-    distinct statement form.
+  - Redefined in `FORTRAN77Parser.g4` to allow an optional `PROGRAM`
+    statement followed by a sequence of statements and a terminating
+    `END` statement.
+  - Effect: programs can be written with or without an explicit
+    `PROGRAM name` line; when present, it is modeled explicitly by
+    `program_stmt`.
+
+- `program_stmt`
+  - New in `FORTRAN77Parser.g4` for FORTRAN 77:
+    `PROGRAM IDENTIFIER` at the start of a main program unit.
 
 - `subroutine_subprogram` / `function_subprogram`
   - Retained from FORTRAN II/66 via the imported parser.
