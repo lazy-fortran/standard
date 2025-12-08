@@ -5534,5 +5534,41 @@ class Fortran2003ParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by Fortran2003Parser#implicit_spec_list_f90.
+    def enterImplicit_spec_list_f90(self, ctx:Fortran2003Parser.Implicit_spec_list_f90Context):
+        pass
+
+    # Exit a parse tree produced by Fortran2003Parser#implicit_spec_list_f90.
+    def exitImplicit_spec_list_f90(self, ctx:Fortran2003Parser.Implicit_spec_list_f90Context):
+        pass
+
+
+    # Enter a parse tree produced by Fortran2003Parser#implicit_spec_f90.
+    def enterImplicit_spec_f90(self, ctx:Fortran2003Parser.Implicit_spec_f90Context):
+        pass
+
+    # Exit a parse tree produced by Fortran2003Parser#implicit_spec_f90.
+    def exitImplicit_spec_f90(self, ctx:Fortran2003Parser.Implicit_spec_f90Context):
+        pass
+
+
+    # Enter a parse tree produced by Fortran2003Parser#letter_spec_list_f90.
+    def enterLetter_spec_list_f90(self, ctx:Fortran2003Parser.Letter_spec_list_f90Context):
+        pass
+
+    # Exit a parse tree produced by Fortran2003Parser#letter_spec_list_f90.
+    def exitLetter_spec_list_f90(self, ctx:Fortran2003Parser.Letter_spec_list_f90Context):
+        pass
+
+
+    # Enter a parse tree produced by Fortran2003Parser#letter_spec_f90.
+    def enterLetter_spec_f90(self, ctx:Fortran2003Parser.Letter_spec_f90Context):
+        pass
+
+    # Exit a parse tree produced by Fortran2003Parser#letter_spec_f90.
+    def exitLetter_spec_f90(self, ctx:Fortran2003Parser.Letter_spec_f90Context):
+        pass
+
+
 
 del Fortran2003Parser

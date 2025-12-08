@@ -7217,5 +7217,41 @@ class LazyFortran2025ParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by LazyFortran2025Parser#implicit_spec_list_f90.
+    def enterImplicit_spec_list_f90(self, ctx:LazyFortran2025Parser.Implicit_spec_list_f90Context):
+        pass
+
+    # Exit a parse tree produced by LazyFortran2025Parser#implicit_spec_list_f90.
+    def exitImplicit_spec_list_f90(self, ctx:LazyFortran2025Parser.Implicit_spec_list_f90Context):
+        pass
+
+
+    # Enter a parse tree produced by LazyFortran2025Parser#implicit_spec_f90.
+    def enterImplicit_spec_f90(self, ctx:LazyFortran2025Parser.Implicit_spec_f90Context):
+        pass
+
+    # Exit a parse tree produced by LazyFortran2025Parser#implicit_spec_f90.
+    def exitImplicit_spec_f90(self, ctx:LazyFortran2025Parser.Implicit_spec_f90Context):
+        pass
+
+
+    # Enter a parse tree produced by LazyFortran2025Parser#letter_spec_list_f90.
+    def enterLetter_spec_list_f90(self, ctx:LazyFortran2025Parser.Letter_spec_list_f90Context):
+        pass
+
+    # Exit a parse tree produced by LazyFortran2025Parser#letter_spec_list_f90.
+    def exitLetter_spec_list_f90(self, ctx:LazyFortran2025Parser.Letter_spec_list_f90Context):
+        pass
+
+
+    # Enter a parse tree produced by LazyFortran2025Parser#letter_spec_f90.
+    def enterLetter_spec_f90(self, ctx:LazyFortran2025Parser.Letter_spec_f90Context):
+        pass
+
+    # Exit a parse tree produced by LazyFortran2025Parser#letter_spec_f90.
+    def exitLetter_spec_f90(self, ctx:LazyFortran2025Parser.Letter_spec_f90Context):
+        pass
+
+
 
 del LazyFortran2025Parser
