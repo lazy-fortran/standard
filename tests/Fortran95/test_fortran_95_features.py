@@ -171,3 +171,17 @@ class TestFortran95Parser:
         tree = parser.array_constructor_f95()
         assert tree is not None
         assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_bracket_array_constructor_rejected(self):
+        """Square bracket array constructors [...] are F2003, not F95.
+
+        ISO/IEC 1539-1:1997 (Fortran 95) Section 4.5 only defines the
+        (/ ... /) syntax. Square brackets were introduced in Fortran 2003
+        (ISO/IEC 1539-1:2004).
+        """
+        bracket_code = "[1, 2, 3]"
+        parser = self.create_parser_for_rule(bracket_code)
+        parser.array_constructor_f95()
+        assert parser.getNumberOfSyntaxErrors() > 0, (
+            "Bracket array constructor [...] should be rejected by F95 grammar"
+        )
