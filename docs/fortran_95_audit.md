@@ -218,11 +218,12 @@ Grammar implementation:
 
 Gaps and historical notes:
 
-- **Historical attribution**:
-  - PURE and ELEMENTAL are accepted already in the F90 grammar (via
-    `prefix_spec`), even though they are Fortran 95 language features.
-    This is a deliberate forward extension but historically inaccurate
-    and should be documented as such.
+- **Historical attribution** (resolved in issue #182):
+  - PURE and ELEMENTAL are accepted in the F90 grammar (via `prefix_spec`)
+    as a deliberate forward extension for practical parsing of mixed-standard
+    code, even though they are Fortran 95 language features. This is now
+    explicitly documented in the F90 grammar comments and in
+    `docs/fortran_90_audit.md` section 9.
 - **Integration into program units**:
   - The new `pure_*` and `elemental_*` rules are not used by F90’s
     `function_subprogram` / `subroutine_subprogram` rules; instead,
@@ -486,9 +487,10 @@ The Fortran 95 layer in this repository:
 - **Does not yet fully integrate** these features into the F90
   program‑unit and execution‑part structure, and does not allow F95
   intrinsics to be used as intrinsic calls.
-- **Contains historical inaccuracies**, notably:
-  - PURE/ELEMENTAL procedure support attributed to F90 in the grammar
-    even though they are language features of Fortran 95.
+- **Historical notes** (all resolved):
+  - (Resolved in #182: PURE/ELEMENTAL in F90 grammar is now documented as a
+    deliberate forward extension, with clear comments in the grammar files
+    and a dedicated section in the F90 audit.)
   - (Resolved: Square‑bracket array constructors were removed from the
     F95 grammar; only the standard `(/ ... /)` form is now accepted.)
 
@@ -508,8 +510,8 @@ cover at least:
 - Integration of F95 constructs into a proper `program_unit_f95` entry
   and the execution/specification parts.
 - Making F95 intrinsic tokens usable as function and subroutine calls.
-- Documenting the PURE/ELEMENTAL historical mismatch between the F90
-  grammar and the actual standards.
+- (Resolved in #182: PURE/ELEMENTAL historical mismatch documented in F90
+  grammar comments and F90 audit section 9.)
 - (Resolved: #181 – bracket array constructors removed from F95 grammar.)
 
 Together with the Fortran 90 audit, this document completes the
