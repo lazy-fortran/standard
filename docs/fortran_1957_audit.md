@@ -60,12 +60,13 @@ Mapping that Appendix‑B list to the current grammar:
     tokens in `FORTRANLexer.g4`; no dedicated parser rules.
 
 - **GO TO, computed GO TO, ASSIGN, assigned GO TO**
-  - Status:
-    - `GOTO` and computed `GOTO`: **implemented and tested.**
-    - `ASSIGN` / assigned `GO TO`: **lexer-only; no syntax.**
-  - Evidence: `goto_stmt` and `computed_goto_stmt` rules exist and are
-    tested (computed GOTO has an explicit zero‑error assertion).
-    `ASSIGN` is a token but not referenced by any parser rule.
+  - Status: **all implemented and tested.**
+  - Evidence: `goto_stmt`, `computed_goto_stmt`, `assign_stmt` and
+    `assigned_goto_stmt` rules exist in `FORTRANParser.g4` and are
+    wired into `statement_body`. All forms are tested with explicit
+    zero-error assertions in `tests/FORTRAN/test_fortran_historical_stub.py`
+    using fixtures `assign_stmt.f`, `assigned_goto_stmt.f` and
+    `assign_goto_combined.f`.
 
 - **DO loops**
   - Status: **implemented (basic 1957 form) and tested.**
@@ -111,6 +112,9 @@ and the associated fixtures:
 - Arithmetic IF: three-way branch `IF (expr) n1, n2, n3`.
 - Computed GOTO: `GO TO (n1, n2, n3), i`.
 - Unconditional GOTO: `GO TO n`.
+- ASSIGN: `ASSIGN i TO n` stores label `i` in variable `n`.
+- Assigned GOTO: `GO TO n, (l1, l2, ..., lm)` branches to the label
+  stored in variable `n`.
 - DO loops using labeled termination (no `END DO`).
 - STOP and CONTINUE.
 - FREQUENCY as an optimization hint.

@@ -153,7 +153,7 @@ class TestFORTRANHistoricalStub:
             "test_fortran_historical_stub",
             "computed_goto_stmt.f",
         )
-        
+
         parser = self.create_parser(test_input)
 
         try:
@@ -164,6 +164,73 @@ class TestFORTRANHistoricalStub:
             assert parser.getNumberOfSyntaxErrors() == 0
         except Exception as e:
             pytest.fail(f"Computed GOTO parsing failed: {e}")
+
+    def test_assign_statement(self):
+        """Test parsing of ASSIGN statement (1957 assigned GOTO mechanism).
+
+        Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B,
+        ASSIGN stores a label in an integer variable for later use with
+        assigned GOTO.
+        Syntax: ASSIGN i TO n
+        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "assign_stmt.f",
+        )
+
+        parser = self.create_parser(test_input)
+
+        try:
+            tree = parser.program_unit_core()
+            assert tree is not None
+            assert parser.getNumberOfSyntaxErrors() == 0
+        except Exception as e:
+            pytest.fail(f"ASSIGN statement parsing failed: {e}")
+
+    def test_assigned_goto_statement(self):
+        """Test parsing of assigned GOTO statement (1957 indirect branch).
+
+        Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B,
+        assigned GOTO branches to the label stored in an integer variable.
+        Syntax: GO TO n, (l1, l2, ..., lm)
+        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "assigned_goto_stmt.f",
+        )
+
+        parser = self.create_parser(test_input)
+
+        try:
+            tree = parser.program_unit_core()
+            assert tree is not None
+            assert parser.getNumberOfSyntaxErrors() == 0
+        except Exception as e:
+            pytest.fail(f"Assigned GOTO statement parsing failed: {e}")
+
+    def test_assign_and_goto_combined(self):
+        """Test ASSIGN and assigned GOTO used together in typical 1957 pattern.
+
+        This tests a realistic 1957 program that uses ASSIGN to store
+        different labels based on conditions and then branches using
+        assigned GOTO.
+        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "assign_goto_combined.f",
+        )
+
+        parser = self.create_parser(test_input)
+
+        try:
+            tree = parser.program_unit_core()
+            assert tree is not None
+            assert parser.getNumberOfSyntaxErrors() == 0
+        except Exception as e:
+            pytest.fail(f"ASSIGN/assigned GOTO combined parsing failed: {e}")
 
     def test_do_loop_with_label(self):
         """Test parsing of DO loops with mandatory labels (1957 style)."""

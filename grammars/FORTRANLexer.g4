@@ -43,10 +43,11 @@ FORMAT       : F O R M A T ;         // I/O formatting
 // Note: FORTRAN I only had statement functions (names ending in F)
 // Full subroutines with CALL/SUBROUTINE/FUNCTION/RETURN came in FORTRAN II (1958)
 
-// Program Control (FORTRAN I, 1957)  
+// Program Control (FORTRAN I, 1957)
 PAUSE        : P A U S E ;           // Operator intervention
 FREQUENCY    : F R E Q U E N C Y ;   // Optimization hint (1957 only)
 ASSIGN       : A S S I G N ;         // Assign label to variable (assigned GOTO)
+TO           : T O ;                 // Used in ASSIGN i TO n
 
 // Data Types (early FORTRAN)
 INTEGER      : I N T E G E R ;

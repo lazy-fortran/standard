@@ -38,6 +38,8 @@ statement_body
     : assignment_stmt
     | goto_stmt
     | computed_goto_stmt
+    | assign_stmt
+    | assigned_goto_stmt
     | if_stmt_arithmetic
     | do_stmt_basic
     | frequency_stmt
@@ -105,6 +107,25 @@ goto_stmt
 // GO TO (label1, label2, ...), expression
 computed_goto_stmt
     : GOTO LPAREN label_list RPAREN COMMA expr
+    ;
+
+// ASSIGN statement (1957 assigned GOTO mechanism)
+// Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B
+// Syntax: ASSIGN i TO n
+// Where i is a statement label and n is an integer variable
+// This stores the label i in variable n for later use with assigned GOTO
+assign_stmt
+    : ASSIGN label TO variable
+    ;
+
+// Assigned GOTO statement (1957 indirect branch)
+// Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B
+// Syntax: GO TO n, (l1, l2, ..., lm)
+// Where n is an integer variable containing a label (set by ASSIGN)
+// and (l1, l2, ..., lm) is a list of valid target labels
+// Branches to the label stored in variable n
+assigned_goto_stmt
+    : GOTO variable COMMA LPAREN label_list RPAREN
     ;
 
 label_list
