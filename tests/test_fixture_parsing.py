@@ -512,39 +512,40 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ),
     # Fortran 95 fragment fixtures from test_fortran_95_features are designed
     # to be parsed via dedicated entry rules (forall_stmt, where_construct_f95,
-    # etc.) in tests/Fortran95/test_fortran_95_features.py, not via the
-    # program_unit_f90 entry rule used by the generic fixture harness.
-    # Issue #148 tracks expanding F95 test coverage; these XPASS entries
-    # document the known integration gap where F95 constructs are not yet
-    # wired into F90's execution_part structure.
+    # function_stmt_f95, etc.) in tests/Fortran95/test_fortran_95_features.py,
+    # not via the program_unit_f95 entry rule used by the generic fixture
+    # harness. These fixtures are bare tokens or partial constructs, not
+    # complete program units.
+    # Issue #148 tracks expanding F95 test coverage with complete program
+    # fixtures that exercise the integrated program_unit_f95 entry point.
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/array_constructor.f90"),
     ): (
         "Fortran 95 array-constructor fragment fixture {relpath} is tested via "
         "array_constructor_f95 entry rule; produces {errors} syntax errors with "
-        "program_unit_f90 entry (Issue #148)."
+        "program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/bit_size.f90"),
     ): (
         "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
-        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+        "{errors} syntax errors with program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/btest.f90"),
     ): (
         "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
-        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+        "{errors} syntax errors with program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/ceiling.f90"),
     ): (
         "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
-        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+        "{errors} syntax errors with program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
@@ -552,7 +553,7 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ): (
         "Fortran 95 function reference fragment fixture {relpath} is tested via "
         "function_reference_f95 entry rule; produces {errors} syntax errors with "
-        "program_unit_f90 entry (Issue #148)."
+        "program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
@@ -560,14 +561,14 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ): (
         "Fortran 95 function reference fragment fixture {relpath} is tested via "
         "function_reference_f95 entry rule; produces {errors} syntax errors with "
-        "program_unit_f90 entry (Issue #148)."
+        "program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/cpu_time.f90"),
     ): (
         "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
-        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+        "{errors} syntax errors with program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
@@ -575,15 +576,15 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ): (
         "Fortran 95 call statement fragment fixture {relpath} is tested via "
         "call_stmt_f95 entry rule; produces {errors} syntax errors with "
-        "program_unit_f90 entry (Issue #148)."
+        "program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/elemental_subroutine_stmt.f90"),
     ): (
         "Fortran 95 ELEMENTAL subroutine header fragment fixture {relpath} is "
-        "tested via elemental_subroutine_stmt entry rule; produces {errors} "
-        "syntax errors with program_unit_f90 entry (Issue #148)."
+        "tested via subroutine_stmt_f95 entry rule; produces {errors} "
+        "syntax errors with program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
@@ -591,14 +592,14 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ): (
         "Fortran 95 END FORALL fragment fixture {relpath} is tested via "
         "end_forall_stmt entry rule; produces {errors} syntax errors with "
-        "program_unit_f90 entry (Issue #148)."
+        "program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/floor.f90"),
     ): (
         "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
-        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+        "{errors} syntax errors with program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
@@ -606,16 +607,16 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ): (
         "Fortran 95 function reference fragment fixture {relpath} is tested via "
         "function_reference_f95 entry rule; produces {errors} syntax errors with "
-        "program_unit_f90 entry (Issue #148)."
+        "program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/forall_construct.f90"),
     ): (
         "Fortran 95 FORALL construct fragment fixture {relpath} is tested via "
-        "forall_construct entry rule; F95 constructs are not yet integrated into "
-        "F90 execution_part and produce {errors} syntax errors with "
-        "program_unit_f90 entry (Issue #148; see docs/fortran_95_audit.md)."
+        "forall_construct entry rule; this is a bare construct fragment, not a "
+        "complete program unit, so it produces {errors} syntax errors with "
+        "program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
@@ -623,23 +624,23 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ): (
         "Fortran 95 FORALL header fragment fixture {relpath} is tested via "
         "forall_header entry rule; produces {errors} syntax errors with "
-        "program_unit_f90 entry (Issue #148)."
+        "program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/forall_stmt.f90"),
     ): (
         "Fortran 95 FORALL statement fragment fixture {relpath} is tested via "
-        "forall_stmt entry rule; F95 constructs are not yet integrated into F90 "
-        "execution_part and produce {errors} syntax errors with program_unit_f90 "
-        "entry (Issue #148; see docs/fortran_95_audit.md)."
+        "forall_stmt entry rule; this is a bare statement fragment, not a "
+        "complete program unit, so it produces {errors} syntax errors with "
+        "program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/iand.f90"),
     ): (
         "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
-        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+        "{errors} syntax errors with program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
@@ -647,43 +648,43 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ): (
         "Fortran 95 function reference fragment fixture {relpath} is tested via "
         "function_reference_f95 entry rule; produces {errors} syntax errors with "
-        "program_unit_f90 entry (Issue #148)."
+        "program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/ibits.f90"),
     ): (
         "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
-        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+        "{errors} syntax errors with program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/modulo.f90"),
     ): (
         "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
-        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+        "{errors} syntax errors with program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/pure_function_stmt.f90"),
     ): (
         "Fortran 95 PURE function header fragment fixture {relpath} is tested via "
-        "pure_function_stmt entry rule; produces {errors} syntax errors with "
-        "program_unit_f90 entry (Issue #148)."
+        "function_stmt_f95 entry rule; produces {errors} syntax errors with "
+        "program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/system_clock.f90"),
     ): (
         "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
-        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+        "{errors} syntax errors with program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/transfer.f90"),
     ): (
         "Fortran 95 intrinsic token fixture {relpath} is a bare token; produces "
-        "{errors} syntax errors with program_unit_f90 entry (Issue #148)."
+        "{errors} syntax errors with program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
@@ -691,16 +692,16 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ): (
         "Fortran 95 function reference fragment fixture {relpath} is tested via "
         "function_reference_f95 entry rule; produces {errors} syntax errors with "
-        "program_unit_f90 entry (Issue #148)."
+        "program_unit_f95 entry (Issue #148)."
     ),
     (
         "Fortran95",
         Path("Fortran95/test_fortran_95_features/where_construct.f90"),
     ): (
         "Fortran 95 WHERE construct fragment fixture {relpath} is tested via "
-        "where_construct_f95 entry rule; F95 constructs are not yet integrated "
-        "into F90 execution_part and produce {errors} syntax errors with "
-        "program_unit_f90 entry (Issue #148; see docs/fortran_95_audit.md)."
+        "where_construct_f95 entry rule; this is a bare construct fragment, not "
+        "a complete program unit, so it produces {errors} syntax errors with "
+        "program_unit_f95 entry (Issue #148)."
     ),
 }
 
