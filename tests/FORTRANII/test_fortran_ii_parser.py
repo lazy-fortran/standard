@@ -355,10 +355,13 @@ class TestFORTRANIIParser(unittest.TestCase):
             with self.subTest(expr=expr_text, desc=description):
                 tree = self.parse(expr_text, 'expr')
                 self.assertIsNotNone(tree, f"Failed to parse: {expr_text}")
-                # Verify the expression text is preserved
-                # (spaces stripped by getText but structure intact)
-                parsed_text = tree.getText()
-                self.assertIsNotNone(parsed_text)
+                # Verify getText matches input modulo whitespace
+                expected = expr_text.replace(' ', '')
+                actual = tree.getText()
+                self.assertEqual(
+                    actual, expected,
+                    f"getText mismatch for '{expr_text}': got '{actual}'"
+                )
 
     def test_label_in_literal_rule(self):
         """Test that LABEL tokens match through the literal parser rule.
@@ -415,6 +418,55 @@ class TestFORTRANIIParser(unittest.TestCase):
             with self.subTest(stmt=stmt_text):
                 tree = self.parse(stmt_text, 'do_stmt')
                 self.assertIsNotNone(tree, f"Failed to parse: {stmt_text}")
+
+    def test_leading_zero_not_lexed_as_label(self):
+        """Test that leading-zero sequences are NOT lexed as LABEL tokens.
+
+        The FORTRAN II LABEL token is defined as [1-9][0-9]{0,4} which means:
+        - Must start with 1-9 (not 0)
+        - 1 to 5 digits total
+
+        Sequences with leading zeros (like 0, 01, 007) do NOT match the
+        LABEL token pattern. They may match INTEGER_LITERAL from the base
+        lexer, but the key contract is that LABEL specifically excludes them.
+
+        This test verifies the lexer correctly distinguishes LABEL tokens
+        from INTEGER_LITERAL tokens based on leading zeros.
+        """
+        # Get the LABEL token type for comparison
+        label_type = FORTRANIILexer.LABEL
+
+        # Leading-zero sequences that should NOT be lexed as LABEL
+        not_label_cases = [
+            "0",        # Single zero
+            "01",       # Leading zero
+            "007",      # Leading zeros
+            "00123",    # Leading zeros
+            "000",      # Multiple zeros
+        ]
+
+        for text in not_label_cases:
+            with self.subTest(text=text):
+                input_stream = InputStream(text)
+                lexer = FORTRANIILexer(input_stream)
+                token = lexer.nextToken()
+                self.assertNotEqual(
+                    token.type, label_type,
+                    f"'{text}' was incorrectly lexed as LABEL "
+                    f"(LABEL requires starting digit 1-9)"
+                )
+
+        # Verify valid LABEL values ARE lexed as LABEL
+        valid_label_cases = ["1", "9", "42", "100", "12345"]
+        for text in valid_label_cases:
+            with self.subTest(text=text, expected="LABEL"):
+                input_stream = InputStream(text)
+                lexer = FORTRANIILexer(input_stream)
+                token = lexer.nextToken()
+                self.assertEqual(
+                    token.type, label_type,
+                    f"'{text}' should be lexed as LABEL token"
+                )
 
 
 if __name__ == "__main__":
