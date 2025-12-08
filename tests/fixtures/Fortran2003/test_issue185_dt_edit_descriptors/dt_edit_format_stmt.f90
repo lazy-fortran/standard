@@ -46,7 +46,7 @@ contains
 end module matrix_io
 
 program test_dt_format_stmt
-  use matrix_io
+  use matrix_io, only: matrix_t
   implicit none
 
   type(matrix_t) :: m1, m2

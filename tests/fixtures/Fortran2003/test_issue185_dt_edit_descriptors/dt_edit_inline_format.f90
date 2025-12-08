@@ -11,8 +11,10 @@
 module dt_types
   implicit none
 
+  integer, parameter :: dp = kind(1.0d0)
+
   type :: point_t
-    real :: x, y
+    real(dp) :: x, y
   contains
     procedure :: write_fmt => point_write_formatted
     generic :: write(formatted) => write_fmt
@@ -35,15 +37,15 @@ contains
 end module dt_types
 
 program test_dt_inline
-  use dt_types
+  use dt_types, only: point_t
   implicit none
 
   type(point_t) :: p1, p2
 
-  p1%x = 1.0
-  p1%y = 2.0
-  p2%x = 3.0
-  p2%y = 4.0
+  p1%x = 1.0d0
+  p1%y = 2.0d0
+  p2%x = 3.0d0
+  p2%y = 4.0d0
 
   ! Basic DT edit descriptor
   write(*, '(DT)') p1

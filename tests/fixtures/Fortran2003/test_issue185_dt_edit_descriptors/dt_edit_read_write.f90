@@ -6,8 +6,10 @@
 module complex_types
   implicit none
 
+  integer, parameter :: dp = kind(1.0d0)
+
   type :: vector_t
-    real :: x, y, z
+    real(dp) :: x, y, z
   contains
     procedure :: write_fmt => vector_write_formatted
     procedure :: read_fmt => vector_read_formatted
@@ -37,7 +39,7 @@ contains
     integer, intent(in)            :: vlist(:)
     integer, intent(out)           :: ios
     character(*), intent(inout)    :: msg
-    real :: tmp_x, tmp_y, tmp_z
+    real(dp) :: tmp_x, tmp_y, tmp_z
 
     read(u, '(3G15.7)') tmp_x, tmp_y, tmp_z
     dtv%x = tmp_x
@@ -50,16 +52,16 @@ contains
 end module complex_types
 
 program test_dt_read_write
-  use complex_types
+  use complex_types, only: vector_t
   implicit none
 
   type(vector_t) :: v1, v2
   integer :: ios
   character(100) :: msg
 
-  v1%x = 1.0
-  v1%y = 2.0
-  v1%z = 3.0
+  v1%x = 1.0d0
+  v1%y = 2.0d0
+  v1%z = 3.0d0
 
   ! WRITE with DT to standard output
   write(*, '(DT)') v1
