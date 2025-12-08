@@ -29,6 +29,21 @@ options {
 // ====================================================================
 
 // ====================================================================
+// FORTRAN 77 (1977) - PROGRAM STRUCTURE
+// ====================================================================
+
+// Override main_program from FORTRAN 66 to support PROGRAM statement
+// FORTRAN 77 introduced the PROGRAM statement (per ANSI X3.9-1978)
+main_program
+    : program_stmt? statement* end_stmt NEWLINE?
+    ;
+
+// PROGRAM statement (NEW in FORTRAN 77)
+program_stmt
+    : PROGRAM IDENTIFIER NEWLINE
+    ;
+
+// ====================================================================
 // FORTRAN 77 (1977) - ENHANCED TYPE SYSTEM
 // ====================================================================
 
@@ -150,6 +165,27 @@ executable_construct
 // FORTRAN 77 (1977) - ENHANCED I/O
 // ====================================================================
 
+// Enhanced READ statement with list-directed I/O (NEW in FORTRAN 77)
+// FORTRAN 77 added READ *, list form for list-directed input
+read_stmt
+    : READ format_identifier (COMMA input_item_list_f77)?
+    | READ LPAREN control_info_list RPAREN input_item_list_f77?
+    ;
+
+input_item_list_f77
+    : input_item_f77 (COMMA input_item_f77)*
+    ;
+
+input_item_f77
+    : variable
+    | implied_do_input
+    ;
+
+implied_do_input
+    : LPAREN input_item_list_f77 COMMA integer_variable EQUALS integer_expr COMMA
+      integer_expr (COMMA integer_expr)? RPAREN
+    ;
+
 // Enhanced PRINT statement with list-directed I/O (NEW in FORTRAN 77)
 // FORTRAN 77 added PRINT *, list form for list-directed output
 print_stmt
@@ -201,8 +237,9 @@ dlist
 // ====================================================================
 
 // Enhanced DO statement with floating point indices (NEW in FORTRAN 77)
+// Uses EQUALS (=) like FORTRAN 66, not ASSIGN keyword
 do_stmt
-    : DO label do_variable ASSIGN initial_expr COMMA final_expr (COMMA increment_expr)?
+    : DO label do_variable EQUALS initial_expr COMMA final_expr (COMMA increment_expr)?
     ;
 
 do_variable
