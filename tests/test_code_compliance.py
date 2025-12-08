@@ -15,7 +15,7 @@ class TestCodeCompliance(unittest.TestCase):
     def test_line_length_compliance(self):
         """Test that all lines are <= 88 characters"""
         violations = []
-        grammar_dir = Path('grammars')
+        grammar_dir = Path('grammars/src')
         
         for g4_file in grammar_dir.glob('*.g4'):
             with open(g4_file, 'r') as f:
@@ -35,7 +35,7 @@ class TestCodeCompliance(unittest.TestCase):
     def test_indentation_compliance(self):
         """Test that all files use 4 spaces, not tabs"""
         violations = []
-        grammar_dir = Path('grammars')
+        grammar_dir = Path('grammars/src')
         
         for g4_file in grammar_dir.glob('*.g4'):
             with open(g4_file, 'r') as f:
@@ -53,7 +53,7 @@ class TestCodeCompliance(unittest.TestCase):
     def test_no_commented_code(self):
         """Test that there are no commented-out code sections"""
         violations = []
-        grammar_dir = Path('grammars')
+        grammar_dir = Path('grammars/src')
         
         # Patterns that indicate commented-out code
         code_patterns = [
@@ -79,7 +79,7 @@ class TestCodeCompliance(unittest.TestCase):
     def test_no_stub_references(self):
         """Test that no files contain stub references"""
         violations = []
-        grammar_dir = Path('grammars')
+        grammar_dir = Path('grammars/src')
         
         stub_words = ['stub', 'placeholder', 'mock', 
                       'temporary', 'hack', 'fixme', 'xxx']
