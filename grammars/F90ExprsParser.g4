@@ -156,9 +156,9 @@ logical_literal_f90
 
 // BOZ literal constants (F90 binary/octal/hex)
 boz_literal_constant
-    : BINARY_CONSTANT               // B'10101'
-    | OCTAL_CONSTANT                // O'777'
-    | HEX_CONSTANT                  // Z'FF' or X'FF'
+    : BINARY_CONSTANT               // Binary BOZ literal (for example B 10101)
+    | OCTAL_CONSTANT                // Octal BOZ literal (for example O 777)
+    | HEX_CONSTANT                  // Hex BOZ literal (for example Z FF or X FF)
     ;
 
 // ====================================================================
