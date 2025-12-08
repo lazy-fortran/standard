@@ -11,7 +11,7 @@ validation/dependencies/ # Downloaded .NET SDK and tools (all files)
 build/                    # Generated parser/lexer files (all files)
 
 # Generated ANTLR files in grammars directory
-grammars/generated/  # All ANTLR-generated parser/lexer files
+grammars/generated/
 grammars/*.py
 grammars/*.pyc
 grammars/*.tokens
