@@ -92,16 +92,17 @@ Mapping that Appendix‑B list to the current grammar:
 
 - **Formatted I/O (FORMAT, READ/WRITE variants, PRINT, PUNCH)**
   - Status:
-    - `READ n, list` and `READ list`: **implemented and tested.**
+    - `READ n, list`, `READ n`, and `READ list`: **implemented and tested.**
     - `PRINT n` and `PRINT n, list`: **implemented and tested.**
     - `PUNCH n` and `PUNCH n, list`: **implemented and tested.**
     - `FORMAT` statement: **token only, parser rule not implemented.**
     - Tape-specific forms: **not implemented.**
-  - Evidence: `read_stmt_basic` accepts both `READ label COMMA input_list`
-    (formatted) and `READ input_list` (simple). `print_stmt` and
-    `punch_stmt` rules implement `PRINT/PUNCH n [, list]` forms per
-    C28-6003 rows 28-29. `write_stmt_basic` accepts `WRITE output_list`.
-    The fixture `io_statements.f` now parses with zero errors.
+  - Evidence: `read_stmt_basic` accepts `READ label COMMA input_list`
+    (formatted with list), `READ label` (format-only per C28-6003 row 24),
+    and `READ input_list` (simple). `print_stmt` and `punch_stmt` rules
+    implement `PRINT/PUNCH n [, list]` forms per C28-6003 rows 28-29.
+    `write_stmt_basic` accepts `WRITE output_list`. The fixture
+    `io_statements.f` now parses with zero errors.
 
 - **Unformatted I/O (`READ TAPE`, `READ DRUM`, `WRITE TAPE`, `WRITE DRUM`)**
   - Status: **not implemented.**
@@ -175,8 +176,8 @@ Out-of-scope / not explicitly audited:
 
 Implemented (core subset):
 
-- `READ n, list` (formatted read) and `READ list` (simple read) via
-  `read_stmt_basic` rule.
+- `READ n, list` (formatted read with list), `READ n` (format-only read
+  per C28-6003 row 24), and `READ list` (simple read) via `read_stmt_basic`.
 - `PRINT n` and `PRINT n, list` (line printer output) via `print_stmt`.
 - `PUNCH n` and `PUNCH n, list` (card punch output) via `punch_stmt`.
 - `WRITE output_list` (simple output) via `write_stmt_basic`.
@@ -282,7 +283,7 @@ each Appendix B entry to the corresponding grammar rule(s) or notes gaps.
 | 21  | READ INPUT TAPE i, n, list    | Not implemented                | Gap: see #153   |
 | 22  | READ TAPE i, list             | Not implemented                | Gap: see #153   |
 | 23  | READ DRUM i, j, list          | Not implemented                | Gap: see #153   |
-| 24  | READ n                        | `read_stmt_basic` (via row 20) | Implemented     |
+| 24  | READ n                        | `read_stmt_basic`              | Implemented     |
 | 25  | WRITE OUTPUT TAPE i, n, list  | Not implemented                | Gap: see #153   |
 | 26  | WRITE TAPE i, list            | Not implemented                | Gap: see #153   |
 | 27  | WRITE DRUM i, j, list         | Not implemented                | Gap: see #153   |
