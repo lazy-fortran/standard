@@ -506,6 +506,30 @@ Gaps:
   - It does not check the full set of restrictions on combinations of
     VALUE, POINTER, C interoperable types, or IEEE flag usage.
   - Those belong to semantic validation layers.
+- `ISO_FORTRAN_ENV` intrinsic module (ISO/IEC 1539-1:2004 Section 13.8.2):
+  - Although `ISO_FORTRAN_ENV` is a Fortran 2003 feature, the F2003
+    grammar's `use_stmt` rule only accepts the three IEEE intrinsic
+    modules (`IEEE_EXCEPTIONS`, `IEEE_ARITHMETIC`, `IEEE_FEATURES`) in
+    the `USE, INTRINSIC ::` path.
+  - This is an intentional simplification: the F2003 grammar focuses on
+    the IEEE arithmetic modules which require dedicated token handling
+    for their exception types, special values, and rounding modes.
+  - `ISO_FORTRAN_ENV` support (with named constants like `INPUT_UNIT`,
+    `OUTPUT_UNIT`, `ERROR_UNIT`, `IOSTAT_END`, `IOSTAT_EOR`, and kind
+    type parameters from later standards) is modeled in the Fortran
+    2018 grammar via the more general `intrinsic_module_name` rule that
+    accepts `ieee_module_name | IDENTIFIER`.
+  - Fixtures that need `USE, INTRINSIC :: ISO_FORTRAN_ENV` should use
+    the Fortran 2018 parser or use a non-intrinsic `USE` statement when
+    syntactic validation is the goal.
+- Rename syntax in `ONLY` lists:
+  - The F2003 grammar's `ieee_only_list` does not support rename syntax
+    (`local_name => use_name`) for IEEE module entities.
+  - The F2018 grammar's `only_item_f2018` supports renames via the
+    `IDENTIFIER POINTER_ASSIGN only_item_target_f2018` alternative.
+  - For F2003-level parsing of rename syntax in USE statements, use
+    the generic `USE module COMMA ONLY COLON only_list` form with a
+    non-intrinsic module.
 
 Gaps that warrant explicit issues:
 
@@ -513,6 +537,8 @@ Gaps that warrant explicit issues:
   (type interoperability, VALUE rules, etc.).
 - A similar issue for **IEEE intrinsic usage semantics** (where and
   how IEEE functions and constants may appear).
+- Issue #244 tracks the documentation of `ISO_FORTRAN_ENV` scope in the
+  F2003 grammar (this section).
 
 ---
 
