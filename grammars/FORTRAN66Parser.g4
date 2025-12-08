@@ -221,8 +221,37 @@ statement_body
     | equivalence_stmt   // Variable memory overlay
     | common_stmt        // Global variable declarations
     | type_declaration  // Variable type declarations
+    | external_stmt     // External procedure declaration (X3.9-1966 Section 7.2)
+    | intrinsic_stmt    // Intrinsic function specification (X3.9-1966 Section 7.2)
     | return_stmt       // Return from subprogram
     | call_stmt         // Call subroutine
+    ;
+
+// ====================================================================
+// FORTRAN 66 (1966) - EXTERNAL AND INTRINSIC STATEMENTS
+// ====================================================================
+// Per ANSI X3.9-1966 Section 7.2, these are non-executable declaration
+// statements that classify procedure names:
+// - EXTERNAL identifies user-defined external procedures
+// - INTRINSIC identifies standard library intrinsic functions
+
+// EXTERNAL statement (X3.9-1966 Section 7.2)
+// Declares one or more external procedure names.
+// Example: EXTERNAL F, G, MYFUNC
+external_stmt
+    : EXTERNAL identifier_list
+    ;
+
+// INTRINSIC statement (X3.9-1966 Section 7.2)
+// Declares one or more intrinsic function names to use standard meanings.
+// Example: INTRINSIC SIN, COS, SQRT, ABS
+intrinsic_stmt
+    : INTRINSIC identifier_list
+    ;
+
+// Identifier list for EXTERNAL/INTRINSIC statements
+identifier_list
+    : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
 // Variable list for declarations
