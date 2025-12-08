@@ -157,7 +157,10 @@ def test_fixture_parses_without_errors(standard: str, relpath: Path) -> None:
     tree = entry()
     errors = parser.getNumberOfSyntaxErrors()
 
-    assert tree is not None, f"{standard} fixture {relpath} did not produce a parse tree"
+    message = (
+        f"{standard} fixture {relpath} did not produce a parse tree"
+    )
+    assert tree is not None, message
 
     key = (standard, relpath)
     if key in XPASS_FIXTURES:
