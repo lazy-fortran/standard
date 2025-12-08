@@ -432,6 +432,19 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     # They are no longer marked as XPASS.
     # FORTRAN 66 fixtures have been updated to parse correctly with the
     # enhanced grammar per issue #144. They are no longer marked as XPASS.
+    # FORTRAN 77 multi-unit fixtures require fortran66_program entry rule
+    # (not main_program). These are tested via dedicated test methods.
+    (
+        "FORTRAN77",
+        Path("FORTRAN77/test_fortran77_parser_extra/entry_statements.f"),
+    ): (
+        "FORTRAN 77 ENTRY statement fixture {relpath} contains multiple "
+        "program units (subroutines and functions) that require the "
+        "fortran66_program entry rule; with main_program entry rule it "
+        "produces {errors} syntax errors. The fixture is tested via "
+        "test_entry_statement_in_subroutine_fixture in "
+        "tests/FORTRAN77/test_fortran77_parser.py."
+    ),
     # Fortran2003 negative / fixed-form fixtures that intentionally exercise
     # error paths or comment-handling edge cases. These are tied to specific
     # Fortran 2003 issues in the audit document.
