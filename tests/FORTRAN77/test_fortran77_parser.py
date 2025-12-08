@@ -284,6 +284,23 @@ END IF"""
         tree = self.parse(fixture_text, 'main_program')
         self.assertIsNotNone(tree)
 
+    def test_file_io_statements_fixture(self):
+        """Test FORTRAN 77 file I/O statements from fixture file
+
+        Per ANSI X3.9-1978, FORTRAN 77 introduces OPEN, CLOSE, and INQUIRE
+        file control statements, and wires REWIND, BACKSPACE, and ENDFILE
+        into the grammar. This fixture exercises positional and keyword-based
+        forms for all file I/O statements.
+        """
+        fixture_text = load_fixture(
+            "FORTRAN77",
+            "test_fortran77_parser",
+            "file_io_statements.f",
+        )
+
+        tree = self.parse(fixture_text, 'main_program')
+        self.assertIsNotNone(tree)
+
     def test_proper_inheritance(self):
         """Test that FORTRAN77 properly inherits from FORTRAN66"""
         # Read the grammar file
