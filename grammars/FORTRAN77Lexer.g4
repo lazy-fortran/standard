@@ -31,6 +31,9 @@ import FORTRAN66Lexer;  // Import FORTRAN 66 (1966) constructs
 // Program unit identification (added in FORTRAN 77, 1977)
 PROGRAM         : P R O G R A M ;
 
+// Entry point in subprograms (FORTRAN 77 Section 15.7)
+ENTRY           : E N T R Y ;
+
 // CHARACTER data type (added in FORTRAN 77, 1977)
 CHARACTER       : C H A R A C T E R ;
 

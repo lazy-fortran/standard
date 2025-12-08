@@ -146,6 +146,47 @@ END IF"""
                 tree = self.parse(text, 'external_stmt')
                 self.assertIsNotNone(tree)
 
+    def test_entry_statement(self):
+        """Test ENTRY statement (NEW in FORTRAN 77)
+
+        Per ISO 1539:1980 Section 15.7, the ENTRY statement provides an
+        alternate entry point into a FUNCTION or SUBROUTINE subprogram.
+
+        Syntax: ENTRY entry-name [ ( [ dummy-arg-list ] ) ]
+
+        The dummy-arg-list may include:
+        - Regular dummy argument names
+        - Alternate return specifiers (*) for subroutines
+        """
+        test_cases = [
+            "ENTRY SETVAL",
+            "ENTRY COMPUTE(X, Y)",
+            "ENTRY RESET()",
+            "ENTRY PROCESS(A, B, C)",
+            "ENTRY ALTRET(*)",
+            "ENTRY MIXARG(X, *, Y)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(entry_stmt=text):
+                tree = self.parse(text, 'entry_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_entry_statement_in_subroutine_fixture(self):
+        """Test ENTRY statement in subroutine context (FORTRAN 77)
+
+        Per ISO 1539:1980 Section 15.7, ENTRY statements may appear in
+        FUNCTION or SUBROUTINE subprograms to define alternate entry points.
+        """
+        fixture_text = load_fixture(
+            "FORTRAN77",
+            "test_fortran77_parser_extra",
+            "entry_statements.f",
+        )
+
+        tree = self.parse(fixture_text, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
     def test_implicit_statement(self):
         """Test IMPLICIT statement (NEW in FORTRAN 77)
 
