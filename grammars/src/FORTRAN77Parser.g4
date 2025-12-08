@@ -1,5 +1,28 @@
-// FORTRAN 77 (1977) - Structured Programming Revolution
-// Added CHARACTER data type and IF-THEN-ELSE constructs
+// FORTRAN 77 Parser - ISO 1539:1980 / ANSI X3.9-1978
+// Reference: ISO 1539:1980 (also published as ANSI X3.9-1978)
+//
+// This parser implements syntax rules for FORTRAN 77 as defined in the
+// ISO/ANSI standard. Section references use the ISO 1539:1980 numbering.
+//
+// Standard Structure Overview:
+//   Section 1: Scope
+//   Section 2: Processor Characteristics
+//   Section 3: Program Form and Source Format (3.1-3.5)
+//   Section 4: Data Types and Constants (4.1-4.8)
+//   Section 5: Arrays and Substrings (5.1-5.7)
+//   Section 6: Expressions (6.1-6.7)
+//   Section 7: Executable and Nonexecutable Statements (7.1-7.2)
+//   Section 8: Specification Statements (8.1-8.9)
+//   Section 9: DATA Statement (9.1-9.3)
+//   Section 10: Assignment Statements (10.1-10.4)
+//   Section 11: Control Statements (11.1-11.12)
+//   Section 12: Input/Output Statements (12.1-12.10)
+//   Section 13: Format Specification (13.1-13.5)
+//   Section 14: Main Program (14.1)
+//   Section 15: Functions and Subroutines (15.1-15.10)
+//   Section 16: Block Data Subprogram (16.1-16.3)
+//   Section 17: Association (17.1-17.4)
+//   Section 18: Scope and Definition (18.1-18.3)
 parser grammar FORTRAN77Parser;
 
 import FORTRAN66Parser;  // Import FORTRAN 66 (1966) constructs
@@ -9,144 +32,176 @@ options {
 }
 
 // ====================================================================
-// FORTRAN 77 (1977) NEW PARSER RULES
+// FORTRAN 77 (ISO 1539:1980) PARSER OVERVIEW
 // ====================================================================
 //
-// FORTRAN 77 (1977) MAJOR INNOVATIONS:
-// - CHARACTER data type for text/string handling
-// - IF-THEN-ELSE-END IF structured programming constructs
-// - List-directed I/O capabilities
-// - Floating point variables as DO loop indices
-// - Generic and specific intrinsic function names
-// - Improved portability and standardization
+// MAJOR INNOVATIONS (with ISO section references):
+// - CHARACTER data type for text/string handling (Section 4.8)
+// - IF-THEN-ELSE-END IF structured programming (Sections 11.6-11.9)
+// - List-directed I/O capabilities (Section 12.4)
+// - REAL/DOUBLE PRECISION DO loop indices (Section 11.10)
+// - Generic and specific intrinsic function names (Section 15.10)
+// - Enhanced file handling: OPEN, CLOSE, INQUIRE (Section 12.10)
 //
-// Historical Context (1977):
-// - Published as ANSI X3.9-1978 standard
+// Historical Context:
+// - ISO 1539:1980 (also ANSI X3.9-1978)
 // - Addressed need for structured programming
-// - Eliminated need for many FORTRAN preprocessors
-// - Became foundation for modern FORTRAN programming
+// - Became foundation for modern Fortran programming
 //
 // ====================================================================
 
 // ====================================================================
-// FORTRAN 77 (1977) - PROGRAM STRUCTURE
+// PROGRAM STRUCTURE - ISO 1539:1980 Section 14
 // ====================================================================
+//
+// ISO 1539:1980 Section 14.1 defines the main program structure:
+// - A main program begins with an optional PROGRAM statement
+// - Followed by specification statements, DATA statements, and
+//   statement function definitions (in that order)
+// - Followed by executable statements
+// - Terminated by an END statement
 
-// Override main_program from FORTRAN 66 to support PROGRAM statement
-// FORTRAN 77 introduced the PROGRAM statement (per ANSI X3.9-1978)
+// Main program - ISO 1539:1980 Section 14.1
+// Override from FORTRAN 66 to add optional PROGRAM statement
 main_program
     : program_stmt? statement* end_stmt NEWLINE?
     ;
 
-// PROGRAM statement (NEW in FORTRAN 77)
+// PROGRAM statement - ISO 1539:1980 Section 14.1
+// Syntax: PROGRAM program-name
+// The program-name is optional in FORTRAN 77 (this grammar requires it)
 program_stmt
     : PROGRAM IDENTIFIER NEWLINE
     ;
 
 // ====================================================================
-// FORTRAN 77 (1977) - ENTRY STATEMENT
+// ENTRY STATEMENT - ISO 1539:1980 Section 15.7
 // ====================================================================
-// Per ISO 1539:1980 Section 15.7, the ENTRY statement provides an
-// alternate entry point into a FUNCTION or SUBROUTINE subprogram.
 //
+// ISO 1539:1980 Section 15.7 defines the ENTRY statement:
 // Syntax: ENTRY entry-name [ ( [ dummy-arg-list ] ) ]
 //
-// Constraints:
+// Constraints (Section 15.7):
 // - ENTRY may only appear in a FUNCTION or SUBROUTINE subprogram
-// - ENTRY must not appear within a DO loop, IF block, or ELSE block
-// - The entry-name is a separate procedure name for the entry point
-// - Dummy arguments may differ from the main subprogram arguments
-//
-// Example:
-//   SUBROUTINE CALC(A, B, C)
-//   ...
-//   ENTRY SETVAL(X, Y)      ! Alternate entry point
-//   ...
-//   ENTRY RESET             ! Entry point with no arguments
-//   ...
-//   END
+// - ENTRY must not appear within a DO loop, block IF, or ELSE block
+// - The entry-name identifies an alternate entry point
+// - Dummy arguments may differ from main subprogram arguments
+// - Alternate return specifiers (*) allowed per Section 15.8.3
 
+// ENTRY statement - ISO 1539:1980 Section 15.7
 entry_stmt
     : ENTRY IDENTIFIER entry_dummy_arg_list?
     ;
 
+// Dummy argument list for ENTRY - ISO 1539:1980 Section 15.7
 entry_dummy_arg_list
     : LPAREN entry_dummy_arg? (COMMA entry_dummy_arg)* RPAREN
     ;
 
+// Dummy argument - ISO 1539:1980 Section 15.4
+// Includes alternate return specifier (*) per Section 15.8.3
 entry_dummy_arg
     : IDENTIFIER
     | MULTIPLY                // Alternate return specifier (*)
     ;
 
 // ====================================================================
-// FORTRAN 77 (1977) - ENHANCED TYPE SYSTEM
+// TYPE SYSTEM - ISO 1539:1980 Section 4 and Section 8.4
 // ====================================================================
+//
+// ISO 1539:1980 Section 4 defines six data types:
+// - INTEGER (Section 4.2)
+// - REAL (Section 4.3)
+// - DOUBLE PRECISION (Section 4.4)
+// - COMPLEX (Section 4.5)
+// - LOGICAL (Section 4.6)
+// - CHARACTER (Section 4.8) - NEW in FORTRAN 77
+//
+// NOTE: ANTLR4 does not support true rule extension, so we must
+// redefine type_spec with all inherited types plus CHARACTER.
 
-// FORTRAN 77 type specification with CHARACTER addition
-// Unfortunately ANTLR4 doesn't support true rule extension,
-// so we must redefine with all inherited types
+// Type specification - ISO 1539:1980 Section 8.4
+// Redefines FORTRAN 66 type_spec to add CHARACTER type
 type_spec
-    : INTEGER
-    | REAL
-    | LOGICAL                    // From FORTRAN IV (1962)
-    | DOUBLE PRECISION           // From FORTRAN IV (1962)
-    | COMPLEX                    // From FORTRAN IV (1962)
-    | CHARACTER character_length? // NEW in FORTRAN 77 (1977)
+    : INTEGER                    // ISO 1539:1980 Section 4.2
+    | REAL                       // ISO 1539:1980 Section 4.3
+    | LOGICAL                    // ISO 1539:1980 Section 4.6
+    | DOUBLE PRECISION           // ISO 1539:1980 Section 4.4
+    | COMPLEX                    // ISO 1539:1980 Section 4.5
+    | CHARACTER character_length? // ISO 1539:1980 Section 4.8
     ;
 
-// Character length specification
+// Character length specification - ISO 1539:1980 Section 8.4.2
+// Forms: CHARACTER*len, CHARACTER*(*), CHARACTER*(len-expr)
 character_length
     : MULTIPLY integer_expr      // CHARACTER*10
-    | MULTIPLY LPAREN MULTIPLY RPAREN  // CHARACTER*(*)
-    | MULTIPLY LPAREN integer_expr RPAREN  // CHARACTER*(LEN)
+    | MULTIPLY LPAREN MULTIPLY RPAREN  // CHARACTER*(*) - assumed length
+    | MULTIPLY LPAREN integer_expr RPAREN  // CHARACTER*(len-expr)
     ;
 
 // ====================================================================
-// FORTRAN 77 (1977) - STRUCTURED PROGRAMMING
+// STATEMENT CLASSIFICATION - ISO 1539:1980 Section 7
 // ====================================================================
+//
+// ISO 1539:1980 Section 7 classifies statements as:
+// - Section 7.1: Executable statements
+// - Section 7.2: Nonexecutable statements
 
-// Override statement body to include structured constructs
+// Statement body - ISO 1539:1980 Section 7
+// Override from FORTRAN 66 to include structured constructs
 statement_body
-    : statement_function_stmt  // Statement function definition (F77 Section 8)
-    | assignment_stmt      // Variable = Expression
-    | goto_stmt           // Unconditional jump to labeled statement
-    | computed_goto_stmt  // Multi-way branch based on integer expression
-    | arithmetic_if_stmt  // Three-way branch based on expression sign
-    | logical_if_stmt     // Single statement logical IF
-    | block_if_construct  // NEW: IF-THEN-ELSE-END IF block
-    | do_stmt            // Counted loop with mandatory label
-    | continue_stmt      // Loop termination and jump target
-    | stop_stmt          // Program termination
-    | pause_stmt         // Operator intervention
-    | read_stmt          // Input from cards/tape
-    | write_stmt         // NEW: Enhanced WRITE statement
-    | print_stmt         // Output to line printer
-    | punch_stmt         // Output to card punch
-    | format_stmt        // I/O formatting specification
-    | dimension_stmt     // Array dimension declarations
-    | equivalence_stmt   // Variable memory overlay
-    | common_stmt        // Global variable declarations
-    | data_stmt         // Variable initialization
-    | type_declaration  // Variable type declarations
-    | end_stmt          // End of program
-    | return_stmt       // Return from subprogram
-    | call_stmt         // Call subroutine
-    | entry_stmt        // NEW: ENTRY statement (F77 Section 15.7)
-    | save_stmt         // NEW: SAVE statement
-    | intrinsic_stmt    // NEW: INTRINSIC statement
-    | external_stmt     // NEW: EXTERNAL statement
-    | implicit_stmt     // NEW: IMPLICIT statement (F77 Section 8.4)
-    | parameter_stmt    // NEW: PARAMETER statement (F77 Section 8.5)
-    | open_stmt         // NEW: OPEN statement (F77 Section 12.10.1)
-    | close_stmt        // NEW: CLOSE statement (F77 Section 12.10.2)
-    | inquire_stmt      // NEW: INQUIRE statement (F77 Section 12.10.3)
-    | rewind_stmt       // Inherited from F66 (F77 Section 12.9)
-    | backspace_stmt    // Inherited from F66 (F77 Section 12.9)
-    | endfile_stmt      // Inherited from F66 (F77 Section 12.9)
+    // Nonexecutable statements - ISO 1539:1980 Section 7.2
+    : statement_function_stmt  // Statement function (Section 15.6)
+    | dimension_stmt     // Section 8.1
+    | equivalence_stmt   // Section 8.2
+    | common_stmt        // Section 8.3
+    | type_declaration   // Section 8.4
+    | implicit_stmt      // Section 8.5 - NEW in FORTRAN 77
+    | parameter_stmt     // Section 8.6 - NEW in FORTRAN 77
+    | save_stmt          // Section 8.7 - NEW in FORTRAN 77
+    | external_stmt      // Section 8.8
+    | intrinsic_stmt     // Section 8.9 - NEW in FORTRAN 77
+    | data_stmt          // Section 9
+    | format_stmt        // Section 13
+    // Executable statements - ISO 1539:1980 Section 7.1
+    | assignment_stmt    // Section 10.1-10.3
+    | goto_stmt          // Section 11.1 (unconditional GO TO)
+    | computed_goto_stmt // Section 11.3 (computed GO TO)
+    | arithmetic_if_stmt // Section 11.4
+    | logical_if_stmt    // Section 11.5
+    | block_if_construct // Sections 11.6-11.9 - NEW in FORTRAN 77
+    | do_stmt            // Section 11.10
+    | continue_stmt      // Section 11.11
+    | stop_stmt          // Section 11.12
+    | pause_stmt         // Section 11.12
+    | call_stmt          // Section 15.8
+    | return_stmt        // Section 15.8
+    | entry_stmt         // Section 15.7 - NEW in FORTRAN 77
+    | end_stmt           // Section 11.12
+    // I/O statements - ISO 1539:1980 Section 12
+    | read_stmt          // Section 12.6 (formatted) / 12.4 (list-directed)
+    | write_stmt         // Section 12.6 - Enhanced in FORTRAN 77
+    | print_stmt         // Section 12.6
+    | punch_stmt         // Legacy I/O, inherited from FORTRAN 66
+    | open_stmt          // Section 12.10.1 - NEW in FORTRAN 77
+    | close_stmt         // Section 12.10.2 - NEW in FORTRAN 77
+    | inquire_stmt       // Section 12.10.3 - NEW in FORTRAN 77
+    | rewind_stmt        // Section 12.9
+    | backspace_stmt     // Section 12.9
+    | endfile_stmt       // Section 12.9
     ;
 
-// Block IF construct (NEW in FORTRAN 77)
+// ====================================================================
+// BLOCK IF CONSTRUCT - ISO 1539:1980 Sections 11.6-11.9
+// ====================================================================
+//
+// ISO 1539:1980 Sections 11.6-11.9 define the block IF construct:
+// - Section 11.6: IF statement (IF (logical-expr) THEN)
+// - Section 11.7: ELSE IF statement (ELSE IF (logical-expr) THEN)
+// - Section 11.8: ELSE statement (ELSE)
+// - Section 11.9: END IF statement (END IF)
+
+// Block IF construct - ISO 1539:1980 Sections 11.6-11.9
 block_if_construct
     : if_then_stmt
       execution_part_construct*
@@ -155,333 +210,443 @@ block_if_construct
       end_if_stmt
     ;
 
+// IF statement - ISO 1539:1980 Section 11.6
+// Syntax: IF (logical-expr) THEN
 if_then_stmt
     : IF LPAREN logical_expr RPAREN THEN
     ;
 
+// ELSE IF part - ISO 1539:1980 Section 11.7
 else_if_part
     : else_if_stmt
       execution_part_construct*
     ;
 
+// ELSE IF statement - ISO 1539:1980 Section 11.7
+// Syntax: ELSE IF (logical-expr) THEN
 else_if_stmt
     : ELSE IF LPAREN logical_expr RPAREN THEN
     ;
 
+// ELSE part - ISO 1539:1980 Section 11.8
 else_part
     : else_stmt
       execution_part_construct*
     ;
 
+// ELSE statement - ISO 1539:1980 Section 11.8
+// Syntax: ELSE
 else_stmt
     : ELSE
     ;
 
+// END IF statement - ISO 1539:1980 Section 11.9
+// Syntax: END IF (or ENDIF as common extension)
 end_if_stmt
     : END IF
     | ENDIF
     ;
 
+// Execution part construct - statements within block IF
+// Per ISO 1539:1980 Section 11.6, any executable statement
+// except DO, block IF, ELSE IF, ELSE, END IF, or END
 execution_part_construct
     : label? executable_construct NEWLINE?
     | NEWLINE
     ;
 
+// Executable construct - ISO 1539:1980 Section 7.1
+// Executable statements allowed within block IF constructs
 executable_construct
-    : assignment_stmt
-    | goto_stmt
-    | computed_goto_stmt
-    | arithmetic_if_stmt
-    | logical_if_stmt
-    | call_stmt
-    | return_stmt
-    | stop_stmt
-    | pause_stmt
-    | continue_stmt
-    | read_stmt
-    | write_stmt
-    | print_stmt
-    | punch_stmt
-    | do_stmt
-    | block_if_construct
-    | open_stmt             // File I/O (F77 Section 12.10.1)
-    | close_stmt            // File I/O (F77 Section 12.10.2)
-    | inquire_stmt          // File I/O (F77 Section 12.10.3)
-    | rewind_stmt           // File positioning (F77 Section 12.9)
-    | backspace_stmt        // File positioning (F77 Section 12.9)
-    | endfile_stmt          // File positioning (F77 Section 12.9)
+    : assignment_stmt    // Section 10
+    | goto_stmt          // Section 11.1
+    | computed_goto_stmt // Section 11.3
+    | arithmetic_if_stmt // Section 11.4
+    | logical_if_stmt    // Section 11.5
+    | call_stmt          // Section 15.8
+    | return_stmt        // Section 15.8
+    | stop_stmt          // Section 11.12
+    | pause_stmt         // Section 11.12
+    | continue_stmt      // Section 11.11
+    | read_stmt          // Section 12.6
+    | write_stmt         // Section 12.6
+    | print_stmt         // Section 12.6
+    | punch_stmt         // Legacy I/O
+    | do_stmt            // Section 11.10
+    | block_if_construct // Sections 11.6-11.9 (nested)
+    | open_stmt          // Section 12.10.1
+    | close_stmt         // Section 12.10.2
+    | inquire_stmt       // Section 12.10.3
+    | rewind_stmt        // Section 12.9
+    | backspace_stmt     // Section 12.9
+    | endfile_stmt       // Section 12.9
     ;
 
 // ====================================================================
-// FORTRAN 77 (1977) - ENHANCED I/O
+// INPUT/OUTPUT STATEMENTS - ISO 1539:1980 Section 12
 // ====================================================================
+//
+// ISO 1539:1980 Section 12 defines I/O statements:
+// - Section 12.4: List-directed formatting (NEW in FORTRAN 77)
+// - Section 12.6: Formatted READ, WRITE, PRINT statements
+// - Section 12.9: File positioning statements (REWIND, BACKSPACE, ENDFILE)
+// - Section 12.10: File connection statements (OPEN, CLOSE, INQUIRE)
 
-// Enhanced READ statement with list-directed I/O (NEW in FORTRAN 77)
-// FORTRAN 77 added READ *, list form for list-directed input
+// READ statement - ISO 1539:1980 Sections 12.4 and 12.6
+// Forms: READ fmt, iolist  OR  READ (cilist) iolist
 read_stmt
     : READ format_identifier (COMMA input_item_list_f77)?
     | READ LPAREN control_info_list RPAREN input_item_list_f77?
     ;
 
+// Input item list - ISO 1539:1980 Section 12.6.1
 input_item_list_f77
     : input_item_f77 (COMMA input_item_f77)*
     ;
 
+// Input item - ISO 1539:1980 Section 12.6.1
 input_item_f77
     : variable
     | implied_do_input
     ;
 
+// Implied DO for input - ISO 1539:1980 Section 12.6.1
 implied_do_input
     : LPAREN input_item_list_f77 COMMA integer_variable EQUALS integer_expr COMMA
       integer_expr (COMMA integer_expr)? RPAREN
     ;
 
-// Enhanced PRINT statement with list-directed I/O (NEW in FORTRAN 77)
-// FORTRAN 77 added PRINT *, list form for list-directed output
+// PRINT statement - ISO 1539:1980 Section 12.6
+// Form: PRINT fmt [, iolist]
+// List-directed form: PRINT *, iolist (Section 12.4)
 print_stmt
     : PRINT format_identifier (COMMA output_item_list)?
     ;
 
-// Enhanced WRITE statement (NEW in FORTRAN 77)
+// WRITE statement - ISO 1539:1980 Section 12.6
+// Form: WRITE (cilist) [iolist]
 write_stmt
     : WRITE LPAREN control_info_list RPAREN output_item_list?
     ;
 
+// Control information list - ISO 1539:1980 Section 12.6
 control_info_list
     : control_info_item (COMMA control_info_item)*
     ;
 
+// Control information item - ISO 1539:1980 Section 12.6
 control_info_item
     : integer_expr          // Unit number
-    | format_identifier     // Format
+    | format_identifier     // Format specifier
     ;
 
+// Format identifier - ISO 1539:1980 Section 12.6
+// Identifies the format specification for I/O
 format_identifier
-    : label              // Format statement label
-    | character_expr     // Format string
-    | MULTIPLY           // List-directed
+    : label              // Format statement label (Section 13)
+    | character_expr     // Character format (Section 12.4.1)
+    | MULTIPLY           // List-directed (Section 12.4) - NEW in F77
     ;
 
+// Output item list - ISO 1539:1980 Section 12.6.2
 output_item_list
     : output_item (COMMA output_item)*
     ;
 
+// Output item - ISO 1539:1980 Section 12.6.2
 output_item
     : expr
-    | character_expr  // String literals in output (NEW in FORTRAN 77)
+    | character_expr  // Character expression (Section 6.2)
     | implied_do
     ;
 
-// Implied DO (enhanced in FORTRAN 77)
+// Implied DO for output - ISO 1539:1980 Section 12.6.2
 implied_do
-    : LPAREN dlist COMMA integer_variable EQUALS integer_expr COMMA integer_expr 
+    : LPAREN dlist COMMA integer_variable EQUALS integer_expr COMMA integer_expr
       (COMMA integer_expr)? RPAREN
     ;
 
+// Output list within implied DO - ISO 1539:1980 Section 12.6.2
 dlist
     : output_item (COMMA output_item)*
     ;
 
 // ====================================================================
-// FORTRAN 77 (1977) - ENHANCED DO LOOPS
+// DO STATEMENT - ISO 1539:1980 Section 11.10
 // ====================================================================
+//
+// ISO 1539:1980 Section 11.10 defines the DO statement:
+// Syntax: DO s [,] i = e1, e2 [, e3]
+//   s  = label of terminal statement
+//   i  = DO variable (integer, real, or double precision)
+//   e1 = initial value
+//   e2 = terminal value
+//   e3 = increment (default 1)
+//
+// NEW in FORTRAN 77: Real and double precision DO variables allowed
 
-// Enhanced DO statement with floating point indices (NEW in FORTRAN 77)
-// Uses EQUALS (=) like FORTRAN 66, not ASSIGN keyword
+// DO statement - ISO 1539:1980 Section 11.10
 do_stmt
     : DO label do_variable EQUALS initial_expr COMMA final_expr (COMMA increment_expr)?
     ;
 
+// DO variable - ISO 1539:1980 Section 11.10
+// Integer, real, or double precision scalar variable
 do_variable
     : integer_variable
-    | real_variable      // NEW in FORTRAN 77: floating point DO variables
+    | real_variable      // NEW in FORTRAN 77: real DO variables
     ;
 
+// Initial value - ISO 1539:1980 Section 11.10
 initial_expr
     : integer_expr
     | real_expr         // NEW in FORTRAN 77
     ;
 
+// Terminal value - ISO 1539:1980 Section 11.10
 final_expr
     : integer_expr
     | real_expr         // NEW in FORTRAN 77
     ;
 
+// Increment value - ISO 1539:1980 Section 11.10
 increment_expr
     : integer_expr
     | real_expr         // NEW in FORTRAN 77
     ;
 
 // ====================================================================
-// FORTRAN 77 (1977) - NEW DECLARATION STATEMENTS
+// SPECIFICATION STATEMENTS - ISO 1539:1980 Section 8
 // ====================================================================
+//
+// ISO 1539:1980 Section 8 defines specification statements:
+// - Section 8.1: DIMENSION statement
+// - Section 8.2: EQUIVALENCE statement
+// - Section 8.3: COMMON statement
+// - Section 8.4: Type statements
+// - Section 8.5: IMPLICIT statement (NEW in FORTRAN 77)
+// - Section 8.6: PARAMETER statement (NEW in FORTRAN 77)
+// - Section 8.7: SAVE statement (NEW in FORTRAN 77)
+// - Section 8.8: EXTERNAL statement
+// - Section 8.9: INTRINSIC statement (NEW in FORTRAN 77)
 
-// SAVE statement (NEW in FORTRAN 77)
+// SAVE statement - ISO 1539:1980 Section 8.7
+// Syntax: SAVE [ save-list ]
+// Causes variables to retain values between procedure invocations
 save_stmt
     : SAVE (save_list)?
     ;
 
+// Save list - ISO 1539:1980 Section 8.7
 save_list
     : save_item (COMMA save_item)*
     ;
 
+// Save item - ISO 1539:1980 Section 8.7
+// Variable name or common block name in slashes
 save_item
     : variable
     | SLASH common_block_name SLASH
     ;
 
+// Common block name - ISO 1539:1980 Section 8.3
 common_block_name
     : IDENTIFIER
     ;
 
-// INTRINSIC statement (NEW in FORTRAN 77)
+// INTRINSIC statement - ISO 1539:1980 Section 8.9
+// Syntax: INTRINSIC name-list
+// Declares names to be specific intrinsic functions
 intrinsic_stmt
     : INTRINSIC intrinsic_procedure_list
     ;
 
+// Intrinsic procedure list - ISO 1539:1980 Section 8.9
 intrinsic_procedure_list
     : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
-// EXTERNAL statement (NEW in FORTRAN 77)
+// EXTERNAL statement - ISO 1539:1980 Section 8.8
+// Syntax: EXTERNAL name-list
+// Declares names to be external procedure names
 external_stmt
     : EXTERNAL external_name_list
     ;
 
+// External name list - ISO 1539:1980 Section 8.8
 external_name_list
     : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
 // ====================================================================
-// FORTRAN 77 (1977) - IMPLICIT STATEMENT
+// IMPLICIT STATEMENT - ISO 1539:1980 Section 8.5
 // ====================================================================
-// Per ANSI X3.9-1978 Section 8.4, the IMPLICIT statement specifies the
-// type and size of all variables, arrays, and functions that begin with
-// specified letters.
 //
+// ISO 1539:1980 Section 8.5 defines the IMPLICIT statement:
 // Syntax: IMPLICIT type (letter-spec-list) [, type (letter-spec-list)]...
 // Example: IMPLICIT INTEGER (I-N), REAL (A-H, O-Z)
 //
-// Note: IMPLICIT NONE was NOT part of FORTRAN 77; it was added in
-// Fortran 90. This grammar implements only the FORTRAN 77 syntax.
+// Specifies the type for all variables, arrays, and functions whose
+// names begin with specified letters, overriding default typing.
+//
+// Note: IMPLICIT NONE is NOT part of FORTRAN 77 (added in Fortran 90)
 
+// IMPLICIT statement - ISO 1539:1980 Section 8.5
 implicit_stmt
     : IMPLICIT implicit_spec_list
     ;
 
+// Implicit specification list - ISO 1539:1980 Section 8.5
 implicit_spec_list
     : implicit_spec (COMMA implicit_spec)*
     ;
 
+// Implicit specification - ISO 1539:1980 Section 8.5
+// Associates a type with a letter range
 implicit_spec
     : type_spec LPAREN letter_spec_list RPAREN
     ;
 
+// Letter specification list - ISO 1539:1980 Section 8.5
 letter_spec_list
     : letter_spec (COMMA letter_spec)*
     ;
 
-// Letter specification: single letter or letter range (A-Z)
+// Letter specification - ISO 1539:1980 Section 8.5
+// Single letter or letter range (e.g., A or A-H)
 letter_spec
     : IDENTIFIER                         // Single letter (e.g., A)
     | IDENTIFIER MINUS IDENTIFIER        // Letter range (e.g., A-H)
     ;
 
 // ====================================================================
-// FORTRAN 77 (1977) - PARAMETER STATEMENT
+// PARAMETER STATEMENT - ISO 1539:1980 Section 8.6
 // ====================================================================
-// Per ANSI X3.9-1978 Section 8.5, the PARAMETER statement defines
-// named constants that may be used wherever a constant is allowed.
 //
-// Syntax: PARAMETER (named-constant = constant-expr [, ...])
+// ISO 1539:1980 Section 8.6 defines the PARAMETER statement:
+// Syntax: PARAMETER (name = const-expr [, name = const-expr]...)
 // Example: PARAMETER (PI = 3.14159, TWO_PI = 6.28318)
 //
+// Creates named constants that may be used wherever constants are allowed.
 // Constraints:
-// - A named constant must be defined before it is referenced
-// - The expression must be a constant expression
+// - Named constant must be defined before it is referenced
+// - Expression must be a constant expression
 
+// PARAMETER statement - ISO 1539:1980 Section 8.6
 parameter_stmt
     : PARAMETER LPAREN parameter_assignment_list RPAREN
     ;
 
+// Parameter assignment list - ISO 1539:1980 Section 8.6
 parameter_assignment_list
     : parameter_assignment (COMMA parameter_assignment)*
     ;
 
+// Parameter assignment - ISO 1539:1980 Section 8.6
+// Associates a name with a constant expression
 parameter_assignment
     : IDENTIFIER EQUALS constant_expr
     ;
 
-// Constant expression for PARAMETER values
-// Per ANSI X3.9-1978, a constant expression consists only of:
+// Constant expression - ISO 1539:1980 Section 8.6
+// Per the standard, must consist of:
 // - Literal constants
 // - Named constants previously defined
 // - Intrinsic functions with constant arguments
-// Semantic validation is deferred to later phases; syntactically we
-// accept any expression to allow forward references within a single
-// PARAMETER statement.
+// Semantic validation deferred; syntactically accepts any expression
 constant_expr
     : expr
     ;
 
 // ====================================================================
-// FORTRAN 77 (1977) - DATA STATEMENT
+// DATA STATEMENT - ISO 1539:1980 Section 9
 // ====================================================================
+//
+// ISO 1539:1980 Section 9 defines the DATA statement:
+// Syntax: DATA nlist /clist/ [[,] nlist /clist/]...
+//
+// Provides initial values for variables, arrays, and implied-DO lists.
+// - Section 9.1: Form of DATA statement
+// - Section 9.2: Variables in DATA statements
+// - Section 9.3: Initial values
 
-// DATA statement (NEW in FORTRAN 77)
+// DATA statement - ISO 1539:1980 Section 9.1
 data_stmt
     : DATA data_stmt_set (COMMA data_stmt_set)*
     ;
 
+// Data statement set - ISO 1539:1980 Section 9.1
+// Associates a name list with a constant list
 data_stmt_set
     : variable_list SLASH data_constant_list SLASH
     ;
 
+// Data constant list - ISO 1539:1980 Section 9.3
 data_constant_list
     : data_constant (COMMA data_constant)*
     ;
 
+// Data constant - ISO 1539:1980 Section 9.3
+// Optionally signed constant
 data_constant
     : literal
     | PLUS literal
     | MINUS literal
     ;
 
+// Variable list - ISO 1539:1980 Section 9.2
 variable_list
     : variable (COMMA variable)*
     ;
 
 // ====================================================================
-// FORTRAN 77 (1977) - ENHANCED EXPRESSIONS
+// LITERALS AND CONSTANTS - ISO 1539:1980 Section 4
 // ====================================================================
+//
+// ISO 1539:1980 Section 4 defines data types and constants:
+// - Section 4.2: Integer type
+// - Section 4.3: Real type
+// - Section 4.4: Double precision type
+// - Section 4.5: Complex type
+// - Section 4.6: Logical type
+// - Section 4.8: CHARACTER type and character constants
 
-// Override literal to accept LABEL tokens as integers due to lexer
-// token precedence: LABEL is defined before INTEGER_LITERAL in
-// FORTRANIILexer and matches first for 1-5 digit numbers
+// Literal constant - ISO 1539:1980 Section 4
+// Override to add CHARACTER constants (STRING_LITERAL)
 literal
-    : INTEGER_LITERAL
-    | LABEL                     // Accept LABEL as integer (token precedence)
-    | REAL_LITERAL
-    | STRING_LITERAL            // NEW in FORTRAN 77
-    | logical_literal           // From FORTRAN IV via FORTRAN 66
+    : INTEGER_LITERAL           // Section 4.2.2
+    | LABEL                     // Accept LABEL as integer (lexer precedence)
+    | REAL_LITERAL              // Section 4.3.2
+    | STRING_LITERAL            // Section 4.8.2 - NEW in FORTRAN 77
+    | logical_literal           // Section 4.6.2
     ;
 
-// Logical literals from FORTRAN IV (imported via FORTRAN 66)
+// Logical literal - ISO 1539:1980 Section 4.6.2
 logical_literal
     : DOT_TRUE
     | DOT_FALSE
     ;
 
-// Character expressions (NEW in FORTRAN 77)
+// ====================================================================
+// CHARACTER EXPRESSIONS - ISO 1539:1980 Section 6.2
+// ====================================================================
+//
+// ISO 1539:1980 Section 6.2 defines character expressions:
+// - Section 6.2.1: Character primaries
+// - Section 6.2.2: Character operators (concatenation //)
+
+// Character expression - ISO 1539:1980 Section 6.2
+// Concatenation of character operands using //
 character_expr
-    : character_operand (CONCAT character_operand)*  // Concatenation
+    : character_operand (CONCAT character_operand)*
     ;
 
+// Character operand - ISO 1539:1980 Section 6.2.1
 character_operand
     : character_primary
     ;
 
+// Character primary - ISO 1539:1980 Section 6.2.1
 character_primary
     : character_literal_constant
     | character_variable
@@ -489,97 +654,115 @@ character_primary
     | LPAREN character_expr RPAREN
     ;
 
+// Character literal constant - ISO 1539:1980 Section 4.8.2
 character_literal_constant
     : STRING_LITERAL
-    | HOLLERITH  // Hollerith constants still supported in F77
+    | HOLLERITH  // Hollerith constants (legacy, Section 13.1.2)
     ;
 
+// Character variable - ISO 1539:1980 Section 5.7
+// May include substring reference
 character_variable
     : IDENTIFIER substring_range?
     ;
 
+// ====================================================================
+// SUBSTRINGS - ISO 1539:1980 Section 5.7
+// ====================================================================
+//
+// ISO 1539:1980 Section 5.7 defines substring references:
+// Syntax: character-variable (start : end)
+
+// Substring range - ISO 1539:1980 Section 5.7
 substring_range
     : LPAREN substr_start_expr COLON substr_end_expr? RPAREN
     ;
 
+// Substring start - ISO 1539:1980 Section 5.7
 substr_start_expr
     : integer_expr
     ;
 
+// Substring end - ISO 1539:1980 Section 5.7
 substr_end_expr
     : integer_expr
     ;
 
+// Character function reference - ISO 1539:1980 Section 15.2
 character_function_reference
     : IDENTIFIER LPAREN actual_arg_spec_list? RPAREN
     ;
 
+// Actual argument specification list - ISO 1539:1980 Section 15.8.1
 actual_arg_spec_list
     : actual_arg_spec (COMMA actual_arg_spec)*
     ;
 
+// Actual argument specification - ISO 1539:1980 Section 15.8.1
 actual_arg_spec
     : expr
     ;
 
-// Variable types for enhanced DO loops
+// Integer variable - ISO 1539:1980 Section 4.2
 integer_variable
     : IDENTIFIER
     ;
 
+// Real variable - ISO 1539:1980 Section 4.3
 real_variable
     : IDENTIFIER
     ;
 
+// Real expression - ISO 1539:1980 Section 6.1
+// Expression that evaluates to real (semantic constraint)
 real_expr
-    : expr  // Expression that evaluates to real (semantic constraint)
+    : expr
     ;
 
 // ====================================================================
-// FORTRAN 77 (1977) - FILE CONTROL STATEMENTS
+// FILE CONNECTION STATEMENTS - ISO 1539:1980 Section 12.10
 // ====================================================================
-// Per ISO 1539:1980 (FORTRAN 77) Sections 12.9 and 12.10, file control
-// statements manage external file connections and positioning.
 //
-// Section 12.9: REWIND, BACKSPACE, ENDFILE (inherited from FORTRAN 66)
-// Section 12.10.1: OPEN statement (NEW in FORTRAN 77)
-// Section 12.10.2: CLOSE statement (NEW in FORTRAN 77)
-// Section 12.10.3: INQUIRE statement (NEW in FORTRAN 77)
+// ISO 1539:1980 Section 12.10 defines file connection statements:
+// - Section 12.10.1: OPEN statement
+// - Section 12.10.2: CLOSE statement
+// - Section 12.10.3: INQUIRE statement
 //
-// Note: rewind_stmt, backspace_stmt, endfile_stmt are inherited from
-// FORTRAN66Parser and accept the enhanced FORTRAN 77 control specifiers.
+// These statements are NEW in FORTRAN 77.
+// File positioning statements (REWIND, BACKSPACE, ENDFILE) are in
+// Section 12.9 and inherited from FORTRAN 66.
 
-// OPEN statement (NEW in FORTRAN 77, ISO 1539:1980 Section 12.10.1)
-// Syntax: OPEN ( [UNIT=]u [, olist] )
-// Connects an external file to a unit for subsequent I/O operations.
-// The olist may include: FILE, STATUS, ACCESS, FORM, RECL, BLANK, IOSTAT, ERR
+// OPEN statement - ISO 1539:1980 Section 12.10.1
+// Syntax: OPEN ( olist )
+// Connects an external file to a unit for I/O operations.
+// Specifiers: UNIT, FILE, STATUS, ACCESS, FORM, RECL, BLANK, IOSTAT, ERR
 open_stmt
     : OPEN LPAREN connect_spec_list RPAREN
     ;
 
-// CLOSE statement (NEW in FORTRAN 77, ISO 1539:1980 Section 12.10.2)
-// Syntax: CLOSE ( [UNIT=]u [, clist] )
+// CLOSE statement - ISO 1539:1980 Section 12.10.2
+// Syntax: CLOSE ( clist )
 // Terminates the connection of an external file to a unit.
-// The clist may include: STATUS, IOSTAT, ERR
+// Specifiers: UNIT, STATUS, IOSTAT, ERR
 close_stmt
     : CLOSE LPAREN close_spec_list RPAREN
     ;
 
-// INQUIRE statement (NEW in FORTRAN 77, ISO 1539:1980 Section 12.10.3)
-// Syntax: INQUIRE ( [UNIT=]u, ilist ) or INQUIRE ( FILE=fn, ilist )
-// Obtains information about a file or unit connection.
-// The ilist may include many inquiry specifiers for file properties.
+// INQUIRE statement - ISO 1539:1980 Section 12.10.3
+// Syntax: INQUIRE ( ilist )
+// Queries properties of a file or unit connection.
+// Supports inquiry by unit or by file name.
 inquire_stmt
     : INQUIRE LPAREN inquire_spec_list RPAREN
     ;
 
-// Connect specifiers for OPEN statement
-// Per ISO 1539:1980 Section 12.10.1, specifiers may appear in any order
-// but each specifier may appear at most once.
+// Connect specifier list - ISO 1539:1980 Section 12.10.1
+// Specifiers may appear in any order but each at most once
 connect_spec_list
     : connect_spec (COMMA connect_spec)*
     ;
 
+// Connect specifier - ISO 1539:1980 Section 12.10.1
 connect_spec
     : unit_spec                                     // [UNIT=]u
     | file_spec                                     // FILE=fn
@@ -592,11 +775,12 @@ connect_spec
     | err_spec                                      // ERR=s
     ;
 
-// Close specifiers for CLOSE statement
+// Close specifier list - ISO 1539:1980 Section 12.10.2
 close_spec_list
     : close_spec (COMMA close_spec)*
     ;
 
+// Close specifier - ISO 1539:1980 Section 12.10.2
 close_spec
     : unit_spec                                     // [UNIT=]u
     | status_spec                                   // STATUS=sta
@@ -604,11 +788,12 @@ close_spec
     | err_spec                                      // ERR=s
     ;
 
-// Inquiry specifiers for INQUIRE statement
+// Inquire specifier list - ISO 1539:1980 Section 12.10.3
 inquire_spec_list
     : inquire_spec (COMMA inquire_spec)*
     ;
 
+// Inquire specifier - ISO 1539:1980 Section 12.10.3
 inquire_spec
     : unit_spec                                     // [UNIT=]u
     | file_spec                                     // FILE=fn
@@ -630,141 +815,172 @@ inquire_spec
     | blank_spec                                    // BLANK=blnk
     ;
 
-// Individual specifier rules
+// ====================================================================
+// I/O SPECIFIER RULES - ISO 1539:1980 Section 12.10
+// ====================================================================
 
-// Unit specifier: [UNIT=]u where u is an integer expression
-// If UNIT= keyword is omitted, must be first specifier
+// Unit specifier - ISO 1539:1980 Section 12.10
+// [UNIT=]u where u is an integer expression (unit number)
 unit_spec
     : IDENTIFIER EQUALS integer_expr                // UNIT=u (keyword form)
     | integer_expr                                  // u (positional form)
     ;
 
-// FILE specifier: FILE=fn where fn is a character expression
+// FILE specifier - ISO 1539:1980 Section 12.10.1
+// FILE=fn where fn is a character expression (file name)
 file_spec
-    : IDENTIFIER EQUALS character_expr              // FILE=filename
+    : IDENTIFIER EQUALS character_expr
     ;
 
-// STATUS specifier: STATUS=sta where sta is a character expression
-// Valid values: OLD, NEW, SCRATCH, UNKNOWN
+// STATUS specifier - ISO 1539:1980 Sections 12.10.1, 12.10.2
+// STATUS=sta where sta is OLD, NEW, SCRATCH, or UNKNOWN
 status_spec
-    : IDENTIFIER EQUALS character_expr              // STATUS=value
+    : IDENTIFIER EQUALS character_expr
     ;
 
-// ACCESS specifier: ACCESS=acc where acc is a character expression
-// Valid values: SEQUENTIAL, DIRECT
+// ACCESS specifier - ISO 1539:1980 Section 12.10.1
+// ACCESS=acc where acc is SEQUENTIAL or DIRECT
 access_spec
-    : IDENTIFIER EQUALS character_expr              // ACCESS=value
+    : IDENTIFIER EQUALS character_expr
     ;
 
-// FORM specifier: FORM=fm where fm is a character expression
-// Valid values: FORMATTED, UNFORMATTED
+// FORM specifier - ISO 1539:1980 Section 12.10.1
+// FORM=fm where fm is FORMATTED or UNFORMATTED
 form_spec
-    : IDENTIFIER EQUALS character_expr              // FORM=value
+    : IDENTIFIER EQUALS character_expr
     ;
 
-// RECL specifier: RECL=rl where rl is a positive integer expression
+// RECL specifier - ISO 1539:1980 Section 12.10.1
+// RECL=rl where rl is a positive integer expression (record length)
 recl_spec
-    : IDENTIFIER EQUALS integer_expr                // RECL=length
+    : IDENTIFIER EQUALS integer_expr
     ;
 
-// BLANK specifier: BLANK=blnk where blnk is a character expression
-// Valid values: NULL, ZERO
+// BLANK specifier - ISO 1539:1980 Section 12.10.1
+// BLANK=blnk where blnk is NULL or ZERO
 blank_spec
-    : IDENTIFIER EQUALS character_expr              // BLANK=value
+    : IDENTIFIER EQUALS character_expr
     ;
 
-// IOSTAT specifier: IOSTAT=ios where ios is an integer variable
+// IOSTAT specifier - ISO 1539:1980 Sections 12.10.1-12.10.3
+// IOSTAT=ios where ios is an integer variable for I/O status
 iostat_spec
-    : IDENTIFIER EQUALS variable                    // IOSTAT=var
+    : IDENTIFIER EQUALS variable
     ;
 
-// ERR specifier: ERR=s where s is a statement label
+// ERR specifier - ISO 1539:1980 Sections 12.10.1-12.10.3
+// ERR=s where s is a statement label for error branching
 err_spec
-    : IDENTIFIER EQUALS label                       // ERR=label
+    : IDENTIFIER EQUALS label
     ;
 
-// EXIST specifier: EXIST=ex where ex is a logical variable (INQUIRE only)
+// EXIST specifier - ISO 1539:1980 Section 12.10.3 (INQUIRE only)
+// EXIST=ex where ex is a logical variable
 exist_spec
-    : IDENTIFIER EQUALS variable                    // EXIST=var
+    : IDENTIFIER EQUALS variable
     ;
 
-// OPENED specifier: OPENED=od where od is a logical variable (INQUIRE only)
+// OPENED specifier - ISO 1539:1980 Section 12.10.3 (INQUIRE only)
+// OPENED=od where od is a logical variable
 opened_spec
-    : IDENTIFIER EQUALS variable                    // OPENED=var
+    : IDENTIFIER EQUALS variable
     ;
 
-// NUMBER specifier: NUMBER=num where num is an integer variable (INQUIRE only)
+// NUMBER specifier - ISO 1539:1980 Section 12.10.3 (INQUIRE only)
+// NUMBER=num where num is an integer variable
 number_spec
-    : IDENTIFIER EQUALS variable                    // NUMBER=var
+    : IDENTIFIER EQUALS variable
     ;
 
-// NAMED specifier: NAMED=nmd where nmd is a logical variable (INQUIRE only)
+// NAMED specifier - ISO 1539:1980 Section 12.10.3 (INQUIRE only)
+// NAMED=nmd where nmd is a logical variable
 named_spec
-    : IDENTIFIER EQUALS variable                    // NAMED=var
+    : IDENTIFIER EQUALS variable
     ;
 
-// NAME specifier: NAME=fn where fn is a character variable (INQUIRE only)
+// NAME specifier - ISO 1539:1980 Section 12.10.3 (INQUIRE only)
+// NAME=fn where fn is a character variable
 name_spec
-    : IDENTIFIER EQUALS variable                    // NAME=var
+    : IDENTIFIER EQUALS variable
     ;
 
-// SEQUENTIAL specifier: SEQUENTIAL=seq (INQUIRE only)
+// SEQUENTIAL specifier - ISO 1539:1980 Section 12.10.3 (INQUIRE only)
+// SEQUENTIAL=seq where seq is a character variable
 sequential_spec
-    : IDENTIFIER EQUALS variable                    // SEQUENTIAL=var
+    : IDENTIFIER EQUALS variable
     ;
 
-// DIRECT specifier: DIRECT=dir (INQUIRE only)
+// DIRECT specifier - ISO 1539:1980 Section 12.10.3 (INQUIRE only)
+// DIRECT=dir where dir is a character variable
 direct_spec
-    : IDENTIFIER EQUALS variable                    // DIRECT=var
+    : IDENTIFIER EQUALS variable
     ;
 
-// FORMATTED specifier: FORMATTED=fmt (INQUIRE only)
+// FORMATTED specifier - ISO 1539:1980 Section 12.10.3 (INQUIRE only)
+// FORMATTED=fmt where fmt is a character variable
 formatted_spec
-    : IDENTIFIER EQUALS variable                    // FORMATTED=var
+    : IDENTIFIER EQUALS variable
     ;
 
-// UNFORMATTED specifier: UNFORMATTED=unf (INQUIRE only)
+// UNFORMATTED specifier - ISO 1539:1980 Section 12.10.3 (INQUIRE only)
+// UNFORMATTED=unf where unf is a character variable
 unformatted_spec
-    : IDENTIFIER EQUALS variable                    // UNFORMATTED=var
+    : IDENTIFIER EQUALS variable
     ;
 
-// NEXTREC specifier: NEXTREC=nr where nr is an integer variable (INQUIRE only)
+// NEXTREC specifier - ISO 1539:1980 Section 12.10.3 (INQUIRE only)
+// NEXTREC=nr where nr is an integer variable
 nextrec_spec
-    : IDENTIFIER EQUALS variable                    // NEXTREC=var
+    : IDENTIFIER EQUALS variable
     ;
 
 // ====================================================================
-// FORTRAN 77 (1977) - HISTORICAL SIGNIFICANCE
+// ISO 1539:1980 SPEC-GRAMMAR MAPPING (PARSER)
 // ====================================================================
 //
-// FORTRAN 77 (1977) was revolutionary because:
+// This section summarizes the mapping from ISO 1539:1980 sections to
+// parser rules defined in this file.
 //
-// 1. **Structured Programming**: IF-THEN-ELSE eliminated GOTO spaghetti
-//    - Block structured conditionals
-//    - Nested IF constructs possible
-//    - Made programs more readable and maintainable
+// Section 4 (Data Types):
+//   - Section 4.2-4.6: Inherited types (INTEGER, REAL, etc.)
+//   - Section 4.8: CHARACTER type -> type_spec, character_length
 //
-// 2. **Text Processing**: CHARACTER data type
-//    - Native string handling capability
-//    - String concatenation with //
-//    - Substring operations
+// Section 5 (Arrays and Substrings):
+//   - Section 5.7: Substrings -> substring_range, character_variable
 //
-// 3. **Enhanced I/O**: List-directed and formatted I/O
-//    - WRITE statement improvements
-//    - Error handling with IOSTAT, ERR, END
-//    - More flexible format specifications
+// Section 6 (Expressions):
+//   - Section 6.2: Character expressions -> character_expr
 //
-// 4. **Program Organization**: Declaration statements
-//    - SAVE for variable persistence
-//    - INTRINSIC and EXTERNAL for procedure declarations
-//    - Better scoping control
+// Section 7 (Statement Classification):
+//   - Section 7.1: Executable statements -> statement_body
+//   - Section 7.2: Nonexecutable statements -> statement_body
 //
-// 5. **Numerical Enhancement**: Floating point DO loops
-//    - More flexible iteration control
-//    - Better support for scientific computing
+// Section 8 (Specification Statements):
+//   - Section 8.4: Type statements -> type_declaration
+//   - Section 8.5: IMPLICIT -> implicit_stmt
+//   - Section 8.6: PARAMETER -> parameter_stmt
+//   - Section 8.7: SAVE -> save_stmt
+//   - Section 8.8: EXTERNAL -> external_stmt
+//   - Section 8.9: INTRINSIC -> intrinsic_stmt
 //
-// This parser captures FORTRAN 77's structured programming revolution
-// while maintaining full compatibility with FORTRAN 66 standardization
-// and FORTRAN IV data type innovations.
+// Section 9 (DATA Statement):
+//   - Section 9.1-9.3: DATA -> data_stmt
+//
+// Section 11 (Control Statements):
+//   - Section 11.6-11.9: Block IF -> block_if_construct
+//   - Section 11.10: DO -> do_stmt
+//
+// Section 12 (I/O Statements):
+//   - Section 12.4: List-directed I/O -> format_identifier (*)
+//   - Section 12.6: Formatted I/O -> read_stmt, write_stmt, print_stmt
+//   - Section 12.10.1: OPEN -> open_stmt
+//   - Section 12.10.2: CLOSE -> close_stmt
+//   - Section 12.10.3: INQUIRE -> inquire_stmt
+//
+// Section 14 (Main Program):
+//   - Section 14.1: Main program -> main_program, program_stmt
+//
+// Section 15 (Subprograms):
+//   - Section 15.7: ENTRY -> entry_stmt
 //
 // ====================================================================
