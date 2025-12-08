@@ -1,5 +1,26 @@
-// FORTRAN 66 (1966) - First Official FORTRAN Standard with FORTRAN IV Features
-// Merges FORTRAN IV (1962) data types with FORTRAN 66 standardization
+/*
+ * FORTRAN66Parser.g4
+ *
+ * FORTRAN 66 (ANSI X3.9-1966) - First Official FORTRAN Standard
+ * Merges FORTRAN IV (1962) data types with FORTRAN 66 standardization.
+ *
+ * Reference: ANSI X3.9-1966 "USA Standard FORTRAN"
+ *            (American National Standards Institute, March 7, 1966)
+ *
+ * Standard Structure:
+ *   Section 1: Scope and Purpose
+ *   Section 2: Definitions
+ *   Section 3: Program Form and Organization (3.1-3.5)
+ *   Section 4: Data Types and Constants (4.1-4.6)
+ *   Section 5: Variables, Arrays, and Subscripts (5.1-5.4)
+ *   Section 6: Expressions (6.1-6.6)
+ *   Section 7: Statements (7.1 Executable, 7.2 Non-executable)
+ *   Section 8: Procedures (8.1-8.7)
+ *
+ * This parser extends FORTRANIIParser with FORTRAN IV features and
+ * FORTRAN 66 standardization constructs.
+ */
+
 parser grammar FORTRAN66Parser;
 
 import FORTRANIIParser;  // Import FORTRAN II (1958) constructs
@@ -8,55 +29,83 @@ options {
     tokenVocab = FORTRAN66Lexer;
 }
 
-// ====================================================================
-// FORTRAN 66 (1966) WITH MERGED FORTRAN IV FEATURES
-// ====================================================================
+// ============================================================================
+// FORTRAN 66 (X3.9-1966) WITH MERGED FORTRAN IV FEATURES
+// ============================================================================
 //
-// FORTRAN 66 (1966) merges FORTRAN IV (1962) innovations with standardization:
-// - LOGICAL data type with .TRUE./.FALSE. literals (from FORTRAN IV)
-// - DOUBLE PRECISION and COMPLEX data types (from FORTRAN IV) 
-// - Logical expressions with .AND., .OR., .NOT. (from FORTRAN IV)
-// - Logical IF statement (from FORTRAN IV)
-// - Standardized program unit structure and BLOCK DATA
+// FORTRAN 66 (ANSI X3.9-1966) merges FORTRAN IV (1962) innovations with
+// formal standardization:
+// - LOGICAL data type with .TRUE./.FALSE. literals (Section 4.5)
+// - DOUBLE PRECISION and COMPLEX data types (Sections 4.3, 4.4)
+// - Logical expressions with .AND., .OR., .NOT. (Section 6.4)
+// - Relational expressions with .LT., .EQ., .GT., etc. (Section 6.3)
+// - Logical IF statement (Section 7.1.2.4)
+// - Standardized program unit structure (Section 8)
+// - BLOCK DATA subprogram for COMMON initialization (Section 8.4)
 //
 // Historical Context (1962-1966):
 // - FORTRAN IV (1962) added data types and logical operations
-// - FORTRAN 66 (1966) standardized and made machine-independent
+// - X3.4.3 committee (1962-1966) standardized machine-independent FORTRAN
 // - Combined innovations create foundation for portable FORTRAN
 //
-// ====================================================================
+// ============================================================================
 
-// ====================================================================
-// FORTRAN IV (1962) TYPE SYSTEM - merged into FORTRAN 66
-// ====================================================================
+// ============================================================================
+// TYPE SPECIFICATION - X3.9-1966 Section 7.2.5
+// ============================================================================
+// X3.9-1966 Section 7.2.5 defines type statements that explicitly declare
+// the type of variables, arrays, and functions:
+//   INTEGER   - Section 4.1: whole numbers
+//   REAL      - Section 4.2: floating-point approximations
+//   DOUBLE PRECISION - Section 4.3: extended precision floating-point
+//   COMPLEX   - Section 4.4: ordered pairs of REAL values
+//   LOGICAL   - Section 4.5: truth values (.TRUE. or .FALSE.)
+// ============================================================================
 
-// FORTRAN 66 type specification with FORTRAN IV data types
 type_spec
-    : INTEGER
-    | REAL
-    | LOGICAL                    // NEW in FORTRAN IV (1962)
-    | DOUBLE PRECISION           // NEW in FORTRAN IV (1962)
-    | COMPLEX                    // NEW in FORTRAN IV (1962)
+    : INTEGER                    // X3.9-1966 Section 4.1
+    | REAL                       // X3.9-1966 Section 4.2
+    | LOGICAL                    // X3.9-1966 Section 4.5
+    | DOUBLE PRECISION           // X3.9-1966 Section 4.3
+    | COMPLEX                    // X3.9-1966 Section 4.4
     ;
 
-// ====================================================================
-// FORTRAN IV (1962) LOGICAL EXPRESSIONS - merged into FORTRAN 66
-// ====================================================================
+// ============================================================================
+// LOGICAL EXPRESSIONS - X3.9-1966 Section 6.4
+// ============================================================================
+// X3.9-1966 Section 6.4 defines logical expressions with these operators
+// (in order of precedence, lowest to highest):
+//   .OR.   - logical disjunction (lowest precedence)
+//   .AND.  - logical conjunction
+//   .NOT.  - logical negation (highest precedence, unary)
+//
+// Operator precedence: .NOT. > .AND. > .OR.
+// Operators of equal precedence associate left to right.
+//
+// A logical expression evaluates to .TRUE. or .FALSE.
+// ============================================================================
 
-// Logical expressions (NEW in FORTRAN IV, 1962)
+// Logical expression - X3.9-1966 Section 6.4
+// Lowest precedence: .OR. disjunction
 logical_expr
     : logical_term (DOT_OR logical_term)*
     ;
 
+// Logical term - X3.9-1966 Section 6.4
+// Higher precedence: .AND. conjunction
 logical_term
     : logical_factor (DOT_AND logical_factor)*
     ;
 
+// Logical factor - X3.9-1966 Section 6.4
+// Highest precedence: .NOT. negation (unary)
 logical_factor
     : DOT_NOT logical_primary
     | logical_primary
     ;
 
+// Logical primary - X3.9-1966 Section 6.4
+// Base cases: literals, relational expressions, variables, parenthesized
 logical_primary
     : logical_literal
     | relational_expr
@@ -64,103 +113,138 @@ logical_primary
     | LPAREN logical_expr RPAREN
     ;
 
-// Logical literals (NEW in FORTRAN IV, 1962)
+// Logical constants - X3.9-1966 Section 4.5.2
 logical_literal
-    : DOT_TRUE
-    | DOT_FALSE
+    : DOT_TRUE                   // X3.9-1966 Section 4.5.2
+    | DOT_FALSE                  // X3.9-1966 Section 4.5.2
     ;
 
-// Logical variable reference
+// Logical variable reference - X3.9-1966 Section 5.1
+// Simple variable or array element
 logical_variable
     : IDENTIFIER
-    | IDENTIFIER LPAREN expr_list RPAREN  // Array element
+    | IDENTIFIER LPAREN expr_list RPAREN  // Array element (Section 5.3)
     ;
 
-// Relational expressions (enhanced in FORTRAN IV, 1962)
+// ============================================================================
+// RELATIONAL EXPRESSIONS - X3.9-1966 Section 6.3
+// ============================================================================
+// X3.9-1966 Section 6.3 defines relational expressions that compare two
+// arithmetic expressions and produce a logical value (.TRUE. or .FALSE.):
+//   e1 .LT. e2  - less than
+//   e1 .LE. e2  - less than or equal
+//   e1 .EQ. e2  - equal
+//   e1 .NE. e2  - not equal
+//   e1 .GT. e2  - greater than
+//   e1 .GE. e2  - greater than or equal
+// ============================================================================
+
 relational_expr
     : expr relational_op expr
     ;
 
 relational_op
-    : DOT_EQ
-    | DOT_NE  
-    | DOT_LT
-    | DOT_LE
-    | DOT_GT
-    | DOT_GE
+    : DOT_EQ                     // X3.9-1966 Section 6.3
+    | DOT_NE                     // X3.9-1966 Section 6.3
+    | DOT_LT                     // X3.9-1966 Section 6.3
+    | DOT_LE                     // X3.9-1966 Section 6.3
+    | DOT_GT                     // X3.9-1966 Section 6.3
+    | DOT_GE                     // X3.9-1966 Section 6.3
     ;
 
-// Logical IF statement (NEW in FORTRAN IV, 1962)
+// ============================================================================
+// LOGICAL IF STATEMENT - X3.9-1966 Section 7.1.2.4
+// ============================================================================
+// X3.9-1966 Section 7.1.2.4 defines the logical IF statement:
+//   IF (e) s
+// where e is a logical expression and s is any executable statement
+// except DO, another logical IF, or END.
+//
+// If e is .TRUE., statement s is executed; otherwise, control passes to
+// the next executable statement.
+// ============================================================================
+
 logical_if_stmt
     : IF LPAREN logical_expr RPAREN statement_body
     ;
 
-// ====================================================================
-// FORTRAN 66 (1966) - STANDARDIZED PROGRAM STRUCTURE
-// ====================================================================
+// ============================================================================
+// PROGRAM STRUCTURE - X3.9-1966 Section 8
+// ============================================================================
+// X3.9-1966 Section 8 defines program units:
+//   8.1 Main Program - sequence of statements ending with END
+//   8.2 FUNCTION Subprogram - returns a value via function name
+//   8.3 SUBROUTINE Subprogram - called via CALL statement
+//   8.4 BLOCK DATA Subprogram - initializes named COMMON blocks
+//
+// A FORTRAN program consists of exactly one main program and zero or more
+// subprograms (FUNCTION, SUBROUTINE, or BLOCK DATA).
+// ============================================================================
 
-// FORTRAN 66 program with standardized program units
-// Per X3.9-1966, a FORTRAN program consists of one or more program units
-// (main program, external functions, external subroutines, block data)
-// compiled separately or together in sequence.
+// FORTRAN 66 program - X3.9-1966 Section 8
+// A complete program consists of one or more program units
 fortran66_program
     : NEWLINE* program_unit+ NEWLINE* EOF
     ;
 
-// A program unit is a main program, subprogram, or block data unit
-// Main program must be distinguished from subprograms; a main program
-// ends with END and does not start with SUBROUTINE or FUNCTION.
+// Program unit - X3.9-1966 Section 8
+// Main program must be distinguished from subprograms by the absence
+// of SUBROUTINE, FUNCTION, or BLOCK DATA keywords.
 program_unit
     : subprogram                // Check subprogram first (has leading keyword)
     | block_data_subprogram     // BLOCK DATA has leading keyword
     | main_program              // Main program: statements ending with END
     ;
 
-// Main program (standardized from FORTRAN IV)
+// Main program - X3.9-1966 Section 8.1
 // A main program is a sequence of statements ending with END.
 // It does not have a leading SUBROUTINE, FUNCTION, or BLOCK DATA keyword.
 main_program
     : statement+ end_stmt NEWLINE?
     ;
 
-// Subprograms (functions and subroutines from FORTRAN IV)
+// Subprograms - X3.9-1966 Sections 8.2 and 8.3
 subprogram
     : subroutine_subprogram
     | function_subprogram
     ;
 
-// Override subroutine_subprogram to use explicit END handling
-// for proper multiple program unit support.
-// Leading NEWLINE* allows blank lines between program units.
+// SUBROUTINE subprogram - X3.9-1966 Section 8.3
+// Form: SUBROUTINE name [(dummy-arg-list)]
+// Called via CALL statement; does not return a value through its name.
 subroutine_subprogram
     : NEWLINE* SUBROUTINE IDENTIFIER parameter_list? NEWLINE
       statement*
       end_stmt NEWLINE?
     ;
 
-// Override function_subprogram to use explicit END handling
-// for proper multiple program unit support.
-// Leading NEWLINE* allows blank lines between program units.
+// FUNCTION subprogram - X3.9-1966 Section 8.2
+// Form: [type] FUNCTION name (dummy-arg-list)
+// Returns a value through the function name; called as part of an expression.
 function_subprogram
     : NEWLINE* type_spec? FUNCTION IDENTIFIER parameter_list NEWLINE
       statement*
       end_stmt NEWLINE?
     ;
 
-// BLOCK DATA subprogram (NEW standardized unit in FORTRAN 66)
-// Used to initialize variables in named COMMON blocks
+// BLOCK DATA subprogram - X3.9-1966 Section 8.4
+// Form: BLOCK DATA [name]
+// Provides compile-time initialization for variables in named COMMON blocks.
+// May contain only: DIMENSION, COMMON, EQUIVALENCE, type, and DATA statements.
 block_data_subprogram
     : BLOCKDATA block_data_name? NEWLINE
       data_initialization_part?
       END
     ;
 
-// Block data name (optional)
+// Block data name - X3.9-1966 Section 8.4
+// Optional name for BLOCK DATA subprogram
 block_data_name
     : IDENTIFIER
     ;
 
-// Data initialization part (assignments in BLOCK DATA)
+// Data initialization part - X3.9-1966 Section 8.4
+// Statements allowed in BLOCK DATA subprogram
 data_initialization_part
     : data_initialization_statement+
     ;
@@ -170,267 +254,328 @@ data_initialization_statement
     | NEWLINE  // Blank lines allowed
     ;
 
+// Allowed statement types in BLOCK DATA - X3.9-1966 Section 8.4
 data_initialization_body
-    : common_stmt           // COMMON variable declarations
-    | dimension_stmt       // Array dimension declarations
-    | equivalence_stmt     // Variable equivalences
-    | type_declaration    // Type declarations
-    | data_stmt            // DATA initialization (X3.9-1966 Section 7.2)
+    : common_stmt          // X3.9-1966 Section 7.2.2
+    | dimension_stmt       // X3.9-1966 Section 7.2.1
+    | equivalence_stmt     // X3.9-1966 Section 7.2.3
+    | type_declaration     // X3.9-1966 Section 7.2.5
+    | data_stmt            // X3.9-1966 Section 7.2.6
     ;
 
 
-// Type declarations (standardized from FORTRAN IV)
+// Type declaration - X3.9-1966 Section 7.2.5
+// Form: type v1, v2, ..., vn
+// Explicitly declares the type of variables and arrays
 type_declaration
     : type_spec variable_list
     ;
 
-// Statement list allowing empty lines (punch cards could be blank)
+// Statement list - X3.9-1966 Section 3.2
+// A sequence of statements (blank lines allowed as in punch cards)
 statement_list
     : statement*
     ;
 
-// Individual statement with optional label and newline handling
+// Statement - X3.9-1966 Section 3.2
+// Form: [label] statement-body
 // Labels were punched in columns 1-5, statements in columns 7-72
 statement
     : label? statement_body NEWLINE?
-    | NEWLINE  // Blank punch card (allowed)
+    | NEWLINE  // Blank line (blank punch card was valid)
     ;
 
-// Statement label (FORTRAN 66: 1-99999, punched in columns 1-5)
+// Statement label - X3.9-1966 Section 3.4
+// 1 to 5 decimal digits (range 1-99999)
+// Labels identify statements for control transfer and FORMAT references
 label
     : LABEL
     ;
 
-// All statement types standardized in FORTRAN 66
+// ============================================================================
+// STATEMENT TYPES - X3.9-1966 Section 7
+// ============================================================================
+// X3.9-1966 Section 7 classifies statements into:
+//   7.1 Executable Statements (control flow, I/O, assignment)
+//   7.2 Non-executable Statements (declarations, specifications)
+//
 // NOTE: end_stmt is NOT included here - it is handled separately as a
-// program unit terminator to enable parsing multiple program units.
+// program unit terminator (X3.9-1966 Section 8) to enable parsing
+// multiple program units.
+// ============================================================================
+
 statement_body
-    : statement_function_stmt  // Statement function definition (X3.9-1966 7.2)
-    | assignment_stmt      // Variable = Expression
-    | goto_stmt           // Unconditional jump to labeled statement
-    | computed_goto_stmt  // Multi-way branch based on integer expression
-    | assign_stmt         // GO TO assignment: ASSIGN k TO i (X3.9-1966 7.1.1.3)
-    | assigned_goto_stmt  // Assigned GO TO: GO TO i, (k1,...) (X3.9-1966 7.1.2.1.2)
-    | arithmetic_if_stmt  // Three-way branch based on expression sign
-    | logical_if_stmt     // Two-way branch based on logical expression
-    | do_stmt            // Counted loop with mandatory label
-    | continue_stmt      // Loop termination and jump target
-    | stop_stmt          // Program termination
-    | pause_stmt         // Operator intervention
-    | read_stmt          // Input from cards/tape
-    | print_stmt         // Output to line printer
-    | punch_stmt         // Output to card punch
-    | format_stmt        // I/O formatting specification
-    | dimension_stmt     // Array dimension declarations
-    | equivalence_stmt   // Variable memory overlay
-    | common_stmt        // Global variable declarations
-    | type_declaration  // Variable type declarations
-    | external_stmt     // External procedure declaration (X3.9-1966 Section 7.2)
-    | intrinsic_stmt    // Intrinsic function specification (X3.9-1966 Section 7.2)
-    | data_stmt         // DATA initialization (X3.9-1966 Section 7.2)
-    | rewind_stmt       // Sequential file positioning (X3.9-1966 Section 7.1.3.3)
-    | backspace_stmt    // Sequential file positioning (X3.9-1966 Section 7.1.3.3)
-    | endfile_stmt      // Sequential file positioning (X3.9-1966 Section 7.1.3.3)
-    | return_stmt       // Return from subprogram
-    | call_stmt         // Call subroutine
+    // Non-executable statements - X3.9-1966 Section 7.2
+    : statement_function_stmt  // X3.9-1966 Section 7.2 (statement function definition)
+    | dimension_stmt           // X3.9-1966 Section 7.2.1
+    | common_stmt              // X3.9-1966 Section 7.2.2
+    | equivalence_stmt         // X3.9-1966 Section 7.2.3
+    | external_stmt            // X3.9-1966 Section 7.2.4
+    | type_declaration         // X3.9-1966 Section 7.2.5
+    | data_stmt                // X3.9-1966 Section 7.2.6
+    | format_stmt              // X3.9-1966 Section 7.2.7
+    | intrinsic_stmt           // X3.9-1966 Section 8.7
+    // Executable statements - X3.9-1966 Section 7.1
+    // Assignment statements - Section 7.1.1
+    | assignment_stmt          // X3.9-1966 Section 7.1.1.1 (arithmetic), 7.1.1.2 (logical)
+    | assign_stmt              // X3.9-1966 Section 7.1.1.3 (ASSIGN k TO i)
+    // Control statements - Section 7.1.2
+    | goto_stmt                // X3.9-1966 Section 7.1.2.1.1 (unconditional GO TO)
+    | assigned_goto_stmt       // X3.9-1966 Section 7.1.2.1.2 (assigned GO TO)
+    | computed_goto_stmt       // X3.9-1966 Section 7.1.2.2 (computed GO TO)
+    | arithmetic_if_stmt       // X3.9-1966 Section 7.1.2.3 (arithmetic IF)
+    | logical_if_stmt          // X3.9-1966 Section 7.1.2.4 (logical IF)
+    | do_stmt                  // X3.9-1966 Section 7.1.2.8 (DO)
+    | continue_stmt            // X3.9-1966 Section 7.1.2.9 (CONTINUE)
+    | stop_stmt                // X3.9-1966 Section 7.1.2.5 (STOP)
+    | pause_stmt               // X3.9-1966 Section 7.1.2.6 (PAUSE)
+    | call_stmt                // X3.9-1966 Section 7.1.2.10 (CALL)
+    | return_stmt              // X3.9-1966 Section 7.1.2.7 (RETURN)
+    // I/O statements - Section 7.1.3
+    | read_stmt                // X3.9-1966 Section 7.1.3.1 (READ)
+    | print_stmt               // X3.9-1966 Section 7.1.3.2 (output)
+    | punch_stmt               // X3.9-1966 Section 7.1.3.2 (output)
+    | rewind_stmt              // X3.9-1966 Section 7.1.3.3 (auxiliary I/O)
+    | backspace_stmt           // X3.9-1966 Section 7.1.3.3 (auxiliary I/O)
+    | endfile_stmt             // X3.9-1966 Section 7.1.3.3 (auxiliary I/O)
     ;
 
-// ====================================================================
-// FORTRAN 66 (1966) - AUXILIARY I/O STATEMENTS
-// ====================================================================
-// Per ANSI X3.9-1966 Section 7.1.3.3, auxiliary I/O statements control
-// sequential file positioning. The syntax is: statement-keyword u
-// where u is an unsigned integer expression identifying the I/O unit.
+// ============================================================================
+// AUXILIARY I/O STATEMENTS - X3.9-1966 Section 7.1.3.3
+// ============================================================================
+// X3.9-1966 Section 7.1.3.3 defines auxiliary I/O statements for sequential
+// file positioning:
+//   REWIND u     - Position file to its initial point
+//   BACKSPACE u  - Position file back one record
+//   ENDFILE u    - Write an end-of-file record
+// where u is an unsigned integer expression (unit identifier).
+// ============================================================================
 
-// REWIND statement - position file to beginning (X3.9-1966 Section 7.1.3.3)
-// Example: REWIND 5
+// REWIND statement - X3.9-1966 Section 7.1.3.3
+// Positions the file to its initial point (beginning)
 rewind_stmt
     : REWIND integer_expr
     ;
 
-// BACKSPACE statement - position file back one record (X3.9-1966 Section 7.1.3.3)
-// Example: BACKSPACE 5
+// BACKSPACE statement - X3.9-1966 Section 7.1.3.3
+// Positions the file back one record
 backspace_stmt
     : BACKSPACE integer_expr
     ;
 
-// ENDFILE statement - write end-of-file mark (X3.9-1966 Section 7.1.3.3)
-// Example: ENDFILE 5
+// ENDFILE statement - X3.9-1966 Section 7.1.3.3
+// Writes an end-of-file record on the specified unit
 endfile_stmt
     : ENDFILE integer_expr
     ;
 
-// ====================================================================
-// FORTRAN 66 (1966) - EXTERNAL AND INTRINSIC STATEMENTS
-// ====================================================================
-// Per ANSI X3.9-1966 Section 7.2, these are non-executable declaration
-// statements that classify procedure names:
-// - EXTERNAL identifies user-defined external procedures
-// - INTRINSIC identifies standard library intrinsic functions
+// ============================================================================
+// EXTERNAL AND INTRINSIC STATEMENTS - X3.9-1966 Sections 7.2.4 and 8.7
+// ============================================================================
+// X3.9-1966 Section 7.2.4 defines the EXTERNAL statement:
+//   EXTERNAL name1, name2, ..., namen
+// Identifies names as external procedure names (allows passing as arguments).
+//
+// X3.9-1966 Section 8.7 defines intrinsic functions and the INTRINSIC statement:
+//   INTRINSIC name1, name2, ..., namen
+// Identifies names as intrinsic (built-in) function names.
+// ============================================================================
 
-// EXTERNAL statement (X3.9-1966 Section 7.2)
-// Declares one or more external procedure names.
-// Example: EXTERNAL F, G, MYFUNC
+// EXTERNAL statement - X3.9-1966 Section 7.2.4
+// Declares names that refer to external procedures
 external_stmt
     : EXTERNAL identifier_list
     ;
 
-// INTRINSIC statement (X3.9-1966 Section 7.2)
-// Declares one or more intrinsic function names to use standard meanings.
-// Example: INTRINSIC SIN, COS, SQRT, ABS
+// INTRINSIC statement - X3.9-1966 Section 8.7
+// Declares names that refer to intrinsic (built-in) functions
 intrinsic_stmt
     : INTRINSIC identifier_list
     ;
 
-// Identifier list for EXTERNAL/INTRINSIC statements
+// Identifier list - used by EXTERNAL and INTRINSIC statements
 identifier_list
     : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
-// Variable list for declarations
+// Variable list - X3.9-1966 Section 5.1
+// List of variables for type declarations
 variable_list
     : variable (COMMA variable)*
     ;
 
-// ====================================================================
-// FORTRAN 66 (1966) - DATA STATEMENT
-// ====================================================================
-// Per ANSI X3.9-1966 Section 7.2, DATA is a nonexecutable statement
-// for compile-time initialization of variables and arrays.
-// Syntax: DATA nlist /clist/, nlist /clist/, ...
-// where nlist = list of variables, array elements, or array names
-//       clist = list of constants (with optional repeat count)
+// ============================================================================
+// DATA STATEMENT - X3.9-1966 Section 7.2.6
+// ============================================================================
+// X3.9-1966 Section 7.2.6 defines the DATA statement for compile-time
+// initialization of variables and arrays:
+//   DATA nlist /clist/ [, nlist /clist/]...
+// where:
+//   nlist = list of variables, array elements, or implied DO loops
+//   clist = list of constants (with optional repeat count)
+//
 // DATA statements may appear in main programs, subprograms, and BLOCK DATA.
 //
-// Example: DATA X, Y, Z /1.0, 2.0, 3.0/
-// Example: DATA A /3*0.0/  (repeat count: 3 zeros)
-// Example: DATA (ARR(I), I=1,10) /10*1.0/  (implied DO)
+// Examples:
+//   DATA X, Y, Z /1.0, 2.0, 3.0/
+//   DATA A /3*0.0/                     (repeat count: 3 zeros)
+//   DATA (ARR(I), I=1,10) /10*1.0/     (implied DO)
+// ============================================================================
 
-// DATA statement (X3.9-1966 Section 7.2)
+// DATA statement - X3.9-1966 Section 7.2.6
 data_stmt
     : DATA data_stmt_set (COMMA data_stmt_set)*
     ;
 
-// DATA statement set: variable list with constant list
+// DATA statement set - X3.9-1966 Section 7.2.6
+// Object list followed by constant list in slashes
 data_stmt_set
     : data_stmt_object_list SLASH data_stmt_value_list SLASH
     ;
 
-// List of objects to initialize (variables, array elements, implied DO)
+// Object list - X3.9-1966 Section 7.2.6
+// Variables, array elements, or implied DO loops to initialize
 data_stmt_object_list
     : data_stmt_object (COMMA data_stmt_object)*
     ;
 
-// Individual data object: variable, array element, or implied DO
+// Data object - X3.9-1966 Section 7.2.6
 data_stmt_object
     : variable                              // Simple variable or array element
     | LPAREN data_implied_do RPAREN         // Implied DO loop
     ;
 
-// Implied DO for DATA statement
-// Example: (ARR(I), I=1,10) or (A(I,J), J=1,5, I=1,3)
+// Implied DO - X3.9-1966 Section 7.2.6
+// Form: (object-list, i = e1, e2 [, e3])
 data_implied_do
     : data_stmt_object_list COMMA IDENTIFIER EQUALS expr COMMA expr (COMMA expr)?
     ;
 
-// List of constant values
+// Constant list - X3.9-1966 Section 7.2.6
 data_stmt_value_list
     : data_stmt_value (COMMA data_stmt_value)*
     ;
 
-// Constant value with optional repeat count
-// Example: 3*0.0 means three zeros, 1.0 means single value
+// Constant value - X3.9-1966 Section 7.2.6
+// Form: [r*]c where r is repeat count and c is constant
 data_stmt_value
     : data_stmt_repeat? data_stmt_constant
     ;
 
-// Repeat count for constants (e.g., 3* in 3*0.0)
+// Repeat count - X3.9-1966 Section 7.2.6
+// Unsigned integer followed by asterisk (e.g., 3* in 3*0.0)
 data_stmt_repeat
     : unsigned_int MULTIPLY
     ;
 
-// Unsigned integer for repeat count
+// Unsigned integer - X3.9-1966 Section 4.1.2
 unsigned_int
     : INTEGER_LITERAL
     | LABEL               // LABEL tokens match 1-5 digit integers
     ;
 
-// Data constant (signed or unsigned literal)
+// Data constant - X3.9-1966 Section 7.2.6
+// Optionally signed literal constant
 data_stmt_constant
     : PLUS? literal
     | MINUS literal
     ;
 
-// ====================================================================
-// FORTRAN 66 (1966) - GO TO ASSIGNMENT STATEMENT
-// ====================================================================
-// Per ANSI X3.9-1966 Section 7.1.1.3, the GO TO assignment statement
-// syntax is: ASSIGN k TO i
+// ============================================================================
+// ASSIGN STATEMENT - X3.9-1966 Section 7.1.1.3
+// ============================================================================
+// X3.9-1966 Section 7.1.1.3 defines the ASSIGN statement:
+//   ASSIGN k TO i
 // where k is a statement label and i is an integer variable.
 // This stores the label k in variable i for use with assigned GO TO.
 //
-// NON-COMPLIANT: ASSIGN is a deleted feature per ISO/IEC 1539-1:2018
-// Annex B.2. Retained for historical FORTRAN 66 accuracy only.
+// NON-COMPLIANT with ISO/IEC 1539-1:2018: ASSIGN is a deleted feature
+// per Annex B.2. Retained for historical FORTRAN 66 accuracy only.
 // See docs/fortran_66_audit.md for compliance details.
+// ============================================================================
+
 assign_stmt
     : ASSIGN label TO variable
     ;
 
-// ====================================================================
-// FORTRAN 66 (1966) - ASSIGNED GO TO STATEMENT
-// ====================================================================
-// Per ANSI X3.9-1966 Section 7.1.2.1.2, the assigned GO TO statement
-// syntax is: GO TO i, (k1, k2, ..., km)
+// ============================================================================
+// ASSIGNED GO TO STATEMENT - X3.9-1966 Section 7.1.2.1.2
+// ============================================================================
+// X3.9-1966 Section 7.1.2.1.2 defines the assigned GO TO statement:
+//   GO TO i, (k1, k2, ..., km)
 // where i is an integer variable containing a label (set by ASSIGN)
 // and (k1, k2, ..., km) is a list of valid target labels.
 // Branches to the label stored in variable i.
 //
-// NON-COMPLIANT: Assigned GO TO is a deleted feature per ISO/IEC
-// 1539-1:2018 Annex B.2. Retained for historical FORTRAN 66 accuracy only.
+// NON-COMPLIANT with ISO/IEC 1539-1:2018: Assigned GO TO is a deleted
+// feature per Annex B.2. Retained for historical FORTRAN 66 accuracy only.
 // See docs/fortran_66_audit.md for compliance details.
+// ============================================================================
+
 assigned_goto_stmt
     : GOTO variable COMMA LPAREN label_list RPAREN
     ;
 
-// ====================================================================
-// FORTRAN 66 (1966) - DO STATEMENT OVERRIDE
-// ====================================================================
-// Override do_stmt from FORTRANIIParser to use EQUALS (=) instead of
-// ASSIGN keyword. Per ANSI X3.9-1966 Section 7.1.2.8, the DO statement
-// syntax is: DO s i = e1, e2 [, e3]
-// where = is the equals sign, not the ASSIGN keyword.
+// ============================================================================
+// DO STATEMENT - X3.9-1966 Section 7.1.2.8
+// ============================================================================
+// X3.9-1966 Section 7.1.2.8 defines the DO statement:
+//   DO s i = e1, e2 [, e3]
+// where:
+//   s  = statement label of the terminal statement (range)
+//   i  = integer DO variable
+//   e1 = initial value expression
+//   e2 = limit value expression
+//   e3 = increment expression (defaults to 1)
+//
+// Note: FORTRAN II used ASSIGN keyword; FORTRAN 66 uses = (equals sign).
+// ============================================================================
+
 do_stmt
     : DO label variable EQUALS expr COMMA expr (COMMA expr)?
     ;
 
-// ====================================================================
-// FORTRAN 66 (1966) - LITERAL OVERRIDE
-// ====================================================================
-// Override literal to accept LABEL tokens as integers. Due to lexer
-// token precedence, LABEL is defined before INTEGER_LITERAL in
-// FORTRANIILexer and matches first for 1-5 digit numbers like 100.
-// This allows expressions like PRINT 100 to parse correctly.
+// ============================================================================
+// CONSTANTS (LITERALS) - X3.9-1966 Section 4
+// ============================================================================
+// X3.9-1966 Section 4 defines constants for each data type:
+//   4.1.2 Integer constants
+//   4.2.2 Real constants
+//   4.3.2 Double precision constants
+//   4.4.2 Complex constants
+//   4.5.2 Logical constants (.TRUE., .FALSE.)
+//
+// Note: LABEL tokens match 1-5 digit integers due to lexer precedence.
+// ============================================================================
+
 literal
-    : INTEGER_LITERAL
-    | LABEL                     // Accept LABEL as integer (token precedence)
-    | REAL_LITERAL
-    | logical_literal           // From FORTRAN IV (1962)
+    : INTEGER_LITERAL            // X3.9-1966 Section 4.1.2
+    | LABEL                      // Accept LABEL as integer (token precedence)
+    | REAL_LITERAL               // X3.9-1966 Section 4.2.2
+    | logical_literal            // X3.9-1966 Section 4.5.2
     ;
 
-// ====================================================================
-// FORTRAN 66 (1966) - FORMAT DESCRIPTOR OVERRIDE
-// ====================================================================
-// Override format handling to properly parse FORTRAN 66 format specs
-// like I5, F10.2, E15.6, etc. The lexer tokenizes F10.2 as F10 (IDENTIFIER)
-// followed by .2 (REAL_LITERAL), so we need to handle this combination.
-// Per ANSI X3.9-1966 Section 7.2.3, format descriptors include:
-// - Iw (integer), Fw.d (float), Ew.d (exponential), Dw.d (double)
-// - Gw.d (general), Aw (character), Lw (logical)
-// - nX (skip), nP (scale factor), nHc...c (Hollerith)
+// ============================================================================
+// FORMAT STATEMENT - X3.9-1966 Section 7.2.7
+// ============================================================================
+// X3.9-1966 Section 7.2.7 defines the FORMAT statement and edit descriptors:
+//   Iw       - Integer (w = field width)
+//   Fw.d     - Real fixed-point (w = width, d = decimal places)
+//   Ew.d     - Real exponential (w = width, d = decimal places)
+//   Dw.d     - Double precision exponential
+//   Gw.d     - General (fixed or exponential based on magnitude)
+//   Aw       - Character/alphanumeric (added in FORTRAN IV)
+//   Lw       - Logical
+//   nX       - Skip n positions
+//   nP       - Scale factor
+//   nHc...c  - Hollerith (n characters follow)
+//
+// Note: Lexer tokenizes F10.2 as F10 (IDENTIFIER) followed by .2 (REAL_LITERAL).
+// ============================================================================
 
 format_item
     : format_repeat_count? format_descriptor_full
-    | HOLLERITH
+    | HOLLERITH                  // X3.9-1966 Section 7.2.7
     ;
 
 format_repeat_count
@@ -438,46 +583,44 @@ format_repeat_count
     | LABEL
     ;
 
-// Full format descriptor including optional decimal and exponent parts
-// Handles cases like F10, F10.2, E15.6E2, etc.
+// Format descriptor with optional decimal specification
 format_descriptor_full
     : IDENTIFIER format_decimal_part?
     ;
 
-// Decimal part of format descriptor (.d or .dEe)
-// The lexer produces .2 as REAL_LITERAL for .2
+// Decimal part of format descriptor (e.g., .d or .dEe)
 format_decimal_part
     : REAL_LITERAL              // Handles .2, .6E2, etc.
     ;
 
-// ====================================================================
-// FORTRAN 66 (1966) - HISTORICAL SIGNIFICANCE
-// ====================================================================
+// ============================================================================
+// FORTRAN 66 (X3.9-1966) HISTORICAL SIGNIFICANCE
+// ============================================================================
 //
-// FORTRAN 66 (1966) was revolutionary because:
+// FORTRAN 66 (ANSI X3.9-1966, March 7, 1966) was revolutionary because:
 //
-// 1. **First Language Standard**: First programming language standard worldwide
-//    - Established ANSI X3.9-1966 as the foundation
-//    - Created template for future language standardization
+// 1. **First Language Standard**: First formal programming language standard
+//    - Established ANSI X3.9-1966 as the template for language standards
+//    - Developed by X3.4.3 subcommittee (1962-1966)
 //
 // 2. **Machine Independence**: Removed vendor-specific dependencies
-//    - Code could run on different computer architectures
-//    - Eliminated IBM-specific features from FORTRAN IV
+//    - Code became portable across different computer architectures
+//    - Eliminated IBM-specific and machine-dependent features
 //
-// 3. **Program Structure**: Standardized program organization
-//    - MAIN PROGRAM, SUBROUTINE, FUNCTION program units
-//    - BLOCK DATA for common block initialization
+// 3. **Program Structure**: Standardized program organization (Section 8)
+//    - Main Program, FUNCTION, SUBROUTINE, BLOCK DATA subprograms
+//    - Clear separation between executable and non-executable statements
 //
 // 4. **Scientific Computing Foundation**: Established reliable base
-//    - Universities could teach standard FORTRAN
+//    - Universities could teach standard FORTRAN curriculum
 //    - Research code became portable between institutions
 //
-// 5. **Industry Adoption**: Vendors aligned with standard
+// 5. **Industry Adoption**: Vendors aligned implementations
 //    - Reduced fragmentation in FORTRAN implementations
-//    - Enabled software industry growth
+//    - Enabled commercial software industry growth
 //
-// This parser captures FORTRAN 66's standardization achievements while
-// maintaining full compatibility with FORTRAN IV's data type innovations.
-// It serves as the foundation for FORTRAN 77's structured programming.
+// This parser captures FORTRAN 66 standardization achievements while
+// maintaining compatibility with FORTRAN IV data type innovations.
+// It serves as the foundation for FORTRAN 77 structured programming.
 //
-// ====================================================================
+// ============================================================================
