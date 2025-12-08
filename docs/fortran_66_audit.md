@@ -1,4 +1,4 @@
-# FORTRAN 66 (ANSI X3.9‑1966) – Grammar Audit (status: in progress)
+# FORTRAN 66 (ANSI X3.9‑1966) – Grammar Audit
 
 This document summarizes the **FORTRAN 66** grammar implemented in this
 repository, based on:
@@ -12,6 +12,20 @@ repository, based on:
 It describes what is implemented vs. what the 1966 standard family
 expects (FORTRAN IV features plus standardization), without claiming
 full conformance.
+
+## ANSI X3.9-1966 Section Reference
+
+The grammar files are annotated with section references to ANSI X3.9-1966:
+
+| Standard Section | Description                        | Grammar Coverage |
+|------------------|-----------------------------------|------------------|
+| Section 3        | Program Form and Organization     | ✓ Implemented    |
+| Section 4        | Data Types and Constants          | ✓ Implemented    |
+| Section 5        | Variables, Arrays, and Subscripts | ✓ Implemented    |
+| Section 6        | Expressions                       | ✓ Implemented    |
+| Section 7.1      | Executable Statements             | ✓ Implemented    |
+| Section 7.2      | Non-executable Statements         | ✓ Implemented    |
+| Section 8        | Procedures                        | ✓ Implemented    |
 
 ## 1. Program units and structure
 
