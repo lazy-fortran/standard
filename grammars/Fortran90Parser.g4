@@ -21,12 +21,16 @@ options {
 // - Free-form: .f90+ files (modern syntax)
 //
 // REVOLUTIONARY F90 FEATURES IMPLEMENTED:
-// - Module system with explicit interfaces  
+// - Module system with explicit interfaces
 // - Dynamic memory management (pointers, allocatable arrays)
 // - Derived types (user-defined structures)
-// - Array operations and constructors  
+// - Array operations and constructors
 // - Enhanced control flow and I/O
-// - Procedure enhancements (RECURSIVE, PURE, ELEMENTAL)
+// - RECURSIVE procedures
+//
+// NOTE: PURE and ELEMENTAL are Fortran 95 (ISO/IEC 1539-1:1997) features,
+// not Fortran 90 features. They are accepted here as a forward extension
+// for practical parsing of mixed-standard code. See issue #182.
 //
 // INHERITANCE ARCHITECTURE (IN THIS REPO):
 // FORTRAN / FORTRANII / FORTRAN66 / FORTRAN77
@@ -606,8 +610,8 @@ prefix
 
 prefix_spec
     : RECURSIVE                     // F90 recursive procedures
-    | PURE                          // F90 pure procedures  
-    | ELEMENTAL                     // F90 elemental procedures
+    | PURE                          // F95 forward extension (see #182)
+    | ELEMENTAL                     // F95 forward extension (see #182)
     | type_spec_f90                 // Function return type
     ;
 
