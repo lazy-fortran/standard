@@ -62,13 +62,12 @@ In this repository:
     `io_control_spec_f95`.
 - Tests currently exercise only a **small subset** of these rules.
 
-Important caveat:
+Program entry point:
 
-- The F95 rules are not yet fully integrated into the F90
-  `program_unit_f90` / `execution_part` structure. Today, F95
-  constructs parse reliably as **fragments** (e.g. via entry rules like
-  `forall_stmt`), but not as part of a complete “Fortran 95 program”
-  grammar with its own entry point.
+- A dedicated `program_unit_f95` entry point integrates F95 constructs
+  (FORALL, enhanced WHERE) into the program structure. This is provided
+  alongside the inherited F90 constructs via `execution_part_f95` and
+  `executable_construct_f95`.
 
 The sections below expand this into a feature‑by‑feature audit.
 
@@ -116,26 +115,20 @@ Tests:
     `forall_stmt.f90` and `forall_construct.f90` and parses them via
     the dedicated `forall_stmt` / `forall_construct` entry rules.
 
-Gaps and limitations:
+Integration:
 
-- **Not integrated into program execution parts**:
-  - F90’s `execution_part` / `executable_construct` rules (in
-    `Fortran90Parser.g4`) do **not** reference `forall_stmt` or
-    `forall_construct`.
-  - The F95 wrapper `executable_construct_f95` is not used by any
-    higher‑level rule, so complete F95 programs containing FORALL
-    cannot currently be parsed via a `program_unit_f95` entry (no such
-    entry exists yet).
-- **Semantics not enforced**:
-  - The requirement that `scalar_mask_expr` be scalar LOGICAL is
-    documented but not enforced syntactically (any `expr_f95` is
-    accepted).
-  - Side‑effect and ordering constraints on the FORALL body are not
-    modeled; they belong to semantic analysis, but should be called out
-    in the audit.
+- The `program_unit_f95` entry point integrates FORALL via
+  `execution_part_f95` -> `executable_construct_f95` -> `construct_f95`
+  -> `forall_construct`. Complete F95 programs containing FORALL can
+  now be parsed via the dedicated entry point.
 
-These integration and semantic‑constraint gaps are tracked (or should
-be tracked) by dedicated Fortran 95 issues.
+Semantic limitations (not enforced by grammar):
+
+- The requirement that `scalar_mask_expr` be scalar LOGICAL is
+  documented but not enforced syntactically (any `expr_f95` is
+  accepted).
+- Side‑effect and ordering constraints on the FORALL body are not
+  modeled; they belong to semantic analysis.
 
 ## 3. Enhanced WHERE and ELSEWHERE
 
@@ -172,22 +165,17 @@ Tests:
 - `test_where_construct` parses `where_construct.f90` through the
   `where_construct_f95` entry rule.
 
-Gaps and limitations:
+Integration:
 
-- **Execution‑part integration**:
-  - As with FORALL, `where_construct_f95` and `where_stmt_f95` are not
-    referenced from the F90 `execution_part`/`construct` rules. The
-    F90‑level `where_construct` and `where_stmt` remain the only
-    constructs reachable from full program parsing.
-  - This means F95’s refined WHERE behavior is only visible when
-    calling the F95‑specific rules directly.
-- **Partial reuse of F90 WHERE**:
-  - `where_assignment_stmt` and `elsewhere_assignment_stmt` still refer
-    to the F90 `where_stmt` instead of `where_stmt_f95`, so some F95
-    enhancements are bypassed in nested contexts.
-- **No syntactic enforcement of scalar logical masks**:
-  - As with FORALL, the “logical and scalar” constraints are captured
-    by comments, not grammar structure.
+- The `program_unit_f95` entry point integrates WHERE via
+  `execution_part_f95` -> `executable_construct_f95` -> `construct_f95`
+  -> `where_construct_f95`. Complete F95 programs containing enhanced
+  WHERE can now be parsed via the dedicated entry point.
+
+Semantic limitations (not enforced by grammar):
+
+- The "logical and scalar" constraints on mask expressions are captured
+  by comments, not grammar structure.
 
 ## 4. PURE and ELEMENTAL procedures
 
