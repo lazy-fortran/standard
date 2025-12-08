@@ -155,13 +155,42 @@ Data types:
 
 Expressions:
 
-- `expr` in `FORTRANIIParser.g4` defines a full precedence hierarchy:
-  - Exponentiation (`**`), multiplication/division, addition/subtraction,
-    unary plus/minus, and parenthesized expressions.
+- `expr` in `FORTRANIIParser.g4` defines a proper multi-level precedence
+  hierarchy aligned with both the 1957 FORTRAN spec and the FORTRAN II
+  manual (Form C28-6000-2, 1958):
+
+  ```
+  expr -> additive_expr -> multiplicative_expr -> unary_expr -> power_expr -> primary
+  ```
+
+  Operator precedence (highest to lowest):
+  1. `**` (exponentiation) - **right associative**
+  2. unary `+`, `-`
+  3. `*`, `/` (multiplication, division) - left associative
+  4. binary `+`, `-` (addition, subtraction) - left associative
+
+- The `**` operator is correctly right-associative:
+  - `2**3**4` parses as `2**(3**4)`, not `(2**3)**4`.
+  - This matches the FORTRAN language specification across all standards.
+
+- Unary operators have higher precedence than binary `+`/`-` but lower
+  than `**`:
+  - `-2**3` parses as `-(2**3)` = -8, not `(-2)**3` = -8.
+
 - `integer_expr` is a syntactic alias for `expr`; integer semantics
   are left to a later semantic phase or consumer.
-- `function_reference` supports calls to intrinsic functions (e.g.
-  `SIN(X)`), modeled as `IDENTIFIER LPAREN expr_list RPAREN`.
+
+- Function calls and array subscripts share the same syntax
+  (`IDENTIFIER LPAREN expr_list RPAREN`); semantic analysis distinguishes
+  them. The `variable` rule handles both forms.
+
+- Tests in `test_fortran_ii_parser.py` verify:
+  - Chained exponentiation parses correctly (`test_chained_exponentiation_parses`)
+  - Right-associativity of `**` (`test_power_expr_right_associativity`)
+  - Mixed operator precedence (`test_mixed_operator_precedence`)
+  - Unary operator precedence (`test_unary_operator_precedence`)
+  - Parenthesized expressions (`test_parenthesized_expressions`)
+  - Function calls in expressions (`test_function_call_in_expression`)
 
 ## 4. COMMON semantics
 
