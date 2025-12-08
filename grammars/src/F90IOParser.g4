@@ -1,12 +1,16 @@
 // Fortran 90 Input/Output Statements
+// Reference: ISO/IEC 1539:1991 Section 5.4 (NAMELIST) and Section 9 (I/O)
 // Delegate grammar for READ, WRITE, PRINT, and NAMELIST
 // Extracted from Fortran90Parser.g4 per issue #252
 parser grammar F90IOParser;
 
 // ====================================================================
-// NAMELIST (F90 STRUCTURED I/O)
+// NAMELIST STATEMENT - ISO/IEC 1539:1991 Section 5.4
 // ====================================================================
-// ISO/IEC 1539:1991 Section 5.4
+//
+// ISO/IEC 1539:1991 Section 5.4 defines the NAMELIST statement:
+// - R527 (namelist-stmt) -> NAMELIST / namelist-group-name / namelist-group-object-list
+//                           [[,] / namelist-group-name / namelist-group-object-list]...
 // Named groups of variables for structured I/O.
 
 // NAMELIST declaration (F90 structured I/O)

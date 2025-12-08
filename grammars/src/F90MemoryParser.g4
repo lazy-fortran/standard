@@ -1,12 +1,18 @@
 // Fortran 90 Dynamic Memory Management
+// Reference: ISO/IEC 1539:1991 Section 6.3 (Dynamic allocation)
 // Delegate grammar for ALLOCATE, DEALLOCATE, and NULLIFY
 // Extracted from Fortran90Parser.g4 per issue #252
 parser grammar F90MemoryParser;
 
 // ====================================================================
-// DYNAMIC MEMORY MANAGEMENT (F90 MAJOR INNOVATION)
+// DYNAMIC MEMORY MANAGEMENT - ISO/IEC 1539:1991 Section 6.3
 // ====================================================================
-// ISO/IEC 1539:1991 Section 6.3
+//
+// ISO/IEC 1539:1991 Section 6.3 defines dynamic memory management:
+// - R620 (allocate-stmt) -> ALLOCATE (allocation-list [, STAT=stat-variable])
+// - R624 (nullify-stmt) -> NULLIFY (pointer-object-list)
+// - R626 (deallocate-stmt) -> DEALLOCATE (allocate-object-list [, STAT=stat-variable])
+//
 // Dynamic allocation and deallocation of arrays and pointers.
 
 // ALLOCATE statement (F90 dynamic memory allocation)

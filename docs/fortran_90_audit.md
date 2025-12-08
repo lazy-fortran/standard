@@ -362,7 +362,42 @@ For users who require strict historical accuracy:
 - The current design prioritizes practical usability over strict historical
   conformance, which is documented in this audit and in the grammar comments.
 
-## 10. Summary
+## 10. ISO/IEC 1539:1991 Spec-Grammar Cross-Walk
+
+The grammar files now include inline ISO/IEC 1539:1991 (WG5 N692) section
+references. This table summarizes the mapping between ISO sections and grammar
+rules:
+
+| ISO Section | Topic | Grammar Files and Rules |
+|-------------|-------|-------------------------|
+| Section 2 | Fortran Terms and Concepts | `Fortran90Parser.g4`: `program_unit_f90` |
+| Section 3.3 | Fixed Source Form | `Fortran90Lexer.g4`: `FIXED_FORM_COMMENT`, `STAR_COMMENT` |
+| Section 3.4 | Free Source Form | `Fortran90Lexer.g4`: `FREE_FORM_COMMENT`, `CONTINUATION`, `SEMICOLON` |
+| Section 4.3 | Intrinsic Types | `F90TypesParser.g4`: `intrinsic_type_spec_f90`, `kind_selector`, `char_selector` |
+| Section 4.4 | Derived Types | `F90TypesParser.g4`: `derived_type_def`, `derived_type_stmt`, `end_type_stmt` |
+| Section 4.4.4 | Structure Constructors | `F90TypesParser.g4`: `structure_constructor`, `component_spec` |
+| Section 4.5 | Array Constructors | `F90ExprsParser.g4`: `array_constructor_f90`, `ac_value_list` |
+| Section 5.1 | Type Declarations | `F90TypesParser.g4`: `type_declaration_stmt_f90`, `attr_spec_f90` |
+| Section 5.1.2.3 | INTENT Attribute | `F90TypesParser.g4`: `intent_spec`; Lexer: `INTENT`, `IN`, `OUT`, `INOUT` |
+| Section 5.1.2.4 | Array Specifications | `F90TypesParser.g4`: `array_spec_f90`, `deferred_shape_spec_list` |
+| Section 5.3 | IMPLICIT Statement | `Fortran90Lexer.g4`: `IMPLICIT`, `NONE` |
+| Section 5.4 | NAMELIST Statement | `F90IOParser.g4`: `namelist_stmt` |
+| Section 6.3 | Dynamic Allocation | `F90MemoryParser.g4`: `allocate_stmt`, `deallocate_stmt`, `nullify_stmt` |
+| Section 7 | Expressions | `F90ExprsParser.g4`: `expr_f90`, `primary_f90` |
+| Section 7.2.2 | Relational Operators | `Fortran90Lexer.g4`: `EQ_OP`, `NE_OP`, `LT_OP`, `LE_OP`, `GT_OP`, `GE_OP` |
+| Section 7.5.2 | Pointer Assignment | `Fortran90Lexer.g4`: `POINTER_ASSIGN`; Parser: `pointer_assignment_stmt` |
+| Section 7.5.3 | WHERE Construct | `F90ControlParser.g4`: `where_construct`, `where_stmt`, `elsewhere_stmt` |
+| Section 8.1.1 | IF Construct | `F90ControlParser.g4`: `if_construct`, `if_then_stmt`, `else_if_stmt` |
+| Section 8.1.3 | CASE Construct | `F90ControlParser.g4`: `select_case_construct`, `case_stmt`, `case_selector` |
+| Section 8.1.4 | DO Construct | `F90ControlParser.g4`: `do_construct_f90`, `loop_control`, `cycle_stmt`, `exit_stmt` |
+| Section 9 | Input/Output | `F90IOParser.g4`: `read_stmt_f90`, `write_stmt_f90`, `io_control_spec` |
+| Section 11.1 | Main Program | `Fortran90Parser.g4`: `main_program`, `program_stmt`, `end_program_stmt` |
+| Section 11.3 | Modules | `F90ModulesParser.g4`: `module`, `module_stmt`, `use_stmt` |
+| Section 12.3 | Interface Blocks | `F90ModulesParser.g4`: `interface_block`, `interface_stmt`, `generic_spec` |
+| Section 12.5 | Procedures | `F90ProcsParser.g4`: `function_stmt`, `subroutine_stmt`, `prefix`, `suffix` |
+| Section 13.8 | Intrinsic Procedures | `F90ExprsParser.g4`: `intrinsic_function_f90`; Lexer: `*_INTRINSIC` tokens |
+
+## 11. Summary
 
 The Fortran 90 grammar in this repository:
 
