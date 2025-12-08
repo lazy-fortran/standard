@@ -533,16 +533,16 @@ syntax rules to grammar rules in `Fortran2018Lexer.g4` and `Fortran2018Parser.g4
 
 | ISO Rule | ISO Description | Grammar Rule |
 |----------|-----------------|--------------|
-| R503 | program-unit | `program_unit_f2018` |
+| R502 | program-unit | `program_unit_f2018` |
 | R1401 | main-program | `main_program_f2018` |
 | R1404 | module | `module_f2018` |
-| R1408 | module-subprogram-part | `module_subprogram_part_f2018` |
-| R1409 | module-subprogram | `module_subprogram_f2018` |
-| R1529 | external-subprogram | `external_subprogram_f2018` |
-| R1530 | function-subprogram | `function_subprogram_f2018` |
-| R1531 | function-stmt | `function_stmt_f2018` |
-| R1536 | subroutine-subprogram | `subroutine_subprogram_f2018` |
-| R1537 | subroutine-stmt | `subroutine_stmt_f2018` |
+| R1407 | module-subprogram-part | `module_subprogram_part_f2018` |
+| R1408 | module-subprogram | `module_subprogram_f2018` |
+| R503 | external-subprogram | `external_subprogram_f2018` |
+| R1529 | function-subprogram | `function_subprogram_f2018` |
+| R1530 | function-stmt | `function_stmt_f2018` |
+| R1534 | subroutine-subprogram | `subroutine_subprogram_f2018` |
+| R1535 | subroutine-stmt | `subroutine_stmt_f2018` |
 
 ### A.2 Specification and Execution Parts (Section 8, 11)
 
@@ -554,8 +554,8 @@ syntax rules to grammar rules in `Fortran2018Lexer.g4` and `Fortran2018Parser.g4
 | R510 | execution-part-construct | `execution_construct_f2018` |
 | R514 | executable-construct | `executable_construct_f2018` |
 | R1409 | use-stmt | `use_stmt` |
-| R1412 | only-list | `only_list` |
-| R1413 | only | `only_item_f2018` |
+| R1412 | only (elements of only-list) | `only_list` |
+| R1412 | only | `only_item_f2018` |
 
 ### A.3 SELECT RANK Construct (Section 11.1.10)
 
@@ -563,46 +563,46 @@ syntax rules to grammar rules in `Fortran2018Lexer.g4` and `Fortran2018Parser.g4
 |----------|-----------------|--------------|
 | R1148 | select-rank-construct | `select_rank_construct` |
 | R1149 | select-rank-stmt | `select_rank_stmt` |
-| R1150 | rank-stmt | `rank_case_stmt` |
-| R1151 | rank selector | `rank_value` |
-| R1153 | end-select-rank-stmt | `end_select_rank_stmt` |
+| R1150 | select-rank-case-stmt | `rank_case_stmt` |
+| -- | rank selector value (scalar-int-constant-expr or *) | `rank_value` |
+| R1151 | end-select-rank-stmt | `end_select_rank_stmt` |
 
 ### A.4 Team Constructs (Section 11.6)
 
 | ISO Rule | ISO Description | Grammar Rule |
 |----------|-----------------|--------------|
-| R1112 | change-team-construct | `change_team_construct` |
-| R1113 | change-team-stmt | `change_team_stmt` |
-| R1114 | team-value | `team_value` |
-| R1114 | coarray-association | `coarray_association` |
-| R1115 | end-team-stmt | `end_team_stmt` |
-| R1116 | form-team-stmt | `form_team_stmt` |
-| R1117 | team-number | `team_number_expr` |
-| R1117 | team-variable | `team_variable` |
-| R1118 | form-team-spec | `form_team_stat` |
+| R1111 | change-team-construct | `change_team_construct` |
+| R1112 | change-team-stmt | `change_team_stmt` |
+| R1113 | coarray-association | `coarray_association` |
+| R1114 | end-change-team-stmt | `end_team_stmt` |
+| R1115 | team-value | `team_value` |
+| R1175 | form-team-stmt | `form_team_stmt` |
+| R1176 | team-number | `team_number_expr` |
+| R1177 | team-variable | `team_variable` |
+| R1178 | form-team-spec | `form_team_stat` |
 
 ### A.5 Event Constructs (Section 11.6.8)
 
 | ISO Rule | ISO Description | Grammar Rule |
 |----------|-----------------|--------------|
-| R1119 | event-post-stmt | `event_post_stmt` |
-| R1120 | event-wait-stmt | `event_wait_stmt` |
-| R1121 | event-variable | `event_variable` |
-| R1122 | event-stat | `event_stat` |
-| R1123 | event-wait-spec | `event_wait_spec` |
+| R1170 | event-post-stmt | `event_post_stmt` |
+| R1172 | event-wait-stmt | `event_wait_stmt` |
+| R1171 | event-variable | `event_variable` |
+| R1165 | sync-stat (STAT=, ERRMSG=) | `event_stat` |
+| R1173 | event-wait-spec | `event_wait_spec` |
 
 ### A.6 DO CONCURRENT with Locality (Section 11.1.7)
 
 | ISO Rule | ISO Description | Grammar Rule |
 |----------|-----------------|--------------|
-| R1121 | do-construct | `do_construct_f2018` |
-| R1125 | do-concurrent-stmt | `do_concurrent_stmt_f2018` |
-| R1126 | concurrent-header | `concurrent_header_f2018` |
-| R1129 | locality-spec | `concurrent_locality` |
+| R1119 | do-construct | `do_construct_f2018` |
+| R1123 | loop-control with CONCURRENT | `do_concurrent_stmt_f2018` |
+| R1125 | concurrent-header | `concurrent_header_f2018` |
+| R1129 | concurrent-locality | `concurrent_locality` |
 | R1130 | LOCAL (variable-name-list) | (in `concurrent_locality`) |
-| R1131 | LOCAL_INIT (variable-name-list) | (in `concurrent_locality`) |
-| R1132 | SHARED (variable-name-list) | (in `concurrent_locality`) |
-| R1133 | DEFAULT (NONE) | (in `concurrent_locality`) |
+| R1130 | LOCAL_INIT (variable-name-list) | (in `concurrent_locality`) |
+| R1130 | SHARED (variable-name-list) | (in `concurrent_locality`) |
+| R1130 | DEFAULT (NONE) | (in `concurrent_locality`) |
 
 ### A.7 STOP and ERROR STOP (Section 11.4)
 
@@ -617,7 +617,7 @@ syntax rules to grammar rules in `Fortran2018Lexer.g4` and `Fortran2018Parser.g4
 | ISO Rule | ISO Description | Grammar Rule |
 |----------|-----------------|--------------|
 | R801 | type-declaration-stmt | `type_declaration_stmt_f2018` |
-| R822 | assumed-rank-spec | `assumed_rank_declaration` |
+| R825 | assumed-rank-spec | `assumed_rank_declaration` |
 | -- | EVENT_TYPE declaration | `event_declaration_stmt` |
 | -- | TEAM_TYPE declaration | `team_declaration_stmt` |
 
@@ -684,6 +684,5 @@ syntax rules to grammar rules in `Fortran2018Lexer.g4` and `Fortran2018Parser.g4
 | Section 16.9.161 | REDUCE | `REDUCE` |
 | Section 16.9.182 | STOPPED_IMAGES | `STOPPED_IMAGES` |
 | Section 16.9.187 | TEAM_NUMBER | `TEAM_NUMBER` |
-| R1118 | NEW_INDEX | `NEW_INDEX` |
-| R1123 | UNTIL_COUNT | `UNTIL_COUNT` |
-
+| R1178 | NEW_INDEX | `NEW_INDEX` |
+| R1173 | UNTIL_COUNT | `UNTIL_COUNT` |

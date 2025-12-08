@@ -47,7 +47,8 @@ IMAGE_STATUS_STOPPED   : I M A G E '_' S T A T U S '_' S T O P P E D ;
 // ----------------------------------------------------------------------------
 // SELECT RANK Construct (NEW in F2018)
 // ISO/IEC 1539-1:2018 Section 11.1.10: SELECT RANK construct
-// ISO/IEC 1539-1:2018 R1148-R1153: select-rank-stmt, rank-stmt, etc.
+// ISO/IEC 1539-1:2018 R1148-R1151: select-rank-construct, select-rank-stmt,
+// select-rank-case-stmt, end-select-rank-stmt
 // ----------------------------------------------------------------------------
 SELECT_RANK      : S E L E C T '_' R A N K ;
 RANK_STAR        : R A N K '_' S T A R ;
@@ -76,9 +77,8 @@ TEAM_NUMBER      : T E A M '_' N U M B E R ;
 // ----------------------------------------------------------------------------
 // Team Support (NEW in F2018)
 // ISO/IEC 1539-1:2018 Section 11.6: Image execution control
-// ISO/IEC 1539-1:2018 Section 11.6.7: CHANGE TEAM construct
-// ISO/IEC 1539-1:2018 Section 11.6.9: FORM TEAM statement
-// ISO/IEC 1539-1:2018 R1112-R1118: change-team-stmt, form-team-stmt, etc.
+// ISO/IEC 1539-1:2018 Section 11.6.7: CHANGE TEAM construct (R1111-R1115)
+// ISO/IEC 1539-1:2018 Section 11.6.9: FORM TEAM statement (R1175-R1178)
 // ISO/IEC 1539-1:2018 Section 16.9.78: GET_TEAM
 // ISO/IEC 1539-1:2018 Section 16.5.6: TEAM_TYPE
 // ----------------------------------------------------------------------------
@@ -91,7 +91,8 @@ GET_TEAM         : G E T '_' T E A M ;
 // ----------------------------------------------------------------------------
 // Events (NEW in F2018)
 // ISO/IEC 1539-1:2018 Section 11.6.8: EVENT POST and EVENT WAIT statements
-// ISO/IEC 1539-1:2018 R1119-R1124: event-post-stmt, event-wait-stmt, etc.
+// ISO/IEC 1539-1:2018 R1170-R1173: event-post-stmt, event-variable,
+// event-wait-stmt, event-wait-spec (with sync-stat R1165)
 // ISO/IEC 1539-1:2018 Section 16.9.72: EVENT_QUERY
 // ISO/IEC 1539-1:2018 Section 16.5.5: EVENT_TYPE
 // ----------------------------------------------------------------------------
@@ -103,7 +104,7 @@ EVENT_QUERY      : E V E N T WS+ Q U E R Y ;
 // ----------------------------------------------------------------------------
 // Assumed Rank Support (NEW in F2018)
 // ISO/IEC 1539-1:2018 Section 8.5.8.7: Assumed-rank entity
-// ISO/IEC 1539-1:2018 R822: assumed-rank-spec is ..
+// ISO/IEC 1539-1:2018 R825: assumed-rank-spec is ..
 // ----------------------------------------------------------------------------
 ASSUMED_RANK     : A S S U M E D '_' R A N K ;
 RANK_KEYWORD     : R A N K ;
@@ -128,14 +129,14 @@ CFI_SETPOINTER   : C F I '_' S E T P O I N T E R ;
 // ----------------------------------------------------------------------------
 // Enhanced Stop (NEW in F2018)
 // ISO/IEC 1539-1:2018 Section 11.4: STOP and ERROR STOP statements
-// ISO/IEC 1539-1:2018 R1162: stop-stmt with QUIET= specifier
+// ISO/IEC 1539-1:2018 R1160/R1161: STOP/ERROR STOP with optional QUIET= specifier
 // ----------------------------------------------------------------------------
 QUIET            : Q U I E T ;
 
 // ----------------------------------------------------------------------------
 // Locality Specifier (NEW in F2018)
 // ISO/IEC 1539-1:2018 Section 11.1.7.5: Additional semantics for DO CONCURRENT
-// ISO/IEC 1539-1:2018 R1129-R1132: locality-spec
+// ISO/IEC 1539-1:2018 R1129: concurrent-locality, R1130 locality-spec
 // ----------------------------------------------------------------------------
 LOCALITY         : L O C A L I T Y ;
 LOCAL_INIT       : L O C A L '_' I N I T ;
@@ -146,11 +147,11 @@ SHARED           : S H A R E D ;
 // Additional tokens referenced in parser (NEW in F2018)
 // ISO/IEC 1539-1:2018 Section 16.9.46-50: RESULT_IMAGE for collective calls
 // ISO/IEC 1539-1:2018 Section 16.9.47: SOURCE_IMAGE for CO_BROADCAST
-// ISO/IEC 1539-1:2018 R1117: coarray-association uses =>
-// ISO/IEC 1539-1:2018 R1118: NEW_INDEX in form-team-spec
+// ISO/IEC 1539-1:2018 R1113: coarray-association uses =>
+// ISO/IEC 1539-1:2018 R1178: NEW_INDEX in form-team-spec
 // ISO/IEC 1539-1:2018 Section 16.9.72: COUNT for EVENT_QUERY
-// ISO/IEC 1539-1:2018 R1123: UNTIL_COUNT for event-wait-spec
-// ISO/IEC 1539-1:2018 R822: assumed-rank-spec is ..
+// ISO/IEC 1539-1:2018 R1173: UNTIL_COUNT for event-wait-spec
+// ISO/IEC 1539-1:2018 R825: assumed-rank-spec is ..
 // ----------------------------------------------------------------------------
 RESULT_IMAGE     : R E S U L T '_' I M A G E ;
 SOURCE_IMAGE     : S O U R C E '_' I M A G E ;
