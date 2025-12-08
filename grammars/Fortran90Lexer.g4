@@ -47,11 +47,15 @@ FREE_FORM_COMMENT
     : '!' ~[\r\n]* -> channel(HIDDEN)
     ;
 
-// Fixed-form comments: C, c, or * at start of line
-// Note: This is a simplified approach - full column-position detection
-// would require lexer modes or custom logic
-FIXED_FORM_COMMENT  
-    : [Cc*] ~[\r\n]* -> channel(HIDDEN)
+// Fixed-form comments: C, c, or * at start of line (column 1)
+// Must follow a newline to ensure column 1 position
+FIXED_FORM_COMMENT
+    : [\r\n]+ [Cc] [ \t] ~[\r\n]* -> channel(HIDDEN)
+    ;
+
+// Star comment at column 1 (fixed-form only)
+STAR_COMMENT
+    : [\r\n]+ '*' ~[\r\n]* -> channel(HIDDEN)
     ;
 
 // Free-form continuation (& at end of line)  
@@ -186,8 +190,9 @@ DOUBLE_COLON    : '::' ;
 POINTER_ASSIGN  : '=>' ;
 PERCENT         : '%' ;
 SLASH           : '/' ;    // For array constructors (/ ... /)
-// Note: Square brackets [...] were introduced in Fortran 2003, NOT F90!
-// F90 only uses (/ ... /) syntax for array constructors
+// Square brackets [...] for array constructors (introduced in F2003, commonly backported)
+LSQUARE         : '[' ;
+RSQUARE         : ']' ;
 
 // F90 array intrinsic keywords
 LBOUND          : L B O U N D ;
@@ -208,6 +213,15 @@ GE_OP           : '>=' ;
 
 // Kind-parameterized literals (F90 innovation)
 INTEGER_LITERAL_KIND : DIGIT+ '_' IDENTIFIER ;
+
+// Override INTEGER_LITERAL to take precedence over LABEL from earlier standards
+INTEGER_LITERAL : DIGIT+ ;
+
+// Override REAL_LITERAL to ensure consistency
+REAL_LITERAL    : DIGIT+ '.' DIGIT* EXPONENT?
+                | '.' DIGIT+ EXPONENT?
+                | DIGIT+ EXPONENT ;
+
 REAL_LITERAL_KIND    : (DIGIT+ '.' DIGIT* | '.' DIGIT+) EXPONENT? '_' IDENTIFIER
                     | DIGIT+ EXPONENT '_' IDENTIFIER ;
 
@@ -284,12 +298,17 @@ IMPLICIT        : ('i'|'I') ('m'|'M') ('p'|'P') ('l'|'L')
                   ('i'|'I') ('c'|'C') ('i'|'I') ('t'|'T') ;
 NONE            : ('n'|'N') ('o'|'O') ('n'|'N') ('e'|'E') ;
 
-// Whitespace and newlines
+// Whitespace handling - MUST skip spaces and tabs
 WHITESPACE : [ \t]+ -> skip ;
+
+// Override inherited NEWLINE to work properly with continuations
 NEWLINE    : [\r\n]+ ;
 
 // Whitespace fragment for compound tokens
 fragment WS : [ \t]+ ;
+
+// Digit fragment for numeric literals
+fragment DIGIT : [0-9] ;
 
 // ====================================================================
 // FORTRAN 90 LEXER NOTES
