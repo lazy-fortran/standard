@@ -190,7 +190,7 @@ DOUBLE_COLON    : '::' ;
 POINTER_ASSIGN  : '=>' ;
 PERCENT         : '%' ;
 SLASH           : '/' ;    // For array constructors (/ ... /)
-// Square brackets [...] for array constructors (introduced in F2003, commonly backported)
+// Square brackets for array constructors (F2003, commonly backported)
 LSQUARE         : '[' ;
 RSQUARE         : ']' ;
 
