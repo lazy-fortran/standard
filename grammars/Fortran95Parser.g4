@@ -36,6 +36,116 @@ options {
 // ====================================================================
 
 // ====================================================================
+// FORTRAN 95 PROGRAM ENTRY POINT (ISO/IEC 1539-1:1997)
+// ====================================================================
+//
+// This entry point integrates F95 constructs (FORALL, enhanced WHERE,
+// F95 type rules and I/O) into the program structure. It reuses the F90
+// program unit structure but augments execution_part and construct
+// rules to reach F95-specific constructs.
+//
+// Issue #179: integrate F95 constructs into program and execution structure.
+
+program_unit_f95
+    : NEWLINE* (main_program_f95 | module_f95 | external_subprogram_f95) NEWLINE*
+    ;
+
+// Main program with F95-integrated execution part
+main_program_f95
+    : program_stmt specification_part_f95? execution_part_f95?
+      internal_subprogram_part? end_program_stmt
+    ;
+
+// Module with F95 specification and subprogram parts
+module_f95
+    : module_stmt specification_part_f95? module_subprogram_part_f95? end_module_stmt
+    ;
+
+module_subprogram_part_f95
+    : contains_stmt NEWLINE* (module_subprogram_f95 NEWLINE*)*
+    ;
+
+module_subprogram_f95
+    : function_subprogram_f95
+    | subroutine_subprogram_f95
+    ;
+
+// External subprogram with F95-integrated execution part
+external_subprogram_f95
+    : function_subprogram_f95
+    | subroutine_subprogram_f95
+    | module_f95
+    ;
+
+function_subprogram_f95
+    : function_stmt specification_part_f95? execution_part_f95?
+      internal_subprogram_part_f95? end_function_stmt
+    ;
+
+subroutine_subprogram_f95
+    : subroutine_stmt specification_part_f95? execution_part_f95?
+      internal_subprogram_part_f95? end_subroutine_stmt
+    ;
+
+internal_subprogram_part_f95
+    : contains_stmt NEWLINE* (internal_subprogram_f95 NEWLINE*)*
+    ;
+
+internal_subprogram_f95
+    : function_subprogram_f95
+    | subroutine_subprogram_f95
+    ;
+
+// ====================================================================
+// F95 SPECIFICATION PART (ISO/IEC 1539-1:1997 Section 11.1)
+// ====================================================================
+//
+// The specification part may include F95-specific type declarations and
+// derived type definitions with default initialization.
+
+specification_part_f95
+    : (NEWLINE* (use_stmt | import_stmt))*
+      (NEWLINE* implicit_stmt_f90)?
+      (NEWLINE* declaration_construct_f95)* NEWLINE*
+    ;
+
+declaration_construct_f95
+    : type_declaration_stmt_f95
+    | derived_type_def_f95
+    | interface_block
+    | parameter_stmt
+    | data_stmt
+    | namelist_stmt
+    | common_stmt
+    | equivalence_stmt
+    | dimension_stmt
+    | allocatable_stmt
+    | pointer_stmt
+    | target_stmt
+    | optional_stmt
+    | intent_stmt
+    | public_stmt
+    | private_stmt
+    | save_stmt
+    | external_stmt
+    | intrinsic_stmt
+    // F90 fallbacks for constructs without F95-specific rules
+    | type_declaration_stmt_f90
+    | derived_type_def
+    ;
+
+// ====================================================================
+// F95 EXECUTION PART (ISO/IEC 1539-1:1997 Section 11.1)
+// ====================================================================
+//
+// The execution part includes F95 executable constructs such as FORALL
+// and enhanced WHERE alongside the F90 constructs.
+
+execution_part_f95
+    : (NEWLINE* executable_construct_f95)* NEWLINE*
+    ;
+
+// ====================================================================
 // F95 IDENTIFIER-OR-KEYWORD (INTRINSIC PROCEDURE NAMES)
 // ====================================================================
 //
@@ -82,8 +192,10 @@ identifier_or_keyword_f95
 // ====================================================================
 
 // FORALL construct (F95 advanced array operations)
+// ISO/IEC 1539-1:1997 Section 7.5.4
 forall_construct
-    : forall_construct_stmt forall_assignment_stmt* end_forall_stmt
+    : forall_construct_stmt NEWLINE
+      (NEWLINE* forall_body_construct)* NEWLINE* end_forall_stmt
     ;
 
 forall_construct_stmt
@@ -92,7 +204,7 @@ forall_construct_stmt
 
 // FORALL statement (single statement form)
 forall_stmt
-    : FORALL forall_header forall_assignment_stmt
+    : FORALL forall_header forall_assignment_stmt NEWLINE?
     ;
 
 // FORALL header with triplet specifications
@@ -105,7 +217,7 @@ forall_triplet_spec_list
     ;
 
 forall_triplet_spec
-    : IDENTIFIER EQUALS expr_f95 COLON expr_f95 (COLON expr_f95)?    
+    : IDENTIFIER EQUALS expr_f95 COLON expr_f95 (COLON expr_f95)?
         // index=start:end:stride
     ;
 
@@ -113,18 +225,23 @@ scalar_mask_expr
     : expr_f95                      // Must be scalar logical expression
     ;
 
+// FORALL body can contain assignments, WHERE, or nested FORALL
+forall_body_construct
+    : forall_assignment_stmt NEWLINE?
+    | where_construct
+    | forall_construct
+    ;
+
 // FORALL assignment statements
 forall_assignment_stmt
     : assignment_stmt_f95
     | pointer_assignment_stmt
     | where_stmt
-    | where_construct
-    | forall_construct            // Nested FORALL
     | forall_stmt                 // Nested FORALL statement
     ;
 
 end_forall_stmt
-    : END_FORALL (IDENTIFIER)?
+    : END_FORALL (IDENTIFIER)? NEWLINE?
     ;
 
 // ====================================================================
@@ -132,38 +249,40 @@ end_forall_stmt
 // ====================================================================
 
 // Enhanced WHERE construct (F95 allows multiple ELSEWHERE)
+// ISO/IEC 1539-1:1997 Section 7.5.3
 where_construct_f95
-    : where_construct_stmt_f95 where_body_construct* end_where_stmt
+    : where_construct_stmt_f95 NEWLINE (NEWLINE* where_body_construct_f95)*
+      NEWLINE* end_where_stmt
     ;
 
 where_construct_stmt_f95
     : (IDENTIFIER COLON)? WHERE LPAREN logical_expr_f95 RPAREN
     ;
 
-where_body_construct
-    : where_assignment_stmt
+where_body_construct_f95
+    : where_assignment_stmt_f95 NEWLINE?
     | where_construct_f95         // Nested WHERE
-    | elsewhere_part
+    | elsewhere_part_f95
     ;
 
-elsewhere_part
-    : elsewhere_stmt elsewhere_assignment_stmt*
+elsewhere_part_f95
+    : elsewhere_stmt_f95 NEWLINE (NEWLINE* elsewhere_assignment_stmt_f95)*
     ;
 
-elsewhere_stmt
+elsewhere_stmt_f95
     : ELSEWHERE (LPAREN logical_expr_f95 RPAREN)? (IDENTIFIER)?
     ;
 
-where_assignment_stmt
+where_assignment_stmt_f95
     : assignment_stmt_f95
     | pointer_assignment_stmt
     | where_stmt
     ;
 
-elsewhere_assignment_stmt
-    : assignment_stmt_f95
-    | pointer_assignment_stmt
-    | where_stmt
+elsewhere_assignment_stmt_f95
+    : assignment_stmt_f95 NEWLINE?
+    | pointer_assignment_stmt NEWLINE?
+    | where_stmt NEWLINE?
     ;
 
 // Simple WHERE statement (enhanced for F95)
@@ -471,6 +590,7 @@ executable_stmt_f95
     | continue_stmt
     | read_stmt_f95
     | write_stmt_f95
+    | print_stmt_f90              // F90 print (inherited)
     | allocate_stmt
     | deallocate_stmt
     | nullify_stmt
