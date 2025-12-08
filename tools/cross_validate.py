@@ -14,7 +14,7 @@ from typing import List, Dict, Tuple, Optional
 import json
 
 # Add grammars to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'grammars'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'grammars/generated/modern'))
 
 from antlr4 import *
 from Fortran2018Lexer import Fortran2018Lexer

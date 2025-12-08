@@ -18,7 +18,7 @@ from typing import List
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-GRAMMAR_DIR = PROJECT_ROOT / "grammars"
+GRAMMAR_DIR = PROJECT_ROOT / "grammars/generated/modern"
 
 if str(GRAMMAR_DIR) not in sys.path:
     sys.path.insert(0, str(GRAMMAR_DIR))

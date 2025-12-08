@@ -21,7 +21,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from fixture_utils import load_fixture
 
 # Add grammars directory to Python path for generated parsers
-sys.path.append(str(Path(__file__).parent.parent.parent / "grammars"))
+sys.path.append(str(Path(__file__).parent.parent.parent / "grammars/generated/modern"))
 
 try:
     from antlr4 import InputStream, CommonTokenStream

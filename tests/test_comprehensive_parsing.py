@@ -10,7 +10,7 @@ from pathlib import Path
 
 # Add tests and grammars directories to path
 sys.path.append(str(Path(__file__).parent))
-sys.path.append(str(Path(__file__).parent.parent / "grammars"))
+sys.path.append(str(Path(__file__).parent.parent / "grammars/generated/modern"))
 
 from antlr4 import *
 from Fortran90Lexer import Fortran90Lexer
