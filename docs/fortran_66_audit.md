@@ -266,9 +266,22 @@ Mapping these families to the current grammar:
     - FORMAT:
       - Implemented as described above.
     - Statement functions:
-      - Supported syntactically via `function_reference` and inherited
-        1957/II mechanisms; the grammar does not distinguish statement
-        functions from external functions at the syntax level.
+      - Parser: `statement_function_stmt` rule implemented in
+        `FORTRANIIParser.g4` (inherited by FORTRAN66Parser.g4) per
+        X3.9-1966 Section 7.2.
+      - Syntax: `name(dummy-arg-list) = expression` where dummy-arg-list
+        is a non-empty comma-separated list of identifier dummy arguments.
+      - Wired into `statement_body` as a distinct alternative from
+        `assignment_stmt`, enabling syntactic differentiation.
+      - Tests: covered by `test_statement_function_simple`,
+        `test_statement_function_multiple_args`,
+        `test_statement_function_complex_expr`,
+        `test_statement_function_in_statement_body`, and
+        `test_statement_function_fixture` in
+        `tests/FORTRAN66/test_fortran66_parser.py`.
+      - Semantic constraint: statement functions must appear in the
+        specification part (after declarations, before executable
+        statements); this constraint is not enforced syntactically.
     - DATA:
       - Lexer: `DATA` token defined in `FORTRAN66Lexer.g4`.
       - Parser: `data_stmt` rule implemented in `FORTRAN66Parser.g4`

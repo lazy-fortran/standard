@@ -205,7 +205,8 @@ label
 // NOTE: end_stmt is NOT included here - it is handled separately as a
 // program unit terminator to enable parsing multiple program units.
 statement_body
-    : assignment_stmt      // Variable = Expression
+    : statement_function_stmt  // Statement function definition (X3.9-1966 7.2)
+    | assignment_stmt      // Variable = Expression
     | goto_stmt           // Unconditional jump to labeled statement
     | computed_goto_stmt  // Multi-way branch based on integer expression
     | assign_stmt         // GO TO assignment: ASSIGN k TO i (X3.9-1966 7.1.1.3)
