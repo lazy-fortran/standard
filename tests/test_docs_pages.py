@@ -22,7 +22,7 @@ def test_design_doc_has_work_in_progress_notice() -> None:
   design_path = _repo_root() / "docs" / "lazyfortran2025-design.md"
   content = design_path.read_text(encoding="utf-8")
 
-  assert "WORK IN PROGRESS" in content
+  assert "Work in progress" in content
 
 
 def test_design_doc_covers_all_lazy_feature_issues() -> None:
@@ -30,7 +30,7 @@ def test_design_doc_covers_all_lazy_feature_issues() -> None:
   content = design_path.read_text(encoding="utf-8")
 
   for issue in range(51, 58):
-    marker = f"Issue #{issue}"
+    marker = f"#{issue}"
     assert (
       marker in content
     ), f"Design document should reference Lazy Fortran issue #{issue}"
@@ -40,36 +40,30 @@ def test_type_inference_doc_spells_out_numeric_kinds() -> None:
   design_path = _repo_root() / "docs" / "lazyfortran2025-design.md"
   content = design_path.read_text(encoding="utf-8")
 
-  assert "Kinds represent **bytes per numeric component**" in content
-  assert "double precision => real(8)" in content
-  assert "double complex => complex(8)" in content
+  assert "bytes per component" in content
+  assert "`double precision` maps to `real(8)`" in content
+  assert "`double complex` maps to `complex(16)`" in content
 
 
 def test_type_inference_doc_covers_implicit_modes_and_promotion() -> None:
   design_path = _repo_root() / "docs" / "lazyfortran2025-design.md"
   content = design_path.read_text(encoding="utf-8")
 
-  assert (
-    "In plain `.lf` without `implicit`, undeclared names are allowed"
-    in content
-  )
-  assert "With `implicit none`, undeclared names are errors" in content
-  assert "integer division stays integer" in content
-  assert "complex dominates real" in content
+  assert "Without `implicit`" in content
+  assert "`implicit none`: undeclared names are errors" in content
+  assert "integer + integer | integer" in content
+  assert "real + complex | complex" in content
 
 
 def test_world_specializations_doc_spells_out_precedence_and_ambiguity() -> None:
   design_path = _repo_root() / "docs" / "lazyfortran2025-design.md"
   content = design_path.read_text(encoding="utf-8")
 
-  assert (
-    "LF‑SYN‑03 – World‑Wide Automatic Specializations (Issue #51)"
-    in content
-  )
-  assert "explicit, user-written specific procedures always" in content
-  assert "win over generated specializations" in content
-  assert "most specific candidate" in content
-  assert "compile-time ambiguity error" in content
+  assert "LF-SYN-03" in content
+  assert "World-Wide Automatic Specializations" in content
+  assert "User-written specifics win" in content
+  assert "Most specific candidate wins" in content
+  assert "Ambiguity is an error" in content
 
 
 def test_world_specializations_doc_mentions_iso_generic_resolution() -> None:
@@ -78,4 +72,4 @@ def test_world_specializations_doc_mentions_iso_generic_resolution() -> None:
 
   assert "ISO/IEC 1539-1:2018" in content
   assert "15.4.3.4" in content
-  assert "STANDARD-COMPLIANT" in content
+  assert "standard-compliant" in content

@@ -1,142 +1,108 @@
-# Lazy Fortran 2025 Design (WORK IN PROGRESS)
+# Lazy Fortran 2025 Design
 
-> WORK IN PROGRESS – this document captures the current design for
-> Lazy Fortran 2025. Details may change as the implementation and
-> standard audits evolve.
+> **Status:** Work in progress. Details may change as implementation evolves.
 
-This design note explains how Lazy Fortran 2025 builds on the
-standard‑grounded grammars for FORTRAN 1957–Fortran 2023 and adds:
+Lazy Fortran 2025 builds on the standard-grounded grammars for FORTRAN 1957 through Fortran 2023, adding:
 
-- a type‑inference model for `.lf` sources,
-- world‑wide automatic specializations, and
-- a strict relationship to the ISO Fortran standard’s generic
-  resolution rules.
+- Type inference for `.lf` sources
+- World-wide automatic specializations
+- Strict alignment with ISO Fortran generic resolution rules
 
-It is intentionally written as a **design** document, not a standard,
-and treats the ISO text as the normative reference whenever there is
-any ambiguity.
+This is a **design document**, not a standard. The ISO text is the normative reference for any ambiguity.
 
 ---
 
-## LF‑TYP‑01 – Numeric kinds and type inference (Issue #52)
+## LF-TYP-01: Numeric Kinds and Type Inference (#52)
 
-Lazy Fortran 2025 uses an explicit numeric‑kind lattice that is
-grounded in the standard intrinsic types but exposed as a simple
-“bytes per component” model:
+Lazy Fortran 2025 uses an explicit numeric-kind lattice grounded in standard intrinsic types, exposed as a "bytes per component" model.
 
-- Kinds represent **bytes per numeric component**.
-- The built‑in mappings are:
-  - `integer(4)` → “32‑bit integer”.
-  - `real(4)`   → “single precision”.
-  - `real(8)`   → “double precision”.
-  - `complex(8)` → “single precision complex”.
-  - `complex(16)` → “double precision complex”.
-- For convenience and readability we also record the canonical
-  **double precision** and **double complex** aliases:
-  - `double precision => real(8)`
-  - `double complex => complex(8)`
+**Default kinds (per ISO standard):**
+- `integer` without kind specifier defaults to `integer(4)`
+- `real` without kind specifier defaults to `real(4)` (single precision)
+- `complex` without kind specifier defaults to `complex(8)` (single precision complex)
 
-The inference engine never invents new kinds; it only picks among
-these and those explicitly declared in the user’s code.
+**Kind mappings:**
 
----
+| Type | Kind | Description |
+|------|------|-------------|
+| `integer(4)` | 4 | 32-bit integer (default integer) |
+| `real(4)` | 4 | Single precision (default real) |
+| `real(8)` | 8 | Double precision |
+| `complex(8)` | 8 | Single precision complex (default complex) |
+| `complex(16)` | 16 | Double precision complex |
 
-## LF‑TYP‑02 – Implicit modes and promotion rules (Issue #53)
+**Aliases:**
+- `double precision` maps to `real(8)`
+- `double complex` maps to `complex(16)`
 
-Type inference is designed to be predictable and compatible with both
-traditional Fortran and modern “implicit none” style:
-
-- In plain `.lf` without `implicit`, undeclared names are allowed  
-  and are inferred according to the standard’s default implicit
-  rules (I–N integer, otherwise real), refined by usage.
-- With `implicit none`, undeclared names are errors and the
-  inference engine refuses to invent declarations.
-- Promotions within expressions follow the standard’s hierarchy but
-  are spelled out explicitly:
-  - integer + integer → integer (integer division stays integer).
-  - integer combined with real → real.
-  - real combined with complex → complex (complex dominates real).
-  - complex combined with complex → complex at the dominant kind.
-
-These rules are applied consistently across all standards in the
-grammar chain so that `.lf` code can freely interoperate with legacy
-Fortran sources.
+The inference engine only selects from these built-in kinds and those explicitly declared in user code. Implicit typing (I-N integer, otherwise real) yields default-kind types: `integer(4)` and `real(4)`.
 
 ---
 
-## LF‑SYN‑03 – World‑Wide Automatic Specializations (Issue #51)
+## LF-TYP-02: Implicit Modes and Promotion Rules (#53)
 
-Lazy Fortran 2025 introduces a world‑wide specialization mechanism
-for generic procedures that is **explicitly aligned** with the
-standard’s generic resolution:
+Type inference is predictable and compatible with both traditional Fortran and modern `implicit none` style.
 
-- The design anchor is ISO/IEC 1539-1:2018, particularly
-  section **15.4.3.4** on generic resolution, which we treat as the
-  normative description of how candidates are chosen.
-- LF‑SYN‑03 – World‑Wide Automatic Specializations (Issue #51)
-  states the core policy:
-  - **Explicit, user-written specific procedures always**
-    win over generated specializations.
-  - If there are multiple matching candidates, we choose the
-    **most specific candidate** (mirroring the ISO generic
-    resolution rules).
-  - If two candidates are incomparable or equally specific, the
-    call site is rejected with a **compile-time ambiguity error**
-    and a reference to the governing ISO rule.
+**Implicit modes:**
+- Without `implicit`: undeclared names follow standard default rules (I-N integer, otherwise real), refined by usage
+- With `implicit none`: undeclared names are errors; inference refuses to invent declarations
 
-In other words, **explicit, user-written specific procedures always**
-win over generated specializations, the most specific candidate is
-chosen whenever the ISO rules allow it, and any remaining ambiguity
-is reported as a compile-time ambiguity error.
+**Promotion rules:**
 
-This is the mechanism that allows Lazy Fortran to add extra
-specialized implementations (e.g. BLAS‑backed kernels, vectorized
-loops) while remaining **STANDARD-COMPLIANT** with respect to
-generic resolution.
+| Expression | Result |
+|------------|--------|
+| integer + integer | integer |
+| integer + real | real |
+| real + complex | complex |
+| complex + complex | complex (dominant kind) |
+
+These rules apply consistently across all standards, enabling `.lf` code to interoperate with legacy Fortran.
 
 ---
 
-## LF‑WLD‑04 – World‑Wide Specializations and ISO generic resolution (Issue #54)
+## LF-SYN-03: World-Wide Automatic Specializations (#51)
 
-To make the relationship between Lazy Fortran and the ISO standard
-absolutely clear:
+Lazy Fortran 2025 introduces world-wide specialization for generic procedures, aligned with ISO/IEC 1539-1:2018 Section 15.4.3.4.
 
-- The grammar and audits for Fortran 2003/2008/2018/2023 already
-  model generic interfaces, type‑bound generics, and intrinsic
-  modules in a spec‑referenced way.
-- The **world‑wide specializations** layer operates *on top* of this:
-  - It never changes which specific procedures exist from the
-    ISO point of view.
-  - It only adds generated implementations that are attached
-    to existing generic names as additional candidates.
-- All candidate sets are then resolved using an algorithm that
-  is a direct transcription of the ISO/IEC 1539-1:2018 §15.4.3.4
-  rules:
-  - Rank, type, kind and polymorphic matching are evaluated
-    exactly as prescribed.
-  - Ambiguity and “no candidate” cases follow the standard,
-    with additional diagnostic detail from the Lazy Fortran layer.
+**Resolution policy:**
+1. **User-written specifics win** - explicit procedures always take precedence over generated specializations
+2. **Most specific candidate wins** - follows ISO generic resolution rules
+3. **Ambiguity is an error** - incomparable candidates trigger compile-time errors with ISO rule references
 
-In short: Lazy Fortran’s specializations are **standard‑compatible
-decorations** and never override or contradict ISO generic behavior.
+This enables Lazy Fortran to add optimized implementations (BLAS-backed kernels, vectorized loops) while remaining standard-compliant.
 
 ---
 
-## LF‑ISSUES – Design coverage for Lazy Fortran issues #51–#57
+## LF-WLD-04: ISO Generic Resolution Alignment (#54)
 
-This document is intended to be the living high‑level design for the
-Lazy Fortran 2025 features, and it explicitly references the
-following GitHub issues:
+The relationship between Lazy Fortran and the ISO standard:
 
-- Issue #51 – LF‑SYN‑03 – World‑Wide Automatic Specializations.
-- Issue #52 – LF‑TYP‑01 – Numeric kind lattice and promotion rules.
-- Issue #53 – LF‑TYP‑02 – Implicit modes and type inference.
-- Issue #54 – LF‑WLD‑04 – ISO generic resolution alignment.
-- Issue #55 – LF‑WLD‑05 – Interoperability with legacy Fortran code.
-- Issue #56 – LF‑CODE‑01 – Tooling integration and diagnostics.
-- Issue #57 – LF‑DOC‑01 – Documentation guarantees for all Lazy
-  Fortran features.
+**Foundation:**
+- Grammars for Fortran 2003/2008/2018/2023 model generic interfaces, type-bound generics, and intrinsic modules per spec
 
-Each of these issues corresponds to a concrete sub‑section or
-implementation plan in this file; as the implementation matures,
-this design document and the issues will be kept in sync.
+**World-wide specializations layer:**
+- Operates *on top* of ISO semantics
+- Never changes which specific procedures exist from ISO perspective
+- Only adds generated implementations as additional candidates to existing generic names
+
+**Resolution algorithm (per ISO/IEC 1539-1:2018 Section 15.4.3.4):**
+- Rank, type, kind, and polymorphic matching evaluated exactly as prescribed
+- Ambiguity and "no candidate" cases follow standard, with enhanced diagnostics
+
+Lazy Fortran specializations are **standard-compatible decorations** that never override ISO generic behavior.
+
+---
+
+## Issue Tracking
+
+| Issue | ID | Description |
+|-------|-----|-------------|
+| #51 | LF-SYN-03 | World-wide automatic specializations |
+| #52 | LF-TYP-01 | Numeric kind lattice and promotion rules |
+| #53 | LF-TYP-02 | Implicit modes and type inference |
+| #54 | LF-WLD-04 | ISO generic resolution alignment |
+| #55 | LF-WLD-05 | Interoperability with legacy Fortran code |
+| #56 | LF-CODE-01 | Tooling integration and diagnostics |
+| #57 | LF-DOC-01 | Documentation guarantees |
+
+Each issue corresponds to a section or implementation plan in this document.
