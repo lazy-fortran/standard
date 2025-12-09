@@ -533,7 +533,7 @@ notify_type_declaration_stmt_f2023
 // Override F2018 executable_construct to include F2023 NOTIFY WAIT statement
 
 // ISO/IEC 1539-1:2023 R514: executable-construct
-// Enhanced executable construct for F2023 (adds NOTIFY WAIT)
+// Enhanced executable construct for F2023 (adds NOTIFY WAIT, includes I/O)
 executable_construct_f2018
     : assignment_stmt                 // Inherit from F2003
     | call_stmt                       // Inherit from F2003
@@ -552,6 +552,11 @@ executable_construct_f2018
     | sync_construct                  // Inherit from F2008
     | wait_stmt                       // Inherit from F2003
     | flush_stmt                      // Inherit from F2003
+    | open_stmt                       // I/O: OPEN (Section 12.5.6)
+    | close_stmt                      // I/O: CLOSE (Section 12.5.7)
+    | write_stmt                      // I/O: WRITE (Section 12.6.2)
+    | read_stmt                       // I/O: READ (Section 12.6.1)
+    | inquire_stmt                    // I/O: INQUIRE (Section 12.10.3)
     | if_construct                    // Inherit from F95
     | do_construct_f2018              // Enhanced in F2018 (R1119-R1132, DO CONCURRENT)
     | select_case_construct           // Inherit from F95
@@ -706,6 +711,8 @@ identifier_or_keyword
     // F2023 NOTIFY WAIT synchronization (Section 11.6)
     | NOTIFY_WAIT  // NOTIFY WAIT can be used as statement keyword
     | NOTIFY_TYPE  // NOTIFY_TYPE can be used as type name
+    // F2023 I/O specifiers (Section 12.5.6.15)
+    | LEADING_ZERO // LEADING_ZERO can be used as variable name in I/O
     ;
 
 // ============================================================================
@@ -769,4 +776,72 @@ type_declaration_stmt
       DOUBLE_COLON entity_decl_list NEWLINE
     | CLASSOF LPAREN data_ref_f2023 RPAREN (COMMA attr_spec_list)?
       DOUBLE_COLON entity_decl_list NEWLINE
+    ;
+
+// ============================================================================
+// LEADING_ZERO I/O SPECIFIER OVERRIDE (ISO/IEC 1539-1:2023 Section 12.5.6.15)
+// ============================================================================
+//
+// J3/22-007 Section 12.5.6.15: LEADING_ZERO= specifier
+// R1213: io-control-spec includes LEADING_ZERO= scalar-default-char-expr
+//
+// The LEADING_ZERO specifier controls whether leading zeros are included
+// in the output for I, B, O, and Z edit descriptors. Valid values:
+// - 'YES': Include leading zeros
+// - 'NO': Suppress leading zeros (default behavior)
+// - 'PROCESSOR_DEFINED': Use processor-dependent default
+//
+// This specifier can appear in:
+// - OPEN statements (connect-spec) to set default for a unit
+// - READ/WRITE statements (io-control-spec) to override per-statement
+// - INQUIRE statements (inquire-spec) to query current setting
+//
+
+// Override F2003 f2003_io_spec to add F2023 LEADING_ZERO specifier
+f2003_io_spec
+    : IDENTIFIER EQUALS primary
+        // Regular identifier = value (file='test.dat')
+    | UNIT EQUALS primary                        // unit=10, unit=*
+    | FILE EQUALS primary                        // file='filename'
+    | ACCESS EQUALS primary                      // access='stream' (F2003)
+    | FORM EQUALS primary                        // form='unformatted'
+    | STATUS EQUALS primary                      // status='new'
+    | BLANK EQUALS primary                       // blank='null'
+    | POSITION EQUALS primary                    // position='rewind'
+    | ACTION EQUALS primary                      // action='read'
+    | DELIM EQUALS primary                       // delim='apostrophe'
+    | PAD EQUALS primary                         // pad='yes'
+    | RECL EQUALS primary                        // recl=100
+    | IOSTAT EQUALS primary                      // iostat=ios
+    | IOMSG EQUALS primary                       // iomsg=msg (F2003)
+    | ERR EQUALS primary                         // err=100
+    | END EQUALS primary                         // end=200
+    | EOR EQUALS primary                         // eor=300
+    | ADVANCE EQUALS primary                     // advance='yes'
+    | SIZE EQUALS primary                        // size=isize
+    | REC EQUALS primary                         // rec=irec
+    | ASYNCHRONOUS EQUALS primary                // asynchronous='yes' (F2003)
+    | STREAM EQUALS primary                      // stream='yes' (F2003 R905)
+    | PENDING EQUALS primary                     // pending=var (F2003 R923)
+    | ID EQUALS primary                          // id=id_var (F2003)
+    | FMT EQUALS primary                         // fmt=*, fmt=100, fmt='(DT)'
+    | LEADING_ZERO EQUALS primary                // leading_zero='yes' (F2023)
+    | primary                                    // Positional: *, 10, '(DT)', etc.
+    ;
+
+// ============================================================================
+// INQUIRE STATEMENT OVERRIDE (ISO/IEC 1539-1:2023 Section 12.10.3)
+// ============================================================================
+//
+// J3/22-007 Section 12.10.3: INQUIRE statement
+// R1230: inquire-stmt is INQUIRE ( inquire-spec-list )
+//                     or INQUIRE ( IOLENGTH = scalar-int-variable ) output-item-list
+//
+// F2023 adds LEADING_ZERO= specifier to inquire-spec (Section 12.5.6.15).
+//
+// Override to use f2003_io_spec_list which includes LEADING_ZERO.
+
+// INQUIRE statement (ISO/IEC 1539-1:2023 R1230)
+inquire_stmt
+    : INQUIRE LPAREN f2003_io_spec_list RPAREN NEWLINE?
     ;
