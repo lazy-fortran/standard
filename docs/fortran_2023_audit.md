@@ -19,7 +19,7 @@ F2023 feature set plus the local PDF and compares that to:
     `tests/fixtures/Fortran2023/...`.
 
 All 7 previously-failing F2023 fixtures now pass after fixes applied in
-PR #343 (Issue #310). The grammar supports the core F2023 features:
+PR #344 (Issue #310). The grammar supports the core F2023 features:
 conditional expressions, ENUM definitions, IEEE module intrinsics,
 array constructors with type-spec, coarray syntax, and legacy character*n.
 
@@ -392,7 +392,7 @@ The Fortran 2023 layer in this repository:
     - BOZ literals and basic NAMELIST/SYSTEM_CLOCK refinements.
   - Token‑level compatibility with F2018 and earlier standards.
 
-**CRITICAL Gaps (Issue #310):**
+**CRITICAL Gaps (Issues #328–#335, #345–#348):**
 
 Enumeration Types (R766-R771) NOT IMPLEMENTED:
 
@@ -405,12 +405,16 @@ Enumeration Types (R766-R771) NOT IMPLEMENTED:
 | R770 | `enumerator` | NOT IMPLEMENTED |
 | R771 | `end-enum-type-stmt` | NOT IMPLEMENTED |
 
+Tracked by Issue #328.
+
 Type Inference (NEW IN F2023) NOT IMPLEMENTED:
 
 | ISO Rule | Description | Status |
 |----------|-------------|--------|
 | R703 | `typeof-type-spec` TYPEOF(data-ref) | NOT IMPLEMENTED |
 | R704 | `classof-type-spec` CLASSOF(data-ref) | NOT IMPLEMENTED |
+
+Tracked by Issue #329.
 
 Other Missing Features:
 
@@ -424,23 +428,38 @@ Other Missing Features:
 | -- | AT edit descriptor | NOT IMPLEMENTED |
 | -- | LEADING_ZERO I/O specifier | NOT IMPLEMENTED |
 
+- R821 rank-clause gap tracked by Issue #345.
+- R1029 / conditional-expression integration tracked by Issue #334.
+- R1179 and NOTIFY_TYPE tracked by Issue #333.
+- C_F_STRPOINTER tracked by Issue #346.
+- AT edit descriptor tracked by Issue #347.
+- LEADING_ZERO I/O specifier tracked by Issue #348.
+
 **Missing Intrinsic Functions (14 new trig functions):**
 
 | Intrinsic | Description |
 |-----------|-------------|
-| ACOSD, ASIND, ATAND, ATAN2D | Degree-based inverse trig |
-| COSD, SIND, TAND | Degree-based trig |
-| ACOSPI, ASINPI, ATANPI, ATAN2PI | Pi-scaled inverse trig |
-| COSPI, SINPI, TANPI | Pi-scaled trig |
-| SPLIT | String splitting |
-| TOKENIZE | String tokenization |
+| ACOSD, ASIND, ATAND, ATAN2D | Degree-based inverse trig (Issue #330) |
+| COSD, SIND, TAND | Degree-based trig (Issue #330) |
+| ACOSPI, ASINPI, ATANPI, ATAN2PI | Pi-scaled inverse trig (Issue #331) |
+| COSPI, SINPI, TANPI | Pi-scaled trig (Issue #331) |
+| SPLIT | String splitting (Issue #332) |
+| TOKENIZE | String tokenization (Issue #332) |
 
 **xfail Fixtures:** 0 (Issue #310 resolved)
 
 Existing umbrella issues:
 
 - #178 – **Fortran 2023: annotate grammar with J3/22‑007 sections**.
-- #310 – **Grammar gaps for F2023 features** (RESOLVED).
+- #310 – **Grammar gaps for F2023 features (7 fixtures)** – addressed by PR #344.
+- #328 – **ENUM TYPE definitions (R766-R771) not implemented**.
+- #329 – **TYPEOF/CLASSOF type inference (R703-R704) not implemented**.
+- #330 – **Degree-based trigonometric intrinsics not implemented**.
+- #331 – **Pi-scaled trigonometric intrinsics not implemented**.
+- #332 – **String intrinsics SPLIT and TOKENIZE not implemented**.
+- #333 – **NOTIFY WAIT statement (R1179) and NOTIFY_TYPE not implemented**.
+- #334 – **Conditional expressions not integrated into F2018 expression hierarchy**.
+- #335 – **Rule-by-rule ISO comparison and remaining gaps**.
 
 Future work should:
 
@@ -454,4 +473,3 @@ Future work should:
 This document tracks the Fortran 2023 grammar implementation status.
 All 7 core F2023 fixtures now pass. Remaining work focuses on advanced
 features (enumeration types, TYPEOF/CLASSOF, trigonometric intrinsics).
-
