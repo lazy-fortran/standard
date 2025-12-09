@@ -108,6 +108,31 @@ SIND             : S I N D ;
 // TAND(X): Tangent with argument in degrees (Section 16.9.186)
 TAND             : T A N D ;
 
+// ----------------------------------------------------------------------------
+// Pi-Scaled Trigonometric Intrinsics (NEW in F2023)
+// ISO/IEC 1539-1:2023 Section 16.9: Intrinsic procedures
+// J3/22-007 Section 16.9.4, 16.9.5, 16.9.18, 16.9.23, 16.9.24, 16.9.52,
+// 16.9.171, 16.9.187
+// ----------------------------------------------------------------------------
+
+// Inverse trigonometric functions returning result divided by pi
+// ACOSPI(X): Arc cosine / pi (Section 16.9.4)
+ACOSPI           : A C O S P I ;
+// ASINPI(X): Arc sine / pi (Section 16.9.18)
+ASINPI           : A S I N P I ;
+// ATANPI(X) or ATANPI(Y,X): Arc tangent / pi (Section 16.9.23)
+ATANPI           : A T A N P I ;
+// ATAN2PI(Y,X): Arc tangent of Y/X / pi (Section 16.9.24)
+ATAN2PI          : A T A N '2' P I ;
+
+// Trigonometric functions with argument multiplied by pi
+// COSPI(X): Cosine of pi * x (Section 16.9.52)
+COSPI            : C O S P I ;
+// SINPI(X): Sine of pi * x (Section 16.9.171)
+SINPI            : S I N P I ;
+// TANPI(X): Tangent of pi * x (Section 16.9.187)
+TANPI            : T A N P I ;
+
 // Fragments are inherited from Fortran2018Lexer - no need to duplicate
 
 // ============================================================================
