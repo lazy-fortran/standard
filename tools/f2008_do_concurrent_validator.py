@@ -188,7 +188,7 @@ class F2008DoConcurrentListener(Fortran2008ParserListener):
         return vars_found
 
     def enterAssignment_stmt(self, ctx):
-        """Track variable assignments within DO CONCURRENT."""
+        """Track variable assignments and references within DO CONCURRENT."""
         if not self._in_do_concurrent or self._current_do_concurrent is None:
             return
 
@@ -197,6 +197,31 @@ class F2008DoConcurrentListener(Fortran2008ParserListener):
         if lhs_match:
             var_name = lhs_match.group(1)
             self._current_do_concurrent.assigned_variables.add(var_name)
+
+        equals_pos = text.find("=")
+        if equals_pos != -1:
+            rhs_text = text[equals_pos + 1:]
+            rhs_vars = self._extract_referenced_variables(rhs_text)
+            self._current_do_concurrent.referenced_variables.update(rhs_vars)
+
+    def _extract_referenced_variables(self, text: str) -> Set[str]:
+        """Extract variable names referenced in an expression.
+
+        Per ISO/IEC 1539-1:2010 Section 8.1.6.6.4, iterations of DO CONCURRENT
+        must be independent - a variable defined in one iteration shall not be
+        referenced in another. This method extracts identifiers that could be
+        variable references to enable dependency checking.
+        """
+        keywords = {
+            "real", "integer", "logical", "character", "complex", "double",
+            "precision", "kind", "len", "size", "shape", "lbound", "ubound",
+            "allocated", "associated", "present", "abs", "sqrt", "sin", "cos",
+            "tan", "exp", "log", "max", "min", "mod", "nint", "floor", "ceiling",
+            "sum", "product", "maxval", "minval", "any", "all", "count", "pack",
+            "unpack", "merge", "spread", "reshape", "transpose", "matmul", "dot",
+        }
+        identifiers = set(re.findall(r"\b([a-z_]\w*)\b", text))
+        return identifiers - keywords
 
     def enterCall_stmt(self, ctx):
         """Track procedure calls within DO CONCURRENT."""
