@@ -427,7 +427,7 @@ Other Missing Features:
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| R821 | `rank-clause` in concurrent-header | NOT IMPLEMENTED |
+| R1130 | REDUCE locality-spec in DO CONCURRENT | IMPLEMENTED (Issue #345) |
 | R1029 | Conditional expressions (chained) | Partial |
 | R1179 | `notify-wait-stmt` | NOT IMPLEMENTED |
 | -- | NOTIFY_TYPE derived type | NOT IMPLEMENTED |
@@ -435,7 +435,12 @@ Other Missing Features:
 | -- | AT edit descriptor | IMPLEMENTED (Issue #347) |
 | -- | LEADING_ZERO I/O specifier | NOT IMPLEMENTED |
 
-- R821 rank-clause gap tracked by Issue #345.
+- R1130 REDUCE locality-spec: Implemented via Issue #345. The REDUCE locality
+  specifier (ISO/IEC 1539-1:2023 Section 11.1.7.5) declares reduction variables
+  for DO CONCURRENT. Syntax: `reduce(operation:variable-name-list)` where
+  operation is +, *, .AND., .OR., .EQV., .NEQV., MAX, MIN, IAND, IEOR, or IOR.
+  Parser rule `reduce_locality_spec_f2023` added to `Fortran2023Parser.g4`
+  and tested by `TestFortran2023Parser::test_do_concurrent_reduce_parsing`.
 - R1029 / conditional-expression integration tracked by Issue #334.
 - R1179 and NOTIFY_TYPE tracked by Issue #333.
 - C_F_STRPOINTER tracked by Issue #346.
