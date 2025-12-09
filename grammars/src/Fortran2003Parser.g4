@@ -1442,7 +1442,7 @@ type_declaration_stmt
       entity_decl_list NEWLINE
     | LOGICAL kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON
       entity_decl_list NEWLINE
-    | CHARACTER char_selector? (COMMA attr_spec_list)? DOUBLE_COLON
+    | CHARACTER char_selector_extended? (COMMA attr_spec_list)? DOUBLE_COLON
       entity_decl_list NEWLINE
     | c_interop_type (COMMA attr_spec_list)? DOUBLE_COLON
       entity_decl_list NEWLINE
@@ -1466,10 +1466,25 @@ kind_param
     | c_interop_type
     ;
 
-// Character selector (ISO/IEC 1539-1:2004 R508)
-// R508: char-selector -> length-selector | (LEN = ..., KIND = ...)
+// Character selector extended (supports both F90+ and F77 styles)
+// F77 style: CHARACTER*n (asterisk length notation)
+// F90+ style: CHARACTER(len) or CHARACTER(len=n, kind=k)
+// ISO/IEC 1539-1:2004 R508: char-selector -> length-selector | (LEN = ..., KIND = ...)
+char_selector_extended
+    : char_selector              // Modern F90+ style: (len) or (len=n)
+    | character_length_f77       // F77 legacy style: *n or *(n)
+    ;
+
 char_selector
     : LPAREN char_length_spec RPAREN
+    ;
+
+// F77 character length syntax (legacy support)
+// ISO 1539:1980 Section 4.8: CHARACTER*len
+character_length_f77
+    : MULTIPLY INTEGER_LITERAL                       // CHARACTER*10
+    | MULTIPLY LPAREN MULTIPLY RPAREN                // CHARACTER*(*) assumed length
+    | MULTIPLY LPAREN expr_f90 RPAREN                // CHARACTER*(len-expr)
     ;
 
 char_length_spec
@@ -1797,11 +1812,31 @@ component_spec_f2003
     | expr_f2003                                 // Positional component
     ;
 
-// Array constructor (ISO/IEC 1539-1:2004 R465)
+// Array constructor (ISO/IEC 1539-1:2004 R465-R469)
 // R465: array-constructor -> (/ ac-spec /) | [ ac-spec ]
+// R466: ac-spec -> type-spec :: [ac-value-list] | ac-value-list
 // Square brackets are F2003+ syntax
+// Note: LBRACKET/RBRACKET tokens are used because F2008+ lexers shadow
+// LSQUARE/RSQUARE with these tokens for coarray image selectors
 array_constructor
-    : LSQUARE array_constructor_elements? RSQUARE
+    : LBRACKET ac_spec RBRACKET
+    | LSQUARE ac_spec RSQUARE
+    ;
+
+// ISO/IEC 1539-1:2004 R466: ac-spec
+// ac-spec -> type-spec :: [ac-value-list] | ac-value-list
+ac_spec
+    : ac_type_spec DOUBLE_COLON array_constructor_elements?
+    | array_constructor_elements?
+    ;
+
+// Type spec for array constructor (intrinsic types only)
+ac_type_spec
+    : INTEGER kind_selector?
+    | REAL kind_selector?
+    | LOGICAL kind_selector?
+    | CHARACTER char_selector_extended?
+    | COMPLEX kind_selector?
     ;
 
 array_constructor_elements
