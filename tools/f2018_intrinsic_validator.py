@@ -488,101 +488,117 @@ class F2018IntrinsicValidator:
             line_lower = line.lower()
 
             match = reduce_pattern.search(line_lower)
-            if match:
-                col = match.start() + 1
-                kwargs = self._extract_keyword_args(line_lower)
-                positional_count = self._count_positional_args(line_lower, "reduce")
-                call_info = IntrinsicCallInfo(
-                    name="reduce",
-                    keyword_args=kwargs,
-                    in_pure_procedure=self._is_in_pure_procedure(i),
-                    line=i,
-                    column=col,
+            if not match:
+                continue
+
+            col = match.start() + 1
+            kwargs = self._extract_keyword_args(line_lower)
+            positional_count = self._count_positional_args(line_lower, "reduce")
+            call_info = IntrinsicCallInfo(
+                name="reduce",
+                keyword_args=kwargs,
+                in_pure_procedure=self._is_in_pure_procedure(i),
+                line=i,
+                column=col,
+            )
+            result.reduce_calls.append(call_info)
+            result.intrinsic_calls.append(call_info)
+
+            self._add_reduce_diagnostics(
+                result=result,
+                line_num=i,
+                column=col,
+                kwargs=kwargs,
+                positional_count=positional_count,
+            )
+
+    def _add_reduce_diagnostics(
+        self,
+        result: F2018IntrinsicValidationResult,
+        line_num: int,
+        column: int,
+        kwargs: Dict[str, str],
+        positional_count: int,
+    ):
+        """Add diagnostics for a single REDUCE intrinsic call."""
+        has_array = "array" in kwargs or positional_count >= 1
+        has_operation = "operation" in kwargs or positional_count >= 2
+
+        if not has_array:
+            result.diagnostics.append(
+                SemanticDiagnostic(
+                    severity=DiagnosticSeverity.ERROR,
+                    code="INTR_E004",
+                    message="REDUCE call missing required ARRAY argument. "
+                    "Per ISO/IEC 1539-1:2018 Section 16.9.161, ARRAY is a "
+                    "mandatory argument that shall be an array of any type. "
+                    "NON-COMPLIANT: Missing required argument.",
+                    line=line_num,
+                    column=column,
+                    iso_section="16.9.161",
                 )
-                result.reduce_calls.append(call_info)
-                result.intrinsic_calls.append(call_info)
+            )
 
-                has_array = "array" in kwargs or positional_count >= 1
-                has_operation = "operation" in kwargs or positional_count >= 2
+        if not has_operation:
+            result.diagnostics.append(
+                SemanticDiagnostic(
+                    severity=DiagnosticSeverity.ERROR,
+                    code="INTR_E005",
+                    message="REDUCE call missing required OPERATION argument. "
+                    "Per ISO/IEC 1539-1:2018 Section 16.9.161, OPERATION is "
+                    "a mandatory argument that shall be a pure function with "
+                    "two arguments of the same type as ARRAY elements. "
+                    "NON-COMPLIANT: Missing required argument.",
+                    line=line_num,
+                    column=column,
+                    iso_section="16.9.161",
+                )
+            )
 
-                if not has_array:
-                    result.diagnostics.append(
-                        SemanticDiagnostic(
-                            severity=DiagnosticSeverity.ERROR,
-                            code="INTR_E004",
-                            message="REDUCE call missing required ARRAY "
-                            "argument. Per ISO/IEC 1539-1:2018 Section "
-                            "16.9.161, ARRAY is a mandatory argument that "
-                            "shall be an array of any type. "
-                            "NON-COMPLIANT: Missing required argument.",
-                            line=i,
-                            column=col,
-                            iso_section="16.9.161",
-                        )
-                    )
+        if has_array and has_operation:
+            result.diagnostics.append(
+                SemanticDiagnostic(
+                    severity=DiagnosticSeverity.INFO,
+                    code="INTR_I008",
+                    message="REDUCE intrinsic detected. Per ISO/IEC "
+                    "1539-1:2018 Section 16.9.161, REDUCE(ARRAY, OPERATION "
+                    "[, DIM] [, MASK] [, IDENTITY] [, ORDERED]) performs a "
+                    "user-defined reduction.",
+                    line=line_num,
+                    column=column,
+                    iso_section="16.9.161",
+                )
+            )
 
-                if not has_operation:
-                    result.diagnostics.append(
-                        SemanticDiagnostic(
-                            severity=DiagnosticSeverity.ERROR,
-                            code="INTR_E005",
-                            message="REDUCE call missing required OPERATION "
-                            "argument. Per ISO/IEC 1539-1:2018 Section "
-                            "16.9.161, OPERATION is a mandatory argument that "
-                            "shall be a pure function with two arguments of "
-                            "the same type as ARRAY elements. "
-                            "NON-COMPLIANT: Missing required argument.",
-                            line=i,
-                            column=col,
-                            iso_section="16.9.161",
-                        )
-                    )
+        if "dim" in kwargs:
+            result.diagnostics.append(
+                SemanticDiagnostic(
+                    severity=DiagnosticSeverity.INFO,
+                    code="INTR_I009",
+                    message="REDUCE with DIM argument reduces along a "
+                    "specific dimension. Per ISO/IEC 1539-1:2018 Section "
+                    "16.9.161, when DIM is present, the reduction is "
+                    "performed along that dimension.",
+                    line=line_num,
+                    column=column,
+                    iso_section="16.9.161",
+                )
+            )
 
-                if has_array and has_operation:
-                    result.diagnostics.append(
-                        SemanticDiagnostic(
-                            severity=DiagnosticSeverity.INFO,
-                            code="INTR_I008",
-                            message="REDUCE intrinsic detected. Per "
-                            "ISO/IEC 1539-1:2018 Section 16.9.161, "
-                            "REDUCE(ARRAY, OPERATION [, DIM] [, MASK] "
-                            "[, IDENTITY] [, ORDERED]) performs a user-defined "
-                            "reduction.",
-                            line=i,
-                            column=col,
-                            iso_section="16.9.161",
-                        )
-                    )
-
-                if "dim" in kwargs:
-                    result.diagnostics.append(
-                        SemanticDiagnostic(
-                            severity=DiagnosticSeverity.INFO,
-                            code="INTR_I009",
-                            message="REDUCE with DIM argument reduces along "
-                            "a specific dimension. Per ISO/IEC 1539-1:2018 "
-                            "Section 16.9.161, when DIM is present, the "
-                            "reduction is performed along that dimension.",
-                            line=i,
-                            column=col,
-                            iso_section="16.9.161",
-                        )
-                    )
-
-                if "mask" in kwargs:
-                    result.diagnostics.append(
-                        SemanticDiagnostic(
-                            severity=DiagnosticSeverity.INFO,
-                            code="INTR_I010",
-                            message="REDUCE with MASK argument applies "
-                            "reduction conditionally. Per ISO/IEC 1539-1:2018 "
-                            "Section 16.9.161, MASK selects which elements "
-                            "participate in the reduction.",
-                            line=i,
-                            column=col,
-                            iso_section="16.9.161",
-                        )
-                    )
+        if "mask" in kwargs:
+            result.diagnostics.append(
+                SemanticDiagnostic(
+                    severity=DiagnosticSeverity.INFO,
+                    code="INTR_I010",
+                    message="REDUCE with MASK argument applies reduction "
+                    "conditionally. Per ISO/IEC 1539-1:2018 Section "
+                    "16.9.161, MASK selects which elements participate in "
+                    "the reduction.",
+                    line=line_num,
+                    column=column,
+                    iso_section="16.9.161",
+                )
+            )
 
     def _detect_out_of_range_calls(
         self, lines: List[str], result: F2018IntrinsicValidationResult
