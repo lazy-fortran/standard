@@ -299,32 +299,26 @@ These statements exist at the FORTRAN 77 level but are NOT wired into
 `execution_part_f90` or `executable_construct_f90`. Real F90 programs
 using file operations will fail to parse correctly.
 
-## 8. Fixtures, XPASS status and integration gaps
+## 8. Fixtures and integration status
 
-`tests/Fortran90/test_fortran_90_comprehensive.py` (30 tests) confirms
+`tests/Fortran90/test_fortran_90_comprehensive.py` (30+ tests) confirms
 that the grammar can parse a broad set of Fortran 90 features when
-exercised in focused unit tests. The generic fixture harness still marks
-several F90 fixtures as expected failures (xfail), including:
+exercised in focused unit tests. The generic fixture harness in
+`tests/test_fixture_parsing.py` validates all F90 fixtures.
 
-- `tests/fixtures/Fortran90/test_fortran_90_comprehensive/`:
-  - `array_constructor_program.f90`
-- `tests/fixtures/Fortran90/test_comprehensive_parsing/`:
-  - `free_form_features_program.f90`
-  - `fortran95_features_program.f90`
+**Current status:** All F90 fixtures pass (0 xfail).
 
-The xfail reasons in `tests/xpass_fixtures.py` document the main
-integration gaps:
+Previous xfail fixtures were corrected to use valid F90 syntax:
 
-- Remaining issues in:
-  - Module and program‑unit handling for large, multi‑unit programs.
-  - Integrated derived type usage in large modules.
-  - Complex array constructor/dynamic array patterns.
-  - Enhanced procedure usage (RECURSIVE, keyword arguments, OPTIONAL)
-    in “full‑program” settings.
-  - Unified fixed/free‑form parsing on mixed‑format sources.
+- `array_constructor_program.f90`: Updated to use F90 parenthesis array
+  constructor syntax `(/.../)` instead of F2003 bracket syntax `[...]`
+- `free_form_features_program.f90`: Fixed declaration placement and
+  array constructor syntax
+- `f90_array_features_program.f90` (renamed from `fortran95_features_program.f90`):
+  Replaced FORALL construct (F95 feature) with valid F90 DO loops
 
-These fixtures collectively define the **current outer edge** of the
-Fortran 90 grammar's practical coverage.
+The `tests/xpass_fixtures.py` registry is now empty for Fortran 90,
+indicating full fixture coverage.
 
 ## 9. PURE and ELEMENTAL: forward extensions from Fortran 95
 
@@ -432,7 +426,7 @@ The Fortran 90 grammar in this repository:
 | R531 | `data-implied-do` nested forms | Partial |
 | R1219 | `entry-stmt` | NOT IMPLEMENTED |
 
-**xfail Fixtures:** 7 (tracked by Issue #311)
+**xfail Fixtures:** 0 (Issue #311 resolved; fixtures corrected)
 
 Future work should:
 
