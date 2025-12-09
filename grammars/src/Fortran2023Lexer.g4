@@ -175,6 +175,17 @@ NOTIFY_WAIT      : N O T I F Y WS+ W A I T ;
 // NOTIFY_TYPE derived type (iso_fortran_env)
 NOTIFY_TYPE      : N O T I F Y '_' T Y P E ;
 
+// ----------------------------------------------------------------------------
+// LEADING_ZERO I/O Specifier (NEW in F2023)
+// ISO/IEC 1539-1:2023 Section 12.5.6.15: LEADING_ZERO= specifier
+// J3/22-007 R1213: io-control-spec includes LEADING_ZERO= scalar-default-char-expr
+// Controls output of leading zeros for I, B, O, Z edit descriptors
+// Values: 'YES', 'NO', 'PROCESSOR_DEFINED'
+// ----------------------------------------------------------------------------
+
+// LEADING_ZERO I/O specifier keyword
+LEADING_ZERO     : L E A D I N G '_' Z E R O ;
+
 // ============================================================================
 // FORTRAN 2023 STANDARD OVERVIEW (ISO/IEC 1539-1:2023)
 // ============================================================================
