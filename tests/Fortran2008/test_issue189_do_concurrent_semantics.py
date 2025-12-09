@@ -255,6 +255,57 @@ class TestDoConcurrentNestedConstructs:
         assert nested_info[0].severity == DiagnosticSeverity.INFO
 
 
+class TestDoConcurrentVariableDependencies:
+    """Tests for variable dependency tracking within DO CONCURRENT."""
+
+    def setup_method(self):
+        self.validator = F2008DoConcurrentValidator()
+
+    def test_variable_reference_tracking(self):
+        """Variable references should be tracked within DO CONCURRENT."""
+        code = """
+program var_ref_test
+    implicit none
+    integer :: i
+    real :: a(10), b(10)
+    do concurrent (i = 1:10)
+        a(i) = b(i) + 1.0
+    end do
+end program var_ref_test
+"""
+        result = self.validator.validate_code(code)
+        assert not result.has_errors
+        assert len(result.do_concurrent_constructs) >= 1
+        construct = result.do_concurrent_constructs[0]
+        assert "a" in construct.assigned_variables
+        assert "b" in construct.referenced_variables
+
+    def test_assign_and_reference_same_variable_info(self):
+        """Assigning and referencing same variable should produce INFO.
+
+        Per ISO/IEC 1539-1:2010 Section 8.1.6.6.4, iterations must be
+        independent. A variable defined in one iteration shall not be
+        referenced in another - this pattern warrants an INFO diagnostic.
+        """
+        code = """
+program assign_ref_test
+    implicit none
+    integer :: i
+    real :: x(10)
+    do concurrent (i = 1:10)
+        x(i) = x(i) + 1.0
+    end do
+end program assign_ref_test
+"""
+        result = self.validator.validate_code(code)
+        assert not result.has_errors
+        info_diags = [d for d in result.diagnostics if d.code == "DO_CONC_I001"]
+        assert len(info_diags) > 0
+        assert info_diags[0].severity == DiagnosticSeverity.INFO
+        assert info_diags[0].iso_section == "8.1.6.6.4"
+        assert "x" in info_diags[0].message
+
+
 class TestDoConcurrentProcedureCalls:
     """Tests for procedure calls within DO CONCURRENT."""
 
