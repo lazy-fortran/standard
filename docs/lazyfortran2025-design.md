@@ -35,19 +35,30 @@ Lazy Fortran 2025 uses an explicit numeric-kind lattice grounded in standard int
 - `double precision` maps to `real(8)`
 - `double complex` maps to `complex(16)`
 
-The inference engine only selects from these built-in kinds and those explicitly declared in user code. Implicit typing (I-N integer, otherwise real) yields default-kind types: `integer(4)` and `real(4)`.
+The inference engine only selects from these built-in kinds and those explicitly declared in user code.
 
 ---
 
-## LF-TYP-02: Implicit Modes and Promotion Rules (#53)
+## LF-TYP-02: Automatic Type Inference (#53)
 
-Type inference is predictable and compatible with both traditional Fortran and modern `implicit none` style.
+Lazy Fortran 2025 uses **automatic type inference** - a modern approach that eliminates the legacy I-N naming convention while remaining predictable.
 
-**Implicit modes:**
-- Without `implicit`: undeclared names follow standard default rules (I-N integer, otherwise real), refined by usage
-- With `implicit none`: undeclared names are errors; inference refuses to invent declarations
+**First assignment wins:**
+- The type of an undeclared variable is determined by its **first assignment**
+- `x = 4` makes `x` an `integer(4)`
+- `y = 3.14` makes `y` a `real(4)`
+- `z = (1.0, 2.0)` makes `z` a `complex(8)`
 
-**Promotion rules:**
+**Subsequent assignments follow standard coercion:**
+- After type is established, later assignments use normal Fortran coercion rules
+- `x = 5.3` after `x = 4` is valid (real truncated to integer, standard behavior)
+- `y = 7` after `y = 3.14` is valid (integer promoted to real)
+
+**Interaction with `implicit none`:**
+- With `implicit none`: undeclared names are errors; inference is disabled
+- This preserves compatibility with strict coding styles
+
+**Expression promotion rules:**
 
 | Expression | Result |
 |------------|--------|
@@ -56,7 +67,7 @@ Type inference is predictable and compatible with both traditional Fortran and m
 | real + complex | complex |
 | complex + complex | complex (dominant kind) |
 
-These rules apply consistently across all standards, enabling `.lf` code to interoperate with legacy Fortran.
+These rules enable `.lf` code to interoperate seamlessly with legacy Fortran.
 
 ---
 
@@ -99,7 +110,7 @@ Lazy Fortran specializations are **standard-compatible decorations** that never 
 |-------|-----|-------------|
 | #51 | LF-SYN-03 | World-wide automatic specializations |
 | #52 | LF-TYP-01 | Numeric kind lattice and promotion rules |
-| #53 | LF-TYP-02 | Implicit modes and type inference |
+| #53 | LF-TYP-02 | Automatic type inference |
 | #54 | LF-WLD-04 | ISO generic resolution alignment |
 | #55 | LF-WLD-05 | Interoperability with legacy Fortran code |
 | #56 | LF-CODE-01 | Tooling integration and diagnostics |

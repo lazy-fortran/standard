@@ -45,11 +45,12 @@ def test_type_inference_doc_spells_out_numeric_kinds() -> None:
   assert "`double complex` maps to `complex(16)`" in content
 
 
-def test_type_inference_doc_covers_implicit_modes_and_promotion() -> None:
+def test_type_inference_doc_covers_automatic_inference_and_promotion() -> None:
   design_path = _repo_root() / "docs" / "lazyfortran2025-design.md"
   content = design_path.read_text(encoding="utf-8")
 
-  assert "Without `implicit`" in content
+  assert "automatic type inference" in content.lower()
+  assert "first assignment" in content.lower()
   assert "`implicit none`: undeclared names are errors" in content
   assert "integer + integer | integer" in content
   assert "real + complex | complex" in content
