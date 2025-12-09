@@ -335,26 +335,23 @@ class TestComprehensiveValidation(unittest.TestCase):
         self.assertIsNotNone(tree)
     
     def test_comprehensive_integration(self):
-        """Final integration test with complex FORTRAN program using all features"""
-        complex_program = load_fixture(
+        """Final integration test with FORTRAN 1957 program using core features"""
+        quadratic_solver = load_fixture(
             "FORTRAN",
             "test_comprehensive_validation",
-            "complex_program.f",
+            "quadratic_solver.f",
         )
-        
-        tree = self.parse_program(complex_program.strip())
-        self.assertIsNotNone(tree, "Failed to parse comprehensive integration program")
-        
-        # Verify the program contains all expected constructs
-        program_text = complex_program
-        self.assertIn("! ", program_text)  # Comments
-        self.assertIn("_", program_text)   # Underscores in identifiers  
-        self.assertIn("**", program_text)  # Power operator
-        self.assertIn(".GT.", program_text) # Relational operator
-        self.assertIn("CALL", program_text) # Subroutine calls
-        self.assertIn("DO", program_text)   # Loops
-        self.assertIn("IF", program_text)   # Conditional
-        self.assertIn("E-", program_text)   # Scientific notation
+
+        tree = self.parse_program(quadratic_solver.strip())
+        self.assertIsNotNone(tree, "Failed to parse quadratic solver program")
+
+        # Verify the program contains expected 1957 FORTRAN constructs
+        program_text = quadratic_solver
+        self.assertIn("**", program_text)   # Power operator
+        self.assertIn("IF", program_text)   # Arithmetic IF
+        self.assertIn("GOTO", program_text) # GO TO
+        self.assertIn("STOP", program_text) # STOP
+        self.assertIn("WRITE", program_text)  # I/O
 
 
 if __name__ == '__main__':
