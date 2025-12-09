@@ -631,9 +631,25 @@ class F2008SubmoduleValidator:
         for proc in result.module_procedures:
             proc_name = proc.name
 
-            if proc_name in result.interface_procedures:
-                iface = result.interface_procedures[proc_name]
-                self._check_signature_match(proc, iface, result)
+            parent_module: Optional[str] = None
+            if proc.submodule_name and proc.submodule_name in result.submodules:
+                parent_module = result.submodules[proc.submodule_name].parent_module
+
+            if parent_module:
+                candidates = [
+                    iface
+                    for iface in result.interface_procedures.values()
+                    if iface.name == proc_name and iface.module_name == parent_module
+                ]
+            else:
+                candidates = [
+                    iface
+                    for iface in result.interface_procedures.values()
+                    if iface.name == proc_name
+                ]
+
+            if candidates:
+                self._check_signature_match(proc, candidates[0], result)
             else:
                 result.diagnostics.append(
                     SemanticDiagnostic(

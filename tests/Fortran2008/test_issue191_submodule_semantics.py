@@ -347,6 +347,30 @@ class TestProcedureLinkageValidation:
         has_info = any(d.code == "SUBMOD_I002" for d in result.diagnostics)
         assert has_info, "Expected SUBMOD_I002 info for missing interface"
 
+    def test_procedure_not_linked_to_non_ancestor_interface(self):
+        """Interface in non-ancestor module should not satisfy linkage."""
+        unrelated_parent = """
+module other_mod
+   implicit none
+   interface
+      subroutine calculate_result(x, y)
+         real, intent(in) :: x
+         real, intent(out) :: y
+      end subroutine calculate_result
+   end interface
+end module other_mod
+"""
+        child_code = load_fixture(
+            "Fortran2008",
+            "test_submodule_semantics",
+            "child_submodule_valid.f90",
+        )
+        result = self.validator.validate_multi_unit([unrelated_parent, child_code])
+        infos = [d for d in result.diagnostics if d.code == "SUBMOD_I002"]
+        assert (
+            len(infos) > 0
+        ), "Expected SUBMOD_I002 info when interface is not in ancestor module"
+
 
 class TestDuplicateImplementationValidation:
     """Tests for duplicate implementation detection."""
