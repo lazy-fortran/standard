@@ -385,12 +385,12 @@ p = particle_t(1.0, 2.0, 3.0)   ! p inferred as type(particle_t)
 6.2.1.1 A template defines a parameterized scope containing procedures:
 
 ```fortran
-TEMPLATE template-name ( template-parameter-list )
-   [ TYPE, DEFERRED :: type-parameter ]...
-   [ REQUIRES requirement-name ( args ) ]...
-CONTAINS
+template template-name ( template-parameter-list )
+   [ type, deferred :: type-parameter ]...
+   [ requires requirement-name ( args ) ]...
+contains
    procedure-definitions
-END TEMPLATE [ template-name ]
+end template [ template-name ]
 ```
 
 6.2.2 **INSTANTIATE statement**
@@ -398,24 +398,24 @@ END TEMPLATE [ template-name ]
 6.2.2.1 Templates are instantiated explicitly:
 
 ```fortran
-INSTANTIATE template-name ( type-arguments ) [ , rename-list ]
+instantiate template-name ( type-arguments ) [ , rename-list ]
 ```
 
 6.2.2.2 Example:
 
 ```fortran
-TEMPLATE swap_t(T)
-   TYPE, DEFERRED :: T
-CONTAINS
-   SUBROUTINE swap(x, y)
-      TYPE(T), INTENT(INOUT) :: x, y
-      TYPE(T) :: tmp
+template swap_t(T)
+   type, deferred :: T
+contains
+   subroutine swap(x, y)
+      type(T), intent(inout) :: x, y
+      type(T) :: tmp
       tmp = x; x = y; y = tmp
-   END SUBROUTINE
-END TEMPLATE
+   end subroutine
+end template
 
-INSTANTIATE swap_t(integer), ONLY: swap_int => swap
-INSTANTIATE swap_t(real), ONLY: swap_real => swap
+instantiate swap_t(integer), only: swap_int => swap
+instantiate swap_t(real), only: swap_real => swap
 ```
 
 6.2.3 **Inline instantiation**
@@ -423,7 +423,7 @@ INSTANTIATE swap_t(real), ONLY: swap_real => swap
 6.2.3.1 Simple template procedures may be instantiated inline:
 
 ```fortran
-CALL swap{integer}(a, b)
+call swap{integer}(a, b)
 ```
 
 ### 6.3 REQUIREMENT construct
@@ -433,25 +433,25 @@ CALL swap{integer}(a, b)
 6.3.1.1 A requirement defines reusable type constraints:
 
 ```fortran
-REQUIREMENT requirement-name ( parameter-list )
-   TYPE, DEFERRED :: type-parameter
-   INTERFACE
+requirement requirement-name ( parameter-list )
+   type, deferred :: type-parameter
+   interface
       interface-body
-   END INTERFACE
-END REQUIREMENT
+   end interface
+end requirement
 ```
 
 6.3.2 **Example**
 
 ```fortran
-REQUIREMENT R_comparable(T, less_than)
-   TYPE, DEFERRED :: T
-   INTERFACE
-      PURE LOGICAL FUNCTION less_than(a, b)
-         TYPE(T), INTENT(IN) :: a, b
-      END FUNCTION
-   END INTERFACE
-END REQUIREMENT
+requirement r_comparable(T, less_than)
+   type, deferred :: T
+   interface
+      pure logical function less_than(a, b)
+         type(T), intent(in) :: a, b
+      end function
+   end interface
+end requirement
 ```
 
 ### 6.4 Traits (Swift/Rust approach)
@@ -461,9 +461,9 @@ END REQUIREMENT
 6.4.1.1 A type set specifies a constraint as a union of types:
 
 ```fortran
-ABSTRACT INTERFACE :: INumeric
+abstract interface :: INumeric
    integer | real(real64)
-END INTERFACE INumeric
+end interface INumeric
 ```
 
 6.4.2 **Trait signatures**
@@ -471,12 +471,12 @@ END INTERFACE INumeric
 6.4.2.1 A trait may specify required procedure signatures:
 
 ```fortran
-ABSTRACT INTERFACE :: ISum
-   FUNCTION sum{INumeric :: T}(x) RESULT(s)
-      TYPE(T), INTENT(IN) :: x(:)
-      TYPE(T) :: s
-   END FUNCTION
-END INTERFACE ISum
+abstract interface :: ISum
+   function sum{INumeric :: T}(x) result(s)
+      type(T), intent(in) :: x(:)
+      type(T) :: s
+   end function
+end interface ISum
 ```
 
 6.4.3 **IMPLEMENTS statement**
@@ -484,18 +484,18 @@ END INTERFACE ISum
 6.4.3.1 Types declare trait conformance:
 
 ```fortran
-TYPE, IMPLEMENTS(ISum) :: SimpleSum
-CONTAINS
-   PROCEDURE, NOPASS :: sum
-END TYPE
+type, implements(ISum) :: simple_sum_t
+contains
+   procedure, nopass :: sum
+end type
 ```
 
 6.4.3.2 Retroactive implementation:
 
 ```fortran
-IMPLEMENTS IComparable :: integer
-   PROCEDURE :: less_than => builtin_less_than
-END IMPLEMENTS
+implements IComparable :: integer
+   procedure :: less_than => builtin_less_than
+end implements
 ```
 
 6.4.4 **Trait annotation syntax**
