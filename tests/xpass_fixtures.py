@@ -20,29 +20,5 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
-    # =========================================================================
-    # Fortran 90 - Issue #311
-    # Grammar gaps for module and control flow constructs
-    # =========================================================================
-    (
-        "Fortran90",
-        Path("Fortran90/test_comprehensive_parsing/fortran95_features_program.f90"),
-    ): (
-        "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
-        "FORALL construct gaps. Tracked by Issue #311."
-    ),
-    (
-        "Fortran90",
-        Path("Fortran90/test_comprehensive_parsing/free_form_features_program.f90"),
-    ): (
-        "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
-        "bracket array constructor syntax (F2003 feature). Tracked by Issue #311."
-    ),
-    (
-        "Fortran90",
-        Path("Fortran90/test_fortran_90_comprehensive/array_constructor_program.f90"),
-    ): (
-        "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
-        "bracket array constructor syntax (F2003 feature). Tracked by Issue #311."
-    ),
+    # No expected failures currently. All fixtures use standard-conformant syntax.
 }
