@@ -97,6 +97,16 @@ Before ANY commit that modifies grammar files:
 3. Verify no new xfail fixtures without issue references
 4. Update audit documents if implementation status changed
 
+### Test Coverage Requirements
+
+Every grammar feature MUST be covered by tests:
+
+1. **EVERY grammar rule** MUST have at least one test fixture exercising it
+2. **EVERY lexer token** MUST be tested in context
+3. **Test fixtures MUST be realistic** - use actual Fortran code patterns from standards
+4. **NO untested grammar rules** - if a rule exists, it MUST have test coverage
+5. **Tests MUST verify correct parsing** - check parse tree structure, not just "no errors"
+
 ### Forbidden Practices
 
 - "Intentionally minimal" or "left for future work" without issue tracking
@@ -105,3 +115,5 @@ Before ANY commit that modifies grammar files:
 - Grammar gaps without GitHub issues
 - Closing issues before fixtures pass
 - Claiming "complete" without 100% ISO rule coverage
+- Grammar rules without test coverage
+- Untested tokens or parser rules
