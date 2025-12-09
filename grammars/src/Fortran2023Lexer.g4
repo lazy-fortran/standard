@@ -161,6 +161,20 @@ TOKENIZE         : T O K E N I Z E ;
 
 // Fragments are inherited from Fortran2018Lexer - no need to duplicate
 
+// ----------------------------------------------------------------------------
+// Notify Wait Synchronization (NEW in F2023)
+// ISO/IEC 1539-1:2023 Section 11.6: Coarray synchronization
+// J3/22-007 R1179: notify-wait-stmt is NOTIFY WAIT ( notify-variable
+//                  [ , event-wait-spec-list ] )
+// ISO/IEC 1539-1:2023 Section 16.5.9: NOTIFY_TYPE derived type
+// ----------------------------------------------------------------------------
+
+// NOTIFY WAIT statement token (coarray synchronization)
+NOTIFY_WAIT      : N O T I F Y WS+ W A I T ;
+
+// NOTIFY_TYPE derived type (iso_fortran_env)
+NOTIFY_TYPE      : N O T I F Y '_' T Y P E ;
+
 // ============================================================================
 // FORTRAN 2023 STANDARD OVERVIEW (ISO/IEC 1539-1:2023)
 // ============================================================================

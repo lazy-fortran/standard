@@ -191,6 +191,7 @@ executable_stmt_f2023
     | random_init_stmt_f2023
     | system_clock_stmt_f2023
     | string_intrinsic_stmt_f2023  // NEW in F2023 (Section 16.9.180, 16.9.197)
+    | notify_wait_stmt_f2023       // NEW in F2023 (Section 11.6, R1179)
     | NEWLINE
     ;
 
@@ -449,6 +450,103 @@ string_intrinsic_stmt_f2023
     ;
 
 // ============================================================================
+// NOTIFY WAIT STATEMENT (ISO/IEC 1539-1:2023 Section 11.6)
+// ============================================================================
+//
+// J3/22-007 Section 11.6: Coarray synchronization
+// R1179: notify-wait-stmt is NOTIFY WAIT ( notify-variable
+//        [ , event-wait-spec-list ] )
+//
+// The NOTIFY WAIT statement waits for a notification from another image.
+// The notify-variable must be a coarray of NOTIFY_TYPE.
+// The event-wait-spec-list allows UNTIL_COUNT=, STAT=, ERRMSG= specifiers.
+//
+// ISO/IEC 1539-1:2023 Section 16.5.9: NOTIFY_TYPE derived type
+// NOTIFY_TYPE is provided by ISO_FORTRAN_ENV for coarray notification.
+//
+
+// J3/22-007 R1179: notify-wait-stmt
+// notify-wait-stmt is NOTIFY WAIT ( notify-variable [ , event-wait-spec-list ] )
+notify_wait_stmt_f2023
+    : NOTIFY_WAIT LPAREN notify_variable_f2023
+      (COMMA event_wait_spec_list)? RPAREN NEWLINE
+    ;
+
+// J3/22-007 R1179: notify-variable
+// notify-variable is a coarray variable of type NOTIFY_TYPE
+notify_variable_f2023
+    : IDENTIFIER                   // Variable of NOTIFY_TYPE
+    ;
+
+// NOTIFY_TYPE declaration statement
+// ISO/IEC 1539-1:2023 Section 16.5.9: NOTIFY_TYPE derived type
+notify_type_declaration_stmt_f2023
+    : TYPE LPAREN NOTIFY_TYPE RPAREN DOUBLE_COLON entity_decl_list NEWLINE
+    ;
+
+// ============================================================================
+// EXECUTABLE CONSTRUCT OVERRIDE (F2023 Extension)
+// ============================================================================
+// Override F2018 executable_construct to include F2023 NOTIFY WAIT statement
+
+// ISO/IEC 1539-1:2023 R514: executable-construct
+// Enhanced executable construct for F2023 (adds NOTIFY WAIT)
+executable_construct_f2018
+    : assignment_stmt                 // Inherit from F2003
+    | call_stmt                       // Inherit from F2003
+    | print_stmt                      // Inherit from F2003
+    | stop_stmt_f2018                 // Enhanced in F2018 (R1160)
+    | error_stop_stmt_f2018           // Enhanced in F2018 (R1161)
+    | select_type_construct           // Inherit from F2003
+    | select_rank_construct           // NEW in F2018 (R1148-R1151)
+    | associate_construct             // Inherit from F2003
+    | block_construct_f2008           // Inherit from F2008
+    | allocate_stmt_f2008             // Inherit from F2008
+    | collective_subroutine_call      // NEW in F2018 (Section 16.9.46-50)
+    | team_construct                  // NEW in F2018 (teams: R1111-R1115, R1175-R1178)
+    | event_construct                 // NEW in F2018 (events: R1170-R1173)
+    | notify_wait_stmt_f2023          // NEW in F2023 (Section 11.6, R1179)
+    | sync_construct                  // Inherit from F2008
+    | wait_stmt                       // Inherit from F2003
+    | flush_stmt                      // Inherit from F2003
+    | if_construct                    // Inherit from F95
+    | do_construct_f2018              // Enhanced in F2018 (R1119-R1132, DO CONCURRENT)
+    | select_case_construct           // Inherit from F95
+    | type_declaration_stmt_f2018     // F2018 allows mixed declarations
+    | executable_construct_f2008      // Inherit F2008 constructs
+    ;
+
+// ============================================================================
+// USE STATEMENT ONLY LIST OVERRIDE (F2023 Extension)
+// ============================================================================
+// Override F2018 only_item to include NOTIFY_TYPE for use in
+// iso_fortran_env imports.
+
+// ISO/IEC 1539-1:2023 R1412: only
+// Enhanced to support NOTIFY_TYPE from iso_fortran_env
+only_item_f2018
+    : IDENTIFIER (POINTER_ASSIGN only_item_target_f2018)?
+    | c_interop_type
+    | OPERATOR LPAREN operator_token RPAREN
+    | NOTIFY_TYPE                     // NEW in F2023 (Section 16.5.9)
+    ;
+
+// ============================================================================
+// DERIVED TYPE SPEC OVERRIDE (F2023 Extension)
+// ============================================================================
+// Override F2003 derived_type_spec to include NOTIFY_TYPE for use in
+// type declarations like type(notify_type) :: var
+
+// ISO/IEC 1539-1:2023 R455: derived-type-spec
+// Enhanced to support NOTIFY_TYPE from iso_fortran_env
+derived_type_spec
+    : IDENTIFIER                                        // Basic type name
+    | IDENTIFIER LPAREN type_param_spec_list RPAREN     // Parameterized type
+    | c_interop_type                                    // C interop types
+    | NOTIFY_TYPE                                       // F2023 Section 16.5.9
+    ;
+
+// ============================================================================
 // FORTRAN 2023 STANDARD OVERVIEW (ISO/IEC 1539-1:2023)
 // ============================================================================
 //
@@ -562,6 +660,9 @@ identifier_or_keyword
     // F2023 string intrinsics (Section 16.9)
     | SPLIT        // SPLIT can be used as subroutine name
     | TOKENIZE     // TOKENIZE can be used as subroutine name
+    // F2023 NOTIFY WAIT synchronization (Section 11.6)
+    | NOTIFY_WAIT  // NOTIFY WAIT can be used as statement keyword
+    | NOTIFY_TYPE  // NOTIFY_TYPE can be used as type name
     ;
 
 // ============================================================================
