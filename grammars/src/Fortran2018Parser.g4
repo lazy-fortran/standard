@@ -39,7 +39,7 @@ program_unit_f2018
 // Enhanced main program for F2018
 main_program_f2018
     : program_stmt specification_part_f2018? execution_part_f2018?
-      internal_subprogram_part? end_program_stmt
+      internal_subprogram_part_f2003? end_program_stmt
     ;
 
 // ISO/IEC 1539-1:2018 R1404: module
@@ -60,14 +60,14 @@ external_subprogram_f2018
 // Enhanced function subprogram for F2018
 function_subprogram_f2018
     : function_stmt_f2018 specification_part_f2018? execution_part_f2018?
-      internal_subprogram_part? end_function_stmt
+      internal_subprogram_part_f2003? end_function_stmt
     ;
 
 // ISO/IEC 1539-1:2018 R1534: subroutine-subprogram
 // Enhanced subroutine subprogram for F2018
 subroutine_subprogram_f2018
     : subroutine_stmt_f2018 specification_part_f2018? execution_part_f2018?
-      internal_subprogram_part? end_subroutine_stmt
+      internal_subprogram_part_f2003? end_subroutine_stmt
     ;
 
 // ISO/IEC 1539-1:2018 R1407: module-subprogram-part

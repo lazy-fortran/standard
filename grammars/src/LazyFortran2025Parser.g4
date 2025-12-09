@@ -85,12 +85,12 @@ lazy_procedure_definition
 // library-style .lf files parse naturally.
 lazy_function_subprogram
     : function_stmt_f2018 specification_part_f2018? lazy_execution_part?
-      internal_subprogram_part? end_function_stmt
+      internal_subprogram_part_f2003? end_function_stmt
     ;
 
 lazy_subroutine_subprogram
     : subroutine_stmt_f2018 specification_part_f2018? lazy_execution_part?
-      internal_subprogram_part? end_subroutine_stmt
+      internal_subprogram_part_f2003? end_subroutine_stmt
     ;
 
 lazy_execution_part

@@ -68,7 +68,7 @@ program_unit_f95
 // Main program (ISO/IEC 1539-1:1997 Section 11.1, R1101)
 main_program_f95
     : program_stmt specification_part_f95? execution_part_f95?
-      internal_subprogram_part? end_program_stmt
+      internal_subprogram_part_f95? end_program_stmt
     ;
 
 // Module (ISO/IEC 1539-1:1997 Section 11.3, R1104)

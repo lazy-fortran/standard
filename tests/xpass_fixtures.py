@@ -114,13 +114,6 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ),
     (
         "Fortran90",
-        Path("Fortran90/test_comprehensive_parsing/mathematics_module.f90"),
-    ): (
-        "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
-        "function RESULT clause handling. Tracked by Issue #311."
-    ),
-    (
-        "Fortran90",
         Path("Fortran90/test_comprehensive_parsing/types_module.f90"),
     ): (
         "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
@@ -139,13 +132,6 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ): (
         "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
         "RECURSIVE function prefix handling. Tracked by Issue #311."
-    ),
-    (
-        "Fortran90",
-        Path("Fortran90/test_fortran_90_comprehensive/mathematics_module.f90"),
-    ): (
-        "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
-        "function RESULT clause handling. Tracked by Issue #311."
     ),
     (
         "Fortran90",
