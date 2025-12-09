@@ -279,13 +279,22 @@ Grammar:
 - `namelist_stmt`:
   - Included in `declaration_construct` as an F90 declaration form.
 
-Gaps:
+**CRITICAL Gaps (Issue #311):**
 
-- File manipulation statements OPEN, CLOSE, INQUIRE, BACKSPACE,
-  REWIND, ENDFILE remain modeled only at the FORTRAN 77 level (and
-  even there incompletely), and are not integrated into F90 execution
-  as dedicated F90 rules. This is tracked across the F77/F90 issues
-  (#163 and related items).
+File I/O statements from N692 Section 9 are NOT integrated into F90:
+
+| ISO Rule | Statement | Status |
+|----------|-----------|--------|
+| R904 | `open-stmt` | NOT IMPLEMENTED in F90 |
+| R908 | `close-stmt` | NOT IMPLEMENTED in F90 |
+| R923 | `backspace-stmt` | NOT IMPLEMENTED in F90 |
+| R924 | `endfile-stmt` | NOT IMPLEMENTED in F90 |
+| R925 | `rewind-stmt` | NOT IMPLEMENTED in F90 |
+| R929 | `inquire-stmt` | NOT IMPLEMENTED in F90 |
+
+These statements exist at the FORTRAN 77 level but are NOT wired into
+`execution_part_f90` or `executable_construct_f90`. Real F90 programs
+using file operations will fail to parse correctly.
 
 ## 8. Fixtures, XPASS status and integration gaps
 
@@ -399,6 +408,8 @@ rules:
 
 ## 11. Summary
 
+**Implementation Coverage:** 217 of 246 ISO syntax rules (88.2%)
+
 The Fortran 90 grammar in this repository:
 
 - Implements most of the **major language features** described in
@@ -415,18 +426,28 @@ The Fortran 90 grammar in this repository:
   fixed‑form** handling (no card‑accurate column enforcement).
 - Passes a broad comprehensive test suite targeted at individual F90
   features.
-- Still has important integration gaps, captured by XPASS fixtures and
-  higher‑level issues (`#146`, `#147`, the IMPLICIT/annotation issues,
-  and the F77/F90 file I/O gaps).
+
+**CRITICAL Gaps (Issue #311):**
+
+| ISO Rule | Description | Status |
+|----------|-------------|--------|
+| R904 | `open-stmt` | NOT IMPLEMENTED |
+| R908 | `close-stmt` | NOT IMPLEMENTED |
+| R923 | `backspace-stmt` | NOT IMPLEMENTED |
+| R924 | `endfile-stmt` | NOT IMPLEMENTED |
+| R925 | `rewind-stmt` | NOT IMPLEMENTED |
+| R929 | `inquire-stmt` | NOT IMPLEMENTED |
+| R620 | `section-subscript` with vector subscript | Partial |
+| R531 | `data-implied-do` nested forms | Partial |
+| R1219 | `entry-stmt` | NOT IMPLEMENTED |
+
+**xfail Fixtures:** 9 (tracked by Issue #311)
 
 Future work should:
 
-- Tighten module/program‑unit integration and internal procedures so
-  that the comprehensive F90 fixtures parse without XPASS.
-- Add explicit IMPLICIT and IMPLICIT NONE statement support in line
-  with N692 §5.2.2.
-- Integrate or wrap the FORTRAN 77 OPEN/CLOSE/INQUIRE/BACKSPACE/
-  REWIND/ENDFILE statements into the F90 execution part, matching
-  N692 §10.
-- Keep the grammar and tests in sync with the spec‑section annotations
-  tracked by issue #173.
+- **HIGH PRIORITY:** Integrate OPEN/CLOSE/INQUIRE/BACKSPACE/REWIND/ENDFILE
+  statements into F90 execution part (N692 §9)
+- Tighten module/program‑unit integration and internal procedures
+- Add explicit IMPLICIT and IMPLICIT NONE statement support (N692 §5.2.2)
+- Implement ENTRY statement (R1219)
+- Keep the grammar and tests in sync with spec‑section annotations (#173)

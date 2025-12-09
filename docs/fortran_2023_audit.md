@@ -378,6 +378,8 @@ Current status:
 
 ## 9. Summary and issue mapping
 
+**Implementation Coverage:** ~35% per exhaustive audit
+
 The Fortran 2023 layer in this repository:
 
 - **Currently implements (partially):**
@@ -390,35 +392,72 @@ The Fortran 2023 layer in this repository:
     - Simple CALL/IF/PRINT statements.
     - RANDOM_INIT and SYSTEM_CLOCK calls.
   - New F2023 tokens and helper rules for:
-    - Enhanced enumerations.
-    - Conditional expressions using `? :`.
+    - Enhanced enumerations (partial).
+    - Conditional expressions using `? :` (limited).
     - IEEE_MAX/MIN/MAX_MAG/MIN_MAG.
     - BOZ literals and basic NAMELIST/SYSTEM_CLOCK refinements.
   - Token‑level compatibility with F2018 and earlier standards.
-- **Gaps requiring resolution (tracked by issue #310):**
-  - F2023 syntax changes not integrated into full F2018 expression and
-    statement model.
-  - Fixtures failing (xfail) that should parse per ISO/IEC 1539-1:2023.
-  - Fortran 2023 semantic requirements (IEEE behavior, SYSTEM_CLOCK
-    kinds, NAMELIST visibility) not enforced in grammar.
 
-Existing umbrella issue:
+**CRITICAL Gaps (Issue #310):**
 
-- #178 – **Fortran 2023: annotate grammar with J3/22‑007 sections**:
-  - Should use this audit as the spec→grammar cross‑walk and ensure
-    every F2023 gap identified here has its own issue.
+Enumeration Types (R766-R771) NOT IMPLEMENTED:
 
-Future work (to be tracked via #178, #310, and follow‑up issues) should:
+| ISO Rule | Description | Status |
+|----------|-------------|--------|
+| R766 | `enum-type-def` | NOT IMPLEMENTED |
+| R767 | `enum-type-stmt` | NOT IMPLEMENTED |
+| R768 | `enum-type-body` | NOT IMPLEMENTED |
+| R769 | `enumerator-def-stmt` | NOT IMPLEMENTED |
+| R770 | `enumerator` | NOT IMPLEMENTED |
+| R771 | `end-enum-type-stmt` | NOT IMPLEMENTED |
 
-- Integrate F2023 enumerations and conditional expressions into the
-  full expression and statement model, not just the F2023-specific
-  overlays.
-- Expand F2023 execution part coverage to include F2018 constructs and
-  any F2023‑specific refinements.
-- Reduce the xfail list by implementing missing grammar rules until all
-  F2023 fixtures parse with zero syntax errors.
+Type Inference (NEW IN F2023) NOT IMPLEMENTED:
+
+| ISO Rule | Description | Status |
+|----------|-------------|--------|
+| R703 | `typeof-type-spec` TYPEOF(data-ref) | NOT IMPLEMENTED |
+| R704 | `classof-type-spec` CLASSOF(data-ref) | NOT IMPLEMENTED |
+
+Other Missing Features:
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| R821 | `rank-clause` in concurrent-header | NOT IMPLEMENTED |
+| R1029 | Conditional expressions (chained) | Partial |
+| R1179 | `notify-wait-stmt` | NOT IMPLEMENTED |
+| -- | NOTIFY_TYPE derived type | NOT IMPLEMENTED |
+| -- | C_F_STRPOINTER procedure | NOT IMPLEMENTED |
+| -- | AT edit descriptor | NOT IMPLEMENTED |
+| -- | LEADING_ZERO I/O specifier | NOT IMPLEMENTED |
+
+**Missing Intrinsic Functions (14 new trig functions):**
+
+| Intrinsic | Description |
+|-----------|-------------|
+| ACOSD, ASIND, ATAND, ATAN2D | Degree-based inverse trig |
+| COSD, SIND, TAND | Degree-based trig |
+| ACOSPI, ASINPI, ATANPI, ATAN2PI | Pi-scaled inverse trig |
+| COSPI, SINPI, TANPI | Pi-scaled trig |
+| SPLIT | String splitting |
+| TOKENIZE | String tokenization |
+
+**xfail Fixtures:** 7 (tracked by Issue #310)
+
+Existing umbrella issues:
+
+- #178 – **Fortran 2023: annotate grammar with J3/22‑007 sections**.
+- #310 – **Grammar gaps for F2023 features**.
+
+Future work should:
+
+- **HIGH PRIORITY:** Implement ENUM TYPE definitions (R766-R771)
+- **HIGH PRIORITY:** Implement TYPEOF/CLASSOF type inference (R703-R704)
+- **MEDIUM PRIORITY:** Add 14 new trigonometric intrinsics
+- **MEDIUM PRIORITY:** Implement NOTIFY WAIT coarray statement
+- Integrate conditional expressions into F2018 expression hierarchy
+- Expand execution part to include all F2018 constructs
 
 This document, together with the tests and xfail configuration, makes
-the current Fortran 2023 gaps transparent and provides a checklist for
-F2023 work under issues #178 and #310.
+the current Fortran 2023 gaps transparent. Approximately 65% of F2023
+syntax rules remain unimplemented.
 
