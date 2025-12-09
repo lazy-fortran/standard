@@ -561,7 +561,7 @@ Grammar implementation:
   - `Fortran2003Lexer.g4`:
     - Inherits free‑form support from `Fortran95Lexer`.
     - Adds fixed‑form comment tokens:
-      - `FIXED_FORM_COMMENT`, `FIXED_FORM_COMMENT_STAR`, `STAR_COMMENT`.
+      - `FIXED_FORM_COMMENT`, `STAR_COMMENT` for column‑1 `C`/`c` and `*` comments.
     - Defines `CONTINUATION` and overrides `NEWLINE` to support unified
       fixed/free‑form handling.
     - Introduces `LSQUARE`/`RSQUARE` for F90+ array constructors.
@@ -591,8 +591,10 @@ Gaps that warrant explicit issues:
 
 - Fixed‑form layout strictness is already tracked at the cross‑standard
   level (see the fixed‑form documentation and earlier issues for
-  FORTRAN/F77/F90). No additional F2003‑specific grammar gaps were
-  found here.
+  FORTRAN/F77/F90).
+- Column‑1 `C`/`c` comment lines that do not have trailing whitespace
+  (for example `C*** heading`) are not currently recognized as fixed‑form
+  comments in the F2003 lexer; this is tracked by Issue #343.
 
 ---
 
@@ -655,7 +657,7 @@ Gaps that warrant explicit issues:
 
 ## 11. Summary and issue mapping
 
-**xfail Fixtures:** 1 (tracked by Issue #309)
+**xfail Fixtures:** 0 (Issue #309 resolved; previously 1 fixture)
 
 The Fortran 2003 layer in this repository:
 
@@ -687,16 +689,19 @@ The Fortran 2003 layer in this repository:
   - Square‑bracket array constructors are treated as available in the
     F95/F2003 era even though historically they are later additions.
 
-**Grammar Gap (Issue #309):**
+**Resolved Grammar Gap (Issue #309):**
 
-| Fixture | Gap |
-|---------|-----|
-| `fixed_form_f2003.f` | Column-1 C comment handling in fixed-form |
+| Fixture | Status |
+|---------|--------|
+| `fixed_form_f2003.f` | Column-1 C comment handling in fixed-form is now implemented and fully tested. |
 
 Existing umbrella issues relevant to this audit:
 
 - #140 – **Standard audits** (this document is the F2003 slice).
-- #309 – **Fixed-form source with column-1 C comments not parsed**.
+- #309 – **Fixed-form source with column-1 C comments not parsed**:
+  - **RESOLVED IN GRAMMAR AND TESTS**: `Fortran2003Lexer.g4` now enforces column‑1 `C`/`c` comments per ISO/IEC 1539‑1:2004 Section 3.3.2, the `fixed_form_f2003.f` fixture parses without errors, and its xfail entry has been removed.
+- #343 – **Fortran 2003 fixed-form C comments require whitespace after column-1 C**:
+  - Tracks the remaining gap where column‑1 `C`/`c` comment lines without trailing whitespace (for example `C*** heading`) are rejected instead of treated as comment lines.
 - #175 – **Fortran 2003: annotate grammar with J3/03‑007 sections**:
   - **RESOLVED**: The grammar files `Fortran2003Parser.g4` and
     `Fortran2003Lexer.g4` have been annotated with comprehensive
@@ -733,4 +738,3 @@ When those issues and their follow‑ups are addressed, Fortran 2003 in
 this repo will have a fully annotated grammar and an audit that
 honestly reflects both the supported subset and any deliberate
 divergences from ISO/IEC 1539‑1:2004.
-
