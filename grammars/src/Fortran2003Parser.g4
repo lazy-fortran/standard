@@ -1242,6 +1242,18 @@ deallocate_stmt
     : DEALLOCATE LPAREN allocation_list RPAREN NEWLINE
     ;
 
+// MOVE_ALLOC intrinsic subroutine (ISO/IEC 1539-1:2004 Section 13.7.80)
+// R1219: CALL MOVE_ALLOC(FROM=from, TO=to)
+// Atomically deallocates TO, moves allocation from FROM to TO, deallocates FROM
+move_alloc_stmt
+    : CALL MOVE_ALLOC LPAREN move_alloc_args RPAREN NEWLINE
+    ;
+
+// Move_alloc arguments - typically FROM and TO (named or positional)
+move_alloc_args
+    : actual_arg_list
+    ;
+
 // ====================================================================
 // VOLATILE AND PROTECTED ATTRIBUTES (ISO/IEC 1539-1:2004 Section 5.1.2)
 // ====================================================================
@@ -1602,6 +1614,7 @@ executable_construct
     | block_construct
     | allocate_stmt_f2003
     | deallocate_stmt
+    | move_alloc_stmt
     | wait_stmt
     | flush_stmt
     | if_construct
@@ -1741,6 +1754,7 @@ do_body_f2003
     | print_stmt
     | allocate_stmt_f2003
     | deallocate_stmt
+    | move_alloc_stmt
     | if_construct
     | do_construct
     | block_construct)*
