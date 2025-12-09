@@ -52,15 +52,25 @@ import FORTRANIILexer;  // Import FORTRAN II (1958) constructs
 // DATA TYPES - X3.9-1966 Section 4
 // ============================================================================
 // X3.9-1966 Section 4 defines six data types for FORTRAN:
-//   4.1 Integer (from FORTRAN I)
-//   4.2 Real (from FORTRAN I)
-//   4.3 Double Precision (from FORTRAN IV, 1962)
-//   4.4 Complex (from FORTRAN IV, 1962)
-//   4.5 Logical (from FORTRAN IV, 1962)
+//   4.1 Integer (from FORTRAN I) - X3.9-1966 Section 4.1
+//   4.2 Real (from FORTRAN I) - X3.9-1966 Section 4.2
+//   4.3 Double Precision (from FORTRAN IV, 1962) - X3.9-1966 Section 4.3
+//   4.4 Complex (from FORTRAN IV, 1962) - X3.9-1966 Section 4.4
+//   4.5 Logical (from FORTRAN IV, 1962) - X3.9-1966 Section 4.5
 //   4.6 (reserved for future use in X3.9-1966)
-//
-// INTEGER and REAL tokens are inherited from FORTRANIILexer.
 // ============================================================================
+
+// INTEGER data type - X3.9-1966 Section 4.1
+// Used in explicit type declarations: INTEGER var1, var2
+INTEGER         : I N T E G E R ;
+
+// REAL data type - X3.9-1966 Section 4.2
+// Used in explicit type declarations: REAL var1, var2
+REAL            : R E A L ;
+
+// IMPLICIT statement - X3.9-1966 Section 7.2.5
+// Defines implicit typing rules: IMPLICIT INTEGER (A-H, O-Z)
+IMPLICIT        : I M P L I C I T ;
 
 // LOGICAL data type - X3.9-1966 Section 4.5
 // Represents truth values (.TRUE. or .FALSE.)

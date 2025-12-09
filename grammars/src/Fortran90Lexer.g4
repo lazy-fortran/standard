@@ -440,6 +440,8 @@ READWRITE       : R E A D W R I T E ;
 
 // Double colon separator - ISO/IEC 1539:1991 Section 5.1, R501
 DOUBLE_COLON    : '::' ;
+// Single colon (array slice notation, only lists) - ISO/IEC 1539:1991 Section 6.2.3
+COLON           : ':' ;
 // Pointer assignment operator - ISO/IEC 1539:1991 Section 7.5.2, R735
 POINTER_ASSIGN  : '=>' ;
 // Component selector - ISO/IEC 1539:1991 Section 6.1.2, R614
