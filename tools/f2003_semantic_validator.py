@@ -1,16 +1,4 @@
 #!/usr/bin/env python3
-"""Fortran 2003 Semantic Validator
-
-Validates Fortran 2003 parse trees against semantic rules from ISO/IEC 1539-1:2004:
-- Section 12.3.2: Procedure pointers, abstract interfaces, and characteristics
-- Section 4.5.4: Type-bound procedures and binding characteristics
-- Section 15: C interoperability (BIND(C), VALUE, ISO_C_BINDING types)
-- Section 14: IEEE arithmetic modules (IEEE_EXCEPTIONS, IEEE_ARITHMETIC, IEEE_FEATURES)
-
-This module implements semantic checks that go beyond syntactic parsing, enforcing
-the standard's requirements for procedure characteristics, type interoperability,
-and IEEE module usage.
-"""
 
 import re
 import sys
@@ -30,8 +18,6 @@ from Fortran2003ParserListener import Fortran2003ParserListener
 
 
 class DiagnosticSeverity(Enum):
-    """Severity levels for semantic diagnostics."""
-
     ERROR = auto()
     WARNING = auto()
     INFO = auto()
@@ -39,17 +25,6 @@ class DiagnosticSeverity(Enum):
 
 @dataclass
 class SemanticDiagnostic:
-    """A semantic issue detected during validation.
-
-    Attributes:
-        severity: ERROR, WARNING, or INFO level
-        code: Unique identifier for this diagnostic type
-        message: Human-readable description of the issue
-        line: Source line number (1-based) or None if unknown
-        column: Source column number (0-based) or None if unknown
-        iso_section: ISO/IEC 1539-1:2004 section reference
-    """
-
     severity: DiagnosticSeverity
     code: str
     message: str
@@ -60,20 +35,6 @@ class SemanticDiagnostic:
 
 @dataclass
 class ValidationResult:
-    """Result of semantic validation.
-
-    Attributes:
-        diagnostics: List of all semantic issues found
-        c_interop_entities: Names of entities declared with BIND(C)
-        ieee_modules_used: Set of IEEE module names imported
-        iso_c_binding_imports: Set of ISO_C_BINDING entities imported
-        procedures: Dict mapping procedure names to their characteristics
-        abstract_interfaces: Dict mapping interface names to definitions
-        procedure_pointers: Dict mapping pointer names to declarations
-        type_bound_procedures: Dict mapping type names to their bindings
-        generic_bindings: Dict mapping type names to their generic bindings
-    """
-
     diagnostics: List[SemanticDiagnostic] = field(default_factory=list)
     c_interop_entities: List[str] = field(default_factory=list)
     ieee_modules_used: Set[str] = field(default_factory=set)
@@ -106,39 +67,19 @@ class ValidationResult:
 # ISO/IEC 1539-1:2004 Section 15.2.2, Table 15.2: C interoperable types
 C_INTEROPERABLE_TYPES: Set[str] = {
     # Integer types
-    "c_int",
-    "c_short",
-    "c_long",
-    "c_long_long",
-    "c_signed_char",
-    "c_size_t",
-    "c_int8_t",
-    "c_int16_t",
-    "c_int32_t",
-    "c_int64_t",
-    "c_int_least8_t",
-    "c_int_least16_t",
-    "c_int_least32_t",
-    "c_int_least64_t",
-    "c_int_fast8_t",
-    "c_int_fast16_t",
-    "c_int_fast32_t",
-    "c_int_fast64_t",
-    "c_intmax_t",
-    "c_intptr_t",
+    "c_int", "c_short", "c_long", "c_long_long",
+    "c_signed_char", "c_size_t",
+    "c_int8_t", "c_int16_t", "c_int32_t", "c_int64_t",
+    "c_int_least8_t", "c_int_least16_t", "c_int_least32_t", "c_int_least64_t",
+    "c_int_fast8_t", "c_int_fast16_t", "c_int_fast32_t", "c_int_fast64_t",
+    "c_intmax_t", "c_intptr_t",
     # Floating-point types
-    "c_float",
-    "c_double",
-    "c_long_double",
-    "c_float_complex",
-    "c_double_complex",
-    "c_long_double_complex",
+    "c_float", "c_double", "c_long_double",
+    "c_float_complex", "c_double_complex", "c_long_double_complex",
     # Other types
-    "c_bool",
-    "c_char",
+    "c_bool", "c_char",
     # Pointer types
-    "c_ptr",
-    "c_funptr",
+    "c_ptr", "c_funptr",
 }
 
 # ISO/IEC 1539-1:2004 Section 15.2.3: C pointer constants
@@ -149,42 +90,26 @@ IEEE_MODULES: Set[str] = {"ieee_exceptions", "ieee_arithmetic", "ieee_features"}
 
 # IEEE exception flags (Section 14.2)
 IEEE_EXCEPTION_FLAGS: Set[str] = {
-    "ieee_overflow",
-    "ieee_underflow",
-    "ieee_divide_by_zero",
-    "ieee_invalid",
-    "ieee_inexact",
+    "ieee_overflow", "ieee_underflow", "ieee_divide_by_zero",
+    "ieee_invalid", "ieee_inexact",
 }
 
 # IEEE special values (Section 14.3)
 IEEE_SPECIAL_VALUES: Set[str] = {
-    "ieee_positive_inf",
-    "ieee_negative_inf",
-    "ieee_quiet_nan",
-    "ieee_signaling_nan",
+    "ieee_positive_inf", "ieee_negative_inf",
+    "ieee_quiet_nan", "ieee_signaling_nan",
 }
 
 # IEEE rounding modes (Section 14.3)
 IEEE_ROUNDING_MODES: Set[str] = {
-    "ieee_nearest",
-    "ieee_to_zero",
-    "ieee_up",
-    "ieee_down",
+    "ieee_nearest", "ieee_to_zero", "ieee_up", "ieee_down",
 }
 
 # IEEE features (Section 14.4)
 IEEE_FEATURES: Set[str] = {
-    "ieee_datatype",
-    "ieee_denormal",
-    "ieee_divide",
-    "ieee_halting",
-    "ieee_inexact_flag",
-    "ieee_inf",
-    "ieee_invalid_flag",
-    "ieee_nan",
-    "ieee_rounding",
-    "ieee_sqrt",
-    "ieee_underflow_flag",
+    "ieee_datatype", "ieee_denormal", "ieee_divide", "ieee_halting",
+    "ieee_inexact_flag", "ieee_inf", "ieee_invalid_flag",
+    "ieee_nan", "ieee_rounding", "ieee_sqrt", "ieee_underflow_flag",
 }
 
 # All IEEE entities for validation
@@ -197,19 +122,6 @@ ALL_IEEE_ENTITIES: Set[str] = (
 # Each procedure has characteristics that determine compatibility
 @dataclass
 class ArgumentCharacteristic:
-    """Characteristics of a single dummy argument (ISO/IEC 1539-1:2004 12.2.2.1).
-
-    Attributes:
-        name: Argument name (optional for unnamed arguments)
-        type_name: Type specification (integer, real, etc.)
-        intent: IN, OUT, or INOUT
-        is_optional: Whether the argument is OPTIONAL
-        is_allocatable: Whether the argument is ALLOCATABLE
-        is_pointer: Whether the argument is POINTER
-        is_value: Whether the argument has VALUE attribute
-        rank: Array rank (0 for scalar)
-    """
-
     name: Optional[str] = None
     type_name: Optional[str] = None
     intent: Optional[str] = None
@@ -222,30 +134,6 @@ class ArgumentCharacteristic:
 
 @dataclass
 class ProcedureCharacteristics:
-    """Characteristics of a procedure (ISO/IEC 1539-1:2004 12.2.2.1).
-
-    Per Section 12.2.2.1, procedure characteristics include:
-    - Whether it is a function or subroutine
-    - Result characteristics (for functions)
-    - Dummy argument characteristics (type, kind, rank, intent)
-    - Whether it is pure, elemental
-    - Whether it has explicit or implicit interface
-
-    Attributes:
-        name: Procedure name
-        is_function: True for functions, False for subroutines
-        is_pure: Whether PURE prefix is present
-        is_elemental: Whether ELEMENTAL prefix is present
-        result_type: Result type for functions
-        result_name: Result variable name (if different from function name)
-        arguments: List of argument characteristics in order
-        has_explicit_interface: Whether an explicit interface is available
-        is_bind_c: Whether BIND(C) is specified
-        bind_name: Optional C binding name
-        line: Source line number
-        column: Source column number
-    """
-
     name: str
     is_function: bool = False
     is_pure: bool = False
@@ -262,18 +150,6 @@ class ProcedureCharacteristics:
 
 @dataclass
 class AbstractInterface:
-    """Represents an abstract interface definition (ISO/IEC 1539-1:2004 12.3.2.3).
-
-    Abstract interfaces provide explicit interfaces for procedure pointers
-    and deferred type-bound procedures.
-
-    Attributes:
-        name: Interface name (may be None for unnamed interfaces)
-        procedures: Procedure characteristics defined in this interface
-        line: Source line number
-        column: Source column number
-    """
-
     name: Optional[str] = None
     procedures: List[ProcedureCharacteristics] = field(default_factory=list)
     line: Optional[int] = None
@@ -282,21 +158,6 @@ class AbstractInterface:
 
 @dataclass
 class ProcedurePointer:
-    """Represents a procedure pointer declaration (ISO/IEC 1539-1:2004 12.3.2.3).
-
-    Procedure pointers can point to procedures that have compatible
-    characteristics with their declared interface.
-
-    Attributes:
-        name: Pointer variable name
-        interface_name: Name of the interface this pointer is declared with
-        is_component: Whether this is a procedure component in a derived type
-        initial_target: Initial target procedure (if => specified)
-        pass_attr: PASS or NOPASS attribute for procedure components
-        line: Source line number
-        column: Source column number
-    """
-
     name: str
     interface_name: Optional[str] = None
     is_component: bool = False
@@ -308,24 +169,6 @@ class ProcedurePointer:
 
 @dataclass
 class TypeBoundProcedure:
-    """Represents a type-bound procedure (ISO/IEC 1539-1:2004 4.5.4).
-
-    Type-bound procedures are bindings within a derived type that associate
-    a binding name with a procedure.
-
-    Attributes:
-        binding_name: Name used to invoke the binding
-        procedure_name: Actual procedure implementing the binding
-        interface_name: Interface name for deferred bindings
-        is_deferred: Whether this is a DEFERRED binding
-        is_nopass: Whether NOPASS is specified
-        pass_arg: Name of the passed-object dummy argument
-        is_non_overridable: Whether NON_OVERRIDABLE is specified
-        access: PUBLIC or PRIVATE
-        line: Source line number
-        column: Source column number
-    """
-
     binding_name: str
     procedure_name: Optional[str] = None
     interface_name: Optional[str] = None
@@ -340,19 +183,6 @@ class TypeBoundProcedure:
 
 @dataclass
 class GenericBinding:
-    """Represents a generic type-bound procedure (ISO/IEC 1539-1:2004 4.5.4).
-
-    Generic bindings map a generic name to multiple specific procedures.
-
-    Attributes:
-        generic_name: Generic interface name or operator
-        specific_bindings: List of specific procedure binding names
-        is_operator: Whether this is an operator overload
-        access: PUBLIC or PRIVATE
-        line: Source line number
-        column: Source column number
-    """
-
     generic_name: str
     specific_bindings: List[str] = field(default_factory=list)
     is_operator: bool = False
@@ -360,21 +190,7 @@ class GenericBinding:
     line: Optional[int] = None
     column: Optional[int] = None
 
-
 class F2003SemanticListener(Fortran2003ParserListener):
-    """ANTLR listener that collects semantic information from parse trees.
-
-    Walks the parse tree and extracts:
-    - Procedure declarations with their characteristics (ISO 12.2.2.1)
-    - Abstract interfaces and their procedure specifications (ISO 12.3.2.3)
-    - Procedure pointer declarations (ISO 12.3.2.3)
-    - Type-bound procedures and generic bindings (ISO 4.5.4)
-    - BIND(C) declarations and their associated types (ISO 15)
-    - USE statements for ISO_C_BINDING and IEEE modules (ISO 14, 15)
-    - VALUE attribute usage
-    - C interoperable type declarations
-    """
-
     def __init__(self):
         super().__init__()
         self.result = ValidationResult()
@@ -394,13 +210,11 @@ class F2003SemanticListener(Fortran2003ParserListener):
         self._current_interface_name: Optional[str] = None
 
     def _get_token_text(self, ctx) -> str:
-        """Extract normalized text from a context."""
         if ctx is None:
             return ""
         return ctx.getText().lower()
 
     def _get_location(self, ctx) -> Tuple[Optional[int], Optional[int]]:
-        """Extract line and column from a context."""
         if ctx is None:
             return None, None
         if hasattr(ctx, "start") and ctx.start:
@@ -415,7 +229,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         ctx=None,
         iso_section: Optional[str] = None,
     ):
-        """Add a diagnostic to the result."""
         line, column = self._get_location(ctx)
         self.result.diagnostics.append(
             SemanticDiagnostic(
@@ -429,7 +242,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         )
 
     def enterUse_stmt(self, ctx):
-        """Check USE statements for ISO_C_BINDING and IEEE modules."""
         text = self._get_token_text(ctx)
 
         # Check for ISO_C_BINDING
@@ -453,17 +265,14 @@ class F2003SemanticListener(Fortran2003ParserListener):
                 self.result.ieee_modules_used.add(ieee_mod)
 
     def enterBinding_spec(self, ctx):
-        """Track entry into BIND(C) context."""
         text = self._get_token_text(ctx)
         if "bind" in text and "c" in text:
             self._in_bind_c_procedure = True
 
     def exitBinding_spec(self, ctx):
-        """Track exit from BIND(C) context."""
         pass
 
     def enterFunction_stmt(self, ctx):
-        """Track function declarations with BIND(C)."""
         text = self._get_token_text(ctx)
         if "bind" in text:
             self._in_bind_c_procedure = True
@@ -474,17 +283,14 @@ class F2003SemanticListener(Fortran2003ParserListener):
                 self.result.c_interop_entities.append(name)
 
     def exitFunction_stmt(self, ctx):
-        """Reset function context."""
         pass
 
     def enterSubroutine_stmt(self, ctx):
-        """Track subroutine declarations with BIND(C)."""
         text = self._get_token_text(ctx)
         if "bind" in text:
             self._in_bind_c_procedure = True
 
     def enterSubroutine_stmt_f2003(self, ctx):
-        """Track F2003 subroutine declarations with BIND(C)."""
         text = self._get_token_text(ctx)
         if "bind" in text:
             self._in_bind_c_procedure = True
@@ -492,7 +298,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
             self._extract_procedure_name_from_text(text, ctx)
 
     def _extract_procedure_name_from_text(self, text: str, ctx):
-        """Extract procedure name from statement text."""
         # Look for subroutine keyword followed by name
         if "subroutine" in text:
             parts = text.split("subroutine")
@@ -510,37 +315,30 @@ class F2003SemanticListener(Fortran2003ParserListener):
                     self.result.c_interop_entities.append(name)
 
     def enterDerived_type_stmt_f2003(self, ctx):
-        """Check derived type declarations for BIND(C)."""
         text = self._get_token_text(ctx)
         if "bind" in text:
             self._in_bind_c_procedure = True
 
     def enterType_attr_spec(self, ctx):
-        """Track type attributes including BIND(C)."""
         text = self._get_token_text(ctx)
         if "bind" in text:
             self._in_bind_c_procedure = True
 
     def exitEnd_function_stmt(self, ctx):
-        """Reset on function end."""
         self._in_bind_c_procedure = False
         self._current_procedure_name = None
 
     def exitEnd_subroutine_stmt(self, ctx):
-        """Reset on subroutine end."""
         self._in_bind_c_procedure = False
         self._current_procedure_name = None
 
     def exitEnd_type_stmt(self, ctx):
-        """Reset on type end."""
         self._in_bind_c_procedure = False
 
     def exitEnd_type_stmt_f2003(self, ctx):
-        """Reset on F2003 type end."""
         self._in_bind_c_procedure = False
 
     def enterAttr_spec(self, ctx):
-        """Check for VALUE attribute usage."""
         text = self._get_token_text(ctx)
         if "value" in text:
             line, col = self._get_location(ctx)
@@ -558,7 +356,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
                 )
 
     def enterC_interop_type(self, ctx):
-        """Track C interoperable type usage."""
         text = self._get_token_text(ctx)
         line, col = self._get_location(ctx)
         self._c_types_used.append((text, line or 0, col or 0))
@@ -575,7 +372,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
             )
 
     def enterIeee_entity(self, ctx):
-        """Validate IEEE entity usage."""
         text = self._get_token_text(ctx)
         line, col = self._get_location(ctx)
 
@@ -613,10 +409,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
                 )
 
     def enterInterface_stmt(self, ctx):
-        """Track entry into interface blocks (ISO/IEC 1539-1:2004 12.3.2).
-
-        Handles both named interfaces and ABSTRACT INTERFACE blocks.
-        """
         text = self._get_token_text(ctx)
         line, col = self._get_location(ctx)
 
@@ -633,7 +425,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
             self._current_interface_name = interface_name
 
     def _extract_interface_name(self, text: str) -> Optional[str]:
-        """Extract interface name from interface statement text."""
         text = text.strip()
         if "interface" in text:
             parts = text.split("interface")
@@ -650,7 +441,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         return None
 
     def exitInterface_block(self, ctx):
-        """Complete interface block processing."""
         if self._in_abstract_interface and self._current_abstract_interface:
             if self._current_abstract_interface.name:
                 name = self._current_abstract_interface.name
@@ -669,11 +459,9 @@ class F2003SemanticListener(Fortran2003ParserListener):
         self._current_interface_name = None
 
     def enterInterface_body(self, ctx):
-        """Track procedure declarations within interface bodies."""
         pass
 
     def exitInterface_body(self, ctx):
-        """Complete procedure within interface body."""
         if self._current_procedure and self._in_abstract_interface:
             if self._current_abstract_interface:
                 self._current_abstract_interface.procedures.append(
@@ -682,7 +470,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         self._current_procedure = None
 
     def enterFunction_stmt_f2003(self, ctx):
-        """Track F2003 function declarations with characteristics."""
         text = self._get_token_text(ctx)
         line, col = self._get_location(ctx)
 
@@ -715,21 +502,18 @@ class F2003SemanticListener(Fortran2003ParserListener):
             self.result.c_interop_entities.append(func_name)
 
     def _extract_function_name(self, text: str) -> Optional[str]:
-        """Extract function name from function statement."""
         match = re.search(r"function\s+(\w+)", text)
         if match:
             return match.group(1)
         return None
 
     def _extract_result_name(self, text: str) -> Optional[str]:
-        """Extract RESULT variable name if specified."""
         match = re.search(r"result\s*\(\s*(\w+)\s*\)", text)
         if match:
             return match.group(1)
         return None
 
     def _extract_prefix_type(self, text: str) -> Optional[str]:
-        """Extract type prefix from function declaration."""
         type_keywords = [
             "integer",
             "real",
@@ -744,7 +528,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         return None
 
     def enterFunction_stmt_interface(self, ctx):
-        """Track function declarations in interface blocks."""
         text = self._get_token_text(ctx)
         line, col = self._get_location(ctx)
 
@@ -771,7 +554,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         )
 
     def exitFunction_subprogram_f2003(self, ctx):
-        """Complete function subprogram and store characteristics."""
         if self._current_procedure:
             self.result.procedures[self._current_procedure.name] = (
                 self._current_procedure
@@ -781,7 +563,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         self._current_procedure_name = None
 
     def enterSubroutine_stmt_interface(self, ctx):
-        """Track subroutine declarations in interface blocks."""
         text = self._get_token_text(ctx)
         line, col = self._get_location(ctx)
 
@@ -803,14 +584,12 @@ class F2003SemanticListener(Fortran2003ParserListener):
         )
 
     def _extract_subroutine_name(self, text: str) -> Optional[str]:
-        """Extract subroutine name from subroutine statement."""
         match = re.search(r"subroutine\s+(\w+)", text)
         if match:
             return match.group(1)
         return None
 
     def exitSubroutine_subprogram_f2003(self, ctx):
-        """Complete subroutine subprogram and store characteristics."""
         if self._current_procedure:
             self.result.procedures[self._current_procedure.name] = (
                 self._current_procedure
@@ -820,7 +599,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         self._current_procedure_name = None
 
     def enterProcedure_declaration_stmt(self, ctx):
-        """Track procedure pointer declarations (ISO 12.3.2.3)."""
         text = self._get_token_text(ctx)
         line, col = self._get_location(ctx)
 
@@ -857,7 +635,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
                         )
 
     def _extract_procedure_pointer_names(self, text: str) -> List[str]:
-        """Extract procedure pointer entity names from declaration."""
         names = []
         double_colon_pos = text.find("::")
         if double_colon_pos >= 0:
@@ -870,7 +647,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         return names
 
     def _extract_pointer_target(self, text: str, ptr_name: str) -> Optional[str]:
-        """Extract initial target for a procedure pointer."""
         pattern = rf"{ptr_name}\s*=>\s*(\w+)"
         match = re.search(pattern, text)
         if match:
@@ -880,7 +656,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         return None
 
     def enterProc_component_def_stmt(self, ctx):
-        """Track procedure component definitions in derived types."""
         text = self._get_token_text(ctx)
         line, col = self._get_location(ctx)
 
@@ -911,7 +686,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
             self.result.procedure_pointers[comp_name] = pointer
 
     def _extract_proc_component_names(self, text: str) -> List[str]:
-        """Extract procedure component names from definition."""
         names = []
         double_colon_pos = text.find("::")
         if double_colon_pos >= 0:
@@ -924,7 +698,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         return names
 
     def enterDerived_type_stmt_f2003(self, ctx):
-        """Track derived type declarations."""
         text = self._get_token_text(ctx)
         line, col = self._get_location(ctx)
 
@@ -936,15 +709,12 @@ class F2003SemanticListener(Fortran2003ParserListener):
             self._in_bind_c_procedure = True
 
     def enterType_bound_procedure_part(self, ctx):
-        """Track entry into type-bound procedure section."""
         self._in_type_bound_part = True
 
     def exitType_bound_procedure_part(self, ctx):
-        """Exit type-bound procedure section."""
         self._in_type_bound_part = False
 
     def enterType_bound_procedure_stmt(self, ctx):
-        """Track type-bound procedure bindings (ISO 4.5.4)."""
         text = self._get_token_text(ctx)
         line, col = self._get_location(ctx)
 
@@ -1004,7 +774,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
     def _extract_type_bound_bindings(
         self, text: str
     ) -> List[Tuple[str, Optional[str]]]:
-        """Extract binding name => procedure name pairs."""
         bindings = []
         double_colon_pos = text.find("::")
         if double_colon_pos >= 0:
@@ -1018,7 +787,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         return bindings
 
     def enterType_bound_generic_stmt(self, ctx):
-        """Track generic type-bound procedures (ISO 4.5.4)."""
         text = self._get_token_text(ctx)
         line, col = self._get_location(ctx)
 
@@ -1054,7 +822,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         self.result.generic_bindings[type_name].append(gb)
 
     def _extract_generic_name(self, text: str) -> Optional[str]:
-        """Extract generic interface name from generic statement."""
         if "operator" in text:
             op_match = re.search(r"operator\s*\(\s*([^\)]+)\s*\)", text)
             if op_match:
@@ -1069,7 +836,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         return None
 
     def _extract_generic_bindings(self, text: str) -> List[str]:
-        """Extract specific binding names from generic statement."""
         bindings = []
         arrow_pos = text.find("=>")
         if arrow_pos >= 0:
@@ -1080,46 +846,16 @@ class F2003SemanticListener(Fortran2003ParserListener):
         return bindings
 
     def exitDerived_type_def_f2003(self, ctx):
-        """Complete derived type definition."""
         self._current_type_name = None
         self._in_bind_c_procedure = False
 
 
 class F2003SemanticValidator:
-    """Semantic validator for Fortran 2003 procedure characteristics, C
-    interoperability and IEEE arithmetic.
-
-    Performs semantic analysis on parse trees to enforce ISO/IEC 1539-1:2004
-    requirements beyond what the grammar can express syntactically.
-
-    Validates:
-    - Procedure characteristics (Section 12.2.2.1, 12.3.2)
-    - Abstract interfaces and procedure pointer compatibility (Section 12.3.2.3)
-    - Type-bound procedure bindings (Section 4.5.4)
-    - C interoperability (Section 15)
-    - IEEE arithmetic modules (Section 14)
-
-    Example usage:
-        validator = F2003SemanticValidator()
-        result = validator.validate_code(fortran_source_code)
-        if result.has_errors:
-            for diag in result.diagnostics:
-                print(f"{diag.line}: {diag.message}")
-    """
-
     def __init__(self):
         self._lexer = None
         self._parser = None
 
     def validate_code(self, code: str) -> ValidationResult:
-        """Validate Fortran 2003 source code for semantic correctness.
-
-        Args:
-            code: Fortran 2003 source code to validate
-
-        Returns:
-            ValidationResult containing diagnostics and extracted information
-        """
         input_stream = InputStream(code)
         self._lexer = Fortran2003Lexer(input_stream)
         token_stream = CommonTokenStream(self._lexer)
@@ -1145,31 +881,11 @@ class F2003SemanticValidator:
         walker = ParseTreeWalker()
         walker.walk(listener, tree)
 
-        self._validate_c_interop_consistency(listener)
-        self._validate_ieee_module_consistency(listener)
         self._validate_procedure_characteristics(listener)
 
         return listener.result
 
-    def _validate_c_interop_consistency(self, listener: F2003SemanticListener):
-        """Check cross-cutting C interoperability rules."""
-        if listener._c_types_used and not listener._iso_c_binding_imported:
-            for type_name, line, col in listener._c_types_used:
-                if type_name not in listener.result.iso_c_binding_imports:
-                    pass
-
-    def _validate_ieee_module_consistency(self, listener: F2003SemanticListener):
-        """Check cross-cutting IEEE arithmetic rules."""
-        pass
-
     def _validate_procedure_characteristics(self, listener: F2003SemanticListener):
-        """Validate procedure characteristics compatibility (ISO 12.2.2.1).
-
-        Checks:
-        1. Procedure pointer targets match their declared interface
-        2. Deferred type-bound procedures have matching implementations
-        3. Generic bindings have compatible specific procedures
-        """
         result = listener.result
 
         for ptr_name, ptr in result.procedure_pointers.items():
@@ -1206,11 +922,6 @@ class F2003SemanticValidator:
         interfaces: Dict[str, AbstractInterface],
         result: ValidationResult,
     ):
-        """Check that a procedure pointer target is compatible with interface.
-
-        Per ISO/IEC 1539-1:2004 Section 12.2.2.1, a procedure pointer can only
-        point to a procedure that has compatible characteristics.
-        """
         if not ptr.initial_target or not ptr.interface_name:
             return
 
@@ -1261,14 +972,6 @@ class F2003SemanticValidator:
                     )
 
     def validate_file(self, filepath: str) -> ValidationResult:
-        """Validate a Fortran 2003 source file.
-
-        Args:
-            filepath: Path to the Fortran source file
-
-        Returns:
-            ValidationResult containing diagnostics and extracted information
-        """
         path = Path(filepath)
         if not path.exists():
             result = ValidationResult()
@@ -1286,69 +989,10 @@ class F2003SemanticValidator:
 
 
 def validate_c_interoperability(code: str) -> ValidationResult:
-    """Convenience function to validate C interoperability in Fortran 2003 code.
-
-    Args:
-        code: Fortran 2003 source code
-
-    Returns:
-        ValidationResult with C interoperability diagnostics
-    """
     validator = F2003SemanticValidator()
     return validator.validate_code(code)
 
 
 def validate_ieee_arithmetic(code: str) -> ValidationResult:
-    """Convenience function to validate IEEE arithmetic usage in Fortran 2003 code.
-
-    Args:
-        code: Fortran 2003 source code
-
-    Returns:
-        ValidationResult with IEEE arithmetic diagnostics
-    """
     validator = F2003SemanticValidator()
     return validator.validate_code(code)
-
-
-if __name__ == "__main__":
-    # Example usage
-    test_code = """
-module test_interop
-    use iso_c_binding, only: c_int, c_float
-    implicit none
-
-    type, bind(c) :: my_c_struct
-        integer(c_int) :: x
-        real(c_float) :: y
-    end type my_c_struct
-
-contains
-
-    subroutine my_c_sub(n) bind(c, name="my_c_sub")
-        integer(c_int), value :: n
-    end subroutine my_c_sub
-
-end module test_interop
-"""
-
-    print("Fortran 2003 Semantic Validator")
-    print("=" * 40)
-
-    validator = F2003SemanticValidator()
-    result = validator.validate_code(test_code)
-
-    print(f"Errors: {result.error_count}")
-    print(f"Warnings: {result.warning_count}")
-    print(f"C interop entities: {result.c_interop_entities}")
-    print(f"IEEE modules used: {result.ieee_modules_used}")
-    print(f"ISO_C_BINDING imports: {result.iso_c_binding_imports}")
-
-    if result.diagnostics:
-        print("\nDiagnostics:")
-        for diag in result.diagnostics:
-            print(f"  [{diag.severity.name}] {diag.code}: {diag.message}")
-            if diag.line:
-                print(f"    Line {diag.line}, Column {diag.column}")
-            if diag.iso_section:
-                print(f"    ISO Section: {diag.iso_section}")
