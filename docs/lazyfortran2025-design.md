@@ -290,11 +290,29 @@ p = particle_t(1.0, 2.0, 3.0)   ! p inferred as type(particle_t)
 > | B | Auto-USE if type found | Convenient | Hidden dependencies, may be ambiguous |
 > | C | Derived types require explicit declaration | Safe, no inference for complex types | Inconsistent with other inference |
 
+5.1.11 **Fallback type for unresolved inference**
+
+5.1.11.1 When type inference cannot determine a variable's type, a fallback behavior is required.
+
+> **OPEN ISSUE 15: Fallback type for unresolved inference**
+>
+> What should happen when a variable's type cannot be inferred?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | Compile error | Catches ambiguities early | May reject valid code |
+> | B | Default to `real(8)` | Matches fortfront, safe for numerics | Silent assumption, may surprise |
+> | C | Default to ISO default kind | Consistent with standard | Precision loss |
+
 ### 5.2 Expression type rules
 
 5.2.1 Expression type determination follows ISO/IEC 1539-1:2023 Clause 10.1.5 (Numeric intrinsic operations).
 
 5.2.2 When automatic type inference determines a variable's type from an expression, the type is determined according to the rules specified in ISO/IEC 1539-1:2023.
+
+5.2.3 Mixed numeric array constructors follow ISO/IEC 1539-1:2023 type promotion rules.
+
+5.2.4 Example: `[1, 2.0, 3]` promotes all elements to real, resulting in a real array.
 
 ### 5.3 Intent inference
 
@@ -479,6 +497,32 @@ IMPLEMENTS IComparable :: integer
    PROCEDURE :: less_than => builtin_less_than
 END IMPLEMENTS
 ```
+
+6.4.4 **Trait annotation syntax**
+
+6.4.4.1 An alternative syntax using `@` annotations may be used for trait declarations.
+
+6.4.4.2 Example:
+
+```fortran
+@IComparable
+integer function compare(a, b)
+    integer, intent(in) :: a, b
+    compare = a - b
+end function
+```
+
+6.4.4.3 The annotation syntax is subject to the following consideration.
+
+> **OPEN ISSUE 16: Trait annotation syntax**
+>
+> Should `@` annotations be supported for trait declarations?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | No annotations | Fortran-like, consistent | Verbose |
+> | B | `@Trait` syntax | Concise, familiar to Java/Python users | New symbol in Fortran |
+> | C | Both supported | Flexibility | Two ways to do same thing |
 
 ### 6.5 Compatibility of approaches
 
