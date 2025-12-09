@@ -272,6 +272,8 @@ executable_construct_f2008
     | stop_stmt                       // STOP (Section 8.4)
     | error_stop_stmt                 // ERROR STOP (Section 8.4) - NEW in F2008
     | critical_construct              // CRITICAL (Section 8.1.5) - NEW in F2008
+    | lock_stmt                       // LOCK (Section 8.5.6) - NEW in F2008
+    | unlock_stmt                     // UNLOCK (Section 8.5.6) - NEW in F2008
     | select_type_construct           // SELECT TYPE (Section 8.1.9)
     | associate_construct             // ASSOCIATE (Section 8.1.3)
     | block_construct_f2008           // BLOCK (Section 8.1.4) - Enhanced in F2008
@@ -411,6 +413,53 @@ critical_stmt
 // R820: end-critical-stmt -> END CRITICAL [critical-construct-name]
 end_critical_stmt
     : END_CRITICAL (IDENTIFIER)? NEWLINE
+    ;
+
+// ============================================================================
+// LOCK/UNLOCK STATEMENTS (ISO/IEC 1539-1:2010 Section 8.5.6)
+// ============================================================================
+// LOCK and UNLOCK statements provide mutex-style synchronization for coarrays.
+// A lock variable must be a scalar variable of type LOCK_TYPE from
+// ISO_FORTRAN_ENV.
+//
+// Key rules from ISO/IEC 1539-1:2010:
+// - R859: lock-stmt -> LOCK ( lock-variable [, lock-stat-list] )
+// - R860: unlock-stmt -> UNLOCK ( lock-variable [, sync-stat-list] )
+// - R861: lock-stat -> ACQUIRED_LOCK = scalar-logical-variable | sync-stat
+// - R866: lock-variable -> scalar-variable
+
+// LOCK statement (ISO/IEC 1539-1:2010 R859)
+// R859: lock-stmt -> LOCK ( lock-variable [, lock-stat-list] )
+// Acquires a lock on a lock variable, optionally checking acquisition status
+lock_stmt
+    : LOCK LPAREN lock_variable (COMMA lock_stat_list)? RPAREN NEWLINE
+    ;
+
+// UNLOCK statement (ISO/IEC 1539-1:2010 R860)
+// R860: unlock-stmt -> UNLOCK ( lock-variable [, sync-stat-list] )
+// Releases a lock on a lock variable
+unlock_stmt
+    : UNLOCK LPAREN lock_variable (COMMA sync_stat_list)? RPAREN NEWLINE
+    ;
+
+// Lock variable (ISO/IEC 1539-1:2010 R866)
+// R866: lock-variable -> scalar-variable
+// Must be of type LOCK_TYPE from ISO_FORTRAN_ENV
+lock_variable
+    : variable_f90
+    ;
+
+// Lock stat list (ISO/IEC 1539-1:2010 R861)
+// List of lock-specific and synchronization status specifiers
+lock_stat_list
+    : lock_stat (COMMA lock_stat)*
+    ;
+
+// Lock stat (ISO/IEC 1539-1:2010 R861)
+// R861: lock-stat -> ACQUIRED_LOCK = scalar-logical-variable | sync-stat
+lock_stat
+    : ACQUIRED_LOCK EQUALS variable_f90  // Logical variable for acquisition status
+    | sync_stat                          // STAT or ERRMSG
     ;
 
 // ============================================================================
@@ -847,4 +896,6 @@ identifier_or_keyword
     | SUBMODULE    // SUBMODULE can be used as a name
     | BLOCK        // BLOCK can be used as variable name
     | ERROR_STOP   // ERROR_STOP is compound keyword, not typically used as name
+    | LOCK         // LOCK can be used as variable name
+    | UNLOCK       // UNLOCK can be used as variable name
     ;

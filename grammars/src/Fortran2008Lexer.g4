@@ -48,7 +48,7 @@ RBRACKET         : ']' ;
 // - SYNC ALL (Section 8.5.3): Synchronize all images
 // - SYNC IMAGES (Section 8.5.4): Synchronize specified images
 // - SYNC MEMORY (Section 8.5.5): Memory synchronization
-// - LOCK/UNLOCK (Section 8.5.6): Lock synchronization (not implemented)
+// - LOCK/UNLOCK (Section 8.5.6): Lock synchronization
 // - CRITICAL (Section 8.1.5): Critical construct
 
 // ============================================================================
@@ -61,6 +61,17 @@ RBRACKET         : ']' ;
 // - R820: end-critical-stmt -> END CRITICAL [critical-construct-name]
 CRITICAL         : C R I T I C A L ;
 END_CRITICAL     : E N D WS+ C R I T I C A L ;
+
+// ============================================================================
+// LOCK/UNLOCK STATEMENTS (ISO/IEC 1539-1:2010 Section 8.5.6)
+// ============================================================================
+// LOCK and UNLOCK statements provide mutex-style synchronization for coarrays:
+// - R859: lock-stmt -> LOCK ( lock-variable [, lock-stat-list] )
+// - R860: unlock-stmt -> UNLOCK ( lock-variable [, sync-stat-list] )
+// - R866: lock-variable -> scalar-variable
+LOCK             : L O C K ;
+UNLOCK           : U N L O C K ;
+ACQUIRED_LOCK    : A C Q U I R E D '_' L O C K ;
 
 // Image inquiry intrinsics (Section 13.7)
 // THIS_IMAGE(): Returns image index (Section 13.7.165)
