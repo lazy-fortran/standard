@@ -426,6 +426,14 @@ identifier_or_keyword
     | COSD         // COSD can be used as function name
     | SIND         // SIND can be used as function name
     | TAND         // TAND can be used as function name
+    // F2023 pi-scaled trigonometric intrinsics (Section 16.9)
+    | ACOSPI       // ACOSPI can be used as function name
+    | ASINPI       // ASINPI can be used as function name
+    | ATANPI       // ATANPI can be used as function name
+    | ATAN2PI      // ATAN2PI can be used as function name
+    | COSPI        // COSPI can be used as function name
+    | SINPI        // SINPI can be used as function name
+    | TANPI        // TANPI can be used as function name
     ;
 
 // ============================================================================
