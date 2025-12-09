@@ -466,6 +466,7 @@ The Fortran 2008 layer in this repository:
 - **Implements and tests, for practical use:**
   - Submodules and separate module subprograms.
   - Coarrays and image control statements (SYNC ALL/IMAGES/MEMORY).
+  - LOCK/UNLOCK statements (Section 8.5.6) with lexer/parser coverage and fixture (#324).
   - DO CONCURRENT.
   - CONTIGUOUS attribute and enhanced INTEGER/REAL kinds.
   - Coarray-aware ALLOCATE and entity declarations.
@@ -484,9 +485,11 @@ The Fortran 2008 layer in this repository:
 | R818 | `critical-construct` | IMPLEMENTED (#323) |
 | R819 | `critical-stmt` | IMPLEMENTED (#323) |
 | R820 | `end-critical-stmt` | IMPLEMENTED (#323) |
-| R859 | `lock-stmt` | NOT IMPLEMENTED |
-| R860 | `unlock-stmt` | NOT IMPLEMENTED |
-| R866 | `lock-variable` | NOT IMPLEMENTED |
+| R859 | `lock-stmt` | IMPLEMENTED (#324) |
+| R860 | `unlock-stmt` | IMPLEMENTED (#324) |
+| R866 | `lock-variable` | IMPLEMENTED (#324) |
+
+LOCK/UNLOCK statements (R859/R860/R866) are now implemented via issue #324; issue #313 now focuses on the remaining bitwise intrinsic gaps.
 
 **Missing Intrinsics (Issue #313):**
 
@@ -517,12 +520,12 @@ Existing umbrella issues relevant to this audit:
 
 - #140 – **Standard audits** (this document is the Fortran 2008 slice).
 - #176 – **Fortran 2008: annotate grammar with J3/08-007 sections**.
-- #313 – **F2008: Missing LOCK/UNLOCK statements and bitwise intrinsics** (CRITICAL construct tracked separately by #323).
+- #313 – **F2008: Missing bitwise intrinsics** (LOCK/UNLOCK resolved via #324; CRITICAL construct tracked separately by #323).
+- #324 – **F2008: Add LOCK/UNLOCK statements for coarray synchronization** (Section 8.5.6).
 - #323 – **F2008: CRITICAL construct (R818-R820)**.
 
 Future work should:
 
-- **MEDIUM PRIORITY:** Implement LOCK/UNLOCK statements (R859-R860)
 - **MEDIUM PRIORITY:** Add bitwise intrinsic tokens and parser rules
 - Add ATOMIC_DEFINE/ATOMIC_REF intrinsics
 - Add HYPOT intrinsic
