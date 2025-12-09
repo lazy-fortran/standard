@@ -169,32 +169,39 @@ exit_stmt
 // - R806 (end-if-stmt) -> END IF [if-construct-name]
 
 // IF construct - ISO/IEC 1539:1991 Section 8.1.1, R802
+// NOTE: Uses _f90 suffix to avoid collision with F77 if_then_stmt which
+// uses logical_expr (no F90 symbolic operators like <= >= == /=).
+// F90 version uses expr_f90 which supports both .LE. and <= forms.
 if_construct
-    : if_then_stmt ENDIF (IDENTIFIER)? // Empty IF with ENDIF
-    | if_then_stmt END IF (IDENTIFIER)? // Empty IF with END IF
-    | if_then_stmt execution_part (else_if_stmt execution_part?)*
-      (else_stmt execution_part?)? end_if_stmt // IF with body
-    | if_then_stmt (else_if_stmt execution_part?)*
-      (else_stmt execution_part?)? end_if_stmt // IF with else/elseif
+    : if_then_stmt_f90 ENDIF (IDENTIFIER)? // Empty IF with ENDIF
+    | if_then_stmt_f90 END IF (IDENTIFIER)? // Empty IF with END IF
+    | if_then_stmt_f90 execution_part (else_if_stmt_f90 execution_part?)*
+      (else_stmt_f90 execution_part?)? end_if_stmt_f90 // IF with body
+    | if_then_stmt_f90 (else_if_stmt_f90 execution_part?)*
+      (else_stmt_f90 execution_part?)? end_if_stmt_f90 // IF with else/elseif
     ;
 
 // IF-THEN statement - ISO/IEC 1539:1991 Section 8.1.1.1, R803
-if_then_stmt
+// Renamed to _f90 to use expr_f90 (supports <= >= == /=) instead of F77 logical_expr
+if_then_stmt_f90
     : (IDENTIFIER COLON)? IF LPAREN expr_f90 RPAREN THEN (IDENTIFIER)?
     ;
 
 // ELSE IF statement - ISO/IEC 1539:1991 Section 8.1.1.2, R804
-else_if_stmt
+// Renamed to _f90 to use expr_f90 (supports <= >= == /=) instead of F77 logical_expr
+else_if_stmt_f90
     : ELSE IF LPAREN expr_f90 RPAREN THEN (IDENTIFIER)?
     ;
 
 // ELSE statement - ISO/IEC 1539:1991 Section 8.1.1.2, R805
-else_stmt
+// Renamed to _f90 for consistency with other F90 IF construct rules
+else_stmt_f90
     : ELSE (IDENTIFIER)?
     ;
 
 // END IF statement - ISO/IEC 1539:1991 Section 8.1.1.2, R806
-end_if_stmt
+// Renamed to _f90 for consistency with other F90 IF construct rules
+end_if_stmt_f90
     : END IF (IDENTIFIER)?
     | ENDIF (IDENTIFIER)?
     ;

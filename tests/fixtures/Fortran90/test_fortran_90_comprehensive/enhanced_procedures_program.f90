@@ -16,9 +16,10 @@ program test_procedures
         real, intent(inout) :: data(:)
         integer, intent(in) :: size
         logical, intent(in), optional :: optional_param
+        logical :: has_param
 
         if (present(optional_param)) then
-            print *, "Optional parameter provided"
+            has_param = .true.
         end if
     end subroutine process_data
 end program

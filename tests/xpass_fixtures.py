@@ -128,13 +128,6 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ),
     (
         "Fortran90",
-        Path("Fortran90/test_fortran_90_comprehensive/enhanced_procedures_program.f90"),
-    ): (
-        "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
-        "RECURSIVE function prefix handling. Tracked by Issue #311."
-    ),
-    (
-        "Fortran90",
         Path("Fortran90/test_fortran_90_comprehensive/select_case_program.f90"),
     ): (
         "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
