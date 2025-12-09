@@ -459,11 +459,13 @@ Gaps:
 
 ## 10. Summary and issue mapping
 
+**Implementation Coverage:** 62.2% fully implemented per exhaustive audit
+
 The Fortran 2008 layer in this repository:
 
 - **Implements and tests, for practical use:**
   - Submodules and separate module subprograms.
-  - Coarrays and image control statements.
+  - Coarrays and image control statements (SYNC ALL/IMAGES/MEMORY).
   - DO CONCURRENT.
   - CONTIGUOUS attribute and enhanced INTEGER/REAL kinds.
   - Coarray‑aware ALLOCATE and entity declarations.
@@ -472,6 +474,34 @@ The Fortran 2008 layer in this repository:
     NORM2, PARITY, FINDLOC, STORAGE_SIZE).
   - Integration of all of the above into F2008 specification and
     execution parts and program units.
+
+**CRITICAL Gaps (Issue #313):**
+
+| ISO Rule | Description | Status |
+|----------|-------------|--------|
+| R818 | `critical-construct` | NOT IMPLEMENTED |
+| R819 | `critical-stmt` | NOT IMPLEMENTED |
+| R820 | `end-critical-stmt` | NOT IMPLEMENTED |
+| R859 | `lock-stmt` | NOT IMPLEMENTED |
+| R860 | `unlock-stmt` | NOT IMPLEMENTED |
+| R866 | `lock-variable` | NOT IMPLEMENTED |
+
+**Missing Intrinsics (Issue #313):**
+
+| Intrinsic | ISO Section | Description |
+|-----------|-------------|-------------|
+| SHIFTL | 13.7.159 | Shift left |
+| SHIFTR | 13.7.160 | Shift right |
+| SHIFTA | 13.7.158 | Arithmetic shift |
+| MASKL | 13.7.110 | Left-justified mask |
+| MASKR | 13.7.111 | Right-justified mask |
+| IALL | 13.7.79 | Bitwise AND reduction |
+| IANY | 13.7.80 | Bitwise OR reduction |
+| IPARITY | 13.7.94 | Bitwise XOR reduction |
+| ATOMIC_DEFINE | 13.7.19 | Define atomic variable |
+| ATOMIC_REF | 13.7.20 | Reference atomic variable |
+| HYPOT | 13.7.77 | Hypotenuse function |
+
 - **Intentionally leaves to semantic tooling:**
   - Coarray semantics (synchronization rules, ranks, codimension
     constraints).
@@ -484,21 +514,16 @@ The Fortran 2008 layer in this repository:
 Existing umbrella issues relevant to this audit:
 
 - #140 – **Standard audits** (this document is the Fortran 2008 slice).
-- #176 – **Fortran 2008: annotate grammar with J3/08‑007 sections**:
-  - Should use this audit as the spec→grammar cross‑walk and ensure
-    every F2008 gap identified here has its own issue.
+- #176 – **Fortran 2008: annotate grammar with J3/08‑007 sections**.
+- #313 – **F2008: Missing CRITICAL construct, LOCK/UNLOCK, bitwise intrinsics**.
 
-Additional issues (existing or to be opened) should cover:
+Future work should:
 
-- Semantic checks for coarrays and image control usage.
-- DO CONCURRENT semantic validation.
-- CONTIGUOUS/coarray/ALLOCATE semantics beyond syntax.
-- Submodule/parent linkage validation.
-
-When those issues and their follow‑ups are addressed, and the grammar
-annotations required by #176 are in place, Fortran 2008 will have a
-complete, spec‑aware grammar audit comparable in depth to the Fortran
-90/95/2003 audits already in this repository.
+- **HIGH PRIORITY:** Implement CRITICAL construct (R818-R820)
+- **MEDIUM PRIORITY:** Implement LOCK/UNLOCK statements (R859-R860)
+- **MEDIUM PRIORITY:** Add bitwise intrinsic tokens and parser rules
+- Add ATOMIC_DEFINE/ATOMIC_REF intrinsics
+- Add HYPOT intrinsic
 
 ---
 
