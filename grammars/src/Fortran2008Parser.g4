@@ -752,6 +752,8 @@ intrinsic_function_call_f2008
     | math_function_call              // Error/gamma functions (Section 13.7)
     | array_function_call             // Array functions (Section 13.7)
     | image_function_call             // Image intrinsics (Section 13.7)
+    | bit_shift_function_call         // Bit shift intrinsics (Section 13.7.158-160)
+    | bit_mask_function_call          // Bit mask intrinsics (Section 13.7.110-111)
     ;
 
 // Bessel function calls (ISO/IEC 1539-1:2010 Section 13.7.22-27)
@@ -788,6 +790,21 @@ image_function_call
     : THIS_IMAGE LPAREN actual_arg_list? RPAREN  // Section 13.7.165
     | NUM_IMAGES LPAREN actual_arg_list? RPAREN  // Section 13.7.121
     | STORAGE_SIZE LPAREN actual_arg_list RPAREN // Section 13.7.163
+    ;
+
+// Bit shift intrinsic function calls (ISO/IEC 1539-1:2010 Section 13.7.158-160)
+// Logical and arithmetic bit shift operations
+bit_shift_function_call
+    : SHIFTA LPAREN actual_arg_list RPAREN       // Section 13.7.158
+    | SHIFTL LPAREN actual_arg_list RPAREN       // Section 13.7.159
+    | SHIFTR LPAREN actual_arg_list RPAREN       // Section 13.7.160
+    ;
+
+// Bit mask intrinsic function calls (ISO/IEC 1539-1:2010 Section 13.7.110-111)
+// Bit mask generation functions
+bit_mask_function_call
+    : MASKL LPAREN actual_arg_list RPAREN        // Section 13.7.110
+    | MASKR LPAREN actual_arg_list RPAREN        // Section 13.7.111
     ;
 
 // ============================================================================
@@ -898,4 +915,10 @@ identifier_or_keyword
     | ERROR_STOP   // ERROR_STOP is compound keyword, not typically used as name
     | LOCK         // LOCK can be used as variable name
     | UNLOCK       // UNLOCK can be used as variable name
+    // F2008 bit manipulation intrinsics (Section 13.7.110-111, 13.7.158-160)
+    | SHIFTA       // SHIFTA can be used as variable name
+    | SHIFTL       // SHIFTL can be used as variable name
+    | SHIFTR       // SHIFTR can be used as variable name
+    | MASKL        // MASKL can be used as variable name
+    | MASKR        // MASKR can be used as variable name
     ;
