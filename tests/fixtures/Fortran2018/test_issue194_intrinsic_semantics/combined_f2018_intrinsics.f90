@@ -1,17 +1,17 @@
 program combined_f2018_intrinsics
-    use, intrinsic :: iso_fortran_env, only: team_type
+    use, intrinsic :: iso_fortran_env, only: team_type, dp => real64
     implicit none
 
     type(team_type) :: t
     integer :: img_status, tnum
     integer, allocatable :: failed_arr(:)
-    real :: arr(10), reduce_result
+    real(dp) :: arr(10), reduce_result
     logical :: out_check
 
     interface
         pure function my_add(a, b) result(c)
-            real, intent(in) :: a, b
-            real :: c
+            real(dp), intent(in) :: a, b
+            real(dp) :: c
         end function my_add
     end interface
 
@@ -19,10 +19,10 @@ program combined_f2018_intrinsics
     failed_arr = failed_images()
     tnum = team_number()
 
-    arr = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+    arr = [1.0d0, 2.0d0, 3.0d0, 4.0d0, 5.0d0, 6.0d0, 7.0d0, 8.0d0, 9.0d0, 10.0d0]
     reduce_result = reduce(arr, my_add)
 
-    out_check = out_of_range(1.0e38, 0)
+    out_check = out_of_range(1.0d38, 0)
 
     call random_init(repeatable=.true., image_distinct=.true.)
 end program combined_f2018_intrinsics

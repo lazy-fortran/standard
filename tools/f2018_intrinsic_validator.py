@@ -15,11 +15,10 @@ Reference: ISO/IEC 1539-1:2018 (Fortran 2018 International Standard)
 """
 
 import re
-import sys
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set
 
 
 class DiagnosticSeverity(Enum):
@@ -86,19 +85,6 @@ class F2018IntrinsicValidationResult:
         return sum(
             1 for d in self.diagnostics if d.severity == DiagnosticSeverity.WARNING
         )
-
-
-IMAGE_STATUS_INTRINSICS: Set[str] = {
-    "image_status", "failed_images", "stopped_images",
-}
-
-COLLECTIVE_INTRINSICS: Set[str] = {
-    "coshape", "team_number",
-}
-
-IMPURE_INTRINSICS: Set[str] = {
-    "random_init",
-}
 
 
 class F2018IntrinsicValidator:
