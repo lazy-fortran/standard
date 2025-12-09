@@ -95,14 +95,18 @@ Mapping that Appendix‑B list to the current grammar:
 - **Formatted I/O (FORMAT, READ/WRITE variants, PRINT, PUNCH)**
   - Status:
     - `READ n, list`, `READ n`, and `READ list`: **implemented and tested.**
+    - `READ INPUT TAPE i, n, list`: **implemented and tested.**
     - `PRINT n` and `PRINT n, list`: **implemented and tested.**
     - `PUNCH n` and `PUNCH n, list`: **implemented and tested.**
+    - `WRITE OUTPUT TAPE i, n, list`: **implemented and tested.**
     - `FORMAT` statement: **implemented and tested.**
-    - Tape-specific forms: **not implemented.**
   - Evidence: `read_stmt_basic` accepts `READ label COMMA input_list`
     (formatted with list), `READ label` (format-only per C28-6003 row 24),
-    and `READ input_list` (simple). `print_stmt` and `punch_stmt` rules
-    implement `PRINT/PUNCH n [, list]` forms per C28-6003 rows 28-29.
+    and `READ input_list` (simple). `read_input_tape_stmt` accepts
+    `READ INPUT TAPE i, n, list` per C28-6003 row 21.
+    `write_output_tape_stmt` accepts `WRITE OUTPUT TAPE i, n, list` per
+    C28-6003 row 25. `print_stmt` and `punch_stmt` rules implement
+    `PRINT/PUNCH n [, list]` forms per C28-6003 rows 28-29.
     `write_stmt_basic` accepts `WRITE output_list`. The `format_stmt` rule
     in `FORTRANParser.g4` implements `FORMAT (specification)` with support
     for edit descriptors (Iw, Fw.d, Ew.d), repeat counts, and Hollerith
@@ -110,13 +114,18 @@ Mapping that Appendix‑B list to the current grammar:
     parse with zero errors.
 
 - **Unformatted I/O (`READ TAPE`, `READ DRUM`, `WRITE TAPE`, `WRITE DRUM`)**
-  - Status: **not implemented.**
-  - Evidence: no dedicated TAPE/DRUM I/O forms in lexer or parser.
+  - Status: **implemented and tested.**
+  - Evidence: `read_tape_stmt`, `read_drum_stmt`, `write_tape_stmt`, and
+    `write_drum_stmt` rules in `FORTRANParser.g4` implement binary I/O
+    per C28-6003 Chapter III.C-D and Appendix B rows 22-23, 26-27.
+    The fixtures `tape_io_1957.f` and `drum_io_1957.f` parse with zero errors.
 
-- **Other I/O (`END FILE`, `REWIND`, `BACKSPACE`)**
-  - Status: **not implemented.**
-  - Evidence: these keywords do not appear in `FORTRANLexer.g4` and
-    have no parser rules.
+- **File-control statements (`END FILE`, `REWIND`, `BACKSPACE`)**
+  - Status: **implemented and tested.**
+  - Evidence: `REWIND`, `BACKSPACE`, and `FILE` tokens in `FORTRANLexer.g4`.
+    `rewind_stmt`, `backspace_stmt`, and `end_file_stmt` rules in
+    `FORTRANParser.g4` implement file-control per C28-6003 Chapter III.F.
+    The fixture `file_control_1957.f` parses with zero errors.
 
 - **PAUSE, STOP, CONTINUE**
   - Status: **all implemented and tested.**
@@ -179,10 +188,16 @@ Out-of-scope / not explicitly audited:
 
 ## 4. I/O and FORMAT
 
-Implemented (core subset):
+Implemented (full IBM 704 I/O statement family):
 
 - `READ n, list` (formatted read with list), `READ n` (format-only read
   per C28-6003 row 24), and `READ list` (simple read) via `read_stmt_basic`.
+- `READ INPUT TAPE i, n, list` (formatted input tape) via `read_input_tape_stmt`.
+- `READ TAPE i, list` (unformatted tape read) via `read_tape_stmt`.
+- `READ DRUM i, j, list` (drum read) via `read_drum_stmt`.
+- `WRITE OUTPUT TAPE i, n, list` (formatted output tape) via `write_output_tape_stmt`.
+- `WRITE TAPE i, list` (unformatted tape write) via `write_tape_stmt`.
+- `WRITE DRUM i, j, list` (drum write) via `write_drum_stmt`.
 - `PRINT n` and `PRINT n, list` (line printer output) via `print_stmt`.
 - `PUNCH n` and `PUNCH n, list` (card punch output) via `punch_stmt`.
 - `WRITE output_list` (simple output) via `write_stmt_basic`.
@@ -191,12 +206,12 @@ Implemented (core subset):
   - Edit descriptors: Iw (integer), Fw.d (fixed-point), Ew.d (exponential)
   - Repeat counts: nIw, nFw.d, etc.
   - Hollerith constants: nHtext (the only string literals in 1957 FORTRAN)
+- `END FILE i` (write end-of-file mark) via `end_file_stmt`.
+- `REWIND i` (rewind tape to beginning) via `rewind_stmt`.
+- `BACKSPACE i` (backspace one record) via `backspace_stmt`.
 
 Known limitations (from fixtures and comments):
 
-- Tape/drum I/O forms (`READ TAPE`, `WRITE TAPE`, `READ DRUM`, `WRITE DRUM`)
-  and auxiliary I/O (`END FILE`, `REWIND`, `BACKSPACE`) are not implemented
-  in the 1957 parser.
 - FORMAT grammar accepts common edit descriptors but does not enforce
   strict width/precision semantics or all IBM 704 edge cases.
 
@@ -320,13 +335,13 @@ each Appendix B entry to the corresponding grammar rule(s) or notes gaps.
 | 18  | DO n i = m1, m2, m3           | `do_stmt_basic`                | Implemented     |
 | 19  | CONTINUE                      | `CONTINUE` token in body       | Implemented     |
 | 20  | READ n, list                  | `read_stmt_basic`              | Implemented     |
-| 21  | READ INPUT TAPE i, n, list    | Not implemented                | Gap: see #153   |
-| 22  | READ TAPE i, list             | Not implemented                | Gap: see #153   |
-| 23  | READ DRUM i, j, list          | Not implemented                | Gap: see #153   |
+| 21  | READ INPUT TAPE i, n, list    | `read_input_tape_stmt`         | Implemented     |
+| 22  | READ TAPE i, list             | `read_tape_stmt`               | Implemented     |
+| 23  | READ DRUM i, j, list          | `read_drum_stmt`               | Implemented     |
 | 24  | READ n                        | `read_stmt_basic`              | Implemented     |
-| 25  | WRITE OUTPUT TAPE i, n, list  | Not implemented                | Gap: see #153   |
-| 26  | WRITE TAPE i, list            | Not implemented                | Gap: see #153   |
-| 27  | WRITE DRUM i, j, list         | Not implemented                | Gap: see #153   |
+| 25  | WRITE OUTPUT TAPE i, n, list  | `write_output_tape_stmt`       | Implemented     |
+| 26  | WRITE TAPE i, list            | `write_tape_stmt`              | Implemented     |
+| 27  | WRITE DRUM i, j, list         | `write_drum_stmt`              | Implemented     |
 | 28  | PRINT n, list                 | `print_stmt`                   | Implemented     |
 | 29  | PUNCH n, list                 | `punch_stmt`                   | Implemented     |
 | 30  | STOP / STOP n                 | `STOP` token in body           | Implemented     |
@@ -338,9 +353,9 @@ each Appendix B entry to the corresponding grammar rule(s) or notes gaps.
 | Construct                      | Grammar Rule(s)                | Status          |
 |--------------------------------|--------------------------------|-----------------|
 | Assignment (v = e)             | `assignment_stmt`              | Implemented     |
-| END FILE i                     | Not implemented                | Gap: see #153   |
-| REWIND i                       | Not implemented                | Gap: see #153   |
-| BACKSPACE i                    | Not implemented                | Gap: see #153   |
+| END FILE i                     | `end_file_stmt`                | Implemented     |
+| REWIND i                       | `rewind_stmt`                  | Implemented     |
+| BACKSPACE i                    | `backspace_stmt`               | Implemented     |
 | Hollerith constants (nHtext)   | `HOLLERITH` token              | Implemented     |
 
 **Gaps requiring follow-up issues:**
@@ -349,19 +364,18 @@ The following gaps have been identified during this crosswalk and are
 tracked by existing issues:
 
 - **#141**: FORTRAN 1957 historical stub promotion (general coverage)
-- **#153**: Full 704 I/O statement family (READ/WRITE/TAPE/DRUM/END FILE/
-  REWIND/BACKSPACE)
 
-Note: Issues **#154** (FORMAT grammar and Hollerith constants) and
-**#155** (strict fixed-form card layout and C/* comments) have been
-resolved by this implementation.
+Note: Issues **#153** (Full 704 I/O statement family), **#154** (FORMAT
+grammar and Hollerith constants), and **#155** (strict fixed-form card
+layout and C/* comments) have been resolved by this implementation.
 
 ## 9. Summary
 
 Today the FORTRAN (1957) grammar is:
 
-- A **historical, educational subset** that:
-  - Compiles and parses a core of early FORTRAN constructs.
+- A **historically complete educational implementation** that:
+  - Compiles and parses the full set of early FORTRAN constructs from the
+    IBM 704 FORTRAN manual (Form C28-6003).
   - Provides realistic arithmetic, control flow, I/O and unique 1957
     features for demonstration and testing.
   - Contains inline C28-6003 spec references in grammar comments for
@@ -371,9 +385,14 @@ Today the FORTRAN (1957) grammar is:
   - Supports **strict fixed-form mode** via `tools/strict_fixed_form.py`
     for validating authentic IBM 704 card-image source files with
     80-column layout, C comments in column 1, and sequence numbers.
-- Not yet:
-  - A complete reconstruction of the IBM 704 FORTRAN compiler.
-  - Fully supportive of tape/drum I/O statements.
+  - Implements the **full IBM 704 I/O statement family** including:
+    - Card I/O: READ, PRINT, PUNCH with FORMAT
+    - Tape I/O: READ INPUT TAPE, WRITE OUTPUT TAPE (formatted)
+    - Tape I/O: READ TAPE, WRITE TAPE (unformatted/binary)
+    - Drum I/O: READ DRUM, WRITE DRUM (binary)
+    - File-control: END FILE, REWIND, BACKSPACE
+- Remaining gap:
+  - Statement functions (f(a,b,...) = e) per Appendix B row 17
 
 Further work on this standard should reference this audit together with
 the open issues for expanding 1957 coverage.
