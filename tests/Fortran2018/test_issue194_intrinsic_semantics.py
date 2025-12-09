@@ -268,5 +268,114 @@ end module test_mod
         assert len(errors) == 0
 
 
+class TestColumnTracking:
+    """Test column position tracking for intrinsic calls (Issue #303)."""
+
+    def test_random_init_column_position(self):
+        """RANDOM_INIT call records correct column position."""
+        code = """program test
+    call random_init(repeatable=.true., image_distinct=.true.)
+end program test
+"""
+        result = validate_intrinsic_semantics(code)
+        assert len(result.random_init_calls) == 1
+        call = result.random_init_calls[0]
+        assert call.line == 2
+        assert call.column == 5
+
+    def test_random_init_column_with_leading_spaces(self):
+        """RANDOM_INIT column accounts for leading whitespace."""
+        code = """program test
+        call random_init(repeatable=.true., image_distinct=.true.)
+end program test
+"""
+        result = validate_intrinsic_semantics(code)
+        assert len(result.random_init_calls) == 1
+        call = result.random_init_calls[0]
+        assert call.line == 2
+        assert call.column == 9
+
+    def test_image_status_column_position(self):
+        """IMAGE_STATUS call records correct column position."""
+        code = """program test
+    integer :: status
+    status = image_status(1)
+end program test
+"""
+        result = validate_intrinsic_semantics(code)
+        assert len(result.image_status_calls) == 1
+        call = result.image_status_calls[0]
+        assert call.line == 3
+        assert call.column == 14
+
+    def test_reduce_column_position(self):
+        """REDUCE call records correct column position."""
+        code = """program test
+    integer :: arr(10), total
+    total = reduce(arr, add_func)
+end program test
+"""
+        result = validate_intrinsic_semantics(code)
+        assert len(result.reduce_calls) == 1
+        call = result.reduce_calls[0]
+        assert call.line == 3
+        assert call.column == 13
+
+    def test_out_of_range_column_position(self):
+        """OUT_OF_RANGE call records correct column position."""
+        code = """program test
+    logical :: flag
+    flag = out_of_range(1.0d100, 0.0)
+end program test
+"""
+        result = validate_intrinsic_semantics(code)
+        assert len(result.out_of_range_calls) == 1
+        call = result.out_of_range_calls[0]
+        assert call.line == 3
+        assert call.column == 12
+
+    def test_diagnostics_include_column(self):
+        """Diagnostics include column position."""
+        code = """program test
+    call random_init(repeatable=.true., image_distinct=.true.)
+end program test
+"""
+        result = validate_intrinsic_semantics(code)
+        info_diags = [
+            d for d in result.diagnostics
+            if d.severity.name == "INFO" and d.code == "INTR_I006"
+        ]
+        assert len(info_diags) >= 1
+        assert info_diags[0].column == 5
+        assert info_diags[0].line == 2
+
+    def test_error_diagnostic_includes_column(self):
+        """Error diagnostics include column position."""
+        code = """module test_mod
+contains
+    pure subroutine my_pure()
+        call random_init(repeatable=.true., image_distinct=.true.)
+    end subroutine my_pure
+end module test_mod
+"""
+        result = validate_intrinsic_semantics(code)
+        errors = [d for d in result.diagnostics if d.code == "INTR_E001"]
+        assert len(errors) >= 1
+        assert errors[0].column == 9
+        assert errors[0].line == 4
+
+    def test_warning_diagnostic_includes_column(self):
+        """Warning diagnostics include column position."""
+        code = """program test
+    call random_init(repeatable=.true.)
+end program test
+"""
+        result = validate_intrinsic_semantics(code)
+        warnings = [d for d in result.diagnostics if d.code == "INTR_W002"]
+        assert len(warnings) >= 1
+        assert warnings[0].column == 5
+        assert warnings[0].line == 2
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
