@@ -180,6 +180,74 @@ y = average(x)  ! T inferred from x, monomorphized automatically
 | Dispatch | Compile-time only (static) | Both static and dynamic |
 | Monomorphization control | Explicit - user controls what's generated | Implicit - compiler decides |
 
+### Compatibility Analysis
+
+The two approaches are **not mutually exclusive** - they can coexist and complement each other:
+
+**Syntactically compatible:**
+- Both use `{T}` for inline type parameters
+- Both generate monomorphized code at compile time
+- J3 `REQUIREMENT` and traits both specify type constraints
+
+**Complementary strengths:**
+
+| Use Case | Better Fit | Why |
+|----------|-----------|-----|
+| Generic containers (Vector, Map) | J3 TEMPLATE | Explicit instantiation controls binary size |
+| Numeric algorithms | Traits type sets | `integer \| real(*)` is concise |
+| Retroactive conformance | Traits only | J3 has no equivalent to `IMPLEMENTS` for existing types |
+| Runtime polymorphism | Traits only | `class(ITrait)` enables vtable dispatch |
+| Explicit specialization control | J3 TEMPLATE | `INSTANTIATE` lists exactly what's generated |
+| Ergonomic call sites | Traits | No `{type}` needed, compiler infers |
+
+**Hybrid approach example:**
+
+```fortran
+! J3 TEMPLATE for container definition
+TEMPLATE vector_t(T)
+   TYPE, DEFERRED :: T
+   TYPE :: vector
+      TYPE(T), ALLOCATABLE :: data(:)
+   CONTAINS
+      PROCEDURE :: push_back
+   END TYPE
+CONTAINS
+   SUBROUTINE push_back(self, item)
+      CLASS(vector), INTENT(INOUT) :: self
+      TYPE(T), INTENT(IN) :: item
+      ...
+   END SUBROUTINE
+END TEMPLATE
+
+! Traits for constraint specification
+ABSTRACT INTERFACE :: IComparable
+   PURE LOGICAL FUNCTION less_than(a, b)
+      TYPE(itself), INTENT(IN) :: a, b
+   END FUNCTION
+END INTERFACE
+
+! Trait-constrained generic using J3 template
+TEMPLATE sorted_vector_t(T)
+   REQUIRES IComparable :: T   ! Trait as constraint
+   INSTANTIATE vector_t(T)
+   ...
+END TEMPLATE
+
+! Retroactive trait implementation (traits-only feature)
+IMPLEMENTS IComparable :: integer
+   PROCEDURE :: less_than => builtin_less_than
+END IMPLEMENTS
+
+! Usage: automatic inference (traits-style)
+v = sorted_vector([3, 1, 4, 1, 5])  ! T=integer inferred
+```
+
+**Recommendation for hybrid:**
+- Use J3 TEMPLATE for defining generic types and explicit instantiation
+- Use traits for type constraints (replacing or augmenting REQUIREMENT)
+- Use `IMPLEMENTS` for retroactive conformance
+- Allow both explicit `{T}` and automatic inference at call sites
+
 ### Open Questions: Generics
 
 #### GEN-OQ-1: Which generics approach?
