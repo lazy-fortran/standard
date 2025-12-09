@@ -19,7 +19,7 @@ JAVA_AVAILABLE := $(shell java -version >/dev/null 2>&1 && echo yes || echo no)
 GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023 LazyFortran2025
 
 # Default target
-.PHONY: all clean test help download-standards
+.PHONY: all clean test help download-standards lint
 
 all: $(GRAMMARS)
 
@@ -176,6 +176,16 @@ test: all test-tree-sitter
 	$(PYTEST) $(TEST_DIR)/ -v --tb=short
 	@echo ""
 	@echo "✅ All tests completed!"
+
+# Basic lint target to keep Python tooling and helpers syntax-checked.
+# This complements the grammar-focused test suite without introducing
+# external linter dependencies.
+lint:
+	@echo "=========================================="
+	@echo "Running lint checks (Python syntax)"
+	@echo "=========================================="
+	@python -m compileall lazyfortran_tooling.py lflint lfmt tools tests scripts
+	@echo "✅ Lint completed successfully"
 
 # Run all tree-sitter tests
 test-tree-sitter:
