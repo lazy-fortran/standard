@@ -189,5 +189,16 @@ class TestBasicF2008Features:
         # Covered by the broader coarray work in issue #83
         assert errors == 0, f"Expected 0 errors for image intrinsics, got {errors}"
 
+    def test_critical_construct(self):
+        """Test CRITICAL construct for coarray synchronization (ISO 8.1.5)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "critical_construct.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "CRITICAL construct failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for CRITICAL construct, got {errors}"
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
