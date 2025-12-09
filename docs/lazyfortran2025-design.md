@@ -5,7 +5,7 @@
 Lazy Fortran 2025 builds on the standard-grounded grammars for FORTRAN 1957 through Fortran 2023, adding:
 
 - Type inference for `.lf` sources
-- World-wide automatic specializations
+- World-wide automatic specializations (monomorphization)
 - Strict alignment with ISO Fortran generic resolution rules
 
 This is a **design document**, not a standard. The ISO text is the normative reference for any ambiguity.
@@ -41,11 +41,52 @@ Lazy Fortran 2025 uses **automatic type inference** - a modern approach that eli
 | real + complex | complex |
 | complex + complex | complex (dominant kind) |
 
+### Open Questions: Type Inference
+
+#### TYP-OQ-1: Default numeric kinds
+
+What kind should inferred numeric literals have?
+
+| Option | Pros | Cons | Monomorphization Impact |
+|--------|------|------|------------------------|
+| A: ISO defaults (`real(4)`, `integer(4)`) | Compatible with existing code, predictable, smaller memory | Precision loss, integer overflow at ~2B | Generates smaller specialized code |
+| B: Double precision (`real(8)`, `integer(8)`) | Safer for scientific computing, no precision surprises | Breaks ISO expectations, 2x memory | Larger but more precise specializations |
+| C: Context-dependent (match surrounding code) | Adapts to usage context | Unpredictable, harder to reason about | May generate multiple specializations |
+
+#### TYP-OQ-2: Inference from `intent(out)` arguments
+
+Fortran idiomatically uses `intent(out)` arguments instead of function return values.
+
+```fortran
+call init_particle(p)  ! Should this declare p automatically?
+```
+
+| Option | Pros | Cons | Monomorphization Impact |
+|--------|------|------|------------------------|
+| A: No (assignment only) | Simple local analysis, predictable | Doesn't support idiomatic Fortran patterns | Simpler - types known locally |
+| B: Yes (inspect callee) | Supports `intent(out)` patterns | Requires cross-procedure analysis, interface files | Requires interface analysis before specialization |
+
+#### TYP-OQ-3: Declaration placement
+
+Should explicit declarations be allowed anywhere in the code, or only at block beginning?
+
+```fortran
+x = 1
+y = 2
+integer :: z  ! Allowed mid-block?
+z = x + y
+```
+
+| Option | Pros | Cons | Monomorphization Impact |
+|--------|------|------|------------------------|
+| A: Block beginning only | Clean structure, all declarations visible | Verbose, variables far from first use | No impact - types resolved same either way |
+| B: Anywhere | Declare near use, familiar to C/Rust devs | Scattered declarations, redundant with inference | No impact |
+
 ---
 
 ## LF-GEN: Traits and Generics
 
-Lazy Fortran 2025 will adopt a generics system. Two main proposals exist:
+Lazy Fortran 2025 will adopt a generics system. Two main proposals exist, both supporting **automatic monomorphization** - the compiler generates specialized code for each concrete type used.
 
 ### Approach A: J3 TEMPLATE/REQUIREMENT (Official Fortran 202Y Direction)
 
@@ -63,12 +104,12 @@ CONTAINS
    END SUBROUTINE
 END TEMPLATE
 
-! Explicit instantiation
+! Explicit instantiation - triggers monomorphization
 INSTANTIATE swap_t(integer), ONLY: swap_int => swap
 INSTANTIATE swap_t(real), ONLY: swap_real => swap
 
 ! Inline instantiation (simple template procedures)
-CALL swap{integer}(a, b)
+CALL swap{integer}(a, b)  ! Also triggers monomorphization
 ```
 
 **REQUIREMENT construct** for reusable constraints:
@@ -92,6 +133,8 @@ CONTAINS
    END SUBROUTINE
 END TEMPLATE
 ```
+
+**Monomorphization:** Explicit `INSTANTIATE` statements define exactly which specializations to generate. Inline `{type}` syntax generates on-demand.
 
 ### Approach B: Traits-for-Fortran (Swift/Rust-inspired)
 
@@ -122,23 +165,97 @@ IMPLEMENTS (INumeric + IPrintable) :: MyType
 END IMPLEMENTS MyType
 
 ! Usage - automatic instantiation (no manual INSTANTIATE)
-y = average(x)  ! T inferred from x
+y = average(x)  ! T inferred from x, monomorphized automatically
 ```
 
-### Key Differences
+**Monomorphization:** Compiler automatically generates specializations based on call-site types. No explicit instantiation needed.
+
+### Comparison
 
 | Aspect | J3 TEMPLATE | Traits-for-Fortran |
 |--------|-------------|-------------------|
-| Instantiation | Explicit `INSTANTIATE` or inline `{T}` | Automatic inference (Swift-like) |
-| Constraints | `REQUIREMENT` + `REQUIRES` | Type sets or explicit signatures in traits |
-| Scope | Module-level templates | Traits can be retroactively implemented |
-| Dispatch | Compile-time only | Both static (`type(T)`) and dynamic (`class(ITrait)`) |
+| Instantiation | Explicit `INSTANTIATE` or inline `{T}` | Automatic inference |
+| Constraints | `REQUIREMENT` + `REQUIRES` | Type sets or trait signatures |
+| Scope | Module-level templates | Traits retroactively implementable |
+| Dispatch | Compile-time only (static) | Both static and dynamic |
+| Monomorphization control | Explicit - user controls what's generated | Implicit - compiler decides |
+
+### Open Questions: Generics
+
+#### GEN-OQ-1: Which generics approach?
+
+| Option | Pros | Cons | Monomorphization Impact |
+|--------|------|------|------------------------|
+| A: J3 TEMPLATE only | Official Fortran direction, predictable | Verbose, manual instantiation | User explicitly controls all specializations |
+| B: Traits-for-Fortran only | Concise, automatic, retroactive | Not official, complex | Compiler auto-generates; may over-specialize |
+| C: Hybrid (both) | Maximum flexibility | Two systems to learn | User chooses explicit or automatic per case |
+
+#### GEN-OQ-2: Generic parameter syntax
+
+What delimiter for generic type parameters in procedure signatures?
+
+```fortran
+SUBROUTINE swap{T}(x, y)      ! Curly braces
+SUBROUTINE swap(T)(x, y)      ! Parentheses (J3 TEMPLATE style)
+SUBROUTINE swap<T>(x, y)      ! Angle brackets
+```
+
+| Option | Pros | Cons | Monomorphization Impact |
+|--------|------|------|------------------------|
+| A: Curly braces `{T}` | Distinct from arrays, J3 inline syntax | Not traditional Fortran | None - syntax only |
+| B: Parentheses `(T)` | J3 TEMPLATE style, Fortran-like | Ambiguous with function calls | None |
+| C: Angle brackets `<T>` | Familiar to C++/Rust devs | Conflicts with `<` and `>` operators | None |
+
+#### GEN-OQ-3: Instantiation model
+
+How should generic code be instantiated/monomorphized?
+
+| Option | Pros | Cons | Monomorphization Impact |
+|--------|------|------|------------------------|
+| A: Explicit only | Predictable, no surprises, J3 approach | Verbose boilerplate | Only requested specializations generated |
+| B: Automatic only | Concise, Swift-like | Magic, harder to debug | Compiler generates all used specializations |
+| C: Automatic with explicit override | Ergonomic defaults, control when needed | Two mechanisms | Auto-generate, but allow manual control |
+
+#### GEN-OQ-4: Constraint specification
+
+How to specify type constraints for generics?
+
+| Option | Pros | Cons | Monomorphization Impact |
+|--------|------|------|------------------------|
+| A: REQUIREMENT construct (J3) | Reusable, explicit, type-safe | Verbose | Constraints checked before monomorphization |
+| B: Type sets (`integer \| real`) | Concise for intrinsics | Only listed types | Generates specialization per type in set |
+| C: Named traits with signatures | OO-style, extensible, user types | Requires implementations | Generates for all implementing types |
+| D: All of the above | Maximum flexibility | Complex spec | Mixed - depends on which mechanism used |
+
+#### GEN-OQ-5: Dispatch mechanism
+
+Should generics support both compile-time and run-time polymorphism?
+
+```fortran
+! Static dispatch - monomorphized, zero overhead
+TYPE(T), INTENT(IN) :: x
+
+! Dynamic dispatch - vtable, runtime flexibility
+CLASS(INumeric), ALLOCATABLE :: x
+```
+
+| Option | Pros | Cons | Monomorphization Impact |
+|--------|------|------|------------------------|
+| A: Static only (J3) | Zero overhead, predictable | No runtime flexibility | All generic code monomorphized |
+| B: Dynamic only | Runtime polymorphism | Overhead, no specialization | No monomorphization - vtable dispatch |
+| C: Both (`type(T)` vs `class(ITrait)`) | User chooses tradeoff | Complex implementation | `type(T)` monomorphized, `class()` uses vtable |
 
 ---
 
 ## LF-SYN: World-Wide Automatic Specializations (#51)
 
-Lazy Fortran 2025 introduces world-wide specialization for generic procedures, aligned with ISO/IEC 1539-1:2018 Section 15.4.3.4.
+Lazy Fortran 2025 introduces world-wide specialization (automatic monomorphization) for generic procedures, aligned with ISO/IEC 1539-1:2018 Section 15.4.3.4.
+
+**How it works:**
+1. Generic procedures are defined with type parameters
+2. At each call site, concrete types are known
+3. Compiler generates specialized (monomorphized) code for each unique type combination
+4. Specialized code is optimized for the concrete types (inlining, SIMD, etc.)
 
 **Resolution policy:**
 1. **User-written specifics win** - explicit procedures always take precedence over generated specializations
@@ -146,6 +263,28 @@ Lazy Fortran 2025 introduces world-wide specialization for generic procedures, a
 3. **Ambiguity is an error** - incomparable candidates trigger compile-time errors with ISO rule references
 
 This enables Lazy Fortran to add optimized implementations (BLAS-backed kernels, vectorized loops) while remaining standard-compliant.
+
+### Open Questions: Specialization
+
+#### SYN-OQ-1: Specialization scope
+
+At what scope should specializations be generated?
+
+| Option | Pros | Cons | Monomorphization Impact |
+|--------|------|------|------------------------|
+| A: Per-module | Smaller compilation units | May duplicate across modules | Each module has own specializations |
+| B: Per-program (link-time) | No duplication, optimal | Requires LTO, longer link | Single copy of each specialization |
+| C: Lazy (on-demand) | Only generates what's used | Complex build system | Minimal code size |
+
+#### SYN-OQ-2: Specialization for optimized libraries
+
+Should the compiler auto-generate BLAS/LAPACK-backed specializations?
+
+| Option | Pros | Cons | Monomorphization Impact |
+|--------|------|------|------------------------|
+| A: Yes, always | Automatic optimization | Binary size, BLAS dependency | Extra specializations for numeric types |
+| B: Yes, opt-in | User controls | Requires annotation | Only when requested |
+| C: No, user provides | Maximum control | More work for user | User writes specialized implementations |
 
 ---
 
@@ -156,105 +295,19 @@ Lazy Fortran specializations are **standard-compatible decorations** that never 
 - Operates *on top* of ISO semantics
 - Never changes which specific procedures exist from ISO perspective
 - Resolution per ISO/IEC 1539-1:2018 Section 15.4.3.4
+- Monomorphized code behaves identically to hand-written specific procedures
 
----
+### Open Questions: ISO Alignment
 
-## Open Questions
+#### WLD-OQ-1: Handling ambiguous resolutions
 
-Design decisions that need further discussion before finalizing.
+When automatic specialization creates ambiguity with user code:
 
-### OQ-1: Default numeric kinds
-
-| Option | Pros | Cons |
-|--------|------|------|
-| A: ISO defaults (`real(4)`, `integer(4)`) | Compatible with existing code, predictable, smaller memory | Precision loss, integer overflow at ~2B |
-| B: Double precision (`real(8)`, `integer(8)`) | Safer for scientific computing, no precision surprises | Breaks ISO expectations, 2x memory |
-
-### OQ-2: Inference from `intent(out)` arguments
-
-Fortran idiomatically uses `intent(out)` arguments instead of function return values.
-
-```fortran
-call init_particle(p)  ! Should this declare p automatically?
-```
-
-| Option | Pros | Cons |
-|--------|------|------|
-| A: No (assignment only) | Simple local analysis, predictable | Doesn't support idiomatic Fortran patterns |
-| B: Yes (inspect callee) | Supports `intent(out)` patterns | Requires cross-procedure analysis, interface files |
-
-### OQ-3: Declaration placement
-
-Should declarations be allowed anywhere in the code, or only at block beginning?
-
-```fortran
-x = 1
-y = 2
-integer :: z  ! Allowed mid-block?
-z = x + y
-```
-
-| Option | Pros | Cons |
-|--------|------|------|
-| A: Block beginning only | Clean structure, all declarations visible | Verbose, variables far from first use |
-| B: Anywhere | Declare near use, familiar to C/Rust devs | Scattered declarations, redundant with inference |
-
-### OQ-4: Generics approach
-
-Which generics system to adopt?
-
-| Option | Pros | Cons |
-|--------|------|------|
-| A: J3 TEMPLATE/REQUIREMENT | Official Fortran direction, type-safe, explicit | Verbose, manual instantiation |
-| B: Traits-for-Fortran | Concise, automatic inference, retroactive impl | Not official, more complex semantics |
-| C: Hybrid | Best of both, flexible | Implementation complexity |
-
-### OQ-5: Generic parameter syntax
-
-What delimiter for generic type parameters?
-
-```fortran
-function sum{T}(x)    ! Curly braces (J3 inline, Traits-for-Fortran)
-function sum(T)(x)    ! Parentheses (J3 TEMPLATE)
-function sum<T>(x)    ! Angle brackets (C++/Rust)
-```
-
-| Option | Pros | Cons |
-|--------|------|------|
-| A: Curly braces `{T}` | Distinct from arrays, used in J3 inline syntax | Not traditional Fortran |
-| B: Parentheses `(T)` | Used in J3 TEMPLATE, Fortran-like | Ambiguous with function calls |
-| C: Angle brackets `<T>` | Familiar to C++/Rust devs | Conflicts with relational operators |
-
-### OQ-6: Instantiation model
-
-How should generic code be instantiated?
-
-| Option | Pros | Cons |
-|--------|------|------|
-| A: Explicit only (`INSTANTIATE`) | Clear, predictable, J3 approach | Verbose, boilerplate |
-| B: Automatic inference | Concise, Swift-like ergonomics | Magic, harder to debug |
-| C: Both (explicit + inline) | Flexibility, J3 supports both | Two ways to do same thing |
-
-### OQ-7: Constraint specification
-
-How to specify type constraints for generics?
-
-| Option | Pros | Cons |
-|--------|------|------|
-| A: REQUIREMENT construct (J3) | Reusable, explicit, type-safe | Verbose |
-| B: Type sets (`integer \| real`) | Concise for intrinsics | Only works for listed types |
-| C: Named traits with signatures | OO-style, extensible | Requires trait implementations |
-| D: All of the above | Maximum flexibility | Complex specification |
-
-### OQ-8: Dispatch mechanism
-
-Should generics support both compile-time and run-time polymorphism?
-
-| Option | Pros | Cons |
-|--------|------|------|
-| A: Static only (J3 approach) | Zero overhead, simple | No runtime flexibility |
-| B: Dynamic only (`class(ITrait)`) | Runtime polymorphism | Overhead, no monomorphization |
-| C: Both (`type(T)` vs `class(ITrait)`) | User chooses tradeoff | Complex implementation |
+| Option | Pros | Cons | Monomorphization Impact |
+|--------|------|------|------------------------|
+| A: Error at compile time | Safe, predictable | May reject valid-seeming code | Prevents problematic specializations |
+| B: User code always wins | Compatible | May hide optimization | User specific blocks auto-specialization |
+| C: Most specific wins | Optimal dispatch | Complex rules | May choose auto over user if more specific |
 
 ---
 
@@ -268,3 +321,13 @@ Should generics support both compile-time and run-time polymorphism?
 | #55 | LF-WLD | Interoperability with legacy Fortran code |
 | #56 | LF-CODE | Tooling integration and diagnostics |
 | #57 | LF-DOC | Documentation guarantees |
+
+---
+
+## References
+
+- [J3 Generics Repository](https://github.com/j3-fortran/generics)
+- [J3 Paper 18-281r1](https://j3-fortran.org/doc/year/18/18-281r1.txt) - Simple templates proposal
+- [J3 Paper 24-107r1](https://j3-fortran.org/doc/year/24/) - TEMPLATE/INSTANTIATE syntax
+- [Traits-for-Fortran](https://github.com/difference-scheme/Traits-for-Fortran) - Swift/Rust-inspired proposal
+- ISO/IEC 1539-1:2018 Section 15.4.3.4 - Generic resolution rules
