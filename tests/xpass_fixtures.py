@@ -21,17 +21,6 @@ from typing import Dict, Tuple
 
 XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     # =========================================================================
-    # Fortran 2003 - Issue #309
-    # Fixed-form source with column-1 C comments
-    # =========================================================================
-    (
-        "Fortran2003",
-        Path("Fortran2003/test_fortran_2003_comprehensive/fixed_form_f2003.f"),
-    ): (
-        "Fortran 2003 fixed-form fixture {relpath} reports {errors} syntax "
-        "errors due to column-1 C comment handling. Tracked by Issue #309."
-    ),
-    # =========================================================================
     # Fortran 2023 - Issue #310
     # Grammar gaps for F2023 features
     # =========================================================================
