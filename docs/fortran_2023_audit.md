@@ -431,7 +431,7 @@ Other Missing Features:
 | R1029 | Conditional expressions (chained) | Partial |
 | R1179 | `notify-wait-stmt` | NOT IMPLEMENTED |
 | -- | NOTIFY_TYPE derived type | NOT IMPLEMENTED |
-| -- | C_F_STRPOINTER procedure | NOT IMPLEMENTED |
+| -- | C_F_STRPOINTER procedure | IMPLEMENTED (Issue #346) |
 | -- | AT edit descriptor | IMPLEMENTED (Issue #347) |
 | -- | LEADING_ZERO I/O specifier | NOT IMPLEMENTED |
 
@@ -441,9 +441,17 @@ Other Missing Features:
   operation is +, *, .AND., .OR., .EQV., .NEQV., MAX, MIN, IAND, IEOR, or IOR.
   Parser rule `reduce_locality_spec_f2023` added to `Fortran2023Parser.g4`
   and tested by `TestFortran2023Parser::test_do_concurrent_reduce_parsing`.
+- C_F_STRPOINTER procedure: Implemented via Issue #346. C interoperability
+  procedure (ISO/IEC 1539-1:2023 Section 18.2.3.7) that converts a C
+  null-terminated string to a Fortran deferred-length character pointer.
+  Syntax: `call c_f_strpointer(cstrarray, fstrptr [, nchars])`. Lexer token
+  `C_F_STRPOINTER` and parser rule `c_f_strpointer_stmt_f2023` added to
+  `Fortran2023Lexer.g4` and `Fortran2023Parser.g4`. Also includes F_C_STRING
+  transformational function (Section 18.2.3.8) for the reverse conversion.
+  Tested by `TestFortran2023Parser::test_c_f_strpointer_parsing` and
+  `TestFortran2023Parser::test_f_c_string_parsing`.
 - R1029 / conditional-expression integration tracked by Issue #334.
 - R1179 and NOTIFY_TYPE tracked by Issue #333.
-- C_F_STRPOINTER tracked by Issue #346.
 - AT edit descriptor: Implemented via Issue #347. The AT edit descriptor
   (ISO/IEC 1539-1:2023 Section 13, R1307) trims trailing blanks from
   character output. It is used in FORMAT specifications as `AT` with no
