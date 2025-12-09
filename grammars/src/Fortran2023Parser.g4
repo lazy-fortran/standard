@@ -585,12 +585,14 @@ executable_construct_f2018
 // iso_fortran_env imports.
 
 // ISO/IEC 1539-1:2023 R1412: only
-// Enhanced to support NOTIFY_TYPE from iso_fortran_env
+// Enhanced to support NOTIFY_TYPE and ISO_FORTRAN_ENV constants
 only_item_f2018
     : IDENTIFIER (POINTER_ASSIGN only_item_target_f2018)?
     | c_interop_type
     | OPERATOR LPAREN operator_token RPAREN
     | NOTIFY_TYPE                     // NEW in F2023 (Section 16.5.9)
+    | LOGICAL_KINDS                   // F2023 ISO_FORTRAN_ENV (Section 16.10.2.14)
+    | CHARACTER_KINDS                 // F2023 ISO_FORTRAN_ENV (Section 16.10.2.2)
     ;
 
 // ============================================================================
@@ -730,6 +732,9 @@ identifier_or_keyword
     // F2023 C interoperability procedures (Section 18.2.3)
     | C_F_STRPOINTER // C_F_STRPOINTER can be used as subroutine name
     | F_C_STRING     // F_C_STRING can be used as function name
+    // F2023 ISO_FORTRAN_ENV intrinsic module constants (Section 16.10.2)
+    | LOGICAL_KINDS  // LOGICAL_KINDS ISO_FORTRAN_ENV constant (F2023)
+    | CHARACTER_KINDS // CHARACTER_KINDS ISO_FORTRAN_ENV constant (F2023)
     ;
 
 // ============================================================================
