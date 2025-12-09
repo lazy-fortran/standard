@@ -271,7 +271,11 @@ Grammar:
     - NAMELIST WRITE `WRITE namelist_name`.
 - `io_control_spec`:
   - Covers UNIT, FMT, IOSTAT, ERR, END, EOR, ADVANCE, SIZE, REC, or a
-    positional unit/expression.
+    positional io-unit/format (expression or `*`).
+  - Supports preconnected unit and list-directed forms via `*` (R901/R912).
+- `io_unit_f90`:
+  - Implements `io-unit` (R901) for `UNIT=` control specs, accepting
+    external/internal file units and `*` for preconnected units.
 - `format_spec`:
   - Accepts list‑directed `*`, labels, format expressions and NAMELIST
     names.
@@ -300,23 +304,15 @@ using file operations will fail to parse correctly.
 `tests/Fortran90/test_fortran_90_comprehensive.py` (30 tests) confirms
 that the grammar can parse a broad set of Fortran 90 features when
 exercised in focused unit tests. The generic fixture harness still marks
-several F90 fixtures as XPASS, including:
+several F90 fixtures as expected failures (xfail), including:
 
 - `tests/fixtures/Fortran90/test_fortran_90_comprehensive/`:
-  - `basic_program.f90`
-  - `derived_types_module.f90`
-  - `dynamic_arrays.f90`
   - `array_constructor_program.f90`
-  - `test_fortran_90_dual_format/free_form_module.f90`
 - `tests/fixtures/Fortran90/test_comprehensive_parsing/`:
-  - `dynamic_arrays_program.f90`
-  - `types_module.f90`
   - `free_form_features_program.f90`
-  - `advanced_features_module.f90`
   - `fortran95_features_program.f90`
-  - `mixed_format_program.f90`
 
-The XPASS reasons in `tests/xpass_fixtures.py` document the main
+The xfail reasons in `tests/xpass_fixtures.py` document the main
 integration gaps:
 
 - Remaining issues in:
