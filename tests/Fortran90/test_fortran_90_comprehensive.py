@@ -487,6 +487,32 @@ class TestFortran90Parser:
         except Exception as e:
             pytest.fail(f"F90 SELECT CASE parsing failed: {e}")
 
+    def test_labeled_do_parsing(self):
+        """Test F77-style labeled DO with terminal statement (issues #440, #463).
+
+        ISO/IEC 1539:1991 R817 requires:
+        - do-stmt -> [do-construct-name :] DO [label] [loop-control]
+
+        ISO/IEC 1539:1991 R823 requires:
+        - end-do -> end-do-stmt | do-terminal-stmt
+
+        This tests F77-compatible label-DO statements that terminate with a
+        labeled CONTINUE statement instead of modern END DO.
+        """
+        code = load_fixture(
+            "Fortran90",
+            "test_fortran_90_comprehensive",
+            "labeled_do_program.f90",
+        )
+
+        parser = self.create_parser(code)
+
+        try:
+            tree = parser.program_unit_f90()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F90 labeled DO parsing failed: {e}")
+
     def test_array_constructor_parsing(self):
         """Test F90 array constructor parsing."""
         code = load_fixture(
@@ -496,7 +522,7 @@ class TestFortran90Parser:
         )
 
         parser = self.create_parser(code)
-        
+
         try:
             tree = parser.program_unit_f90()
             assert tree is not None
