@@ -193,6 +193,16 @@ IANY             : I A N Y ;
 IPARITY          : I P A R I T Y ;
 
 // ============================================================================
+// ATOMIC INTRINSICS (ISO/IEC 1539-1:2010 Section 13.7.19-13.7.20)
+// ============================================================================
+// Atomic subroutines for coarray programming provide atomic memory operations:
+// - ATOMIC_DEFINE(ATOM,VALUE): Atomically define a variable (Section 13.7.19)
+// - ATOMIC_REF(VALUE,ATOM): Atomically reference a variable (Section 13.7.20)
+// These are subroutines, not functions, called via CALL statement.
+ATOMIC_DEFINE    : A T O M I C '_' D E F I N E ;
+ATOMIC_REF       : A T O M I C '_' R E F ;
+
+// ============================================================================
 // ENHANCED INTEGER/REAL KINDS (ISO/IEC 1539-1:2010 Section 13.8.2)
 // ============================================================================
 // Named constants from ISO_FORTRAN_ENV for specific bit sizes:
