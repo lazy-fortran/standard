@@ -196,6 +196,7 @@ executable_stmt
     | nullify_stmt                   // Section 6.3.2 - F90 pointer nullification
     | where_stmt                     // Section 7.5.3 - F90 array conditional
     | pointer_assignment_stmt        // Section 7.5.2 - F90 pointer assignment
+    | entry_stmt_f90                 // Section 12.5.2.4 - F90 ENTRY statement
     | assignment_stmt_f90            // Section 7.5.1 - Last resort for ENDIF
     ;
 
