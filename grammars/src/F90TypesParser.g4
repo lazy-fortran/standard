@@ -118,6 +118,15 @@ intrinsic_type_spec_f90
     | COMPLEX (kind_selector)?      // Section 4.3.1.4
     | LOGICAL (kind_selector)?      // Section 4.3.4
     | CHARACTER (char_selector)?    // Section 4.3.2
+    | CHARACTER char_length_star    // Section 5.1.1.5 (obsolescent)
+    ;
+
+// Character length with asterisk - ISO/IEC 1539:1991 Section 5.1.1.5
+// Obsolescent form: CHARACTER*n, CHARACTER*(*), CHARACTER*(expr)
+char_length_star
+    : MULTIPLY expr_f90                    // CHARACTER*80
+    | MULTIPLY LPAREN MULTIPLY RPAREN      // CHARACTER*(*) assumed length
+    | MULTIPLY LPAREN expr_f90 RPAREN      // CHARACTER*(80)
     ;
 
 // Derived type specification - ISO/IEC 1539:1991 Section 5.1, R502
