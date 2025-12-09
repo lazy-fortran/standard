@@ -50,6 +50,11 @@ Lazy Fortran 2025 uses **automatic type inference** - a modern approach that eli
 - `z = (1.0, 2.0)` makes `z` a `complex(8)`
 - `obj = create_particle()` makes `obj` whatever type `create_particle` returns
 
+**Open question: `intent(out)` arguments**
+- Fortran idiomatically uses `intent(out)` arguments instead of function return values
+- Should `call init_particle(p)` automatically declare `p` based on the `intent(out)` signature?
+- *To be discussed* - this would require inspecting callee signatures at the call site
+
 **Subsequent assignments follow standard coercion:**
 - After type is established, later assignments use normal Fortran coercion rules
 - `x = 5.3` after `x = 4` is valid (real truncated to integer, standard behavior)
