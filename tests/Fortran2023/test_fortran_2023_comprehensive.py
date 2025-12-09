@@ -571,6 +571,29 @@ class TestFortran2023Parser:
         except Exception as e:
             pytest.fail(f"F2023 AT edit descriptor parsing failed: {e}")
 
+    def test_do_concurrent_reduce_parsing(self):
+        """Test F2023 DO CONCURRENT REDUCE locality specifier parsing.
+
+        ISO/IEC 1539-1:2023 Section 11.1.7.5:
+        R1130: locality-spec adds REDUCE ( reduce-operation : variable-name-list )
+
+        The REDUCE locality specifier declares reduction variables for
+        DO CONCURRENT. Supported reduce-operations include:
+        +, *, .AND., .OR., .EQV., .NEQV., MAX, MIN, IAND, IEOR, IOR
+        """
+        reduce_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "do_concurrent_reduce.f90",
+        )
+        parser = self.create_parser(reduce_input)
+
+        try:
+            tree = parser.program_unit_f2023()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F2023 DO CONCURRENT REDUCE parsing failed: {e}")
+
 
 class TestFortran2023Foundation:
     """Test F2023 as foundation for LazyFortran2025."""

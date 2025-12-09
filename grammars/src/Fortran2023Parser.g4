@@ -528,6 +528,56 @@ notify_type_declaration_stmt_f2023
     ;
 
 // ============================================================================
+// DO CONCURRENT REDUCE LOCALITY SPECIFIER (ISO/IEC 1539-1:2023 Section 11.1.7)
+// ============================================================================
+//
+// J3/22-007 Section 11.1.7.5: Additional semantics for DO CONCURRENT constructs
+// R1130: locality-spec adds REDUCE ( reduce-operation : variable-name-list )
+//
+// The REDUCE locality specifier declares reduction variables for DO CONCURRENT.
+// Each iteration has a separate reduction variable initialized to the identity
+// value for the operation. At the end of the construct, the values are combined
+// using the reduce-operation.
+//
+// reduce-operation is one of:
+//   + | * | .AND. | .OR. | .EQV. | .NEQV. | MAX | MIN | IAND | IEOR | IOR
+//
+
+// ISO/IEC 1539-1:2023 R1129: concurrent-locality (F2023 override)
+// Adds REDUCE locality specifier to F2018 locality specs
+concurrent_locality
+    : LOCAL LPAREN variable_name_list RPAREN
+    | LOCAL_INIT LPAREN variable_name_list RPAREN
+    | SHARED LPAREN variable_name_list RPAREN
+    | DEFAULT LPAREN NONE RPAREN
+    | reduce_locality_spec_f2023                  // NEW in F2023
+    ;
+
+// ISO/IEC 1539-1:2023 R1130: reduce-locality-spec
+// reduce-locality-spec is REDUCE ( reduce-operation : variable-name-list )
+reduce_locality_spec_f2023
+    : REDUCE LPAREN reduce_operation_f2023 COLON variable_name_list RPAREN
+    ;
+
+// ISO/IEC 1539-1:2023: reduce-operation
+// reduce-operation is + | * | .AND. | .OR. | .EQV. | .NEQV. | MAX | MIN |
+//                     IAND | IEOR | IOR
+// Note: MAX, MIN are parsed as IDENTIFIERs since they don't have dedicated tokens.
+// IAND, IEOR, IOR have dedicated tokens from F95 lexer.
+reduce_operation_f2023
+    : PLUS                            // Sum reduction
+    | MULTIPLY                        // Product reduction
+    | DOT_AND                         // Logical AND reduction
+    | DOT_OR                          // Logical OR reduction
+    | DOT_EQV                         // Logical equivalence reduction
+    | DOT_NEQV                        // Logical non-equivalence reduction
+    | IDENTIFIER                      // MAX, MIN (and potentially other names)
+    | IAND_INTRINSIC                  // Bitwise AND reduction
+    | IEOR_INTRINSIC                  // Bitwise exclusive OR reduction
+    | IOR_INTRINSIC                   // Bitwise inclusive OR reduction
+    ;
+
+// ============================================================================
 // EXECUTABLE CONSTRUCT OVERRIDE (F2023 Extension)
 // ============================================================================
 // Override F2018 executable_construct to include F2023 NOTIFY WAIT statement
