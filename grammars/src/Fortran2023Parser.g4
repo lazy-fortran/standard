@@ -190,6 +190,7 @@ executable_stmt_f2023
     | print_stmt_f2023
     | random_init_stmt_f2023
     | system_clock_stmt_f2023
+    | string_intrinsic_stmt_f2023  // NEW in F2023 (Section 16.9.180, 16.9.197)
     | NEWLINE
     ;
 
@@ -387,6 +388,67 @@ system_clock_stmt_f2023
     ;
 
 // ============================================================================
+// STRING INTRINSICS (ISO/IEC 1539-1:2023 Section 16.9)
+// ============================================================================
+//
+// J3/22-007 Section 16.9.180: SPLIT subroutine
+// J3/22-007 Section 16.9.197: TOKENIZE subroutine
+//
+// These intrinsics provide string tokenization capabilities new in F2023.
+//
+
+// ISO/IEC 1539-1:2023 Section 16.9.180: SPLIT
+// SPLIT(STRING, SET, TOKENS [, SEPARATOR])
+// Splits STRING into tokens using characters in SET as delimiters.
+// Arguments:
+//   STRING (IN): Character scalar to split
+//   SET (IN): Character scalar containing delimiter characters
+//   TOKENS (OUT): Allocatable array of character strings containing tokens
+//   SEPARATOR (OUT, optional): Allocatable array of character scalars
+split_stmt_f2023
+    : CALL SPLIT LPAREN
+      expr_f2003 COMMA                           // STRING argument
+      expr_f2003 COMMA                           // SET argument
+      expr_f2003                                 // TOKENS argument
+      (COMMA expr_f2003)?                        // SEPARATOR (optional)
+      RPAREN NEWLINE
+    ;
+
+// ISO/IEC 1539-1:2023 Section 16.9.197: TOKENIZE
+// TOKENIZE(STRING, SET [, QUOTE, BACK])
+// Returns a token iterator for tokenizing STRING.
+// Arguments:
+//   STRING (IN): Character scalar to tokenize
+//   SET (IN): Character scalar containing delimiter characters
+//   QUOTE (IN, optional): Character scalar containing quote characters
+//   BACK (IN, optional): Logical scalar for backward tokenization
+tokenize_stmt_f2023
+    : CALL TOKENIZE LPAREN
+      expr_f2003 COMMA                           // STRING argument
+      expr_f2003                                 // SET argument
+      (COMMA tokenize_spec_f2023)*               // Optional QUOTE, BACK specs
+      RPAREN NEWLINE
+    ;
+
+// Optional arguments for TOKENIZE (keyword or positional)
+tokenize_spec_f2023
+    : IDENTIFIER EQUALS expr_f2003              // Keyword argument (QUOTE=, BACK=)
+    | expr_f2003                                // Positional argument
+    ;
+
+// ============================================================================
+// STRING INTRINSICS INTEGRATION (F2023)
+// ============================================================================
+// Wire string intrinsics into executable_stmt_f2023 to allow usage in
+// executable context.
+
+// F2023 string intrinsic subroutine call
+string_intrinsic_stmt_f2023
+    : split_stmt_f2023
+    | tokenize_stmt_f2023
+    ;
+
+// ============================================================================
 // FORTRAN 2023 STANDARD OVERVIEW (ISO/IEC 1539-1:2023)
 // ============================================================================
 //
@@ -497,6 +559,9 @@ identifier_or_keyword
     // F2023 TYPEOF/CLASSOF type inference (Section 7.3.2.1)
     | TYPEOF       // TYPEOF can be used as identifier
     | CLASSOF      // CLASSOF can be used as identifier
+    // F2023 string intrinsics (Section 16.9)
+    | SPLIT        // SPLIT can be used as subroutine name
+    | TOKENIZE     // TOKENIZE can be used as subroutine name
     ;
 
 // ============================================================================
