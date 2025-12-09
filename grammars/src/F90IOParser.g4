@@ -36,14 +36,14 @@ read_stmt_f90
 
 // Enhanced WRITE statement (F90 improvements)
 write_stmt_f90
-    : WRITE LPAREN io_control_spec_list RPAREN (output_item_list)?
+    : WRITE LPAREN io_control_spec_list RPAREN (output_item_list_f90)?
     | WRITE namelist_name            // NAMELIST write
     ;
 
 // PRINT statement (F77 inherited)
 print_stmt_f90
-    : PRINT MULTIPLY (COMMA output_item_list)? NEWLINE?   // PRINT *, list
-    | PRINT format_spec (COMMA output_item_list)? NEWLINE?  // PRINT format, list
+    : PRINT MULTIPLY (COMMA output_item_list_f90)? NEWLINE?   // PRINT *, list
+    | PRINT format_spec (COMMA output_item_list_f90)? NEWLINE?  // PRINT format, list
     ;
 
 // ====================================================================
@@ -97,20 +97,26 @@ input_item_list
 
 input_item
     : variable_f90
-    | io_implied_do
+    | io_implied_do_input
     ;
 
-output_item_list
-    : output_item (COMMA output_item)*
+// Implied DO for input items - ISO/IEC 1539:1991 Section 9.4.2
+io_implied_do_input
+    : LPAREN input_item_list COMMA do_variable EQUALS expr_f90 COMMA expr_f90
+      (COMMA expr_f90)? RPAREN
     ;
 
-output_item
+output_item_list_f90
+    : output_item_f90 (COMMA output_item_f90)*
+    ;
+
+output_item_f90
     : expr_f90
-    | io_implied_do
+    | io_implied_do_f90
     ;
 
-io_implied_do
-    : LPAREN output_item_list COMMA do_variable EQUALS expr_f90 COMMA expr_f90
+io_implied_do_f90
+    : LPAREN output_item_list_f90 COMMA do_variable EQUALS expr_f90 COMMA expr_f90
       (COMMA expr_f90)? RPAREN
     ;
 

@@ -211,9 +211,8 @@ Gaps:
 
 - Complex nesting rules and interactions between named constructs and
   `CYCLE` / `EXIT` are not fully validated. The generic fixture suite
-  still marks several F90 integration fixtures (e.g.
-  `select_case_program.f90`) as XPASS because of current limitations
-  in the entry rule and integration of constructs.
+  still marks several F90 integration fixtures as XPASS because of
+  current limitations in the entry rule and integration of constructs.
 
 ## 6. Expressions and literals
 
@@ -301,13 +300,12 @@ using file operations will fail to parse correctly.
 `tests/Fortran90/test_fortran_90_comprehensive.py` (30 tests) confirms
 that the grammar can parse a broad set of Fortran 90 features when
 exercised in focused unit tests. The generic fixture harness still marks
-a number of F90 fixtures as XPASS, including:
+several F90 fixtures as XPASS, including:
 
 - `tests/fixtures/Fortran90/test_fortran_90_comprehensive/`:
   - `basic_program.f90`
   - `derived_types_module.f90`
   - `dynamic_arrays.f90`
-  - `select_case_program.f90`
   - `array_constructor_program.f90`
   - `test_fortran_90_dual_format/free_form_module.f90`
 - `tests/fixtures/Fortran90/test_comprehensive_parsing/`:
