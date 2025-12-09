@@ -108,7 +108,6 @@ END_SUBMODULE    : E N D WS+ S U B M O D U L E ;
 // - R818: loop-control -> ... | CONCURRENT concurrent-header
 // - R819: concurrent-header -> (concurrent-spec [, scalar-mask-expr])
 // DO CONCURRENT indicates iterations may execute in any order or concurrently.
-DO_CONCURRENT    : D O '_' C O N C U R R E N T ;
 CONCURRENT       : C O N C U R R E N T ;
 
 // ============================================================================

@@ -705,7 +705,7 @@ class TestFortran2023Foundation:
             # F2003 OOP
             'CLASS', 'EXTENDS', 'PROCEDURE', 'ABSTRACT',
             # F2008 parallel programming
-            'CONCURRENT', 'CONTIGUOUS', 'DO_CONCURRENT',
+            'CONCURRENT', 'CONTIGUOUS',
             # F2018 teams and events
             'CO_SUM', 'SELECT_RANK', 'FORM_TEAM',
             # F2023 enhancements
