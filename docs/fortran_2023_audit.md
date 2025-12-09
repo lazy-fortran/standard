@@ -281,13 +281,16 @@ Specification:
 
 Parser implementation:
 
-- `ieee_intrinsic_function_f2023`:
-  - Recognizes IEEE_MAX/MIN/MAX_MAG/MIN_MAG calls with simple argument
-    lists:
-    - `IEEE_MAX(x, y, ...)`, etc.
-- These functions are not yet integrated into the `primary` or
-  `intrinsic_function_call` hierarchy used for full expression parsing
-  in F2018; instead, they live in a F2023‑specific helper rule.
+- IEEE functions:
+  - The tokens `IEEE_MAX`, `IEEE_MIN`, `IEEE_MAX_MAG`, and `IEEE_MIN_MAG`
+    remain available in `identifier_or_keyword`, and the inherited F2018
+    `intrinsic_function_call`/`primary` chain parses their calls with arbitrary
+    argument lists.
+  - Issue #457 deleted the redundant helper rule `ieee_intrinsic_function_f2023`
+    because it never connected to the rest of the expression model; the
+    comprehensive tests listed below still exercise the same syntax.
+The F2023 IEEE functions continue to be only partially integrated (NaN
+semantics and expression coverage), and issue #310 still tracks that gap.
 
 Tests:
 
@@ -318,13 +321,15 @@ Specification:
 Parser implementation:
 
 - BOZ:
-  - `boz_literal_constant_f2023`:
-    - Reuses `BINARY_CONSTANT`, `OCTAL_CONSTANT`, `HEX_CONSTANT`.
-  - This is a small helper and does not deeply integrate with the F90
-    BOZ rules; it is used primarily in tests.
+  - BOZ constants reuse `BINARY_CONSTANT`, `OCTAL_CONSTANT`, and `HEX_CONSTANT`
+    through the inherited F2018 `boz_literal_constant` rule that remains in the
+    base grammar.
+  - Issue #457 deleted the redundant helper `boz_literal_constant_f2023`
+    because it simply wrapped those tokens without integrating with the grammar.
 - NAMELIST:
-  - `namelist_group_object_f2023` is a placeholder alias for IDENTIFIER;
-    the grammar does not implement the full NAMELIST enhancements.
+  - Issue #457 also removed the alias `namelist_group_object_f2023`; IDENTIFIER
+    already handles the enhanced PUBLIC/PRIVATE grouping, so no extra rule was
+    needed.
 - SYSTEM_CLOCK:
   - `system_clock_stmt_f2023`:
     - `CALL SYSTEM_CLOCK(count, count_rate, count_max)`.
@@ -448,6 +453,8 @@ Other Missing Features:
   `C_F_STRPOINTER` and parser rule `c_f_strpointer_stmt_f2023` added to
   `Fortran2023Lexer.g4` and `Fortran2023Parser.g4`. Also includes F_C_STRING
   transformational function (Section 18.2.3.8) for the reverse conversion.
+  The parser helper `f_c_string_expr_f2023` was removed in Issue #457 since
+  `expr_f2003` already accepts the same call syntax.
   Tested by `TestFortran2023Parser::test_c_f_strpointer_parsing` and
   `TestFortran2023Parser::test_f_c_string_parsing`.
 - R1029 / conditional-expression integration tracked by Issue #334.
