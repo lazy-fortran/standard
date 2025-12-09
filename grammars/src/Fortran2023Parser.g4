@@ -245,7 +245,7 @@ type_declaration_stmt_f2023
     ;
 
 // J3/22-007 R702: type-spec
-// F2023 type specification
+// F2023 type specification (enhanced with TYPEOF/CLASSOF from Section 7.3.2.1)
 type_spec_f2023
     : INTEGER
     | REAL
@@ -254,6 +254,59 @@ type_spec_f2023
     | CHARACTER
     | DOUBLE PRECISION
     | TYPE LPAREN IDENTIFIER RPAREN
+    | typeof_type_spec_f2023       // NEW in F2023 (R703)
+    | classof_type_spec_f2023      // NEW in F2023 (R704)
+    ;
+
+// ============================================================================
+// TYPEOF/CLASSOF TYPE SPECIFIERS (ISO/IEC 1539-1:2023 Section 7.3.2.1)
+// ============================================================================
+//
+// J3/22-007 Section 7.3.2.1: TYPEOF and CLASSOF type specifiers
+// These allow declaring variables with the same type as another entity.
+//
+// R703: typeof-type-spec is TYPEOF ( data-ref )
+// R704: classof-type-spec is CLASSOF ( data-ref )
+//
+// TYPEOF: declares with same declared type as data-ref
+// CLASSOF: declares with same dynamic type as data-ref (polymorphic)
+//
+
+// J3/22-007 R703: typeof-type-spec
+// typeof-type-spec is TYPEOF ( data-ref )
+// Declares entity with same declared type as data-ref
+typeof_type_spec_f2023
+    : TYPEOF LPAREN data_ref_f2023 RPAREN
+    ;
+
+// J3/22-007 R704: classof-type-spec
+// classof-type-spec is CLASSOF ( data-ref )
+// Declares entity with same dynamic type as data-ref (polymorphic context)
+classof_type_spec_f2023
+    : CLASSOF LPAREN data_ref_f2023 RPAREN
+    ;
+
+// J3/22-007 R611: data-ref (simplified for TYPEOF/CLASSOF context)
+// data-ref is part-ref [ % part-ref ]...
+// Simplified to handle common cases: variable names, array elements,
+// structure components
+data_ref_f2023
+    : IDENTIFIER (LPAREN section_subscript_list_f2023 RPAREN)?
+      (PERCENT data_ref_f2023)?
+    ;
+
+// J3/22-007 R619: section-subscript-list
+// section-subscript-list is section-subscript [ , section-subscript ]...
+section_subscript_list_f2023
+    : section_subscript_f2023 (COMMA section_subscript_f2023)*
+    ;
+
+// J3/22-007 R620: section-subscript
+// section-subscript is subscript | subscript-triplet | vector-subscript
+// Simplified to handle common subscript patterns
+section_subscript_f2023
+    : expr_f2023                                    // Simple subscript
+    | expr_f2023? COLON expr_f2023? (COLON expr_f2023)?  // Triplet
     ;
 
 // J3/22-007 R803: entity-decl-list
@@ -441,6 +494,9 @@ identifier_or_keyword
     | COSPI        // COSPI can be used as function name
     | SINPI        // SINPI can be used as function name
     | TANPI        // TANPI can be used as function name
+    // F2023 TYPEOF/CLASSOF type inference (Section 7.3.2.1)
+    | TYPEOF       // TYPEOF can be used as identifier
+    | CLASSOF      // CLASSOF can be used as identifier
     ;
 
 // ============================================================================
@@ -470,4 +526,37 @@ expr_f2003
     | LPAREN expr_f2003 QUESTION expr_f2003 COLON expr_f2003 RPAREN  // Parenthesized
     | expr_f90                                // Inherit F90 expressions
     | primary                                 // F2003 primary
+    ;
+
+// ============================================================================
+// TYPE DECLARATION STATEMENT OVERRIDE (F2023 TYPEOF/CLASSOF)
+// ============================================================================
+// ISO/IEC 1539-1:2023 Section 7.3.2.1: TYPEOF and CLASSOF type specifiers
+// Override F2003 type_declaration_stmt to add TYPEOF/CLASSOF support
+//
+// R703: typeof-type-spec is TYPEOF ( data-ref )
+// R704: classof-type-spec is CLASSOF ( data-ref )
+
+// Type declaration statement with F2023 TYPEOF/CLASSOF support
+// Overrides F2003 type_declaration_stmt
+type_declaration_stmt
+    : INTEGER kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON
+      entity_decl_list NEWLINE
+    | REAL kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON
+      entity_decl_list NEWLINE
+    | LOGICAL kind_selector? (COMMA attr_spec_list)? DOUBLE_COLON
+      entity_decl_list NEWLINE
+    | CHARACTER char_selector_extended? (COMMA attr_spec_list)? DOUBLE_COLON
+      entity_decl_list NEWLINE
+    | c_interop_type (COMMA attr_spec_list)? DOUBLE_COLON
+      entity_decl_list NEWLINE
+    | TYPE LPAREN derived_type_spec RPAREN (COMMA attr_spec_list)?
+      DOUBLE_COLON entity_decl_list NEWLINE
+    | CLASS LPAREN type_spec_or_star RPAREN (COMMA attr_spec_list)?
+      DOUBLE_COLON entity_decl_list NEWLINE
+    // F2023 TYPEOF/CLASSOF type specifiers (Section 7.3.2.1)
+    | TYPEOF LPAREN data_ref_f2023 RPAREN (COMMA attr_spec_list)?
+      DOUBLE_COLON entity_decl_list NEWLINE
+    | CLASSOF LPAREN data_ref_f2023 RPAREN (COMMA attr_spec_list)?
+      DOUBLE_COLON entity_decl_list NEWLINE
     ;
