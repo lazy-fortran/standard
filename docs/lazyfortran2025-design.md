@@ -220,14 +220,15 @@ allocate(matrix(n, m))    ! rank-2, runtime bounds
 
 5.1.7.1 Whether pointer assignment (`p => target`) should automatically infer the `pointer` attribute is subject to the following consideration.
 
-> **OPEN ISSUE 11: Pointer attribute inference**
+> **OPEN ISSUE 11: Pointer and target attribute inference**
 >
-> Should `p => x` automatically declare `p` with the `pointer` attribute?
+> Should `p => x` automatically declare `p` with `pointer` and `x` with `target`?
 >
 > | Option | Description | Pros | Cons |
 > |--------|-------------|------|------|
-> | A | No (require explicit) | Clear intent, no hidden semantics | Verbose |
-> | B | Yes (infer from `=>`) | Concise, matches usage | Hides pointer semantics, may surprise |
+> | A | No inference | Clear intent, no hidden semantics | Verbose |
+> | B | Infer `pointer` only | Concise for pointer | Target must be explicit |
+> | C | Infer both `pointer` and `target` | Fully automatic | Hides semantics, may surprise |
 
 5.1.8 **Allocatable attribute inference**
 
@@ -241,6 +242,53 @@ allocate(matrix(n, m))    ! rank-2, runtime bounds
 > |--------|-------------|------|------|
 > | A | No (require explicit) | Clear intent, no hidden semantics | Verbose |
 > | B | Yes (infer from `allocate`) | Concise, matches usage | Hides allocation semantics |
+
+5.1.9 **Function result type inference**
+
+5.1.9.1 Function return types may be inferred from the function body or from call sites.
+
+5.1.9.2 Example:
+
+```fortran
+function add(a, b)
+    add = a + b       ! return type inferred from expression
+end function
+```
+
+5.1.9.3 The mechanism for inferring function result types is subject to the following consideration.
+
+> **OPEN ISSUE 13: Function result type inference**
+>
+> How should function return types be inferred?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | Body only | Local analysis, predictable | May miss context from call sites |
+> | B | Call site only | Adapts to usage | Requires whole-program analysis |
+> | C | Body first, call site fallback | Best of both | Complex precedence rules |
+> | D | Must match (error on conflict) | Catches inconsistencies | Stricter, may reject valid code |
+
+5.1.10 **Derived type inference**
+
+5.1.10.1 Variables may be inferred to have derived (user-defined) types from constructor calls or assignments.
+
+5.1.10.2 Example:
+
+```fortran
+p = particle_t(1.0, 2.0, 3.0)   ! p inferred as type(particle_t)
+```
+
+5.1.10.3 The handling of derived type inference is subject to the following consideration.
+
+> **OPEN ISSUE 14: Derived type inference**
+>
+> How should derived type inference interact with module scope?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | Type must be in scope | Simple, explicit USE required | Verbose |
+> | B | Auto-USE if type found | Convenient | Hidden dependencies, may be ambiguous |
+> | C | Derived types require explicit declaration | Safe, no inference for complex types | Inconsistent with other inference |
 
 ### 5.2 Expression type rules
 
