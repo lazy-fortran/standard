@@ -200,5 +200,16 @@ class TestBasicF2008Features:
         assert tree is not None, "CRITICAL construct failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for CRITICAL construct, got {errors}"
 
+    def test_lock_unlock_statements(self):
+        """Test LOCK/UNLOCK statements for coarray synchronization (ISO 8.5.6)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "lock_unlock.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "LOCK/UNLOCK statements failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for LOCK/UNLOCK statements, got {errors}"
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
