@@ -150,10 +150,28 @@ a constraint specifying a set of types that a generic parameter may take
 x = 4              ! x is integer
 y = 3.14           ! y is real
 z = (1.0, 2.0)     ! z is complex
+flag = .true.      ! flag is logical
+s = "hello"        ! s is character(len=5)
 obj = create_particle()  ! obj has return type of create_particle
 ```
 
-5.1.2.3 Subsequent assignments to the same variable use standard Fortran coercion rules.
+5.1.2.4 Subsequent assignments to the same variable use standard Fortran coercion rules.
+
+5.1.2.5 Logical literals (`.true.`, `.false.`) establish logical type.
+
+5.1.2.6 Complex literals of the form `(real-part, imag-part)` establish complex type. The kind is determined by the component literals according to ISO/IEC 1539-1:2023.
+
+5.1.2.7 String literals establish character type. The handling of length is subject to the following consideration.
+
+> **OPEN ISSUE 10: Character length inference**
+>
+> How should character length be handled when multiple assignments have different lengths?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | First assignment wins | Consistent with other types | Truncation on longer strings |
+> | B | Maximum length seen | No truncation | May waste memory |
+> | C | Allocatable deferred-length | Fully dynamic | More complex, allocation overhead |
 
 5.1.3 **Array bounds inference**
 
@@ -518,27 +536,39 @@ __<module-name>_MOD_<procedure-name>
 
 | Type | Kind | Storage | Suffix |
 |------|------|---------|--------|
+| integer | 1 | 1 byte | i8 |
+| integer | 2 | 2 bytes | i16 |
 | integer | 4 | 4 bytes | i32 |
 | integer | 8 | 8 bytes | i64 |
+| integer | 16 | 16 bytes | i128 |
 | real | 4 | 4 bytes | r32 |
 | real | 8 | 8 bytes | r64 |
+| real | 16 | 16 bytes | r128 |
 | complex | 4 | 8 bytes | c64 |
 | complex | 8 | 16 bytes | c128 |
+| complex | 16 | 32 bytes | c256 |
+| logical | 1 | 1 byte | l8 |
 | logical | 4 | 4 bytes | l32 |
-| character | * | * | char |
+| character | N | N bytes | chN |
 
 8.3.2.3 Kind suffixes (alternative byte-based convention):
 
 | Type | Kind | Storage | Suffix |
 |------|------|---------|--------|
+| integer | 1 | 1 byte | i1 |
+| integer | 2 | 2 bytes | i2 |
 | integer | 4 | 4 bytes | i4 |
 | integer | 8 | 8 bytes | i8 |
+| integer | 16 | 16 bytes | i16 |
 | real | 4 | 4 bytes | r4 |
 | real | 8 | 8 bytes | r8 |
+| real | 16 | 16 bytes | r16 |
 | complex | 4 | 8 bytes | c4 |
 | complex | 8 | 16 bytes | c8 |
+| complex | 16 | 32 bytes | c16 |
+| logical | 1 | 1 byte | l1 |
 | logical | 4 | 4 bytes | l4 |
-| character | * | * | char |
+| character | N | N bytes | chN |
 
 8.3.2.4 Array rank is indicated by `rank<n>` suffix:
 
