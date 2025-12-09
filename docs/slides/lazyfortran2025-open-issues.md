@@ -318,7 +318,11 @@ Two approaches available:
 TEMPLATE swap_t(T)
     TYPE, DEFERRED :: T
 CONTAINS
-    SUBROUTINE swap(x, y) ...
+    SUBROUTINE swap(x, y)
+        TYPE(T), INTENT(INOUT) :: x, y
+        TYPE(T) :: tmp
+        tmp = x; x = y; y = tmp
+    END SUBROUTINE
 END TEMPLATE
 ```
 
@@ -373,7 +377,7 @@ call swap<integer>(a, b)    ! Conflicts with .lt.
 
 ```fortran
 ! Static dispatch (monomorphization)
-call add_i32(x, y)    ! Compiled for integer(4)
+call add_i4(x, y)     ! Compiled for integer(4)
 
 ! Dynamic dispatch (vtable)
 class(IAddable), pointer :: obj
@@ -403,6 +407,9 @@ TYPE, IMPLEMENTS(IComparable) :: MyType
 ! Annotation style
 @IComparable
 integer function compare(a, b)
+    integer, intent(in) :: a, b
+    compare = a - b
+end function
 ```
 
 <div class="question">
