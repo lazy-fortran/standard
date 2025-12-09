@@ -475,6 +475,7 @@ The Fortran 2008 layer in this repository:
     and fixture (#323).
   - New intrinsic procedures (BESSEL family, ERF/ERFC, GAMMA/LOG_GAMMA,
     NORM2, PARITY, FINDLOC, STORAGE_SIZE).
+  - Atomic subroutine intrinsics (`ATOMIC_DEFINE`/`ATOMIC_REF`, ISO/IEC 1539-1:2010 Sections 13.7.19-13.7.20) with lexer/parser coverage and fixture `atomic_intrinsics.f90` (#327).
   - Integration of all of the above into F2008 specification and
     execution parts and program units.
 
@@ -503,8 +504,6 @@ LOCK/UNLOCK statements (R859/R860/R866) are now implemented via issue #324; issu
 | IALL | 13.7.79 | Bitwise AND reduction |
 | IANY | 13.7.80 | Bitwise OR reduction |
 | IPARITY | 13.7.94 | Bitwise XOR reduction |
-| ATOMIC_DEFINE | 13.7.19 | Define atomic variable |
-| ATOMIC_REF | 13.7.20 | Reference atomic variable |
 | HYPOT | 13.7.77 | Hypotenuse function |
 
 - **Intentionally leaves to semantic tooling:**
@@ -523,11 +522,11 @@ Existing umbrella issues relevant to this audit:
 - #313 – **F2008: Missing bitwise intrinsics** (LOCK/UNLOCK resolved via #324; CRITICAL construct tracked separately by #323).
 - #324 – **F2008: Add LOCK/UNLOCK statements for coarray synchronization** (Section 8.5.6).
 - #323 – **F2008: CRITICAL construct (R818-R820)**.
+- #327 – **F2008: Atomic subroutines (ATOMIC_DEFINE/ATOMIC_REF)** (Sections 13.7.19-13.7.20) IMPLEMENTED.
 
 Future work should:
 
 - **MEDIUM PRIORITY:** Add bitwise intrinsic tokens and parser rules
-- Add ATOMIC_DEFINE/ATOMIC_REF intrinsics
 - Add HYPOT intrinsic
 
 ---
