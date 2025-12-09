@@ -655,6 +655,8 @@ Gaps that warrant explicit issues:
 
 ## 11. Summary and issue mapping
 
+**xfail Fixtures:** 1 (tracked by Issue #309)
+
 The Fortran 2003 layer in this repository:
 
 - **Implements and tests, for practical use:**
@@ -685,9 +687,16 @@ The Fortran 2003 layer in this repository:
   - Square‑bracket array constructors are treated as available in the
     F95/F2003 era even though historically they are later additions.
 
+**Grammar Gap (Issue #309):**
+
+| Fixture | Gap |
+|---------|-----|
+| `fixed_form_f2003.f` | Column-1 C comment handling in fixed-form |
+
 Existing umbrella issues relevant to this audit:
 
 - #140 – **Standard audits** (this document is the F2003 slice).
+- #309 – **Fixed-form source with column-1 C comments not parsed**.
 - #175 – **Fortran 2003: annotate grammar with J3/03‑007 sections**:
   - **RESOLVED**: The grammar files `Fortran2003Parser.g4` and
     `Fortran2003Lexer.g4` have been annotated with comprehensive
