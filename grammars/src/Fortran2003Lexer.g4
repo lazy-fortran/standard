@@ -353,5 +353,10 @@ NEWLINE : [\r\n]+ ;
 LSQUARE : '[' ;
 RSQUARE : ']' ;
 
+// Enumeration tokens (Fortran 2003 feature - ISO/IEC 1539-1:2004 Section 4.6)
+// ENUM construct for C interoperability with BIND(C)
+ENUM             : E N U M ;
+ENUMERATOR       : E N U M E R A T O R ;
+
 // Whitespace handling - MUST skip spaces and tabs
 WHITESPACE : [ \t]+ -> skip ;

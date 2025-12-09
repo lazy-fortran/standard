@@ -91,7 +91,7 @@ enum_def_f2023
 // enum-def-stmt is ENUM, BIND(C) [ :: enum-type-name ]
 //             or ENUMERATION TYPE [ :: enum-type-name ]
 enum_def_stmt_f2023
-    : ENUM COMMA BIND LPAREN C RPAREN NEWLINE
+    : ENUM COMMA BIND LPAREN C RPAREN (DOUBLE_COLON IDENTIFIER)? NEWLINE
     | ENUM (DOUBLE_COLON IDENTIFIER)? NEWLINE    // F2023 typed enumerators
     ;
 
@@ -364,3 +364,87 @@ system_clock_stmt_f2023
 // complete foundation for LazyFortran2025.
 //
 // ============================================================================
+
+// ============================================================================
+// IDENTIFIER OR KEYWORD OVERRIDE (F2023 Extension)
+// ============================================================================
+// F2023 adds IEEE_MAX, IEEE_MIN, etc. tokens that can be used as function names.
+// Override F2008 identifier_or_keyword to include F2023-specific tokens.
+identifier_or_keyword
+    : IDENTIFIER
+    | VALUE        // VALUE can be used as an identifier when not in C-binding context
+    | NAME         // NAME can be used as an identifier
+    | RESULT       // RESULT can be used as a variable name
+    | SUM_INTRINSIC  // SUM can be used as a variable/result name
+    | ID           // ID can be used as a variable name (common identifier)
+    | DATA         // DATA can be used as a variable name (legacy keyword)
+    | KIND         // KIND can be used as parameter name in type instantiation
+    | LEN          // LEN can be used as parameter name in character declarations
+    | TRIM_INTRINSIC  // TRIM can be used as function name
+    | SIZE         // SIZE can be used as function name (F90 token)
+    | SHAPE_INTRINSIC  // SHAPE can be used as a type name
+    | STAT         // STAT can be used as variable name in ALLOCATE
+    | ERRMSG       // ERRMSG can be used as variable name in ALLOCATE
+    | SOURCE       // SOURCE can be used as variable name
+    | MOLD         // MOLD can be used as variable name
+    | UNIT         // UNIT can be used as variable name in I/O
+    | IOSTAT       // IOSTAT can be used as variable name
+    | FILE         // FILE can be used as variable name in I/O
+    | ACCESS       // ACCESS can be used as variable name in I/O
+    | FORM         // FORM can be used as variable name in I/O
+    | STATUS       // STATUS can be used as variable name in I/O
+    | BLANK        // BLANK can be used as variable name in I/O
+    | POSITION     // POSITION can be used as variable name in I/O
+    | ACTION       // ACTION can be used as variable name in I/O
+    | DELIM        // DELIM can be used as variable name in I/O
+    | PAD          // PAD can be used as variable name in I/O
+    | RECL         // RECL can be used as variable name in I/O
+    | IOMSG        // IOMSG can be used as variable name in I/O
+    | ASYNCHRONOUS // ASYNCHRONOUS can be used as variable name in I/O
+    // F2008-specific tokens inherited
+    | IMAGES       // IMAGES can be used as variable name (SYNC IMAGES keyword)
+    | ALL          // ALL can be used as variable name (SYNC ALL keyword)
+    | MEMORY       // MEMORY can be used as variable name (SYNC MEMORY keyword)
+    | CONCURRENT   // CONCURRENT can be used as variable name (DO CONCURRENT)
+    | CONTIGUOUS   // CONTIGUOUS can be used as variable name
+    | SUBMODULE    // SUBMODULE can be used as a name
+    | BLOCK        // BLOCK can be used as variable name
+    | ERROR_STOP   // ERROR_STOP is compound keyword
+    // F2023-specific tokens
+    | IEEE_MAX     // IEEE_MAX can be used as function name
+    | IEEE_MIN     // IEEE_MIN can be used as function name
+    | IEEE_MAX_MAG // IEEE_MAX_MAG can be used as function name
+    | IEEE_MIN_MAG // IEEE_MIN_MAG can be used as function name
+    | ENUMERATOR   // ENUMERATOR can be used as a name
+    | PENDING      // PENDING can be used as enumerator name
+    | ENUM         // ENUM can be used as a name
+    ;
+
+// ============================================================================
+// EXPRESSION OVERRIDE (F2023 Conditional Expressions)
+// ============================================================================
+// ISO/IEC 1539-1:2023 Section 10.1.5: Conditional expressions
+// J3/22-007 R1020: conditional-expr is ( conditional-test ? consequent
+//                  [ : conditional-test ? consequent ]... : consequent )
+// Override F2003 expr to include conditional expression (ternary operator)
+expr_f2003
+    : expr_f2003 DOT_OR expr_f2003            // Logical OR (.or.)
+    | expr_f2003 DOT_AND expr_f2003           // Logical AND (.and.)
+    | DOT_NOT expr_f2003                      // Logical NOT (.not.)
+    | expr_f2003 (GT | GT_OP) expr_f2003      // Greater than
+    | expr_f2003 (LT | LT_OP) expr_f2003      // Less than
+    | expr_f2003 (GE | GE_OP) expr_f2003      // Greater than or equal
+    | expr_f2003 (LE | LE_OP) expr_f2003      // Less than or equal
+    | expr_f2003 (EQ | EQ_OP) expr_f2003      // Equal
+    | expr_f2003 (NE | NE_OP) expr_f2003      // Not equal
+    | expr_f2003 CONCAT expr_f2003            // String concatenation (//)
+    | expr_f2003 POWER expr_f2003             // Exponentiation
+    | expr_f2003 (MULTIPLY | SLASH) expr_f2003  // Multiply/divide
+    | expr_f2003 (PLUS | MINUS) expr_f2003    // Add/subtract
+    | MINUS expr_f2003                        // Unary minus
+    | PLUS expr_f2003                         // Unary plus
+    | expr_f2003 QUESTION expr_f2003 COLON expr_f2003  // F2023 conditional (ternary)
+    | LPAREN expr_f2003 QUESTION expr_f2003 COLON expr_f2003 RPAREN  // Parenthesized
+    | expr_f90                                // Inherit F90 expressions
+    | primary                                 // F2003 primary
+    ;
