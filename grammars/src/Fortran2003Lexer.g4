@@ -29,16 +29,23 @@ import Fortran95Lexer;
 // ====================================================================
 
 // Fixed-form comments (ISO/IEC 1539-1:2004 Section 3.3.2)
+// In fixed source form, a line is a comment if column 1 contains C, c, or *.
+// The newline followed immediately by C/c ensures column 1 position.
+//
+// For files that start with a comment (no preceding newline), a leading
+// newline should be added to the source during preprocessing.
+
+// Fixed-form comment: newline followed immediately by C/c in column 1
+// Must be followed by whitespace to distinguish from keywords like CONTAINS
+// ISO/IEC 1539-1:2004 Section 3.3.2
 FIXED_FORM_COMMENT
-    : [\r\n][ \t]* [cC] [ \t] ~[\r\n]*  -> channel(HIDDEN)
+    : [\r\n]+ [cC] [ \t] ~[\r\n]* -> channel(HIDDEN)
     ;
 
-FIXED_FORM_COMMENT_STAR
-    : [\r\n][ \t]* [cC] [*!] ~[\r\n]*  -> channel(HIDDEN)
-    ;
-
+// Star comment at column 1 (after newline)
+// ISO/IEC 1539-1:2004 Section 3.3.2
 STAR_COMMENT
-    : [\r\n][ \t]* '*' ~[\r\n]* -> channel(HIDDEN)
+    : [\r\n]+ '*' ~[\r\n]* -> channel(HIDDEN)
     ;
 
 // ====================================================================
