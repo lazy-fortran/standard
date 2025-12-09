@@ -352,46 +352,6 @@ entity_decl_f2023
 // IEEE_MIN_NUM, IEEE_MIN_NUM_MAG with refined NaN handling
 //
 
-// J3/22-007 Section 17.11.20-17.11.23: IEEE arithmetic functions
-// F2023 IEEE intrinsic functions (enhanced NaN handling)
-ieee_intrinsic_function_f2023
-    : IEEE_MAX LPAREN IDENTIFIER (COMMA IDENTIFIER)* RPAREN
-    | IEEE_MIN LPAREN IDENTIFIER (COMMA IDENTIFIER)* RPAREN
-    | IEEE_MAX_MAG LPAREN IDENTIFIER (COMMA IDENTIFIER)* RPAREN
-    | IEEE_MIN_MAG LPAREN IDENTIFIER (COMMA IDENTIFIER)* RPAREN
-    ;
-
-// ============================================================================
-// ENHANCED NAMELIST (ISO/IEC 1539-1:2023 Section 14.2.4)
-// ============================================================================
-//
-// J3/22-007 Section 14.2.4: NAMELIST statement
-// F2023 enhancement: PUBLIC namelist groups may contain PRIVATE variables
-//
-
-// J3/22-007 R1418: namelist-group-object
-// Enhanced namelist group object (F2023: PUBLIC groups may contain PRIVATE)
-namelist_group_object_f2023
-    : IDENTIFIER
-    ;
-
-// ============================================================================
-// BOZ CONSTANTS (ISO/IEC 1539-1:2023 Section 7.7)
-// ============================================================================
-//
-// J3/22-007 R772: boz-literal-constant
-// F2023 enhancement: BOZ in array constructors with explicit type-spec
-// interpreted as REAL bits when type-spec is REAL
-//
-
-// J3/22-007 R772: boz-literal-constant
-// Enhanced BOZ constant handling in array constructors
-boz_literal_constant_f2023
-    : BINARY_CONSTANT
-    | OCTAL_CONSTANT
-    | HEX_CONSTANT
-    ;
-
 // ============================================================================
 // SYSTEM_CLOCK ENHANCEMENTS (ISO/IEC 1539-1:2023 Section 16.9.196)
 // ============================================================================
@@ -494,20 +454,6 @@ c_f_strpointer_stmt_f2023
       expr_f2003                                 // FSTRPTR argument
       (COMMA expr_f2003)?                        // NCHARS (optional)
       RPAREN NEWLINE
-    ;
-
-// ISO/IEC 1539-1:2023 Section 18.2.3.8: F_C_STRING
-// F_C_STRING(STRING [, ASIS])
-// Transformational function that returns a C-compatible null-terminated string.
-// Arguments:
-//   STRING (IN): Character scalar of kind C_CHAR
-//   ASIS (IN, optional): Logical scalar; if true, preserves embedded nulls
-// Returns: A character array of kind C_CHAR with null terminator
-f_c_string_expr_f2023
-    : F_C_STRING LPAREN
-      expr_f2003                                 // STRING argument
-      (COMMA expr_f2003)?                        // ASIS (optional)
-      RPAREN
     ;
 
 // C interoperability intrinsic statement wrapper for executable context
