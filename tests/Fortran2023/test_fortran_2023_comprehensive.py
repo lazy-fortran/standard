@@ -244,10 +244,48 @@ class TestFortran2023Lexer:
             'MODULE', 'USE', 'ONLY', 'PUBLIC', 'PRIVATE', 'INTERFACE',
             'CONTAINS', 'END_MODULE', 'END_INTERFACE'
         ]
-        
+
         for keyword in module_keywords:
             tokens = self.get_tokens(keyword)
             assert len(tokens) >= 1, f"F90 module keyword '{keyword}' not recognized in F2023"
+
+    def test_typeof_classof_keywords(self):
+        """Test F2023 TYPEOF and CLASSOF type inference keywords.
+
+        ISO/IEC 1539-1:2023 Section 7.3.2.1:
+        - R703: typeof-type-spec is TYPEOF ( data-ref )
+        - R704: classof-type-spec is CLASSOF ( data-ref )
+        """
+        type_inference_keywords = {
+            'TYPEOF': Fortran2023Lexer.TYPEOF,
+            'CLASSOF': Fortran2023Lexer.CLASSOF
+        }
+
+        for keyword, expected_token in type_inference_keywords.items():
+            tokens = self.get_tokens(keyword)
+            assert len(tokens) >= 1
+            assert tokens[0].type == expected_token, (
+                f"Type inference keyword '{keyword}' expected type "
+                f"{expected_token}, got {tokens[0].type}"
+            )
+
+    def test_typeof_classof_case_insensitive(self):
+        """Test TYPEOF/CLASSOF keywords are case-insensitive per ISO standard."""
+        test_cases = [
+            ('typeof', Fortran2023Lexer.TYPEOF),
+            ('TYPEOF', Fortran2023Lexer.TYPEOF),
+            ('TypeOf', Fortran2023Lexer.TYPEOF),
+            ('classof', Fortran2023Lexer.CLASSOF),
+            ('CLASSOF', Fortran2023Lexer.CLASSOF),
+            ('ClassOf', Fortran2023Lexer.CLASSOF)
+        ]
+
+        for keyword, expected_token in test_cases:
+            tokens = self.get_tokens(keyword)
+            assert len(tokens) >= 1
+            assert tokens[0].type == expected_token, (
+                f"'{keyword}' expected type {expected_token}, got {tokens[0].type}"
+            )
 
 
 @pytest.mark.skipif(not PARSER_AVAILABLE, reason="Parser not available")
@@ -385,12 +423,32 @@ class TestFortran2023Parser:
             "f2018_compat_program.f90",
         )
         parser = self.create_parser(f2018_input)
-        
+
         try:
             tree = parser.program_unit_f2023()
             assert tree is not None
         except Exception as e:
             pytest.fail(f"F2018 compatibility in F2023 parsing failed: {e}")
+
+    def test_typeof_classof_parsing(self):
+        """Test F2023 TYPEOF/CLASSOF type inference parsing.
+
+        ISO/IEC 1539-1:2023 Section 7.3.2.1:
+        - R703: typeof-type-spec is TYPEOF ( data-ref )
+        - R704: classof-type-spec is CLASSOF ( data-ref )
+        """
+        typeof_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "typeof_classof.f90",
+        )
+        parser = self.create_parser(typeof_input)
+
+        try:
+            tree = parser.program_unit_f2023()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F2023 TYPEOF/CLASSOF type inference parsing failed: {e}")
 
 
 class TestFortran2023Foundation:
@@ -429,7 +487,9 @@ class TestFortran2023Foundation:
             # F2023 degree-based trigonometric intrinsics
             'ACOSD', 'ASIND', 'ATAND', 'ATAN2D', 'COSD', 'SIND', 'TAND',
             # F2023 pi-scaled trigonometric intrinsics
-            'ACOSPI', 'ASINPI', 'ATANPI', 'ATAN2PI', 'COSPI', 'SINPI', 'TANPI'
+            'ACOSPI', 'ASINPI', 'ATANPI', 'ATAN2PI', 'COSPI', 'SINPI', 'TANPI',
+            # F2023 TYPEOF/CLASSOF type inference (Section 7.3.2.1)
+            'TYPEOF', 'CLASSOF'
         ]
         
         for feature in required_features:

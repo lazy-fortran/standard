@@ -133,6 +133,18 @@ SINPI            : S I N P I ;
 // TANPI(X): Tangent of pi * x (Section 16.9.187)
 TANPI            : T A N P I ;
 
+// ----------------------------------------------------------------------------
+// TYPEOF/CLASSOF Type Inference (NEW in F2023)
+// ISO/IEC 1539-1:2023 Section 7.3.2.1: TYPEOF/CLASSOF type specifiers
+// J3/22-007 R703: typeof-type-spec is TYPEOF ( data-ref )
+// J3/22-007 R704: classof-type-spec is CLASSOF ( data-ref )
+// ----------------------------------------------------------------------------
+
+// TYPEOF declares entity with same declared type as data-ref
+TYPEOF           : T Y P E O F ;
+// CLASSOF declares entity with same dynamic type as data-ref (polymorphic)
+CLASSOF          : C L A S S O F ;
+
 // Fragments are inherited from Fortran2018Lexer - no need to duplicate
 
 // ============================================================================
