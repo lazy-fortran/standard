@@ -9,8 +9,10 @@ repository currently supports, based on:
 - `tests/FORTRANII/test_fortran_ii_parser.py`
 - `tests/test_fixture_parsing.py` (XPASS fixtures)
 
-It is intentionally descriptive of the current implementation, not a
-claim of full conformance to every historical FORTRAN II dialect.
+This is a descriptive audit of the current implementation. Full
+conformance to the IBM 704 FORTRAN II manual (C28-6000-2, 1958) requires
+resolving the gaps documented in section 8 below. Tape/drum I/O and
+file-control statements are tracked by issue #153 (reopened).
 
 ## 1. Program structure and subprograms
 
@@ -393,15 +395,15 @@ or are out of scope for the current grammar:
 | IF QUOTIENT OVERFLOW n1, n2          | (FORTRAN I: see FORTRANParser) | FORTRAN I only  |
 | IF DIVIDE CHECK n1, n2               | (FORTRAN I: see FORTRANParser) | FORTRAN I only  |
 | SENSE LIGHT i                        | (FORTRAN I: `sense_light_stmt`) | FORTRAN I only |
-| READ INPUT TAPE i, n, list           | Not implemented                | Out of scope    |
-| READ TAPE i, list                    | Not implemented                | Out of scope    |
-| READ DRUM i, j, list                 | Not implemented                | Out of scope    |
-| WRITE OUTPUT TAPE i, n, list         | Not implemented                | Out of scope    |
-| WRITE TAPE i, list                   | Not implemented                | Out of scope    |
-| WRITE DRUM i, j, list                | Not implemented                | Out of scope    |
-| END FILE i                           | Not implemented                | Out of scope    |
-| REWIND i                             | Not implemented                | Out of scope    |
-| BACKSPACE i                          | Not implemented                | Out of scope    |
+| READ INPUT TAPE i, n, list           | Not implemented                | Gap: see #153   |
+| READ TAPE i, list                    | Not implemented                | Gap: see #153   |
+| READ DRUM i, j, list                 | Not implemented                | Gap: see #153   |
+| WRITE OUTPUT TAPE i, n, list         | Not implemented                | Gap: see #153   |
+| WRITE TAPE i, list                   | Not implemented                | Gap: see #153   |
+| WRITE DRUM i, j, list                | Not implemented                | Gap: see #153   |
+| END FILE i                           | Not implemented                | Gap: see #153   |
+| REWIND i                             | Not implemented                | Gap: see #153   |
+| BACKSPACE i                          | Not implemented                | Gap: see #153   |
 
 ### 8.4 Implementation Status
 
@@ -419,12 +421,11 @@ been addressed:
   preprocessor (issue #143, closed). Validates IBM 704 card layout per
   C28-6000-2 and converts to lenient form for parsing.
 
-The following features are explicitly out of scope for the current
-simplified grammar:
+The following features remain as gaps to be resolved:
 
 - Tape/drum I/O forms (READ INPUT TAPE, WRITE OUTPUT TAPE, READ/WRITE
   TAPE/DRUM) and auxiliary file control (END FILE, REWIND, BACKSPACE)
-  are not implemented. These were closed as out of scope (issue #153).
+  are not implemented. These are tracked by issue #153 (reopened).
 
 ## 9. Summary
 

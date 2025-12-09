@@ -366,17 +366,13 @@ syntax errors under the generic entry rule:
 - `FORTRAN66/test_fortran66_parser/standard_program.f`
 - `FORTRAN66/test_fortran66_parser/subroutine_program.f`
 
-The XPASS reason strings describe these fixtures as:
+Fixtures that fail are marked as xfail with explicit issue references
+(see issue #311 for Fortran 90 grammar gaps that affect FORTRAN 66
+compatibility).
 
-- “more ambitious than the simplified grammar”.
-- exercising constructs “only partially modeled”.
-- representing full standard programs that still yield syntax errors.
-
-This confirms that:
-
-- The targeted tests validate key FORTRAN 66/IV features in isolation.
-- The integrated, whole-program behavior for richer examples still has
-  gaps relative to the standard.
+The gaps identified represent grammar limitations tracked in the
+crosswalk table above. Resolution requires implementing the missing
+ANSI X3.9-1966 statement forms.
 
 ## 7. Summary
 

@@ -8,8 +8,10 @@ repository actually supports today, based only on the contents of:
 - `tests/FORTRAN/test_fortran_historical_stub.py`
 - `tests/test_fixture_parsing.py` and the fixtures it references
 
-It is intentionally descriptive of the current implementation, not a
-claim of full conformance to the original IBM 704 FORTRAN compiler.
+This is a descriptive audit of the current implementation. Full
+conformance to the original IBM 704 FORTRAN compiler requires resolving
+the gaps documented in sections 2 and 8 below (tracked by issues #141
+and #153).
 
 ## 1. Program structure
 
@@ -281,16 +283,13 @@ available for modern tooling. This implementation addresses issue #155.
 
 ## 7. Fixtures and XPASS status
 
-The generic fixture test (`tests/test_fixture_parsing.py`) treats many
-1957 fixtures as XPASS with reason strings explaining that:
+The generic fixture test (`tests/test_fixture_parsing.py`) marks failing
+fixtures as xfail with explicit issue references. Any remaining xfail
+entries represent grammar gaps tracked in issues #141 and #153.
 
-- They “go beyond the simplified FORTRAN grammar”.
-- They “intentionally stretch the FORMAT grammar”.
-- They “remain outside the strict subset accepted by the stub”.
-
-These XPASS entries are the authoritative list of historical examples
-that still fail to parse and should be used as a to‑do list when
-extending the grammar toward fuller 1957 coverage.
+Fixtures that fail due to tape/drum I/O or file-control statements
+(END FILE, REWIND, BACKSPACE) are documented in section 8 below
+and tracked by issue #153.
 
 ## 8. C28-6003 Appendix B Crosswalk
 

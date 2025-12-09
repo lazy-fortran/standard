@@ -167,9 +167,8 @@ Gaps:
   with named types, valid initializer forms) are not modeled in the
   grammar.
 - Some enumerated type forms defined in F2003/F2018 (e.g. particular
-  attribute combinations on ENUM types) may not be fully represented;
-  the grammar uses a simplified ENUM/ENUMERATOR model tuned for the
-  existing tests.
+  attribute combinations on ENUM types) may not be fully represented.
+  This is a grammar gap tracked by issue #310.
 
 ---
 
@@ -202,21 +201,19 @@ Tests:
   - `conditional_expression.f90` also appears in the generic fixture
     harness; XPASS is configured to tolerate current parser limitations.
 
-Gaps:
+Gaps (tracked by issue #310):
 
-- The `expr_f2023`/`primary_f2023` system is intentionally **minimal**:
-  - It doesn’t reuse the rich F90/F2003 expression grammar; it models a
-    subset sufficient for the conditional expression tests.
-  - There is no integration between `expr_f2023` and the existing F2018
-    `expr_f90`/`expr_f2003` rules; F2023 expressions are localised to
-    the F2023 execution part.
-- This design is pragmatically sufficient for demonstrating conditional
-  expressions in isolation but does **not** model all Fortran expression
-  forms in F2023.
+- The `expr_f2023`/`primary_f2023` system does not reuse the rich
+  F90/F2003 expression grammar; it models a limited subset.
+- There is no integration between `expr_f2023` and the existing F2018
+  `expr_f90`/`expr_f2003` rules; F2023 expressions are isolated to the
+  F2023 execution part.
+- Full F2023 compliance requires integrating the conditional expression
+  syntax into the complete F2018 expression hierarchy.
 
 ---
 
-## 5. F2023 execution part: minimal, F2023‑only statements
+## 5. F2023 execution part (limited statement repertoire)
 
 Specification:
 
@@ -229,7 +226,7 @@ Parser implementation:
 - `execution_part_f2023`:
   - A sequence of `executable_stmt_f2023` only.
 - `executable_stmt_f2023`:
-  - Minimal statement repertoire:
+  - Limited statement repertoire:
     - `assignment_stmt_f2023`
     - `call_stmt_f2023`
     - `if_stmt_f2023`
@@ -253,16 +250,16 @@ Tests:
 - `TestFortran2023Foundation` also checks:
   - Token availability for core features across all standards.
 
-Gaps:
+Gaps (tracked by issue #310):
 
-- `execution_part_f2023` is intentionally **minimal**:
-  - It does not include F2018 constructs like team/event/collective
-    constructs, DO CONCURRENT locality, SELECT RANK, etc.
-  - F2023 semantic changes to these features (where present in the
-    standard) are therefore only represented via the inherited F2018
-    grammar, not integrated into the F2023 execution part.
-- This reflects the repository’s current goal: a small F2023 overlay
-  for key new syntax, with the bulk of F2018 behavior unchanged.
+- `execution_part_f2023` does not include F2018 constructs like
+  team/event/collective constructs, DO CONCURRENT locality, SELECT
+  RANK, etc.
+- F2023 semantic changes to these features (where present in the
+  standard) are only represented via the inherited F2018 grammar, not
+  integrated into the F2023 execution part.
+- Full F2023 compliance requires the F2023 execution part to inherit
+  or override the complete F2018 statement set.
 
 ---
 
@@ -297,7 +294,7 @@ Gaps:
 - IEEE 2023 semantic changes (NaN handling, etc.) are explicitly not
   modeled; this is expected for a pure grammar.
 - The F2023 IEEE functions are not fully integrated into the expression
-  model; they are handled in a minimal way sufficient for tests.
+  model; they are only partially implemented (tracked by issue #310).
 
 ---
 
@@ -369,15 +366,13 @@ Note: `basic_program.f90` now parses successfully and is no longer xfail.
 These gaps must be resolved by implementing the missing F2023 grammar
 rules per ISO/IEC 1539-1:2023.
 
-Interpretation:
+Current status:
 
-- The F2023 grammar is a **minimal overlay** on the F2018 core:
-  - It covers lexical tokens and enough parsing to demonstrate the new
-    features in isolation.
-  - It does not aim yet to parse arbitrary F2023 programs with zero
-    syntax errors.
-- The XPASS fixtures plus this audit serve as the roadmap for further
-  F2023 work.
+- The F2023 grammar is an **incomplete overlay** on the F2018 core.
+- It covers lexical tokens and partial parsing for new features but
+  does not parse arbitrary F2023 programs with zero syntax errors.
+- The xfail fixtures and this audit document the gaps requiring
+  resolution (tracked by issue #310).
 
 ---
 
@@ -385,13 +380,12 @@ Interpretation:
 
 The Fortran 2023 layer in this repository:
 
-- **Implements, in a minimal but tested way:**
+- **Currently implements (partially):**
   - A F2023‑specific program entry (`program_unit_f2023`) that re‑uses
     F2018 program units.
-  - A small specification part overlay (`specification_part_f2023`)
-    that supports ENUM/ENUMERATOR definitions and F2023 type
-    declarations.
-  - A minimal execution part (`execution_part_f2023`) that supports:
+  - A specification part overlay (`specification_part_f2023`) that
+    supports ENUM/ENUMERATOR definitions and F2023 type declarations.
+  - A limited execution part (`execution_part_f2023`) that supports:
     - Assignments (with and without conditional expressions).
     - Simple CALL/IF/PRINT statements.
     - RANDOM_INIT and SYSTEM_CLOCK calls.
@@ -401,13 +395,12 @@ The Fortran 2023 layer in this repository:
     - IEEE_MAX/MIN/MAX_MAG/MIN_MAG.
     - BOZ literals and basic NAMELIST/SYSTEM_CLOCK refinements.
   - Token‑level compatibility with F2018 and earlier standards.
-- **Deliberately does not yet:**
-  - Integrate F2023 syntax changes deeply into the full F2018
-    expression and statement model.
-  - Eliminate XPASS entries for all F2023 fixtures in the generic test
-    harness.
-  - Enforce any of the Fortran 2023 semantic changes (IEEE behavior,
-    SYSTEM_CLOCK kinds, NAMELIST visibility, etc.).
+- **Gaps requiring resolution (tracked by issue #310):**
+  - F2023 syntax changes not integrated into full F2018 expression and
+    statement model.
+  - Fixtures failing (xfail) that should parse per ISO/IEC 1539-1:2023.
+  - Fortran 2023 semantic requirements (IEEE behavior, SYSTEM_CLOCK
+    kinds, NAMELIST visibility) not enforced in grammar.
 
 Existing umbrella issue:
 
@@ -415,18 +408,17 @@ Existing umbrella issue:
   - Should use this audit as the spec→grammar cross‑walk and ensure
     every F2023 gap identified here has its own issue.
 
-Future work (to be tracked via #178 and follow‑up issues) should:
+Future work (to be tracked via #178, #310, and follow‑up issues) should:
 
 - Integrate F2023 enumerations and conditional expressions into the
-  full expression and statement model, not just the minimal F2023
+  full expression and statement model, not just the F2023-specific
   overlays.
-- Expand F2023 execution part coverage to include (or clearly defer)
-  F2018 constructs and any F2023‑specific refinements.
-- Reduce the XPASS list by tightening the grammar and tests until the
-  comprehensive F2023 fixtures parse with zero syntax errors or are
-  explicitly documented as out of scope.
+- Expand F2023 execution part coverage to include F2018 constructs and
+  any F2023‑specific refinements.
+- Reduce the xfail list by implementing missing grammar rules until all
+  F2023 fixtures parse with zero syntax errors.
 
-This document, together with the tests and XPASS configuration, makes
-the current Fortran 2023 support transparent and provides a precise
-checklist for future F2023 work under issue #178.
+This document, together with the tests and xfail configuration, makes
+the current Fortran 2023 gaps transparent and provides a checklist for
+F2023 work under issues #178 and #310.
 
