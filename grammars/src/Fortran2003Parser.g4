@@ -242,7 +242,14 @@ subroutine_stmt_f2003
 // Internal subprogram part (ISO/IEC 1539-1:2004 R1213)
 // R1213: internal-subprogram-part -> contains-stmt [internal-subprogram]...
 internal_subprogram_part_f2003
-    : contains_stmt internal_subprogram+
+    : contains_stmt internal_subprogram_f2003+
+    ;
+
+// Internal subprogram (ISO/IEC 1539-1:2004 R1214)
+// R1214: internal-subprogram -> function-subprogram | subroutine-subprogram
+internal_subprogram_f2003
+    : function_subprogram_f2003
+    | subroutine_subprogram_f2003
     ;
 
 // Module subprogram (ISO/IEC 1539-1:2004 R1107)

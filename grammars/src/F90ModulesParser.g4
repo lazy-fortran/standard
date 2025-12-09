@@ -20,7 +20,7 @@ parser grammar F90ModulesParser;
 
 // Module definition - ISO/IEC 1539:1991 Section 11.3, R1104
 module
-    : module_stmt specification_part? module_subprogram_part? end_module_stmt
+    : module_stmt specification_part? module_subprogram_part_f90? end_module_stmt
     ;
 
 // MODULE statement - ISO/IEC 1539:1991 Section 11.3, R1105
@@ -34,14 +34,16 @@ end_module_stmt
     ;
 
 // Module subprogram part - ISO/IEC 1539:1991 Section 11.3, R1108
-module_subprogram_part
-    : contains_stmt NEWLINE* (module_subprogram NEWLINE*)*
+// Renamed to _f90 for consistent versioning with procedure rules
+module_subprogram_part_f90
+    : contains_stmt NEWLINE* (module_subprogram_f90 NEWLINE*)*
     ;
 
 // Module subprogram - ISO/IEC 1539:1991 Section 11.3, R1109
-module_subprogram
-    : function_subprogram
-    | subroutine_subprogram
+// Renamed to _f90 to use the F90-specific subprogram rules
+module_subprogram_f90
+    : function_subprogram_f90
+    | subroutine_subprogram_f90
     ;
 
 // CONTAINS statement - ISO/IEC 1539:1991 Section 12.5.1

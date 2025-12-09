@@ -63,7 +63,7 @@ program_unit_f2008
 // Enhanced with F2008 specification and execution parts
 main_program_f2008
     : program_stmt specification_part_f2008? execution_part_f2008?
-      internal_subprogram_part? end_program_stmt
+      internal_subprogram_part_f2003? end_program_stmt
     ;
 
 // Module (ISO/IEC 1539-1:2010 Section 11.2.1, R1104)
@@ -87,7 +87,7 @@ external_subprogram_f2008
 //                               end-function-stmt
 function_subprogram_f2008
     : function_stmt_f2008 specification_part_f2008? execution_part_f2008?
-      internal_subprogram_part? end_function_stmt
+      internal_subprogram_part_f2003? end_function_stmt
     ;
 
 // Subroutine subprogram (ISO/IEC 1539-1:2010 Section 12.6.2.3, R1231)
@@ -96,7 +96,7 @@ function_subprogram_f2008
 //                                 end-subroutine-stmt
 subroutine_subprogram_f2008
     : subroutine_stmt_f2008 specification_part_f2008? execution_part_f2008?
-      internal_subprogram_part? end_subroutine_stmt
+      internal_subprogram_part_f2003? end_subroutine_stmt
     ;
 
 // Function statement (ISO/IEC 1539-1:2010 Section 12.6.2.2, R1224)
@@ -399,14 +399,14 @@ module_subprogram
 // Implementation of a module procedure interface defined in parent module
 module_subroutine_subprogram_f2008
     : module_subroutine_stmt_f2008 specification_part_f2008?
-      execution_part_f2008? internal_subprogram_part? end_subroutine_stmt
+      execution_part_f2008? internal_subprogram_part_f2003? end_subroutine_stmt
     ;
 
 // Separate module function (ISO/IEC 1539-1:2010 Section 12.6.2.5, R1237)
 // Implementation of a module function interface defined in parent module
 module_function_subprogram_f2008
     : module_function_stmt_f2008 specification_part_f2008?
-      execution_part_f2008? internal_subprogram_part? end_function_stmt
+      execution_part_f2008? internal_subprogram_part_f2003? end_function_stmt
     ;
 
 // MODULE SUBROUTINE statement (ISO/IEC 1539-1:2010 R1238 variant)
