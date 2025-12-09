@@ -271,6 +271,7 @@ executable_construct_f2008
     | print_stmt                      // PRINT (Section 9.6.3)
     | stop_stmt                       // STOP (Section 8.4)
     | error_stop_stmt                 // ERROR STOP (Section 8.4) - NEW in F2008
+    | critical_construct              // CRITICAL (Section 8.1.5) - NEW in F2008
     | select_type_construct           // SELECT TYPE (Section 8.1.9)
     | associate_construct             // ASSOCIATE (Section 8.1.3)
     | block_construct_f2008           // BLOCK (Section 8.1.4) - Enhanced in F2008
@@ -379,6 +380,37 @@ sync_stat_list
 sync_stat
     : STAT EQUALS variable_f90
     | ERRMSG EQUALS variable_f90
+    ;
+
+// ============================================================================
+// CRITICAL CONSTRUCT (ISO/IEC 1539-1:2010 Section 8.1.5)
+// ============================================================================
+// The CRITICAL construct limits execution of a block of statements to one
+// image at a time across all images in the current team.
+//
+// Key rules from ISO/IEC 1539-1:2010:
+// - R818: critical-construct -> critical-stmt block end-critical-stmt
+// - R819: critical-stmt -> [critical-construct-name :] CRITICAL [(sync-stat-list)]
+// - R820: end-critical-stmt -> END CRITICAL [critical-construct-name]
+
+// CRITICAL construct (ISO/IEC 1539-1:2010 R818)
+// R818: critical-construct -> critical-stmt block end-critical-stmt
+critical_construct
+    : critical_stmt
+      execution_part_f2008?
+      end_critical_stmt
+    ;
+
+// CRITICAL statement (ISO/IEC 1539-1:2010 R819)
+// R819: critical-stmt -> [critical-construct-name :] CRITICAL [(sync-stat-list)]
+critical_stmt
+    : (IDENTIFIER COLON)? CRITICAL (LPAREN sync_stat_list? RPAREN)? NEWLINE
+    ;
+
+// END CRITICAL statement (ISO/IEC 1539-1:2010 R820)
+// R820: end-critical-stmt -> END CRITICAL [critical-construct-name]
+end_critical_stmt
+    : END_CRITICAL (IDENTIFIER)? NEWLINE
     ;
 
 // ============================================================================
