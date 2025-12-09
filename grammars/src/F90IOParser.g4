@@ -57,8 +57,8 @@ io_control_spec_list
     ;
 
 io_control_spec
-    : UNIT EQUALS expr_f90          // Unit specification
-    | FMT EQUALS format_spec        // Format specification
+    : UNIT EQUALS io_unit_f90       // Unit specification (R910)
+    | FMT EQUALS format_spec        // Format specification (R910)
     | IOSTAT EQUALS variable_f90    // I/O status
     | ERR EQUALS label              // Error handling
     | END EQUALS label              // End-of-file handling
@@ -66,7 +66,15 @@ io_control_spec
     | ADVANCE EQUALS expr_f90       // Non-advancing I/O (F90)
     | SIZE EQUALS variable_f90      // Characters transferred (F90)
     | REC EQUALS expr_f90           // Record number (direct access)
-    | expr_f90                      // Positional unit
+    | MULTIPLY                      // Positional * for io-unit or format (R901/R912)
+    | expr_f90                      // Positional unit or format expression
+    ;
+
+// IO unit - ISO/IEC 1539:1991 Section 9.4, R901
+// io-unit -> external-file-unit | * | internal-file-unit
+io_unit_f90
+    : expr_f90                      // external-file-unit or internal-file-unit
+    | MULTIPLY                      // preconnected unit (stdout/stdin)
     ;
 
 format_spec

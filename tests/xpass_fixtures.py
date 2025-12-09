@@ -93,13 +93,6 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     # =========================================================================
     (
         "Fortran90",
-        Path("Fortran90/test_comprehensive_parsing/advanced_features_module.f90"),
-    ): (
-        "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
-        "module PRIVATE attribute handling. Tracked by Issue #311."
-    ),
-    (
-        "Fortran90",
         Path("Fortran90/test_comprehensive_parsing/fortran95_features_program.f90"),
     ): (
         "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
@@ -111,13 +104,6 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     ): (
         "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
         "character*n length syntax gaps. Tracked by Issue #311."
-    ),
-    (
-        "Fortran90",
-        Path("Fortran90/test_comprehensive_parsing/types_module.f90"),
-    ): (
-        "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
-        "TYPE construct in module handling. Tracked by Issue #311."
     ),
     (
         "Fortran90",
