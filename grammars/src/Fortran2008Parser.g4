@@ -179,6 +179,7 @@ specification_part_f2008
 // F2008 adds CONTIGUOUS statement (Section 5.3.7, R544)
 declaration_construct_f2008
     : derived_type_def_f2003          // Derived types (Section 4.5)
+    | enum_def_f2008                  // ENUM definitions (Section 4.6)
     | class_declaration_stmt          // CLASS declarations (Section 4.5.6)
     | procedure_declaration_stmt      // Procedure declarations (Section 12.4.3.2)
     | interface_block                 // Interface blocks (Section 12.4.3)
@@ -186,7 +187,58 @@ declaration_construct_f2008
     | protected_stmt                  // PROTECTED (Section 5.3.14)
     | contiguous_stmt                 // CONTIGUOUS (Section 5.3.7) - NEW in F2008
     | type_declaration_stmt_f2008     // Type declarations with F2008 kinds
+    | public_stmt                     // PUBLIC (Section 5.3.10) - Inherited from F90
+    | private_stmt                    // PRIVATE (Section 5.3.10) - Inherited from F90
+    | namelist_stmt                   // NAMELIST (Section 5.4)
+    | common_stmt                     // COMMON (Section 5.7.2)
+    | parameter_stmt                  // PARAMETER (Section 5.4.11)
+    | data_stmt                       // DATA (Section 5.4.7)
     | declaration_construct_f2003     // Inherit F2003 declarations
+    ;
+
+// ============================================================================
+// ENUM DEFINITION (ISO/IEC 1539-1:2010 Section 4.6)
+// ============================================================================
+// F2003 introduced ENUM for C interoperability with BIND(C).
+// F2023 extends with typed enumerators.
+
+// Enum definition (ISO/IEC 1539-1:2010 R460)
+enum_def_f2008
+    : enum_def_stmt_f2008
+      enumerator_def_stmt_f2008*
+      end_enum_stmt_f2008
+    ;
+
+// Enum definition statement (ISO/IEC 1539-1:2010 R461)
+// R461: enum-def-stmt -> ENUM, BIND(C) [ :: type-name ]
+// Note: type-name can be a keyword-like identifier (e.g., "status")
+enum_def_stmt_f2008
+    : ENUM COMMA BIND LPAREN C RPAREN (DOUBLE_COLON identifier_or_keyword)? NEWLINE
+    | ENUM (DOUBLE_COLON identifier_or_keyword)? NEWLINE
+    ;
+
+// Enumerator definition statement (ISO/IEC 1539-1:2010 R462)
+// R462: enumerator-def-stmt -> ENUMERATOR [::] enumerator-list
+// Enumerator names can also be keyword-like identifiers
+enumerator_def_stmt_f2008
+    : ENUMERATOR (DOUBLE_COLON)? enumerator_list_f2008 NEWLINE
+    ;
+
+// Enumerator list
+enumerator_list_f2008
+    : enumerator_f2008 (COMMA enumerator_f2008)*
+    ;
+
+// Enumerator (ISO/IEC 1539-1:2010 R463)
+// R463: enumerator -> named-constant [ = scalar-int-constant-expr ]
+enumerator_f2008
+    : identifier_or_keyword (EQUALS INTEGER_LITERAL)?
+    ;
+
+// End enum statement (ISO/IEC 1539-1:2010 R464)
+// R464: end-enum-stmt -> END ENUM
+end_enum_stmt_f2008
+    : END ENUM NEWLINE
     ;
 
 // ============================================================================
@@ -716,4 +768,51 @@ execution_part
 // Routes to F2008 program unit with submodule support
 program_unit
     : program_unit_f2008
+    ;
+
+// ============================================================================
+// IDENTIFIER OR KEYWORD OVERRIDE (F2008 Extension)
+// ============================================================================
+// F2008 adds several new keywords that can also be used as identifiers.
+// Override F2003 identifier_or_keyword to include F2008-specific tokens.
+identifier_or_keyword
+    : IDENTIFIER
+    | VALUE        // VALUE can be used as an identifier when not in C-binding context
+    | NAME         // NAME can be used as an identifier
+    | RESULT       // RESULT can be used as a variable name
+    | SUM_INTRINSIC  // SUM can be used as a variable/result name
+    | ID           // ID can be used as a variable name (common identifier)
+    | DATA         // DATA can be used as a variable name (legacy keyword)
+    | KIND         // KIND can be used as parameter name in type instantiation
+    | LEN          // LEN can be used as parameter name in character declarations
+    | TRIM_INTRINSIC  // TRIM can be used as function name
+    | SIZE         // SIZE can be used as function name (F90 token)
+    | SHAPE_INTRINSIC  // SHAPE can be used as a type name
+    | STAT         // STAT can be used as variable name in ALLOCATE
+    | ERRMSG       // ERRMSG can be used as variable name in ALLOCATE
+    | SOURCE       // SOURCE can be used as variable name
+    | MOLD         // MOLD can be used as variable name
+    | UNIT         // UNIT can be used as variable name in I/O
+    | IOSTAT       // IOSTAT can be used as variable name
+    | FILE         // FILE can be used as variable name in I/O
+    | ACCESS       // ACCESS can be used as variable name in I/O
+    | FORM         // FORM can be used as variable name in I/O
+    | STATUS       // STATUS can be used as variable name in I/O
+    | BLANK        // BLANK can be used as variable name in I/O
+    | POSITION     // POSITION can be used as variable name in I/O
+    | ACTION       // ACTION can be used as variable name in I/O
+    | DELIM        // DELIM can be used as variable name in I/O
+    | PAD          // PAD can be used as variable name in I/O
+    | RECL         // RECL can be used as variable name in I/O
+    | IOMSG        // IOMSG can be used as variable name in I/O
+    | ASYNCHRONOUS // ASYNCHRONOUS can be used as variable name in I/O
+    // F2008-specific tokens that can be used as identifiers
+    | IMAGES       // IMAGES can be used as variable name (SYNC IMAGES keyword)
+    | ALL          // ALL can be used as variable name (SYNC ALL keyword)
+    | MEMORY       // MEMORY can be used as variable name (SYNC MEMORY keyword)
+    | CONCURRENT   // CONCURRENT can be used as variable name (DO CONCURRENT)
+    | CONTIGUOUS   // CONTIGUOUS can be used as variable name
+    | SUBMODULE    // SUBMODULE can be used as a name
+    | BLOCK        // BLOCK can be used as variable name
+    | ERROR_STOP   // ERROR_STOP is compound keyword, not typically used as name
     ;
