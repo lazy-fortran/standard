@@ -36,10 +36,11 @@ import Fortran95Lexer;
 // newline should be added to the source during preprocessing.
 
 // Fixed-form comment: newline followed immediately by C/c in column 1
-// ISO/IEC 1539-1:2004 Section 3.3.2 - column-1 C/c makes entire line a comment
-// regardless of what follows (no whitespace required after C)
+// ISO/IEC 1539-1:2004 Section 3.3.2 - column-1 C/c is a comment line
+// Match C/c followed by whitespace or non-alphanumeric (avoids keywords).
 FIXED_FORM_COMMENT
-    : [\r\n]+ [cC] ~[\r\n]* -> channel(HIDDEN)
+    : [\r\n]+ [cC] ( [ \t] ~[\r\n]* | [*\-=!+#$%^&/<>:;,~`@0-9] ~[\r\n]* )
+      -> channel(HIDDEN)
     ;
 
 // Star comment at column 1 (after newline)
