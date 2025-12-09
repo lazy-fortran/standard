@@ -162,6 +162,49 @@ class TestFortran2023Lexer:
             elif base_name == 'COSD':
                 assert tokens[0].type == Fortran2023Lexer.COSD
 
+    def test_pi_trig_intrinsics(self):
+        """Test F2023 pi-scaled trigonometric intrinsic keywords.
+
+        ISO/IEC 1539-1:2023 Section 16.9:
+        - ACOSPI: Arc cosine / pi (Section 16.9.4)
+        - ASINPI: Arc sine / pi (Section 16.9.18)
+        - ATANPI: Arc tangent / pi (Section 16.9.23)
+        - ATAN2PI: Arc tangent of Y/X / pi (Section 16.9.24)
+        - COSPI: Cosine of pi * x (Section 16.9.52)
+        - SINPI: Sine of pi * x (Section 16.9.171)
+        - TANPI: Tangent of pi * x (Section 16.9.187)
+        """
+        pi_intrinsics = {
+            'ACOSPI': Fortran2023Lexer.ACOSPI,
+            'ASINPI': Fortran2023Lexer.ASINPI,
+            'ATANPI': Fortran2023Lexer.ATANPI,
+            'ATAN2PI': Fortran2023Lexer.ATAN2PI,
+            'COSPI': Fortran2023Lexer.COSPI,
+            'SINPI': Fortran2023Lexer.SINPI,
+            'TANPI': Fortran2023Lexer.TANPI
+        }
+
+        for intrinsic, expected_token in pi_intrinsics.items():
+            tokens = self.get_tokens(intrinsic)
+            assert len(tokens) >= 1
+            assert tokens[0].type == expected_token, (
+                f"Pi-scaled trig intrinsic '{intrinsic}' expected type "
+                f"{expected_token}, got {tokens[0].type}"
+            )
+
+    def test_pi_trig_case_insensitive(self):
+        """Test pi-scaled trig intrinsics are case-insensitive per ISO standard."""
+        test_cases = ['sinpi', 'SINPI', 'Sinpi', 'SiNpI', 'cospi', 'COSPI', 'Cospi']
+
+        for case in test_cases:
+            tokens = self.get_tokens(case)
+            assert len(tokens) >= 1
+            base_name = case.upper()
+            if base_name == 'SINPI':
+                assert tokens[0].type == Fortran2023Lexer.SINPI
+            elif base_name == 'COSPI':
+                assert tokens[0].type == Fortran2023Lexer.COSPI
+
     def test_f2018_compatibility(self):
         """Test that F2023 maintains full F2018 compatibility."""
         # Test key F2018 constructs still work
@@ -314,6 +357,26 @@ class TestFortran2023Parser:
         except Exception as e:
             pytest.fail(f"F2023 degree trigonometric intrinsics parsing failed: {e}")
 
+    def test_pi_trig_intrinsics_parsing(self):
+        """Test F2023 pi-scaled trigonometric intrinsics parsing.
+
+        ISO/IEC 1539-1:2023 Section 16.9:
+        - ACOSPI, ASINPI, ATANPI, ATAN2PI: Inverse functions divided by pi
+        - COSPI, SINPI, TANPI: Functions with argument multiplied by pi
+        """
+        trig_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "pi_trig_intrinsics.f90",
+        )
+        parser = self.create_parser(trig_input)
+
+        try:
+            tree = parser.program_unit_f2023()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F2023 pi-scaled trigonometric intrinsics parsing failed: {e}")
+
     def test_f2018_compatibility_parsing(self):
         """Test that F2023 maintains F2018 parsing compatibility."""
         f2018_input = load_fixture(
@@ -364,7 +427,9 @@ class TestFortran2023Foundation:
             # F2023 enhancements
             'ENUMERATOR', 'QUESTION', 'IEEE_MAX',
             # F2023 degree-based trigonometric intrinsics
-            'ACOSD', 'ASIND', 'ATAND', 'ATAN2D', 'COSD', 'SIND', 'TAND'
+            'ACOSD', 'ASIND', 'ATAND', 'ATAN2D', 'COSD', 'SIND', 'TAND',
+            # F2023 pi-scaled trigonometric intrinsics
+            'ACOSPI', 'ASINPI', 'ATANPI', 'ATAN2PI', 'COSPI', 'SINPI', 'TANPI'
         ]
         
         for feature in required_features:
