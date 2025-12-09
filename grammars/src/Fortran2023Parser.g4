@@ -116,7 +116,14 @@ enumerator_f2023
 // J3/22-007 R763: end-enum-stmt
 // end-enum-stmt is END ENUM [ enum-type-name ]
 end_enum_stmt_f2023
-    : END ENUM NEWLINE
+    : END ENUM IDENTIFIER? NEWLINE
+    ;
+
+// Override F2008 end-enum-stmt to support F2023 optional type name
+// ISO/IEC 1539-1:2023 R771: end-enum-type-stmt is END ENUM [ enum-type-name ]
+// In F2023, END ENUM may include the optional enum-type-name for clarity
+end_enum_stmt_f2008
+    : END ENUM identifier_or_keyword? NEWLINE
     ;
 
 // ============================================================================
