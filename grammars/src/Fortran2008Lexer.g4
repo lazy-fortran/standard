@@ -158,6 +158,10 @@ ERFC             : E R F C ;
 GAMMA            : G A M M A ;
 LOG_GAMMA        : L O G '_' G A M M A ;
 
+// Hypotenuse function (Section 13.7.77)
+// - HYPOT(X,Y): Euclidean distance sqrt(X**2 + Y**2) without overflow
+HYPOT            : H Y P O T ;
+
 // Array reduction and inquiry functions (Section 13.7.119, 13.7.127, 13.7.58)
 // - NORM2(X[,DIM]): L2 norm of an array (Section 13.7.119)
 // - PARITY(MASK[,DIM]): Reduction via .NEQV. (Section 13.7.127)

@@ -211,5 +211,50 @@ class TestBasicF2008Features:
         assert tree is not None, "LOCK/UNLOCK statements failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for LOCK/UNLOCK statements, got {errors}"
 
+    def test_bit_shift_intrinsics(self):
+        """Test bit shift intrinsics SHIFTL, SHIFTR, SHIFTA, MASKL, MASKR (ISO 13.7)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "bit_shift_intrinsics.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "Bit shift intrinsics failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for bit shift intrinsics, got {errors}"
+
+    def test_bit_reduction_intrinsics(self):
+        """Test bitwise reduction intrinsics IALL, IANY, IPARITY (ISO 13.7)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "bit_reduction_intrinsics.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "Bit reduction intrinsics failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for bit reduction intrinsics, got {errors}"
+
+    def test_atomic_intrinsics(self):
+        """Test ATOMIC_DEFINE and ATOMIC_REF intrinsics (ISO 13.7.19-20)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "atomic_intrinsics.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "Atomic intrinsics failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for atomic intrinsics, got {errors}"
+
+    def test_hypot_intrinsic(self):
+        """Test HYPOT intrinsic function (ISO 13.7.77)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "hypot_intrinsic.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "HYPOT intrinsic failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for HYPOT intrinsic, got {errors}"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
