@@ -770,12 +770,13 @@ bessel_function_call
     ;
 
 // Mathematical function calls (ISO/IEC 1539-1:2010 Section 13.7)
-// Error function and gamma function
+// Error function, gamma function, and hypotenuse
 math_function_call
     : ERF LPAREN actual_arg_list RPAREN          // Section 13.7.52
     | ERFC LPAREN actual_arg_list RPAREN         // Section 13.7.53
     | GAMMA LPAREN actual_arg_list RPAREN        // Section 13.7.61
     | LOG_GAMMA LPAREN actual_arg_list RPAREN    // Section 13.7.108
+    | HYPOT LPAREN actual_arg_list RPAREN        // Section 13.7.77
     ;
 
 // Array function calls (ISO/IEC 1539-1:2010 Section 13.7)
@@ -961,4 +962,6 @@ identifier_or_keyword
     // F2008 atomic intrinsics (Section 13.7.19-20)
     | ATOMIC_DEFINE  // ATOMIC_DEFINE can be used as variable name
     | ATOMIC_REF     // ATOMIC_REF can be used as variable name
+    // F2008 mathematical intrinsics (Section 13.7.77)
+    | HYPOT          // HYPOT can be used as variable name
     ;

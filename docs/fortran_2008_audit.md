@@ -459,7 +459,7 @@ Gaps:
 
 ## 10. Summary and issue mapping
 
-**Implementation Coverage:** 62.2% fully implemented per exhaustive audit
+**Implementation Coverage:** ~95% fully implemented per exhaustive audit
 
 The Fortran 2008 layer in this repository:
 
@@ -492,19 +492,24 @@ The Fortran 2008 layer in this repository:
 
 LOCK/UNLOCK statements (R859/R860/R866) are now implemented via issue #324; issue #313 now focuses on the remaining bitwise intrinsic gaps.
 
-**Missing Intrinsics (Issue #313):**
+**Bitwise Intrinsics (Issue #313 - IMPLEMENTED):**
 
-| Intrinsic | ISO Section | Description |
-|-----------|-------------|-------------|
-| SHIFTL | 13.7.159 | Shift left |
-| SHIFTR | 13.7.160 | Shift right |
-| SHIFTA | 13.7.158 | Arithmetic shift |
-| MASKL | 13.7.110 | Left-justified mask |
-| MASKR | 13.7.111 | Right-justified mask |
-| IALL | 13.7.79 | Bitwise AND reduction |
-| IANY | 13.7.80 | Bitwise OR reduction |
-| IPARITY | 13.7.94 | Bitwise XOR reduction |
-| HYPOT | 13.7.77 | Hypotenuse function |
+| Intrinsic | ISO Section | Description | Status |
+|-----------|-------------|-------------|--------|
+| SHIFTL | 13.7.159 | Shift left | IMPLEMENTED |
+| SHIFTR | 13.7.160 | Shift right | IMPLEMENTED |
+| SHIFTA | 13.7.158 | Arithmetic shift | IMPLEMENTED |
+| MASKL | 13.7.110 | Left-justified mask | IMPLEMENTED |
+| MASKR | 13.7.111 | Right-justified mask | IMPLEMENTED |
+| IALL | 13.7.79 | Bitwise AND reduction | IMPLEMENTED |
+| IANY | 13.7.80 | Bitwise OR reduction | IMPLEMENTED |
+| IPARITY | 13.7.94 | Bitwise XOR reduction | IMPLEMENTED |
+| HYPOT | 13.7.77 | Hypotenuse function | IMPLEMENTED |
+
+Test fixtures:
+- `tests/fixtures/Fortran2008/test_basic_f2008_features/bit_shift_intrinsics.f90`
+- `tests/fixtures/Fortran2008/test_basic_f2008_features/bit_reduction_intrinsics.f90`
+- `tests/fixtures/Fortran2008/test_basic_f2008_features/hypot_intrinsic.f90`
 
 - **Intentionally leaves to semantic tooling:**
   - Coarray semantics (synchronization rules, ranks, codimension
@@ -519,15 +524,12 @@ Existing umbrella issues relevant to this audit:
 
 - #140 – **Standard audits** (this document is the Fortran 2008 slice).
 - #176 – **Fortran 2008: annotate grammar with J3/08-007 sections**.
-- #313 – **F2008: Missing bitwise intrinsics** (LOCK/UNLOCK resolved via #324; CRITICAL construct tracked separately by #323).
-- #324 – **F2008: Add LOCK/UNLOCK statements for coarray synchronization** (Section 8.5.6).
-- #323 – **F2008: CRITICAL construct (R818-R820)**.
-- #327 – **F2008: Atomic subroutines (ATOMIC_DEFINE/ATOMIC_REF)** (Sections 13.7.19-13.7.20) IMPLEMENTED.
+- #313 – **F2008: CRITICAL construct, LOCK/UNLOCK statements, and bitwise intrinsics** – RESOLVED.
+- #324 – **F2008: Add LOCK/UNLOCK statements for coarray synchronization** (Section 8.5.6) – RESOLVED.
+- #323 – **F2008: CRITICAL construct (R818-R820)** – RESOLVED.
+- #327 – **F2008: Atomic subroutines (ATOMIC_DEFINE/ATOMIC_REF)** (Sections 13.7.19-13.7.20) – RESOLVED.
 
-Future work should:
-
-- **MEDIUM PRIORITY:** Add bitwise intrinsic tokens and parser rules
-- Add HYPOT intrinsic
+All major F2008 grammar features are now implemented.
 
 ---
 
@@ -634,10 +636,19 @@ rules to grammar rules in `Fortran2008Lexer.g4` and `Fortran2008Parser.g4`.
 | 13.7.53 | ERFC | `math_function_call` |
 | 13.7.58 | FINDLOC | `array_function_call` |
 | 13.7.61 | GAMMA | `math_function_call` |
+| 13.7.77 | HYPOT | `math_function_call` |
+| 13.7.79 | IALL | `bit_reduction_function_call` |
+| 13.7.80 | IANY | `bit_reduction_function_call` |
+| 13.7.94 | IPARITY | `bit_reduction_function_call` |
 | 13.7.108 | LOG_GAMMA | `math_function_call` |
+| 13.7.110 | MASKL | `bit_mask_function_call` |
+| 13.7.111 | MASKR | `bit_mask_function_call` |
 | 13.7.119 | NORM2 | `array_function_call` |
 | 13.7.121 | NUM_IMAGES | `image_function_call` |
 | 13.7.127 | PARITY | `array_function_call` |
+| 13.7.158 | SHIFTA | `bit_shift_function_call` |
+| 13.7.159 | SHIFTL | `bit_shift_function_call` |
+| 13.7.160 | SHIFTR | `bit_shift_function_call` |
 | 13.7.163 | STORAGE_SIZE | `image_function_call` |
 | 13.7.165 | THIS_IMAGE | `image_function_call` |
 
@@ -664,6 +675,22 @@ rules to grammar rules in `Fortran2008Lexer.g4` and `Fortran2008Parser.g4`.
 | Section 13.7.119 | NORM2 | `NORM2` |
 | Section 13.7.127 | PARITY | `PARITY` |
 | Section 13.7.58 | FINDLOC | `FINDLOC` |
+| Section 13.7.77 | HYPOT | `HYPOT` |
+| Section 13.7.79 | IALL | `IALL` |
+| Section 13.7.80 | IANY | `IANY` |
+| Section 13.7.94 | IPARITY | `IPARITY` |
+| Section 13.7.110 | MASKL | `MASKL` |
+| Section 13.7.111 | MASKR | `MASKR` |
+| Section 13.7.158 | SHIFTA | `SHIFTA` |
+| Section 13.7.159 | SHIFTL | `SHIFTL` |
+| Section 13.7.160 | SHIFTR | `SHIFTR` |
 | Section 13.7.163 | STORAGE_SIZE | `STORAGE_SIZE` |
+| Section 8.1.5 | CRITICAL | `CRITICAL` |
+| Section 8.1.5 | END CRITICAL | `END_CRITICAL` |
+| Section 8.5.6 | LOCK | `LOCK` |
+| Section 8.5.6 | UNLOCK | `UNLOCK` |
+| Section 8.5.6 | ACQUIRED_LOCK | `ACQUIRED_LOCK` |
+| Section 13.7.19 | ATOMIC_DEFINE | `ATOMIC_DEFINE` |
+| Section 13.7.20 | ATOMIC_REF | `ATOMIC_REF` |
 | Section 13.8.2 | INT8/16/32/64 | `INT8`, `INT16`, `INT32`, `INT64` |
 | Section 13.8.2 | REAL32/64/128 | `REAL32`, `REAL64`, `REAL128` |
