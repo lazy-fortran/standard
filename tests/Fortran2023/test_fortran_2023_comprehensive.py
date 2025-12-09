@@ -113,11 +113,54 @@ class TestFortran2023Lexer:
             'LOGICAL_KINDS': Fortran2023Lexer.LOGICAL_KINDS,
             'CHARACTER_KINDS': Fortran2023Lexer.CHARACTER_KINDS
         }
-        
+
         for const, expected_token in constants.items():
             tokens = self.get_tokens(const)
             assert len(tokens) >= 1
             assert tokens[0].type == expected_token
+
+    def test_degree_trig_intrinsics(self):
+        """Test F2023 degree-based trigonometric intrinsic keywords.
+
+        ISO/IEC 1539-1:2023 Section 16.9:
+        - ACOSD: Arc cosine in degrees (Section 16.9.3)
+        - ASIND: Arc sine in degrees (Section 16.9.17)
+        - ATAND: Arc tangent in degrees (Section 16.9.21)
+        - ATAN2D: Arc tangent of Y/X in degrees (Section 16.9.22)
+        - COSD: Cosine with argument in degrees (Section 16.9.51)
+        - SIND: Sine with argument in degrees (Section 16.9.170)
+        - TAND: Tangent with argument in degrees (Section 16.9.186)
+        """
+        trig_intrinsics = {
+            'ACOSD': Fortran2023Lexer.ACOSD,
+            'ASIND': Fortran2023Lexer.ASIND,
+            'ATAND': Fortran2023Lexer.ATAND,
+            'ATAN2D': Fortran2023Lexer.ATAN2D,
+            'COSD': Fortran2023Lexer.COSD,
+            'SIND': Fortran2023Lexer.SIND,
+            'TAND': Fortran2023Lexer.TAND
+        }
+
+        for intrinsic, expected_token in trig_intrinsics.items():
+            tokens = self.get_tokens(intrinsic)
+            assert len(tokens) >= 1
+            assert tokens[0].type == expected_token, (
+                f"Degree trig intrinsic '{intrinsic}' expected type "
+                f"{expected_token}, got {tokens[0].type}"
+            )
+
+    def test_degree_trig_case_insensitive(self):
+        """Test degree-based trig intrinsics are case-insensitive per ISO standard."""
+        test_cases = ['sind', 'SIND', 'Sind', 'SiNd', 'cosd', 'COSD', 'Cosd']
+
+        for case in test_cases:
+            tokens = self.get_tokens(case)
+            assert len(tokens) >= 1
+            base_name = case.upper()
+            if base_name == 'SIND':
+                assert tokens[0].type == Fortran2023Lexer.SIND
+            elif base_name == 'COSD':
+                assert tokens[0].type == Fortran2023Lexer.COSD
 
     def test_f2018_compatibility(self):
         """Test that F2023 maintains full F2018 compatibility."""
@@ -251,6 +294,26 @@ class TestFortran2023Parser:
         except Exception as e:
             pytest.fail(f"F2023 BOZ array constructor parsing failed: {e}")
 
+    def test_degree_trig_intrinsics_parsing(self):
+        """Test F2023 degree-based trigonometric intrinsics parsing.
+
+        ISO/IEC 1539-1:2023 Section 16.9:
+        - ACOSD, ASIND, ATAND, ATAN2D: Inverse functions returning degrees
+        - COSD, SIND, TAND: Functions with argument in degrees
+        """
+        trig_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "degree_trig_intrinsics.f90",
+        )
+        parser = self.create_parser(trig_input)
+
+        try:
+            tree = parser.program_unit_f2023()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F2023 degree trigonometric intrinsics parsing failed: {e}")
+
     def test_f2018_compatibility_parsing(self):
         """Test that F2023 maintains F2018 parsing compatibility."""
         f2018_input = load_fixture(
@@ -299,7 +362,9 @@ class TestFortran2023Foundation:
             # F2018 teams and events
             'CO_SUM', 'SELECT_RANK', 'FORM_TEAM',
             # F2023 enhancements
-            'ENUMERATOR', 'QUESTION', 'IEEE_MAX'
+            'ENUMERATOR', 'QUESTION', 'IEEE_MAX',
+            # F2023 degree-based trigonometric intrinsics
+            'ACOSD', 'ASIND', 'ATAND', 'ATAN2D', 'COSD', 'SIND', 'TAND'
         ]
         
         for feature in required_features:
