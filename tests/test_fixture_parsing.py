@@ -110,8 +110,31 @@ STANDARD_CONFIGS: Dict[str, StandardConfig] = {
 }
 
 
+# Directories excluded from generic fixture testing because they:
+# - Require preprocessing (strict_fixed_form needs tools/strict_fixed_form.py)
+# - Contain fragment fixtures tested via dedicated entry rules
+# - Contain negative/invalid fixtures that are expected to fail
+# - Require different parser entry rules than the default
+EXCLUDED_DIRECTORIES = {
+    "test_strict_fixed_form",       # Requires strict_fixed_form.py preprocessing
+    "test_fortran_95_features",     # Fragment fixtures with dedicated entry rules
+    "test_fortran77_parser_extra",  # Multi-unit fixtures need fortran66_program entry
+}
+
+# Filename prefixes excluded from generic fixture testing
+EXCLUDED_PREFIXES = (
+    "bad_",         # Negative test fixtures (expected to fail)
+    "invalid_",     # Invalid syntax fixtures (expected to fail)
+)
+
+
 def _discover_fixtures() -> List[Tuple[str, Path]]:
-    """Discover all .f / .f90 / .lf fixtures under tests/fixtures."""
+    """Discover all .f / .f90 / .lf fixtures under tests/fixtures.
+
+    Excludes:
+    - Fixtures in EXCLUDED_DIRECTORIES (require special handling)
+    - Fixtures with EXCLUDED_PREFIXES (negative tests)
+    """
     cases: List[Tuple[str, Path]] = []
     if not FIXTURES_ROOT.exists():
         return cases
@@ -126,6 +149,12 @@ def _discover_fixtures() -> List[Tuple[str, Path]]:
             if not path.is_file():
                 continue
             if path.suffix.lower() not in {".f", ".f90", ".lf"}:
+                continue
+            # Skip excluded directories
+            if any(excl in path.parts for excl in EXCLUDED_DIRECTORIES):
+                continue
+            # Skip negative/invalid fixtures
+            if path.name.startswith(EXCLUDED_PREFIXES):
                 continue
             rel = path.relative_to(FIXTURES_ROOT)
             cases.append((standard, rel))
@@ -164,16 +193,18 @@ def test_fixture_parses_without_errors(standard: str, relpath: Path) -> None:
     assert tree is not None, message
 
     key = (standard, relpath)
-    if key in XPASS_FIXTURES:
-        reason_template = XPASS_FIXTURES[key]
-        pytest.xfail(
-            reason_template.format(
-                standard=standard,
-                relpath=relpath,
-                errors=errors,
+    if errors > 0:
+        if key in XPASS_FIXTURES:
+            reason_template = XPASS_FIXTURES[key]
+            pytest.xfail(
+                reason_template.format(
+                    standard=standard,
+                    relpath=relpath,
+                    errors=errors,
+                )
             )
-        )
-
-    assert errors == 0, (
-        f"{standard} fixture {relpath} expected 0 syntax errors, got {errors}"
-    )
+        else:
+            pytest.fail(
+                f"{standard} fixture {relpath} expected 0 syntax errors, "
+                f"got {errors}"
+            )
