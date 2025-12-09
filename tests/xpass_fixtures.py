@@ -126,11 +126,4 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
         "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
         "bracket array constructor syntax (F2003 feature). Tracked by Issue #311."
     ),
-    (
-        "Fortran90",
-        Path("Fortran90/test_fortran_90_comprehensive/select_case_program.f90"),
-    ): (
-        "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
-        "SELECT CASE with character selector handling. Tracked by Issue #311."
-    ),
 }
