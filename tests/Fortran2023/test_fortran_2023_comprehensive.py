@@ -488,6 +488,24 @@ class TestFortran2023Parser:
         except Exception as e:
             pytest.fail(f"F2023 TYPEOF/CLASSOF type inference parsing failed: {e}")
 
+    def test_string_intrinsics_parsing(self):
+        """Test F2023 SPLIT/TOKENIZE string intrinsic parsing.
+
+        ISO/IEC 1539-1:2023 Section 16.9.180 and 16.9.197
+        """
+        string_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "string_intrinsics.f90",
+        )
+        parser = self.create_parser(string_input)
+
+        try:
+            tree = parser.program_unit_f2023()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F2023 string intrinsic parsing failed: {e}")
+
 
 class TestFortran2023Foundation:
     """Test F2023 as foundation for LazyFortran2025."""
