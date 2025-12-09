@@ -115,3 +115,38 @@ internal_subprogram_f90
     : function_subprogram_f90
     | subroutine_subprogram_f90
     ;
+
+// ====================================================================
+// ENTRY STATEMENT - ISO/IEC 1539:1991 Section 12.5.2.4
+// ====================================================================
+//
+// R1219 entry-stmt is ENTRY entry-name [ ( [ dummy-arg-list ] ) [ suffix ] ]
+//
+// The ENTRY statement specifies an alternate entry point into a function
+// or subroutine subprogram. In F90, the RESULT clause (suffix) is permitted
+// for function ENTRY statements.
+//
+// Constraints:
+// - ENTRY may only appear in a function or subroutine subprogram
+// - ENTRY must not appear in an internal subprogram
+// - ENTRY must not appear between a nonblock DO and its terminal statement
+// - The entry-name becomes accessible to the host scoping unit
+
+// F90 ENTRY statement with optional RESULT clause
+// ISO/IEC 1539:1991 Section 12.5.2.4, R1219
+entry_stmt_f90
+    : ENTRY IDENTIFIER entry_dummy_arg_list_f90? suffix?
+    ;
+
+// Dummy argument list for ENTRY - ISO/IEC 1539:1991 Section 12.5.2.4
+// R1220 dummy-arg is dummy-arg-name | *
+entry_dummy_arg_list_f90
+    : LPAREN entry_dummy_arg_f90? (COMMA entry_dummy_arg_f90)* RPAREN
+    ;
+
+// Dummy argument for ENTRY - ISO/IEC 1539:1991 Section 12.5.2.4
+// Includes alternate return specifier (*) per Section 12.4.3
+entry_dummy_arg_f90
+    : identifier_or_keyword
+    | MULTIPLY                  // Alternate return specifier (*)
+    ;
