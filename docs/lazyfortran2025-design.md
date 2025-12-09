@@ -501,7 +501,20 @@ __<module-name>_MOD_<procedure-name>
 
 8.3.2 **Kind suffixes**
 
-8.3.2.1 Standard kind suffixes:
+8.3.2.1 The naming convention for kind suffixes is subject to the following consideration.
+
+> **OPEN ISSUE 9: Kind suffix convention**
+>
+> Should kind suffixes use bits (C-style) or bytes (Fortran kind parameter)?
+>
+> | Option | Example | Pros | Cons |
+> |--------|---------|------|------|
+> | A | `i32`, `r64` (bits) | Familiar to C/Rust programmers, current fortfront | Inconsistent with Fortran kind parameters |
+> | B | `i4`, `r8` (bytes) | Matches `integer(4)`, `real(8)` exactly | Less familiar to polyglot programmers |
+>
+> Option B aligns with Fortran's kind system where `integer(4)` means 4 bytes, not 4 bits.
+
+8.3.2.2 Kind suffixes (using current bit-based convention):
 
 | Type | Kind | Suffix |
 |------|------|--------|
@@ -514,7 +527,20 @@ __<module-name>_MOD_<procedure-name>
 | logical | 4 | l32 |
 | character | * | char |
 
-8.3.2.2 Array rank is indicated by `rank<n>` suffix:
+8.3.2.3 Kind suffixes (alternative byte-based convention):
+
+| Type | Kind | Suffix |
+|------|------|--------|
+| integer | 4 | i4 |
+| integer | 8 | i8 |
+| real | 4 | r4 |
+| real | 8 | r8 |
+| complex | 8 | c8 |
+| complex | 16 | c16 |
+| logical | 4 | l4 |
+| character | * | char |
+
+8.3.2.4 Array rank is indicated by `rank<n>` suffix:
 
 ```
 matmul__r64rank2_r64rank2
