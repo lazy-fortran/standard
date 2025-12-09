@@ -603,6 +603,25 @@ array_expr
     : expr_f90                       // Array expression
     ;
 
+// ISO/IEC 1539-1:2018 R1023: primary (override to include F2018 intrinsics)
+// Override F2008 primary to include F2018 intrinsic function calls
+primary
+    : identifier_or_keyword (PERCENT identifier_or_keyword)*
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN
+    | identifier_or_keyword DOUBLE_QUOTE_STRING
+    | identifier_or_keyword SINGLE_QUOTE_STRING
+    | intrinsic_function_call_f2018
+    | ieee_constant
+    | INTEGER_LITERAL
+    | LABEL
+    | REAL_LITERAL
+    | SINGLE_QUOTE_STRING
+    | DOUBLE_QUOTE_STRING
+    | '*'
+    | array_constructor
+    | LPAREN primary RPAREN
+    ;
+
 // ============================================================================
 // UTILITY RULES - Override F2008 rules for F2018 entry points
 // ============================================================================
