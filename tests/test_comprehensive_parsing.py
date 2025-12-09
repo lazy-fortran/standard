@@ -156,12 +156,43 @@ class TestUnifiedGrammarArchitecture:
             "test_comprehensive_parsing",
             "mixed_format_program.f90",
         )
-        
+
         tree, errors, exception = self.parse_fortran_code(mixed_code.strip(), "Fortran90")
         # Allow parsing errors in mixed format integration tests
         if errors > 0:
             print(f"Warning: Mixed format test had {errors} parsing errors")
         assert tree is not None or errors > 0, "Mixed format test should parse or fail gracefully"
+
+    def test_file_io_statements(self):
+        """Test F90 file I/O statements (OPEN, CLOSE, INQUIRE, REWIND, BACKSPACE, ENDFILE).
+
+        ISO/IEC 1539:1991 Section 9 defines file I/O:
+        - R904 open-stmt: OPEN statement for file connection
+        - R908 close-stmt: CLOSE statement for file disconnection
+        - R923 backspace-stmt: BACKSPACE for file positioning
+        - R924 endfile-stmt: ENDFILE for file positioning
+        - R925 rewind-stmt: REWIND for file positioning
+        - R929 inquire-stmt: INQUIRE for file inquiry
+
+        Fixes #315: F90 file I/O statements integration.
+        """
+        test_files = [
+            "open_close_inquire.f90",
+            "file_positioning.f90",
+            "advanced_io_specs.f90",
+        ]
+
+        for filename in test_files:
+            code = load_fixture(
+                "Fortran90",
+                "test_file_io_statements",
+                filename,
+            )
+
+            tree, errors, exception = self.parse_fortran_code(code.strip(), "Fortran90")
+            assert tree is not None, f"{filename} failed to parse: {exception}"
+            assert errors == 0, f"{filename} had {errors} parsing errors"
+
 
 if __name__ == "__main__":
     # Run tests if called directly
