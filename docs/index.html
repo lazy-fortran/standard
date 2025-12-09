@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Lazy Fortran 2025 Design (WORK IN PROGRESS)</title>
+  <title>Lazy Fortran 2025 Design</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root {
-      color-scheme: light dark;
-      --lf-bg: #0b1020;
-      --lf-fg: #f5f7ff;
-      --lf-accent: #ffcc66;
-      --lf-muted: #9ca3af;
-      --lf-code-bg: #111827;
-      --lf-border: #374151;
+      --lf-bg: #ffffff;
+      --lf-fg: #1a1a1a;
+      --lf-accent: #2563eb;
+      --lf-muted: #6b7280;
+      --lf-code-bg: #f3f4f6;
+      --lf-border: #d1d5db;
+      --lf-card-bg: #fafafa;
     }
 
     * {
@@ -23,7 +23,7 @@
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
         "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top left, #111827 0, #020617 50%);
+      background: var(--lf-bg);
       color: var(--lf-fg);
       min-height: 100vh;
     }
@@ -43,7 +43,8 @@
     header h1 {
       margin: 0 0 0.35rem;
       font-size: clamp(1.75rem, 2.4vw, 2.25rem);
-      letter-spacing: 0.03em;
+      letter-spacing: 0.02em;
+      color: var(--lf-accent);
     }
 
     header p {
@@ -60,7 +61,7 @@
       margin-top: 0.6rem;
       border-radius: 999px;
       border: 1px solid var(--lf-border);
-      background: rgba(15, 23, 42, 0.8);
+      background: var(--lf-card-bg);
       color: var(--lf-muted);
       font-size: 0.78rem;
       text-transform: uppercase;
@@ -71,8 +72,8 @@
       width: 6px;
       height: 6px;
       border-radius: 999px;
-      background: var(--lf-accent);
-      box-shadow: 0 0 0 3px rgba(255, 204, 102, 0.25);
+      background: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
     }
 
     nav {
@@ -89,7 +90,7 @@
       padding: 0.4rem 0.75rem;
       border-radius: 999px;
       border: 1px solid var(--lf-border);
-      background: rgba(15, 23, 42, 0.65);
+      background: var(--lf-card-bg);
       color: var(--lf-muted);
       text-decoration: none;
       font-size: 0.85rem;
@@ -106,13 +107,13 @@
       border-color: var(--lf-accent);
       color: var(--lf-fg);
       transform: translateY(-1px);
-      background: rgba(15, 23, 42, 0.9);
+      background: #fff;
     }
 
     nav a .pill {
       padding: 0.1rem 0.5rem;
       border-radius: 999px;
-      background: rgba(148, 163, 184, 0.18);
+      background: #e5e7eb;
       font-size: 0.78rem;
       color: var(--lf-muted);
     }
@@ -120,11 +121,9 @@
     main {
       border-radius: 1rem;
       padding: 1.75rem 1.5rem 1.5rem;
-      background: radial-gradient(circle at top left, #111827 0, #020617 60%);
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      box-shadow:
-        0 18px 45px rgba(15, 23, 42, 0.85),
-        0 0 0 1px rgba(15, 23, 42, 0.8);
+      background: var(--lf-card-bg);
+      border: 1px solid var(--lf-border);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
     .status-bar {
@@ -134,16 +133,16 @@
       gap: 0.75rem;
       margin-bottom: 1.25rem;
       padding-bottom: 0.75rem;
-      border-bottom: 1px dashed rgba(75, 85, 99, 0.8);
+      border-bottom: 1px dashed var(--lf-border);
       font-size: 0.8rem;
       color: var(--lf-muted);
     }
 
     .status-bar code {
-      background: rgba(15, 23, 42, 0.85);
+      background: var(--lf-code-bg);
       padding: 0.1rem 0.4rem;
       border-radius: 0.4rem;
-      border: 1px solid rgba(55, 65, 81, 0.9);
+      border: 1px solid var(--lf-border);
       font-size: 0.78rem;
     }
 
@@ -162,10 +161,12 @@
 
     #content h1 {
       font-size: 1.55rem;
+      color: var(--lf-accent);
     }
 
     #content h2 {
       font-size: 1.25rem;
+      color: #374151;
     }
 
     #content h3 {
@@ -174,7 +175,7 @@
 
     #content p {
       margin: 0.4rem 0;
-      color: rgba(229, 231, 235, 0.95);
+      color: #374151;
     }
 
     #content a {
@@ -201,7 +202,7 @@
       padding: 0.1rem 0.25rem;
       border-radius: 0.25rem;
       font-size: 0.85rem;
-      border: 1px solid rgba(55, 65, 81, 0.9);
+      border: 1px solid var(--lf-border);
     }
 
     #content pre {
@@ -210,13 +211,36 @@
       border-radius: 0.5rem;
       overflow-x: auto;
       font-size: 0.85rem;
-      border: 1px solid rgba(55, 65, 81, 0.9);
+      border: 1px solid var(--lf-border);
     }
 
     #content pre code {
       background: transparent;
       padding: 0;
       border: 0;
+    }
+
+    #content table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 0.75rem 0;
+      font-size: 0.9rem;
+    }
+
+    #content th,
+    #content td {
+      border: 1px solid var(--lf-border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+
+    #content th {
+      background: #e5e7eb;
+      font-weight: 600;
+    }
+
+    #content tr:nth-child(even) {
+      background: #f9fafb;
     }
 
     .loading,
@@ -226,7 +250,7 @@
     }
 
     .error {
-      color: #f97373;
+      color: #dc2626;
     }
 
     footer {
@@ -250,12 +274,12 @@
 <body>
   <div class="shell">
     <header>
-      <h1>Lazy Fortran 2025 Design</h1>
-      <p>Grammar-driven design notes for the LazyFortran2025 standard.</p>
+      <h1>Lazy Fortran 2025</h1>
+      <p>Design specification for the LazyFortran2025 language extension.</p>
       <p>Rendered from the Markdown sources in this repository.</p>
       <div class="badge">
         <span class="dot"></span>
-        <span>WORK IN PROGRESS &mdash; design may change</span>
+        <span>Draft - design may change</span>
       </div>
     </header>
 
@@ -265,39 +289,34 @@
         <span class="pill">lazy-fortran/standard</span>
       </a>
       <a href="lazyfortran2025-design.md">
-        <strong>Feature overview</strong>
+        <strong>Design Spec</strong>
         <span class="pill">LF-0001</span>
       </a>
       <a href="slides/html/">
         <strong>Open Issues Slides</strong>
         <span class="pill">Discussion</span>
       </a>
-      <a href="UNIFIED_ARCHITECTURE.md">
-        <strong>Grammar architecture</strong>
-        <span class="pill">Background</span>
-      </a>
     </nav>
 
     <main>
       <div class="status-bar">
         <div>
-          Source document:
+          Source:
           <code>docs/lazyfortran2025-design.md</code>
         </div>
         <div>
-          Site root:
+          Site:
           <code>https://lazy-fortran.github.io/standard/</code>
         </div>
       </div>
 
       <article id="content" class="loading">
-        Loading Lazy Fortran 2025 design document&hellip;
+        Loading Lazy Fortran 2025 design document...
       </article>
     </main>
 
     <footer>
-      Built automatically from the Lazy Fortran documentation in this
-      repository. See the GitHub Actions log for deployment details.
+      Built from the Lazy Fortran documentation repository.
     </footer>
   </div>
 
@@ -317,14 +336,14 @@
           target.classList.remove("loading", "error");
           target.innerHTML = marked.parse(markdown, { mangle: false, headerIds: true });
         } catch (error) {
-          console.error("Failed to load Lazy Fortran design doc:", error);
+          console.error("Failed to load design doc:", error);
           target.classList.remove("loading");
           target.classList.add("error");
           target.innerHTML =
-            "Failed to load the Lazy Fortran design document from <code>" +
+            "Failed to load the design document from <code>" +
             sourcePath +
-            "</code>. You can still view the raw Markdown " +
-            '<a href="lazyfortran2025-design.md">directly on GitHub Pages</a>.';
+            "</code>. View the raw Markdown " +
+            '<a href="lazyfortran2025-design.md">directly</a>.';
         }
       }
 
@@ -334,10 +353,9 @@
         target.classList.remove("loading");
         target.classList.add("error");
         target.textContent =
-          "Unable to load the Markdown renderer for the Lazy Fortran design document.";
+          "Unable to load the Markdown renderer.";
       }
     })();
   </script>
 </body>
 </html>
-
