@@ -108,7 +108,9 @@ a constraint specifying a set of types that a generic parameter may take
 
 5.1.2.1 The type of an undeclared variable is determined by its first assignment.
 
-5.1.2.2 The following assignments establish types:
+5.1.2.2 The kind of inferred numeric types is specified in A.1.
+
+5.1.2.3 The following assignments establish types:
 
 ```fortran
 x = 4              ! x is integer
@@ -135,6 +137,14 @@ allocate(matrix(n, m))    ! rank-2, runtime bounds
 5.1.4.1 When `implicit none` is present, undeclared names are errors and inference is disabled.
 
 5.1.4.2 This preserves compatibility with strict coding styles.
+
+5.1.5 **Inference from intent(out) arguments**
+
+5.1.5.1 Whether undeclared variables passed to `intent(out)` arguments are automatically declared is specified in A.2.
+
+5.1.6 **Declaration placement**
+
+5.1.6.1 Whether explicit declarations may appear anywhere in a block or only at the beginning is specified in A.4.
 
 ### 5.2 Expression type rules
 
@@ -176,6 +186,10 @@ allocate(matrix(n, m))    ! rank-2, runtime bounds
 6.1.2 Approach A (J3 TEMPLATE) follows the official Fortran 202Y direction.
 
 6.1.3 Approach B (Traits) provides Swift/Rust-inspired ergonomics.
+
+6.1.4 Which approach(es) to adopt is specified in A.5.
+
+6.1.5 The syntax for generic type parameters is specified in A.7.
 
 ### 6.2 TEMPLATE construct (J3 approach)
 
@@ -301,7 +315,9 @@ END IMPLEMENTS
 
 6.5.1 The two approaches are not mutually exclusive and may be combined.
 
-6.5.2 Complementary strengths:
+6.5.2 Whether generics support static dispatch, dynamic dispatch, or both is specified in A.8.
+
+6.5.3 Complementary strengths:
 
 | Use Case | Recommended Approach |
 |----------|---------------------|
