@@ -126,12 +126,19 @@ declaration_construct_f2018
 // ISO/IEC 1539-1:2018 R1409: use-stmt
 // Enhanced USE statement for F2018, including intrinsic modules such as
 // ISO_FORTRAN_ENV in addition to the IEEE intrinsic modules from F2003.
+// The module_name_f2018 rule allows both IDENTIFIER and IEEE module tokens.
 use_stmt
-    : USE IDENTIFIER NEWLINE
-    | USE IDENTIFIER COMMA ONLY COLON only_list NEWLINE
+    : USE module_name_f2018 NEWLINE
+    | USE module_name_f2018 COMMA ONLY COLON only_list NEWLINE
     | USE COMMA INTRINSIC DOUBLE_COLON intrinsic_module_name NEWLINE
     | USE COMMA INTRINSIC DOUBLE_COLON intrinsic_module_name COMMA ONLY COLON
       only_list NEWLINE
+    ;
+
+// Module name for USE statement - includes IEEE tokens which lexer matches first
+module_name_f2018
+    : IDENTIFIER
+    | ieee_module_name
     ;
 
 // Intrinsic module names (e.g. ISO_FORTRAN_ENV, IEEE intrinsic modules)
@@ -297,10 +304,11 @@ collective_stat_list
     ;
 
 // ISO/IEC 1539-1:2018 Section 16.9.46-50: stat-variable, errmsg-variable
+// RESULT_IMAGE accepts an expression (typically an integer image number)
 collective_stat
     : STAT EQUALS variable_f90
     | ERRMSG EQUALS variable_f90
-    | RESULT_IMAGE EQUALS variable_f90
+    | RESULT_IMAGE EQUALS expr_f90
     ;
 
 // ISO/IEC 1539-1:2018 Section 16.9.49: OPERATION argument for CO_REDUCE

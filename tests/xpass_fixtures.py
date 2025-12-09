@@ -21,62 +21,6 @@ from typing import Dict, Tuple
 
 XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
     # =========================================================================
-    # Fortran 2023 - Issue #310
-    # Grammar gaps for F2023 features
-    # =========================================================================
-    (
-        "Fortran2023",
-        Path("Fortran2023/test_fortran_2023_comprehensive/boz_array_constructor.f90"),
-    ): (
-        "Fortran 2023 fixture {relpath} reports {errors} syntax errors due to "
-        "missing bracket array constructor support. Tracked by Issue #310."
-    ),
-    (
-        "Fortran2023",
-        Path("Fortran2023/test_fortran_2023_comprehensive/conditional_expression.f90"),
-    ): (
-        "Fortran 2023 fixture {relpath} reports {errors} syntax errors due to "
-        "missing conditional expression (? :) support. Tracked by Issue #310."
-    ),
-    (
-        "Fortran2023",
-        Path("Fortran2023/test_fortran_2023_comprehensive/enum_program.f90"),
-    ): (
-        "Fortran 2023 fixture {relpath} reports {errors} syntax errors due to "
-        "missing ENUM TYPE support. Tracked by Issue #310."
-    ),
-    (
-        "Fortran2023",
-        Path("Fortran2023/test_fortran_2023_comprehensive/f2018_compat_program.f90"),
-    ): (
-        "Fortran 2023 fixture {relpath} reports {errors} syntax errors due to "
-        "coarray/image syntax gaps. Tracked by Issue #310."
-    ),
-    (
-        "Fortran2023",
-        Path("Fortran2023/test_fortran_2023_comprehensive/ieee_program.f90"),
-    ): (
-        "Fortran 2023 fixture {relpath} reports {errors} syntax errors due to "
-        "IEEE arithmetic module intrinsic gaps. Tracked by Issue #310."
-    ),
-    (
-        "Fortran2023",
-        Path("Fortran2023/test_fortran_2023_comprehensive/mixed_era_program.f90"),
-    ): (
-        "Fortran 2023 fixture {relpath} reports {errors} syntax errors due to "
-        "character*n length syntax gaps. Tracked by Issue #310."
-    ),
-    (
-        "Fortran2023",
-        Path(
-            "Fortran2023/"
-            "test_fortran_2023_comprehensive_extra/namelist_enhancements_module.f90"
-        ),
-    ): (
-        "Fortran 2023 fixture {relpath} reports {errors} syntax errors due to "
-        "module PRIVATE attribute syntax gaps. Tracked by Issue #310."
-    ),
-    # =========================================================================
     # Fortran 90 - Issue #311
     # Grammar gaps for module and control flow constructs
     # =========================================================================
