@@ -251,7 +251,10 @@ class TestCrossUnitValidation:
             "child_submodule_valid.f90",
         )
         result = self.validator.validate_multi_unit([parent_code, child_code])
-        errors = [d for d in result.diagnostics if d.severity == DiagnosticSeverity.ERROR]
+        errors = [
+            d for d in result.diagnostics
+            if d.severity == DiagnosticSeverity.ERROR
+        ]
         assert len(errors) == 0, f"Unexpected errors: {errors}"
 
     def test_missing_parent_module_warning(self):
@@ -293,9 +296,16 @@ class TestCrossUnitValidation:
             "test_submodule_semantics",
             "nested_submodule.f90",
         )
-        result = self.validator.validate_multi_unit([parent_code, child_code, nested_code])
-        parent_warnings = [d for d in result.diagnostics if d.code in ("SUBMOD_W001", "SUBMOD_W002")]
-        assert len(parent_warnings) == 0, f"Unexpected parent warnings: {parent_warnings}"
+        result = self.validator.validate_multi_unit(
+            [parent_code, child_code, nested_code]
+        )
+        parent_warnings = [
+            d for d in result.diagnostics
+            if d.code in ("SUBMOD_W001", "SUBMOD_W002")
+        ]
+        assert (
+            len(parent_warnings) == 0
+        ), f"Unexpected parent warnings: {parent_warnings}"
 
 
 class TestProcedureLinkageValidation:
@@ -317,8 +327,12 @@ class TestProcedureLinkageValidation:
             "child_submodule_valid.f90",
         )
         result = self.validator.validate_multi_unit([parent_code, child_code])
-        type_mismatches = [d for d in result.diagnostics if d.code == "SUBMOD_E003"]
-        assert len(type_mismatches) == 0, f"Unexpected type mismatches: {type_mismatches}"
+        type_mismatches = [
+            d for d in result.diagnostics if d.code == "SUBMOD_E003"
+        ]
+        assert (
+            len(type_mismatches) == 0
+        ), f"Unexpected type mismatches: {type_mismatches}"
 
     def test_procedure_type_mismatch(self):
         """Module procedure type mismatch should produce error."""
