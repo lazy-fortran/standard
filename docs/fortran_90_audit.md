@@ -305,7 +305,6 @@ a number of F90 fixtures as XPASS, including:
 
 - `tests/fixtures/Fortran90/test_fortran_90_comprehensive/`:
   - `basic_program.f90`
-  - `mathematics_module.f90`
   - `derived_types_module.f90`
   - `dynamic_arrays.f90`
   - `select_case_program.f90`
@@ -313,7 +312,6 @@ a number of F90 fixtures as XPASS, including:
   - `enhanced_procedures_program.f90`
   - `test_fortran_90_dual_format/free_form_module.f90`
 - `tests/fixtures/Fortran90/test_comprehensive_parsing/`:
-  - `mathematics_module.f90`
   - `dynamic_arrays_program.f90`
   - `types_module.f90`
   - `free_form_features_program.f90`
@@ -441,7 +439,7 @@ The Fortran 90 grammar in this repository:
 | R531 | `data-implied-do` nested forms | Partial |
 | R1219 | `entry-stmt` | NOT IMPLEMENTED |
 
-**xfail Fixtures:** 9 (tracked by Issue #311)
+**xfail Fixtures:** 7 (tracked by Issue #311)
 
 Future work should:
 
