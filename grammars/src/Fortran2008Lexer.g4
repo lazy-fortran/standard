@@ -170,6 +170,20 @@ FINDLOC          : F I N D L O C ;
 // - STORAGE_SIZE(A[,KIND]): Storage size in bits (Section 13.7.163)
 STORAGE_SIZE     : S T O R A G E '_' S I Z E ;
 
+// Bit shift intrinsics (Section 13.7.158-13.7.160)
+// - SHIFTA(I,SHIFT): Arithmetic right shift (Section 13.7.158)
+// - SHIFTL(I,SHIFT): Logical left shift (Section 13.7.159)
+// - SHIFTR(I,SHIFT): Logical right shift (Section 13.7.160)
+SHIFTA           : S H I F T A ;
+SHIFTL           : S H I F T L ;
+SHIFTR           : S H I F T R ;
+
+// Bit mask intrinsics (Section 13.7.110-13.7.111)
+// - MASKL(I[,KIND]): Left-justified bit mask (Section 13.7.110)
+// - MASKR(I[,KIND]): Right-justified bit mask (Section 13.7.111)
+MASKL            : M A S K L ;
+MASKR            : M A S K R ;
+
 // ============================================================================
 // ENHANCED INTEGER/REAL KINDS (ISO/IEC 1539-1:2010 Section 13.8.2)
 // ============================================================================
