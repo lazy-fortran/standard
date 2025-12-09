@@ -53,24 +53,6 @@ external_subprogram_f2023
     ;
 
 // ============================================================================
-// FORTRAN 2023 SPECIFICATION PART (ISO/IEC 1539-1:2023 Section 8)
-// ============================================================================
-
-// J3/22-007 R504: specification-part
-// F2023 specification part with enhancements
-specification_part_f2023
-    : (specification_item_f2023)*
-    ;
-
-// J3/22-007 R507: declaration-construct
-// F2023 specification items
-specification_item_f2023
-    : enum_def_f2023               // NEW in F2023 (Section 7.8)
-    | type_declaration_stmt_f2023
-    | NEWLINE
-    ;
-
-// ============================================================================
 // ENUMERATION TYPES (ISO/IEC 1539-1:2023 Section 7.8)
 // ============================================================================
 //
@@ -215,14 +197,8 @@ binary_op_f2023
     ;
 
 // ============================================================================
-// EXECUTION PART (ISO/IEC 1539-1:2023 Section 11)
+// EXECUTABLE STATEMENTS (ISO/IEC 1539-1:2023 Section 11, R514)
 // ============================================================================
-
-// J3/22-007 R509: execution-part
-// F2023 execution part with enhancements
-execution_part_f2023
-    : (executable_stmt_f2023)*
-    ;
 
 // J3/22-007 R514: executable-construct (simplified F2023 overlay)
 // F2023 executable statements
@@ -567,12 +543,6 @@ notify_wait_stmt_f2023
 // notify-variable is a coarray variable of type NOTIFY_TYPE
 notify_variable_f2023
     : IDENTIFIER                   // Variable of NOTIFY_TYPE
-    ;
-
-// NOTIFY_TYPE declaration statement
-// ISO/IEC 1539-1:2023 Section 16.5.9: NOTIFY_TYPE derived type
-notify_type_declaration_stmt_f2023
-    : TYPE LPAREN NOTIFY_TYPE RPAREN DOUBLE_COLON entity_decl_list NEWLINE
     ;
 
 // ============================================================================
