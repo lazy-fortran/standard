@@ -19,7 +19,7 @@ import sys
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
 sys.path.insert(
     0, str(Path(__file__).parent.parent / "grammars" / "generated" / "modern")
@@ -91,23 +91,6 @@ class DoConcurrentValidationResult:
         return sum(
             1 for d in self.diagnostics if d.severity == DiagnosticSeverity.WARNING
         )
-
-
-IO_STATEMENTS: Set[str] = {
-    "read", "write", "print", "open", "close", "inquire", "backspace",
-    "endfile", "rewind", "flush", "wait",
-}
-
-IMAGE_CONTROL_STATEMENTS: Set[str] = {
-    "sync all", "sync images", "sync memory", "lock", "unlock",
-    "critical", "end critical", "event post", "event wait",
-}
-
-IMPURE_INTRINSICS: Set[str] = {
-    "command_argument_count", "get_command", "get_command_argument",
-    "get_environment_variable", "system_clock", "date_and_time",
-    "cpu_time", "random_number", "random_seed", "execute_command_line",
-}
 
 
 class F2008DoConcurrentListener(Fortran2008ParserListener):
