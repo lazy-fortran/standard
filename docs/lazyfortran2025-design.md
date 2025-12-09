@@ -32,8 +32,7 @@ Readers should have access to ISO/IEC 1539-1:2023 for complete understanding of 
 8. [Application binary interface](#8-application-binary-interface)
 9. [Standardizer](#9-standardizer)
 
-Annex A. [Open questions (informative)](#annex-a-open-questions-informative)
-Annex B. [References](#annex-b-references)
+Annex A. [References](#annex-a-references)
 
 ---
 
@@ -113,7 +112,7 @@ a constraint specifying a set of types that a generic parameter may take
 | Section | Feature | ISO Fortran Behavior | Lazy Fortran Behavior |
 |---------|---------|---------------------|----------------------|
 | 5.1 | Type inference | Explicit declarations or I-N naming | First assignment determines type |
-| 5.3 | Default intent | No default (arguments modifiable) | See A.3 |
+| 5.3 | Default intent | No default (arguments modifiable) | See 5.3.3 |
 
 ---
 
@@ -133,7 +132,17 @@ a constraint specifying a set of types that a generic parameter may take
 
 5.1.2.1 The type of an undeclared variable is determined by its first assignment.
 
-5.1.2.2 The kind of inferred numeric types is specified in A.1.
+5.1.2.2 The kind of inferred numeric types follows the rules below.
+
+> **OPEN ISSUE 1: Default numeric kinds**
+>
+> What kind should inferred numeric literals have?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | ISO defaults (`real(4)`, `integer(4)`) | Compatible, predictable, smaller memory | Precision loss, overflow at ~2B |
+> | B | Double precision (`real(8)`, `integer(8)`) | Safer for scientific computing | Breaks ISO expectations, 2x memory |
+> | C | Context-dependent | Adapts to usage | Unpredictable |
 
 5.1.2.3 The following assignments establish types:
 
@@ -165,11 +174,29 @@ allocate(matrix(n, m))    ! rank-2, runtime bounds
 
 5.1.5 **Inference from intent(out) arguments**
 
-5.1.5.1 Whether undeclared variables passed to `intent(out)` arguments are automatically declared is specified in A.2.
+5.1.5.1 Whether undeclared variables passed to `intent(out)` arguments are automatically declared is subject to the following consideration.
+
+> **OPEN ISSUE 2: Inference from intent(out) arguments**
+>
+> Should `call init(p)` automatically declare `p` based on `intent(out)` signature?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | No (assignment only) | Simple local analysis | Doesn't support idiomatic patterns |
+> | B | Yes (inspect callee) | Supports `intent(out)` patterns | Requires cross-procedure analysis |
 
 5.1.6 **Declaration placement**
 
-5.1.6.1 Whether explicit declarations may appear anywhere in a block or only at the beginning is specified in A.4.
+5.1.6.1 Whether explicit declarations may appear anywhere in a block or only at the beginning is subject to the following consideration.
+
+> **OPEN ISSUE 3: Declaration placement**
+>
+> Should explicit declarations be allowed anywhere or only at block beginning?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | Block beginning only | Clean structure | Variables far from first use |
+> | B | Anywhere | Declare near use | Scattered, redundant with inference |
 
 ### 5.2 Expression type rules
 
@@ -191,7 +218,19 @@ allocate(matrix(n, m))    ! rank-2, runtime bounds
 
 5.3.2.2 Arguments that are modified are inferred as `intent(inout)` or `intent(out)` based on whether the input value is used.
 
-5.3.3 The default intent when usage analysis is inconclusive is specified in A.3.
+5.3.3 **Default intent**
+
+5.3.3.1 The default intent when usage analysis is inconclusive is subject to the following consideration.
+
+> **OPEN ISSUE 4: Default intent for procedure arguments**
+>
+> What should be the default intent when not explicitly specified?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | `intent(in)` default | Safe, prevents accidents | Breaks code relying on implicit inout |
+> | B | `intent(inout)` default | Closer to ISO | Still error-prone |
+> | C | No default (require explicit) | Forces clarity | Verbose |
 
 ---
 
@@ -205,9 +244,29 @@ allocate(matrix(n, m))    ! rank-2, runtime bounds
 
 6.1.3 Approach B (Traits) provides Swift/Rust-inspired ergonomics.
 
-6.1.4 Which approach(es) to adopt is specified in A.5.
+6.1.4 Which approach(es) to adopt is subject to the following consideration.
 
-6.1.5 The syntax for generic type parameters is specified in A.7.
+> **OPEN ISSUE 5: Generics approach**
+>
+> Which generics system to adopt?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | J3 TEMPLATE only | Official direction | Verbose |
+> | B | Traits only | Concise, automatic | Not official |
+> | C | Hybrid (both) | Maximum flexibility | Two systems |
+
+6.1.5 The syntax for generic type parameters is subject to the following consideration.
+
+> **OPEN ISSUE 6: Generic parameter syntax**
+>
+> What delimiter for generic type parameters?
+>
+> | Option | Syntax | Pros | Cons |
+> |--------|--------|------|------|
+> | A | `{T}` | Distinct, J3 inline | Not traditional |
+> | B | `(T)` | Fortran-like | Ambiguous with calls |
+> | C | `<T>` | Familiar to C++/Rust | Conflicts with operators |
 
 ### 6.2 TEMPLATE construct (J3 approach)
 
@@ -333,7 +392,17 @@ END IMPLEMENTS
 
 6.5.1 The two approaches are not mutually exclusive and may be combined.
 
-6.5.2 Whether generics support static dispatch, dynamic dispatch, or both is specified in A.8.
+6.5.2 Whether generics support static dispatch, dynamic dispatch, or both is subject to the following consideration.
+
+> **OPEN ISSUE 7: Dispatch mechanism**
+>
+> Should generics support both static and dynamic dispatch?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | Static only | Zero overhead | No runtime flexibility |
+> | B | Dynamic only | Runtime polymorphism | Overhead |
+> | C | Both | User chooses | Complex |
 
 6.5.3 Complementary strengths:
 
@@ -370,7 +439,17 @@ END IMPLEMENTS
 
 7.3.1 Specializations may be generated at module scope, program scope, or link-time depending on implementation.
 
-7.3.2 See A.6 for open questions on scope.
+7.3.2 The scope at which specializations are generated is subject to the following consideration.
+
+> **OPEN ISSUE 8: Specialization scope**
+>
+> At what scope should specializations be generated?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | Per-module | Smaller units | May duplicate |
+> | B | Per-program (link-time) | No duplication | Requires LTO |
+> | C | Lazy (on-demand) | Minimal size | Complex build |
 
 ---
 
@@ -607,95 +686,13 @@ end program main
 
 ---
 
-## Annex A Open questions (informative)
+## Annex A References
 
-### A.1 Default numeric kinds
-
-What kind should inferred numeric literals have?
-
-| Option | Description | Pros | Cons |
-|--------|-------------|------|------|
-| A | ISO defaults (`real(4)`, `integer(4)`) | Compatible, predictable, smaller memory | Precision loss, overflow at ~2B |
-| B | Double precision (`real(8)`, `integer(8)`) | Safer for scientific computing | Breaks ISO expectations, 2x memory |
-| C | Context-dependent | Adapts to usage | Unpredictable |
-
-### A.2 Inference from intent(out) arguments
-
-Should `call init(p)` automatically declare `p` based on `intent(out)` signature?
-
-| Option | Description | Pros | Cons |
-|--------|-------------|------|------|
-| A | No (assignment only) | Simple local analysis | Doesn't support idiomatic patterns |
-| B | Yes (inspect callee) | Supports `intent(out)` patterns | Requires cross-procedure analysis |
-
-### A.3 Default intent for procedure arguments
-
-What should be the default intent when not explicitly specified?
-
-| Option | Description | Pros | Cons |
-|--------|-------------|------|------|
-| A | `intent(in)` default | Safe, prevents accidents | Breaks code relying on implicit inout |
-| B | `intent(inout)` default | Closer to ISO | Still error-prone |
-| C | No default (require explicit) | Forces clarity | Verbose |
-
-### A.4 Declaration placement
-
-Should explicit declarations be allowed anywhere or only at block beginning?
-
-| Option | Description | Pros | Cons |
-|--------|-------------|------|------|
-| A | Block beginning only | Clean structure | Variables far from first use |
-| B | Anywhere | Declare near use | Scattered, redundant with inference |
-
-### A.5 Generics approach
-
-Which generics system to adopt?
-
-| Option | Description | Pros | Cons |
-|--------|-------------|------|------|
-| A | J3 TEMPLATE only | Official direction | Verbose |
-| B | Traits only | Concise, automatic | Not official |
-| C | Hybrid (both) | Maximum flexibility | Two systems |
-
-### A.6 Specialization scope
-
-At what scope should specializations be generated?
-
-| Option | Description | Pros | Cons |
-|--------|-------------|------|------|
-| A | Per-module | Smaller units | May duplicate |
-| B | Per-program (link-time) | No duplication | Requires LTO |
-| C | Lazy (on-demand) | Minimal size | Complex build |
-
-### A.7 Generic parameter syntax
-
-What delimiter for generic type parameters?
-
-| Option | Syntax | Pros | Cons |
-|--------|--------|------|------|
-| A | `{T}` | Distinct, J3 inline | Not traditional |
-| B | `(T)` | Fortran-like | Ambiguous with calls |
-| C | `<T>` | Familiar to C++/Rust | Conflicts with operators |
-
-### A.8 Dispatch mechanism
-
-Should generics support both static and dynamic dispatch?
-
-| Option | Description | Pros | Cons |
-|--------|-------------|------|------|
-| A | Static only | Zero overhead | No runtime flexibility |
-| B | Dynamic only | Runtime polymorphism | Overhead |
-| C | Both | User chooses | Complex |
-
----
-
-## Annex B References
-
-### B.1 Normative references
+### A.1 Normative references
 
 - ISO/IEC 1539-1:2023, *Information technology — Programming languages — Fortran — Part 1: Base language*
 
-### B.2 Informative references
+### A.2 Informative references
 
 The following documents are referenced for background information only. They do not constitute requirements of this document.
 
