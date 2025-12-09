@@ -223,18 +223,76 @@ class F2008DoConcurrentListener(Fortran2008ParserListener):
         identifiers = set(re.findall(r"\b([a-z_]\w*)\b", text))
         return identifiers - keywords
 
+    def enterScalar_mask_expr(self, ctx):
+        """Track variable references in DO CONCURRENT mask expressions.
+
+        Per ISO/IEC 1539-1:2010 Section 8.1.6.6, the mask expression in
+        DO CONCURRENT is evaluated for each iteration. Variables referenced
+        in the mask contribute to the dependency analysis for iteration
+        independence validation.
+        """
+        if not self._in_do_concurrent or self._current_do_concurrent is None:
+            return
+
+        text = self._get_token_text(ctx)
+        mask_vars = self._extract_referenced_variables(text)
+        self._current_do_concurrent.referenced_variables.update(mask_vars)
+        self._current_do_concurrent.has_mask = True
+        self._current_do_concurrent.mask_expr = text
+
+    def enterIf_construct(self, ctx):
+        """Track variable references in IF construct within DO CONCURRENT.
+
+        Per ISO/IEC 1539-1:2010 Section 8.1.6.6.4, iteration independence
+        requires tracking all variable references, including those in
+        conditional expressions. This method extracts variables from both
+        IF and ELSE IF conditions.
+        """
+        if not self._in_do_concurrent or self._current_do_concurrent is None:
+            return
+
+        text = self._get_token_text(ctx)
+
+        if_match = re.search(r"if\s*\((.+?)\)\s*then", text, re.IGNORECASE)
+        if if_match:
+            condition_text = if_match.group(1)
+            condition_vars = self._extract_referenced_variables(condition_text)
+            self._current_do_concurrent.referenced_variables.update(
+                condition_vars
+            )
+
+        for elseif_match in re.finditer(
+            r"elseif\s*\((.+?)\)\s*then", text, re.IGNORECASE
+        ):
+            condition_text = elseif_match.group(1)
+            condition_vars = self._extract_referenced_variables(condition_text)
+            self._current_do_concurrent.referenced_variables.update(
+                condition_vars
+            )
+
     def enterCall_stmt(self, ctx):
-        """Track procedure calls within DO CONCURRENT."""
+        """Track procedure calls and argument references within DO CONCURRENT.
+
+        Per ISO/IEC 1539-1:2010 Section 8.1.6.6.4, variables passed as
+        procedure arguments must be tracked for iteration independence
+        analysis, as they may be modified or referenced across iterations.
+        """
         if not self._in_do_concurrent or self._current_do_concurrent is None:
             return
 
         text = self._get_token_text(ctx)
         self._current_do_concurrent.contains_procedure_call = True
 
-        call_match = re.search(r"call\s+(\w+)", text)
+        call_match = re.search(r"call\s*(\w+)", text)
         if call_match:
             proc_name = call_match.group(1)
             self._current_do_concurrent.called_procedures.add(proc_name)
+
+        args_match = re.search(r"call\s*\w+\s*\((.+)\)", text, re.IGNORECASE)
+        if args_match:
+            args_text = args_match.group(1)
+            arg_vars = self._extract_referenced_variables(args_text)
+            self._current_do_concurrent.referenced_variables.update(arg_vars)
 
     def enterPrint_stmt(self, ctx):
         """Track PRINT statements within DO CONCURRENT."""
