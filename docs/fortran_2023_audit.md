@@ -100,6 +100,10 @@ Lexer implementation (`Fortran2023Lexer.g4`):
   - `QUESTION` for the ternary conditional operator `?`.
   - IEEE functions: `IEEE_MAX`, `IEEE_MIN`, `IEEE_MAX_MAG`, `IEEE_MIN_MAG`.
   - Intrinsic constants: `LOGICAL_KINDS`, `CHARACTER_KINDS`.
+  - Pi-scaled trigonometric intrinsics: `ACOSPI`, `ASINPI`, `ATANPI`,
+    `ATAN2PI`, `COSPI`, `SINPI`, `TANPI` (ISO/IEC 1539-1:2023 Section
+    16.9). They behave like other intrinsic tokens, so the lexer makes
+    them available for parser rules that reference `identifier_or_keyword`.
 - Inherits:
   - All Fortran 2018 tokens, including coarray/teams/events and earlier
     standard features.
@@ -115,6 +119,9 @@ Tests:
     - Verifies IEEE_MAX/MIN/MAX_MAG/MIN_MAG.
   - `test_enhanced_intrinsic_constants`:
     - Verifies LOGICAL_KINDS and CHARACTER_KINDS.
+  - `test_pi_trig_intrinsics` and `test_pi_trig_case_insensitive`:
+    - Verify recognition of the new pi-scaled trig keywords and their
+      case-insensitive behavior.
   - `test_f2018_compatibility`:
     - Confirms all key F2018 tokens are still recognized.
   - `test_f2003_oop_compatibility` and `test_f90_module_compatibility`:
@@ -435,16 +442,26 @@ Other Missing Features:
 - AT edit descriptor tracked by Issue #347.
 - LEADING_ZERO I/O specifier tracked by Issue #348.
 
-**Missing Intrinsic Functions (14 new trig functions):**
+**Missing Intrinsic Functions (remaining gaps):**
 
 | Intrinsic | Description |
 |-----------|-------------|
 | ACOSD, ASIND, ATAND, ATAN2D | Degree-based inverse trig (Issue #330) |
 | COSD, SIND, TAND | Degree-based trig (Issue #330) |
-| ACOSPI, ASINPI, ATANPI, ATAN2PI | Pi-scaled inverse trig (Issue #331) |
-| COSPI, SINPI, TANPI | Pi-scaled trig (Issue #331) |
 | SPLIT | String splitting (Issue #332) |
 | TOKENIZE | String tokenization (Issue #332) |
+
+**Implemented pi-scaled trigonometric intrinsics (Issue #331 resolved by PR #359):**
+
+- The keywords `ACOSPI`, `ASINPI`, `ATANPI`, `ATAN2PI`, `COSPI`, `SINPI`,
+  and `TANPI` appear in `identifier_or_keyword` so they can be parsed as
+  intrinsic functions (ISO/IEC 1539-1:2023 Section 16.9.4/16.9.18/16.9.23/
+  16.9.24/16.9.52/16.9.171/16.9.187). Tokens were added to
+  `Fortran2023Lexer.g4` and are tested by
+  `TestFortran2023Lexer::test_pi_trig_intrinsics` and
+  `::test_pi_trig_case_insensitive`.
+- Parsing coverage comes from `tests/fixtures/Fortran2023/test_fortran_2023_comprehensive/pi_trig_intrinsics.f90`
+  and `TestFortran2023Parser::test_pi_trig_intrinsics_parsing`.
 
 **xfail Fixtures:** 0 (Issue #310 resolved)
 
@@ -455,7 +472,7 @@ Existing umbrella issues:
 - #328 – **ENUM TYPE definitions (R766-R771) not implemented**.
 - #329 – **TYPEOF/CLASSOF type inference (R703-R704) not implemented**.
 - #330 – **Degree-based trigonometric intrinsics not implemented**.
-- #331 – **Pi-scaled trigonometric intrinsics not implemented**.
+- #331 – **Pi-scaled trigonometric intrinsics implemented (PR #359)**.
 - #332 – **String intrinsics SPLIT and TOKENIZE not implemented**.
 - #333 – **NOTIFY WAIT statement (R1179) and NOTIFY_TYPE not implemented**.
 - #334 – **Conditional expressions not integrated into F2018 expression hierarchy**.
@@ -465,7 +482,7 @@ Future work should:
 
 - **HIGH PRIORITY:** Implement ENUM TYPE definitions (R766-R771)
 - **HIGH PRIORITY:** Implement TYPEOF/CLASSOF type inference (R703-R704)
-- **MEDIUM PRIORITY:** Add 14 new trigonometric intrinsics
+- **MEDIUM PRIORITY:** Add the remaining degree-based trigonometric intrinsics (Issue #330)
 - **MEDIUM PRIORITY:** Implement NOTIFY WAIT coarray statement
 - Integrate conditional expressions into F2018 expression hierarchy
 - Expand execution part to include all F2018 constructs
