@@ -315,20 +315,20 @@ Two approaches available:
 
 **J3 TEMPLATE** (official Fortran direction):
 ```fortran
-TEMPLATE swap_t(T)
-    TYPE, DEFERRED :: T
-CONTAINS
-    SUBROUTINE swap(x, y)
-        TYPE(T), INTENT(INOUT) :: x, y
-        TYPE(T) :: tmp
+template swap_t(T)
+    type, deferred :: T
+contains
+    subroutine swap(x, y)
+        type(T), intent(inout) :: x, y
+        type(T) :: tmp
         tmp = x; x = y; y = tmp
-    END SUBROUTINE
-END TEMPLATE
+    end subroutine
+end template
 ```
 
 **Traits** (Swift/Rust style):
 ```fortran
-TYPE, IMPLEMENTS(IComparable) :: MyType
+type, implements(IComparable) :: my_type_t
 ```
 
 ---
@@ -402,7 +402,7 @@ call obj%add(x, y)    ! Runtime lookup
 
 ```fortran
 ! Standard style
-TYPE, IMPLEMENTS(IComparable) :: MyType
+type, implements(IComparable) :: my_type_t
 
 ! Annotation style
 @IComparable
