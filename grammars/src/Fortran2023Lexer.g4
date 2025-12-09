@@ -83,6 +83,31 @@ IEEE_MIN_MAG     : I E E E '_' M I N '_' M A G ;
 LOGICAL_KINDS    : L O G I C A L '_' K I N D S ;
 CHARACTER_KINDS  : C H A R A C T E R '_' K I N D S ;
 
+// ----------------------------------------------------------------------------
+// Degree-based Trigonometric Intrinsics (NEW in F2023)
+// ISO/IEC 1539-1:2023 Section 16.9: Intrinsic procedures
+// J3/22-007 Section 16.9.3, 16.9.17, 16.9.21, 16.9.22, 16.9.51, 16.9.170,
+// 16.9.186
+// ----------------------------------------------------------------------------
+
+// Inverse trigonometric functions returning degrees
+// ACOSD(X): Arc cosine in degrees (Section 16.9.3)
+ACOSD            : A C O S D ;
+// ASIND(X): Arc sine in degrees (Section 16.9.17)
+ASIND            : A S I N D ;
+// ATAND(X) or ATAND(Y,X): Arc tangent in degrees (Section 16.9.21)
+ATAND            : A T A N D ;
+// ATAN2D(Y,X): Arc tangent of Y/X in degrees (Section 16.9.22)
+ATAN2D           : A T A N '2' D ;
+
+// Trigonometric functions with argument in degrees
+// COSD(X): Cosine with argument in degrees (Section 16.9.51)
+COSD             : C O S D ;
+// SIND(X): Sine with argument in degrees (Section 16.9.170)
+SIND             : S I N D ;
+// TAND(X): Tangent with argument in degrees (Section 16.9.186)
+TAND             : T A N D ;
+
 // Fragments are inherited from Fortran2018Lexer - no need to duplicate
 
 // ============================================================================

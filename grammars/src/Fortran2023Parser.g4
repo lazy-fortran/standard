@@ -418,6 +418,14 @@ identifier_or_keyword
     | ENUMERATOR   // ENUMERATOR can be used as a name
     | PENDING      // PENDING can be used as enumerator name
     | ENUM         // ENUM can be used as a name
+    // F2023 degree-based trigonometric intrinsics (Section 16.9)
+    | ACOSD        // ACOSD can be used as function name
+    | ASIND        // ASIND can be used as function name
+    | ATAND        // ATAND can be used as function name
+    | ATAN2D       // ATAN2D can be used as function name
+    | COSD         // COSD can be used as function name
+    | SIND         // SIND can be used as function name
+    | TAND         // TAND can be used as function name
     ;
 
 // ============================================================================
