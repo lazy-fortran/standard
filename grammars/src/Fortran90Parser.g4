@@ -191,6 +191,12 @@ executable_stmt
     | read_stmt_f90                  // Section 9.4 - Enhanced I/O
     | write_stmt_f90                 // Section 9.4 - Enhanced I/O
     | print_stmt_f90                 // Section 9.4 - F77-inherited print
+    | open_stmt_f90                  // Section 9.7.1 - File connection (R904)
+    | close_stmt_f90                 // Section 9.7.2 - File disconnection (R908)
+    | inquire_stmt_f90               // Section 9.7.3 - File inquiry (R929)
+    | backspace_stmt_f90             // Section 9.6.1 - File positioning (R923)
+    | endfile_stmt_f90               // Section 9.6.2 - File positioning (R924)
+    | rewind_stmt_f90                // Section 9.6.3 - File positioning (R925)
     | allocate_stmt                  // Section 6.3.1 - F90 memory management
     | deallocate_stmt                // Section 6.3.3 - F90 memory management
     | nullify_stmt                   // Section 6.3.2 - F90 pointer nullification

@@ -377,6 +377,57 @@ ERR             : ('e'|'E') ('r'|'R') ('r'|'R') ;
 WHILE           : ('w'|'W') ('h'|'H') ('i'|'I') ('l'|'L') ('e'|'E') ;
 
 // ====================================================================
+// FILE I/O SPECIFIER KEYWORDS - ISO/IEC 1539:1991 Section 9.7 (OPEN/CLOSE/INQUIRE)
+// ====================================================================
+//
+// ISO/IEC 1539:1991 Section 9.7 defines file connection statement specifiers.
+// These tokens enable proper parsing of OPEN, CLOSE, and INQUIRE statements.
+// NOTE: These are context-sensitive keywords; they can still be used as identifiers
+// outside of I/O statements. The parser handles this via alternative matching.
+
+// FILE= specifier - ISO/IEC 1539:1991 Section 9.7.1.5
+FILE            : F I L E ;
+// STATUS= specifier - ISO/IEC 1539:1991 Section 9.7.1.6
+STATUS          : S T A T U S ;
+// ACCESS= specifier - ISO/IEC 1539:1991 Section 9.7.1.8
+ACCESS          : A C C E S S ;
+// FORM= specifier - ISO/IEC 1539:1991 Section 9.7.1.9
+FORM            : F O R M ;
+// RECL= specifier - ISO/IEC 1539:1991 Section 9.7.1.10
+RECL            : R E C L ;
+// BLANK= specifier - ISO/IEC 1539:1991 Section 9.7.1.11
+BLANK           : B L A N K ;
+// POSITION= specifier - ISO/IEC 1539:1991 Section 9.7.1.12 (F90)
+POSITION        : P O S I T I O N ;
+// ACTION= specifier - ISO/IEC 1539:1991 Section 9.7.1.13 (F90)
+ACTION          : A C T I O N ;
+// DELIM= specifier - ISO/IEC 1539:1991 Section 9.7.1.14 (F90)
+DELIM           : D E L I M ;
+// PAD= specifier - ISO/IEC 1539:1991 Section 9.7.1.15 (F90)
+PAD             : P A D ;
+// EXIST= specifier (INQUIRE) - ISO/IEC 1539:1991 Section 9.7.3.4
+EXIST           : E X I S T ;
+// OPENED= specifier (INQUIRE) - ISO/IEC 1539:1991 Section 9.7.3.5
+OPENED          : O P E N E D ;
+// SEQUENTIAL= specifier (INQUIRE) - ISO/IEC 1539:1991 Section 9.7.3.9
+SEQUENTIAL      : S E Q U E N T I A L ;
+// DIRECT= specifier (INQUIRE) - ISO/IEC 1539:1991 Section 9.7.3.10
+DIRECT          : D I R E C T ;
+// NEXTREC= specifier (INQUIRE) - ISO/IEC 1539:1991 Section 9.7.3.13
+NEXTREC         : N E X T R E C ;
+// READWRITE= specifier (INQUIRE) - ISO/IEC 1539:1991 Section 9.7.3.17 (F90)
+READWRITE       : R E A D W R I T E ;
+
+// NOTE: The following are intentionally NOT defined as separate tokens because
+// they conflict with existing tokens or have common use as identifiers:
+// - NAME (conflicts with derived type component names)
+// - NAMED (would prevent use as identifier)
+// - NUMBER (would prevent use as identifier)
+// - FORMATTED (conflicts with write(formatted) generic binding)
+// - UNFORMATTED (conflicts with write(unformatted) generic binding)
+// These are matched via IDENTIFIER in the parser rules.
+
+// ====================================================================
 // FORTRAN 90 OPERATORS - ISO/IEC 1539:1991 Section 3.2 and 7.2
 // ====================================================================
 //
