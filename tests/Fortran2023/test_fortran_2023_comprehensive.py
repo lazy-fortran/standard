@@ -287,6 +287,44 @@ class TestFortran2023Lexer:
                 f"'{keyword}' expected type {expected_token}, got {tokens[0].type}"
             )
 
+    def test_string_intrinsic_keywords(self):
+        """Test F2023 SPLIT and TOKENIZE string intrinsic keywords.
+
+        ISO/IEC 1539-1:2023 Section 16.9:
+        - Section 16.9.180: SPLIT - split string into tokens
+        - Section 16.9.197: TOKENIZE - tokenize string
+        """
+        string_intrinsics = {
+            'SPLIT': Fortran2023Lexer.SPLIT,
+            'TOKENIZE': Fortran2023Lexer.TOKENIZE
+        }
+
+        for intrinsic, expected_token in string_intrinsics.items():
+            tokens = self.get_tokens(intrinsic)
+            assert len(tokens) >= 1
+            assert tokens[0].type == expected_token, (
+                f"String intrinsic '{intrinsic}' expected type "
+                f"{expected_token}, got {tokens[0].type}"
+            )
+
+    def test_string_intrinsic_case_insensitive(self):
+        """Test SPLIT/TOKENIZE keywords are case-insensitive per ISO standard."""
+        test_cases = [
+            ('split', Fortran2023Lexer.SPLIT),
+            ('SPLIT', Fortran2023Lexer.SPLIT),
+            ('Split', Fortran2023Lexer.SPLIT),
+            ('tokenize', Fortran2023Lexer.TOKENIZE),
+            ('TOKENIZE', Fortran2023Lexer.TOKENIZE),
+            ('Tokenize', Fortran2023Lexer.TOKENIZE)
+        ]
+
+        for keyword, expected_token in test_cases:
+            tokens = self.get_tokens(keyword)
+            assert len(tokens) >= 1
+            assert tokens[0].type == expected_token, (
+                f"'{keyword}' expected type {expected_token}, got {tokens[0].type}"
+            )
+
 
 @pytest.mark.skipif(not PARSER_AVAILABLE, reason="Parser not available")
 class TestFortran2023Parser:
@@ -450,6 +488,24 @@ class TestFortran2023Parser:
         except Exception as e:
             pytest.fail(f"F2023 TYPEOF/CLASSOF type inference parsing failed: {e}")
 
+    def test_string_intrinsics_parsing(self):
+        """Test F2023 SPLIT/TOKENIZE string intrinsic parsing.
+
+        ISO/IEC 1539-1:2023 Section 16.9.180 and 16.9.197
+        """
+        string_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "string_intrinsics.f90",
+        )
+        parser = self.create_parser(string_input)
+
+        try:
+            tree = parser.program_unit_f2023()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F2023 string intrinsic parsing failed: {e}")
+
 
 class TestFortran2023Foundation:
     """Test F2023 as foundation for LazyFortran2025."""
@@ -489,7 +545,9 @@ class TestFortran2023Foundation:
             # F2023 pi-scaled trigonometric intrinsics
             'ACOSPI', 'ASINPI', 'ATANPI', 'ATAN2PI', 'COSPI', 'SINPI', 'TANPI',
             # F2023 TYPEOF/CLASSOF type inference (Section 7.3.2.1)
-            'TYPEOF', 'CLASSOF'
+            'TYPEOF', 'CLASSOF',
+            # F2023 string intrinsics (Section 16.9.180, 16.9.197)
+            'SPLIT', 'TOKENIZE'
         ]
         
         for feature in required_features:
