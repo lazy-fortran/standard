@@ -18,10 +18,16 @@ Lazy Fortran 2025 uses **automatic type inference** - a modern approach that eli
 
 **First assignment wins:**
 - The type of an undeclared variable is determined by its **first assignment**
-- `x = 4` makes `x` an `integer(4)`
-- `y = 3.14` makes `y` a `real(4)`
-- `z = (1.0, 2.0)` makes `z` a `complex(8)`
+- `x = 4` makes `x` an `integer(4)` (or `integer(8)`? see below)
+- `y = 3.14` makes `y` a `real(4)` (or `real(8)`? see below)
+- `z = (1.0, 2.0)` makes `z` a `complex(8)` (or `complex(16)`? see below)
 - `obj = create_particle()` makes `obj` whatever type `create_particle` returns
+
+**Open question: default kinds**
+- ISO defaults are single precision (`real(4)`, `integer(4)`)
+- Modern scientific computing typically uses double precision (`real(8)`, `integer(8)`)
+- Should Lazy Fortran default to double precision for safety and precision?
+- *To be discussed* - tradeoff between ISO compatibility and modern practice
 
 **Open question: `intent(out)` arguments**
 - Fortran idiomatically uses `intent(out)` arguments instead of function return values
