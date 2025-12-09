@@ -49,7 +49,18 @@ RBRACKET         : ']' ;
 // - SYNC IMAGES (Section 8.5.4): Synchronize specified images
 // - SYNC MEMORY (Section 8.5.5): Memory synchronization
 // - LOCK/UNLOCK (Section 8.5.6): Lock synchronization (not implemented)
-// - CRITICAL (Section 8.5.7): Critical section (not implemented)
+// - CRITICAL (Section 8.1.5): Critical construct
+
+// ============================================================================
+// CRITICAL CONSTRUCT (ISO/IEC 1539-1:2010 Section 8.1.5)
+// ============================================================================
+// CRITICAL construct ensures that the enclosed code is executed by only one
+// image at a time across all images in the current team:
+// - R818: critical-construct -> critical-stmt block end-critical-stmt
+// - R819: critical-stmt -> [critical-construct-name :] CRITICAL [(sync-stat-list)]
+// - R820: end-critical-stmt -> END CRITICAL [critical-construct-name]
+CRITICAL         : C R I T I C A L ;
+END_CRITICAL     : E N D WS+ C R I T I C A L ;
 
 // Image inquiry intrinsics (Section 13.7)
 // THIS_IMAGE(): Returns image index (Section 13.7.165)

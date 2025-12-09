@@ -468,8 +468,10 @@ The Fortran 2008 layer in this repository:
   - Coarrays and image control statements (SYNC ALL/IMAGES/MEMORY).
   - DO CONCURRENT.
   - CONTIGUOUS attribute and enhanced INTEGER/REAL kinds.
-  - Coarray‑aware ALLOCATE and entity declarations.
+  - Coarray-aware ALLOCATE and entity declarations.
   - ERROR STOP.
+  - CRITICAL construct (Section 8.1.5, R818-R820) with lexer/parser coverage
+    and fixture (#323).
   - New intrinsic procedures (BESSEL family, ERF/ERFC, GAMMA/LOG_GAMMA,
     NORM2, PARITY, FINDLOC, STORAGE_SIZE).
   - Integration of all of the above into F2008 specification and
@@ -479,9 +481,9 @@ The Fortran 2008 layer in this repository:
 
 | ISO Rule | Description | Status |
 |----------|-------------|--------|
-| R818 | `critical-construct` | NOT IMPLEMENTED |
-| R819 | `critical-stmt` | NOT IMPLEMENTED |
-| R820 | `end-critical-stmt` | NOT IMPLEMENTED |
+| R818 | `critical-construct` | IMPLEMENTED (#323) |
+| R819 | `critical-stmt` | IMPLEMENTED (#323) |
+| R820 | `end-critical-stmt` | IMPLEMENTED (#323) |
 | R859 | `lock-stmt` | NOT IMPLEMENTED |
 | R860 | `unlock-stmt` | NOT IMPLEMENTED |
 | R866 | `lock-variable` | NOT IMPLEMENTED |
@@ -514,12 +516,12 @@ The Fortran 2008 layer in this repository:
 Existing umbrella issues relevant to this audit:
 
 - #140 – **Standard audits** (this document is the Fortran 2008 slice).
-- #176 – **Fortran 2008: annotate grammar with J3/08‑007 sections**.
-- #313 – **F2008: Missing CRITICAL construct, LOCK/UNLOCK, bitwise intrinsics**.
+- #176 – **Fortran 2008: annotate grammar with J3/08-007 sections**.
+- #313 – **F2008: Missing LOCK/UNLOCK statements and bitwise intrinsics** (CRITICAL construct tracked separately by #323).
+- #323 – **F2008: CRITICAL construct (R818-R820)**.
 
 Future work should:
 
-- **HIGH PRIORITY:** Implement CRITICAL construct (R818-R820)
 - **MEDIUM PRIORITY:** Implement LOCK/UNLOCK statements (R859-R860)
 - **MEDIUM PRIORITY:** Add bitwise intrinsic tokens and parser rules
 - Add ATOMIC_DEFINE/ATOMIC_REF intrinsics
@@ -663,4 +665,3 @@ rules to grammar rules in `Fortran2008Lexer.g4` and `Fortran2008Parser.g4`.
 | Section 13.7.163 | STORAGE_SIZE | `STORAGE_SIZE` |
 | Section 13.8.2 | INT8/16/32/64 | `INT8`, `INT16`, `INT32`, `INT64` |
 | Section 13.8.2 | REAL32/64/128 | `REAL32`, `REAL64`, `REAL128` |
-
