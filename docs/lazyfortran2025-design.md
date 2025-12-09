@@ -35,7 +35,7 @@ Lazy Fortran 2025 uses an explicit numeric-kind lattice grounded in standard int
 - `double precision` maps to `real(8)`
 - `double complex` maps to `complex(16)`
 
-The inference engine only selects from these built-in kinds and those explicitly declared in user code.
+Numeric literals use these built-in kinds. User-defined types are inferred from function return types and constructors.
 
 ---
 
@@ -48,6 +48,7 @@ Lazy Fortran 2025 uses **automatic type inference** - a modern approach that eli
 - `x = 4` makes `x` an `integer(4)`
 - `y = 3.14` makes `y` a `real(4)`
 - `z = (1.0, 2.0)` makes `z` a `complex(8)`
+- `obj = create_particle()` makes `obj` whatever type `create_particle` returns
 
 **Subsequent assignments follow standard coercion:**
 - After type is established, later assignments use normal Fortran coercion rules
