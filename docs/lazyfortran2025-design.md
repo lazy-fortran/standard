@@ -216,6 +216,32 @@ allocate(matrix(n, m))    ! rank-2, runtime bounds
 > | A | Block beginning only | Clean structure | Variables far from first use |
 > | B | Anywhere | Declare near use | Scattered, redundant with inference |
 
+5.1.7 **Pointer attribute inference**
+
+5.1.7.1 Whether pointer assignment (`p => target`) should automatically infer the `pointer` attribute is subject to the following consideration.
+
+> **OPEN ISSUE 11: Pointer attribute inference**
+>
+> Should `p => x` automatically declare `p` with the `pointer` attribute?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | No (require explicit) | Clear intent, no hidden semantics | Verbose |
+> | B | Yes (infer from `=>`) | Concise, matches usage | Hides pointer semantics, may surprise |
+
+5.1.8 **Allocatable attribute inference**
+
+5.1.8.1 Whether `allocate` statements should automatically infer the `allocatable` attribute is subject to the following consideration.
+
+> **OPEN ISSUE 12: Allocatable attribute inference**
+>
+> Should `allocate(arr(n))` automatically declare `arr` with the `allocatable` attribute?
+>
+> | Option | Description | Pros | Cons |
+> |--------|-------------|------|------|
+> | A | No (require explicit) | Clear intent, no hidden semantics | Verbose |
+> | B | Yes (infer from `allocate`) | Concise, matches usage | Hides allocation semantics |
+
 ### 5.2 Expression type rules
 
 5.2.1 Expression type determination follows ISO/IEC 1539-1:2023 Clause 10.1.5 (Numeric intrinsic operations).
