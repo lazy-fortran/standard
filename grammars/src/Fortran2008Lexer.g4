@@ -184,6 +184,14 @@ SHIFTR           : S H I F T R ;
 MASKL            : M A S K L ;
 MASKR            : M A S K R ;
 
+// Bitwise reduction intrinsics (Section 13.7.79-80, 13.7.94)
+// - IALL(ARRAY[,DIM][,MASK]): Bitwise AND reduction (Section 13.7.79)
+// - IANY(ARRAY[,DIM][,MASK]): Bitwise OR reduction (Section 13.7.80)
+// - IPARITY(ARRAY[,DIM][,MASK]): Bitwise XOR reduction (Section 13.7.94)
+IALL             : I A L L ;
+IANY             : I A N Y ;
+IPARITY          : I P A R I T Y ;
+
 // ============================================================================
 // ENHANCED INTEGER/REAL KINDS (ISO/IEC 1539-1:2010 Section 13.8.2)
 // ============================================================================
