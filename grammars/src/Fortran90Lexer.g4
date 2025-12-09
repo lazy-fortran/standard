@@ -81,11 +81,11 @@ FREE_FORM_COMMENT
     ;
 
 // Fixed-form comment - ISO/IEC 1539:1991 Section 3.3.2
-// Syntax: C, c, or * in column 1 makes entire line a comment
-// Must follow a newline to ensure column 1 position.
-// No whitespace required after C/c per ISO standard.
+// Column-1 C/c makes entire line a comment. Match when followed by
+// whitespace or non-alphanumeric chars (avoids keywords like CONTAINS).
 FIXED_FORM_COMMENT
-    : [\r\n]+ [Cc] ~[\r\n]* -> channel(HIDDEN)
+    : [\r\n]+ [Cc] ( [ \t] ~[\r\n]* | [*\-=!+#$%^&/<>:;,~`@0-9] ~[\r\n]* )
+      -> channel(HIDDEN)
     ;
 
 // Star comment at column 1 (fixed-form only)
