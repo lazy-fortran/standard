@@ -309,7 +309,6 @@ a number of F90 fixtures as XPASS, including:
   - `dynamic_arrays.f90`
   - `select_case_program.f90`
   - `array_constructor_program.f90`
-  - `enhanced_procedures_program.f90`
   - `test_fortran_90_dual_format/free_form_module.f90`
 - `tests/fixtures/Fortran90/test_comprehensive_parsing/`:
   - `dynamic_arrays_program.f90`
@@ -319,7 +318,7 @@ a number of F90 fixtures as XPASS, including:
   - `fortran95_features_program.f90`
   - `mixed_format_program.f90`
 
-The XPASS reasons in `tests/test_fixture_parsing.py` document the main
+The XPASS reasons in `tests/xpass_fixtures.py` document the main
 integration gaps:
 
 - Remaining issues in:
@@ -394,7 +393,7 @@ rules:
 | Section 7.2.2 | Relational Operators | `Fortran90Lexer.g4`: `EQ_OP`, `NE_OP`, `LT_OP`, `LE_OP`, `GT_OP`, `GE_OP` |
 | Section 7.5.2 | Pointer Assignment | `Fortran90Lexer.g4`: `POINTER_ASSIGN`; Parser: `pointer_assignment_stmt` |
 | Section 7.5.3 | WHERE Construct | `F90ControlParser.g4`: `where_construct`, `where_stmt`, `elsewhere_stmt` |
-| Section 8.1.1 | IF Construct | `F90ControlParser.g4`: `if_construct`, `if_then_stmt`, `else_if_stmt` |
+| Section 8.1.1 | IF Construct | `F90ControlParser.g4`: `if_construct`, `if_then_stmt_f90`, `else_if_stmt_f90`, `else_stmt_f90`, `end_if_stmt_f90` |
 | Section 8.1.3 | CASE Construct | `F90ControlParser.g4`: `select_case_construct`, `case_stmt`, `case_selector` |
 | Section 8.1.4 | DO Construct | `F90ControlParser.g4`: `do_construct_f90`, `loop_control`, `cycle_stmt`, `exit_stmt` |
 | Section 9 | Input/Output | `F90IOParser.g4`: `read_stmt_f90`, `write_stmt_f90`, `io_control_spec` |
