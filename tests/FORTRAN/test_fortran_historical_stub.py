@@ -832,6 +832,285 @@ class TestFORTRANHardwareIF:
         assert parser.getNumberOfSyntaxErrors() == 0
 
 
+class TestFORTRANTapeDrumIO:
+    """Test IBM 704 tape and drum I/O statements.
+
+    Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Appendix B rows 21-27
+    and Chapter III, the original FORTRAN supported tape and drum I/O for
+    the IBM 704 magnetic tape units and magnetic drum storage.
+    """
+
+    def create_parser(self, input_text):
+        """Create parser for FORTRAN input text."""
+        input_stream = InputStream(input_text)
+        lexer = FORTRANLexer(input_stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = FORTRANParser(token_stream)
+        return parser
+
+    def test_tape_io_tokens(self):
+        """Test that lexer recognizes TAPE, INPUT, OUTPUT as identifiers.
+
+        Note: TAPE, INPUT, OUTPUT are NOT separate keyword tokens in the lexer
+        to avoid conflicts with later Fortran standards. They are recognized
+        contextually by the parser as IDENTIFIERs.
+        """
+        test_input = "TAPE INPUT OUTPUT"
+        input_stream = InputStream(test_input)
+        lexer = FORTRANLexer(input_stream)
+        tokens = []
+        while True:
+            token = lexer.nextToken()
+            if token.type == -1:
+                break
+            tokens.append(token)
+        assert len(tokens) == 3
+        assert all(token.type == FORTRANLexer.IDENTIFIER for token in tokens)
+        assert tokens[0].text.upper() == "TAPE"
+        assert tokens[1].text.upper() == "INPUT"
+        assert tokens[2].text.upper() == "OUTPUT"
+
+    def test_drum_token(self):
+        """Test that lexer recognizes DRUM as identifier.
+
+        Note: DRUM is NOT a separate keyword token in the lexer to avoid
+        conflicts with later Fortran standards. It is recognized contextually
+        by the parser as an IDENTIFIER.
+        """
+        test_input = "DRUM"
+        input_stream = InputStream(test_input)
+        lexer = FORTRANLexer(input_stream)
+        token = lexer.nextToken()
+        assert token.type == FORTRANLexer.IDENTIFIER
+        assert token.text.upper() == "DRUM"
+
+    def test_file_control_tokens(self):
+        """Test that lexer recognizes REWIND, BACKSPACE tokens (FILE as identifier).
+
+        Note: REWIND and BACKSPACE are keywords. FILE is NOT a keyword token
+        to avoid conflicts with later Fortran standards where FILE= is used in
+        OPEN statements. FILE is recognized contextually by the parser as an
+        IDENTIFIER.
+        """
+        test_input = "REWIND BACKSPACE FILE"
+        input_stream = InputStream(test_input)
+        lexer = FORTRANLexer(input_stream)
+        tokens = []
+        while True:
+            token = lexer.nextToken()
+            if token.type == -1:
+                break
+            tokens.append(token)
+        assert any(token.type == FORTRANLexer.REWIND for token in tokens)
+        assert any(token.type == FORTRANLexer.BACKSPACE for token in tokens)
+        assert any(
+            token.type == FORTRANLexer.IDENTIFIER and token.text.upper() == "FILE"
+            for token in tokens
+        )
+
+    def test_read_input_tape_statement(self):
+        """Test parsing of READ INPUT TAPE i, n, list.
+
+        Per IBM 704 FORTRAN manual Appendix B row 21, reads formatted data
+        from input tape unit i using format n into list.
+        """
+        test_input = """        READ INPUT TAPE 1, 100, A, B, C
+100     FORMAT (3F10.2)
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_read_tape_statement(self):
+        """Test parsing of READ TAPE i, list.
+
+        Per IBM 704 FORTRAN manual Appendix B row 22, reads binary
+        (unformatted) data from tape unit i into list.
+        """
+        test_input = """        READ TAPE 3, A, B, C
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_read_drum_statement(self):
+        """Test parsing of READ DRUM i, j, list.
+
+        Per IBM 704 FORTRAN manual Appendix B row 23, reads binary data
+        from drum unit i, sector j into list.
+        """
+        test_input = """        READ DRUM 1, 100, A, B, C
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_write_output_tape_statement(self):
+        """Test parsing of WRITE OUTPUT TAPE i, n, list.
+
+        Per IBM 704 FORTRAN manual Appendix B row 25, writes formatted data
+        to output tape unit i using format n from list.
+        """
+        test_input = """        WRITE OUTPUT TAPE 5, 200, X, Y, Z
+200     FORMAT (3E15.6)
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_write_tape_statement(self):
+        """Test parsing of WRITE TAPE i, list.
+
+        Per IBM 704 FORTRAN manual Appendix B row 26, writes binary
+        (unformatted) data to tape unit i from list.
+        """
+        test_input = """        WRITE TAPE 7, P, Q, R
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_write_drum_statement(self):
+        """Test parsing of WRITE DRUM i, j, list.
+
+        Per IBM 704 FORTRAN manual Appendix B row 27, writes binary data
+        to drum unit i, sector j from list.
+        """
+        test_input = """        WRITE DRUM 4, 150, RESULT
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_tape_io_fixture(self):
+        """Test parsing of complete tape I/O fixture."""
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "tape_io_1957.f",
+        )
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_drum_io_fixture(self):
+        """Test parsing of complete drum I/O fixture."""
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "drum_io_1957.f",
+        )
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+
+class TestFORTRANFileControl:
+    """Test IBM 704 file-control statements.
+
+    Per IBM 704 FORTRAN manual (Form C28-6003, Oct 1958) Chapter III.F,
+    the original FORTRAN supported file-control statements for tape
+    positioning and end-of-file marking.
+    """
+
+    def create_parser(self, input_text):
+        """Create parser for FORTRAN input text."""
+        input_stream = InputStream(input_text)
+        lexer = FORTRANLexer(input_stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = FORTRANParser(token_stream)
+        return parser
+
+    def test_rewind_statement(self):
+        """Test parsing of REWIND i.
+
+        Per IBM 704 FORTRAN manual Chapter III.F, rewinds tape unit i
+        to the beginning.
+        """
+        test_input = """        REWIND 1
+        REWIND 2
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_backspace_statement(self):
+        """Test parsing of BACKSPACE i.
+
+        Per IBM 704 FORTRAN manual Chapter III.F, repositions tape unit i
+        back one logical record.
+        """
+        test_input = """        BACKSPACE 3
+        BACKSPACE 4
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_end_file_statement(self):
+        """Test parsing of END FILE i.
+
+        Per IBM 704 FORTRAN manual Chapter III.F, writes an end-of-file
+        mark on tape unit i.
+        """
+        test_input = """        END FILE 5
+        END FILE 6
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_file_control_fixture(self):
+        """Test parsing of complete file-control fixture."""
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "file_control_1957.f",
+        )
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_file_control_combined(self):
+        """Test combined use of all file-control statements.
+
+        This tests REWIND, BACKSPACE, and END FILE used together as they
+        would have been in 1957 IBM 704 FORTRAN programs for tape processing.
+        """
+        test_input = """        REWIND 1
+        READ TAPE 1, A, B, C
+        BACKSPACE 1
+        READ TAPE 1, A, B, C
+        END FILE 1
+        END
+"""
+        parser = self.create_parser(test_input)
+        tree = parser.program_unit_core()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+
 if __name__ == '__main__':
     """Run FORTRAN historical stub tests."""
     print("Running FORTRAN (1957) Historical Stub Tests...")

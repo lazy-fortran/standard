@@ -42,11 +42,21 @@ CONTINUE     : C O N T I N U E ; // DO loop continuation - Appendix B row 19
 STOP         : S T O P ;    // Program termination - Appendix B row 30
 
 // I/O Keywords
-// C28-6003 Chapter III (Input-Output) and Appendix B rows 20-28
+// C28-6003 Chapter III (Input-Output) and Appendix B rows 20-29
 READ         : R E A D ;    // Input - Appendix B rows 20-24
 WRITE        : W R I T E ;  // Output - Appendix B rows 25-27
 PRINT        : P R I N T ;  // Line printer output - Appendix B row 28
 PUNCH        : P U N C H ;  // Card punch output - Appendix B row 29
+
+// File-control Keywords (IBM 704 specific)
+// C28-6003 Chapter III.F (File-control) - not in Appendix B but documented
+REWIND       : R E W I N D ;       // REWIND i - rewind tape unit i
+BACKSPACE    : B A C K S P A C E ; // BACKSPACE i - backspace tape unit i
+
+// Note: TAPE, DRUM, INPUT, OUTPUT, FILE are NOT defined as separate keywords
+// to avoid conflicts with later Fortran standards where these are used as
+// identifiers. The parser uses contextual matching with IDENTIFIER for these.
+// See FORTRANParser.g4 for tape/drum I/O statement rules.
 
 // Storage/Declaration Keywords
 // C28-6003 Chapter II.B (Variables and Subscripts) and Appendix B

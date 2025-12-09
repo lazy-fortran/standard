@@ -70,10 +70,15 @@ statement_body
     | do_stmt_basic                 // Appendix B row 18: DO n i = m1,m2,m3
     | frequency_stmt                // Appendix B row 13: FREQUENCY n(i,j,...)
     | format_stmt                   // Appendix B row 16: FORMAT (specification)
-    | read_stmt_basic               // Appendix B rows 20-24: READ forms
-    | write_stmt_basic              // Appendix B rows 25-27: WRITE forms
+    | read_tape_drum_stmt            // Appendix B rows 21-24: READ tape/drum forms
+    | read_stmt_basic               // Appendix B row 20, 24: READ n, list / READ n
+    | write_tape_drum_stmt          // Appendix B rows 25-27: WRITE tape/drum forms
+    | write_stmt_basic              // Simple WRITE output_list
     | print_stmt                    // Appendix B row 28: PRINT n, list
     | punch_stmt                    // Appendix B row 29: PUNCH n, list
+    | end_file_stmt                 // C28-6003 Chapter III.F: END FILE i
+    | rewind_stmt                   // C28-6003 Chapter III.F: REWIND i
+    | backspace_stmt                // C28-6003 Chapter III.F: BACKSPACE i
     | pause_stmt                    // Appendix B row 31: PAUSE / PAUSE n
     | dimension_stmt                // Appendix B row 14: DIMENSION v,v,...
     | equivalence_stmt              // Appendix B row 15: EQUIVALENCE sets
@@ -248,11 +253,11 @@ frequency_stmt
 // ============================================================================
 // I/O STATEMENTS
 // C28-6003 Chapter III (Input-Output) and Appendix B rows 16, 20-29
-// Note: This grammar implements simplified forms; full 1957 I/O had
-// READ INPUT TAPE, WRITE OUTPUT TAPE, READ/WRITE TAPE/DRUM, etc.
+// This grammar implements the full 1957 I/O statement family including
+// tape/drum operations and file-control statements.
 // ============================================================================
 
-// READ statement - Appendix B rows 20-24
+// READ statement - Appendix B rows 20, 24
 // C28-6003 Chapter III.A: READ n, list - read using format n
 // Row 20: READ n, list - formatted input with variable list
 // Row 24: READ n - formatted input with FORMAT-implied list
@@ -263,10 +268,44 @@ read_stmt_basic
     | READ input_list                   // READ list (simple form)
     ;
 
-// WRITE statement - Appendix B rows 25-27 (simplified)
-// C28-6003 Chapter III: Full forms include format labels and device specs
+// ============================================================================
+// TAPE/DRUM READ STATEMENTS
+// C28-6003 Chapter III.B-D and Appendix B rows 21-23
+// ============================================================================
+// Combined rule for READ TAPE/DRUM variants to handle backtracking correctly
+
+// READ tape/drum statement - unified rule for all tape/drum READ forms
+// Appendix B rows 21-23
+// Uses io_device_keyword to match TAPE/DRUM/INPUT contextually
+read_tape_drum_stmt
+    : READ io_device_keyword io_device_keyword tape_unit
+      COMMA label COMMA input_list                          // row 21: INPUT TAPE
+    | READ io_device_keyword tape_unit
+      COMMA drum_sector COMMA input_list                    // row 23: DRUM
+    | READ io_device_keyword tape_unit COMMA input_list     // row 22: TAPE
+    ;
+
+// WRITE statement - simple form
+// C28-6003 Chapter III: Basic WRITE output_list
 write_stmt_basic
     : WRITE output_list
+    ;
+
+// ============================================================================
+// TAPE/DRUM WRITE STATEMENTS
+// C28-6003 Chapter III.B-D and Appendix B rows 25-27
+// ============================================================================
+// Combined rule for WRITE TAPE/DRUM variants to handle backtracking correctly
+
+// WRITE tape/drum statement - unified rule for all tape/drum WRITE forms
+// Appendix B rows 25-27
+// Uses io_device_keyword to match TAPE/DRUM/OUTPUT contextually
+write_tape_drum_stmt
+    : WRITE io_device_keyword io_device_keyword tape_unit
+      COMMA label COMMA output_list                          // row 25: OUTPUT TAPE
+    | WRITE io_device_keyword drum_unit
+      COMMA drum_sector COMMA output_list                    // row 27: DRUM
+    | WRITE io_device_keyword tape_unit COMMA output_list    // row 26: TAPE
     ;
 
 // PRINT statement - Appendix B row 28
@@ -281,6 +320,51 @@ print_stmt
 // List may be omitted per manual row 29 variant
 punch_stmt
     : PUNCH label (COMMA output_list)?
+    ;
+
+// ============================================================================
+// FILE-CONTROL STATEMENTS
+// C28-6003 Chapter III.F (File-control statements)
+// These control tape positioning and end-of-file marking
+// ============================================================================
+
+// END FILE statement - C28-6003 Chapter III.F
+// END FILE i - writes an end-of-file mark on tape unit i
+// Note: FILE is matched as IDENTIFIER via io_device_keyword to avoid keyword conflicts
+end_file_stmt
+    : END io_device_keyword tape_unit
+    ;
+
+// REWIND statement - C28-6003 Chapter III.F
+// REWIND i - rewinds tape unit i to the beginning
+rewind_stmt
+    : REWIND tape_unit
+    ;
+
+// BACKSPACE statement - C28-6003 Chapter III.F
+// BACKSPACE i - repositions tape unit i back one logical record
+backspace_stmt
+    : BACKSPACE tape_unit
+    ;
+
+// ============================================================================
+// I/O UNIT SPECIFIERS
+// C28-6003 Chapter III: Tape and drum unit designators
+// ============================================================================
+
+// Tape unit number - typically a small integer (1-10 on IBM 704)
+tape_unit
+    : expr
+    ;
+
+// Drum unit number - typically a small integer
+drum_unit
+    : expr
+    ;
+
+// Drum sector address - integer expression for drum positioning
+drum_sector
+    : expr
     ;
 
 // ============================================================================
@@ -474,4 +558,23 @@ input_list
 // List of expressions to output
 output_list
     : expr (COMMA expr)*
+    ;
+
+// ============================================================================
+// CONTEXTUAL KEYWORDS FOR TAPE/DRUM I/O
+// C28-6003 Chapter III - IBM 704 specific I/O keywords
+// ============================================================================
+// These keywords are matched as IDENTIFIERs to avoid conflicts with later
+// Fortran standards where INPUT, OUTPUT, TAPE, DRUM, and FILE can be used
+// as regular identifiers. The grammar uses structural disambiguation (number
+// of tokens and commas) rather than keyword-based predicates.
+
+// I/O device keyword - matches INPUT, OUTPUT, TAPE, DRUM, or FILE as identifiers
+// The grammar relies on alternative ordering and structural differences to
+// disambiguate between tape and drum statements:
+// - READ/WRITE DRUM uses 5 commas (unit, sector, list)
+// - READ/WRITE TAPE uses 3 commas (unit, list)
+// - READ/WRITE INPUT/OUTPUT TAPE uses 2 keywords + 5 tokens
+io_device_keyword
+    : IDENTIFIER
     ;
