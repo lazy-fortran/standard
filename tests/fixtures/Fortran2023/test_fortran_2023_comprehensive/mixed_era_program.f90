@@ -15,9 +15,9 @@ program historical_test
     ! F2018 collective operations
     call co_sum(coarray)
 
-    ! F2023 conditional expressions
+    ! F2023 conditional expressions (ISO/IEC 1539-1:2023 Section 10.1.5)
     integer :: x, result
     x = 1
-    result = x > 0 ? x : 0
+    result = (x > 0 ? x : 0)
 end program historical_test
 

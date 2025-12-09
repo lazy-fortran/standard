@@ -131,9 +131,60 @@ end_enum_stmt_f2008
 // ============================================================================
 //
 // J3/22-007 Section 10.1.5: Conditional expressions
-// Syntax: ( conditional-test ? consequent [ : conditional-test ? consequent ]
-//          ... : consequent )
+// R1020: conditional-expr is ( conditional-test ? consequent
+//        [ : conditional-test ? consequent ]... : consequent )
+// R1021: conditional-test is scalar-logical-expr
+// R1022: consequent is scalar-expr
+// R1023: conditional-consequent-expr is conditional-test ? consequent
+// R1024: cond-else-expr is : consequent
 //
+// The conditional expression MUST be parenthesized per ISO standard.
+// Supports chained conditionals: ( cond1 ? val1 : cond2 ? val2 : default )
+//
+
+// J3/22-007 R1020: conditional-expr
+// conditional-expr is ( conditional-test ? consequent
+//                      [ : conditional-test ? consequent ]... : consequent )
+// ISO/IEC 1539-1:2023 Section 10.1.5 requires parentheses around the
+// entire expression. Chained conditionals are supported via the
+// conditional_chain_f2023 rule.
+conditional_expr_f2023
+    : LPAREN conditional_chain_f2023 RPAREN
+    ;
+
+// J3/22-007 R1020: Chained conditional expression body
+// Supports: cond1 ? val1 : cond2 ? val2 : ... : default
+// The chain consists of one or more conditional-consequent pairs
+// followed by a final else consequent.
+conditional_chain_f2023
+    : conditional_consequent_f2023 (conditional_consequent_f2023)* cond_else_f2023
+    ;
+
+// J3/22-007 R1023: conditional-consequent-expr
+// conditional-consequent-expr is conditional-test ? consequent
+conditional_consequent_f2023
+    : conditional_test_f2023 QUESTION consequent_f2023 COLON
+    ;
+
+// J3/22-007 R1024: cond-else-expr (final else branch)
+// cond-else-expr is : consequent (the colon is part of the preceding rule)
+cond_else_f2023
+    : consequent_f2023
+    ;
+
+// J3/22-007 R1021: conditional-test
+// conditional-test is scalar-logical-expr
+// Uses expr_f2003 since it can evaluate to a logical value
+conditional_test_f2023
+    : expr_f2003
+    ;
+
+// J3/22-007 R1022: consequent
+// consequent is scalar-expr
+// Uses expr_f2003 for the value expression
+consequent_f2023
+    : expr_f2003
+    ;
 
 // ============================================================================
 // ENHANCED EXPRESSIONS (ISO/IEC 1539-1:2023 Section 10)
@@ -153,14 +204,6 @@ primary_f2023
     | REAL_LITERAL
     | STRING_LITERAL
     | LPAREN expr_f2023 RPAREN
-    ;
-
-// J3/22-007 R1020: conditional-expr
-// conditional-expr is ( conditional-test ? consequent [ : conditional-test
-//                      ? consequent ]... : consequent )
-// Note: This simplified form captures the basic ternary syntax
-conditional_expr_f2023
-    : expr_f2023 QUESTION expr_f2023 COLON expr_f2023
     ;
 
 // J3/22-007 R1001-R1010: binary operators (subset)
@@ -671,7 +714,9 @@ identifier_or_keyword
 // ISO/IEC 1539-1:2023 Section 10.1.5: Conditional expressions
 // J3/22-007 R1020: conditional-expr is ( conditional-test ? consequent
 //                  [ : conditional-test ? consequent ]... : consequent )
-// Override F2003 expr to include conditional expression (ternary operator)
+// Override F2003 expr to include conditional expression in F2018 expression
+// hierarchy. The conditional_expr_f2023 rule handles ISO-compliant syntax
+// with mandatory parentheses and support for chained conditionals.
 expr_f2003
     : expr_f2003 DOT_OR expr_f2003            // Logical OR (.or.)
     | expr_f2003 DOT_AND expr_f2003           // Logical AND (.and.)
@@ -688,8 +733,7 @@ expr_f2003
     | expr_f2003 (PLUS | MINUS) expr_f2003    // Add/subtract
     | MINUS expr_f2003                        // Unary minus
     | PLUS expr_f2003                         // Unary plus
-    | expr_f2003 QUESTION expr_f2003 COLON expr_f2003  // F2023 conditional (ternary)
-    | LPAREN expr_f2003 QUESTION expr_f2003 COLON expr_f2003 RPAREN  // Parenthesized
+    | conditional_expr_f2023                  // F2023 conditional (Section 10.1.5)
     | expr_f90                                // Inherit F90 expressions
     | primary                                 // F2003 primary
     ;
