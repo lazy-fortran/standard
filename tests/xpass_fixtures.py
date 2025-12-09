@@ -36,7 +36,7 @@ XPASS_FIXTURES: Dict[Tuple[str, Path], str] = {
         Path("Fortran90/test_comprehensive_parsing/free_form_features_program.f90"),
     ): (
         "Fortran 90 fixture {relpath} reports {errors} syntax errors due to "
-        "character*n length syntax gaps. Tracked by Issue #311."
+        "bracket array constructor syntax (F2003 feature). Tracked by Issue #311."
     ),
     (
         "Fortran90",
