@@ -18,10 +18,10 @@ F2023 feature set plus the local PDF and compares that to:
   - Generic fixture harness: `tests/test_fixture_parsing.py` and
     `tests/fixtures/Fortran2023/...`.
 
-The F2023 parser is explicitly described as “intentionally minimal” in
-the fixture harness: many Fortran 2023 fixtures are XPASS’d and used as
-status tests rather than strict requirements. This audit follows that
-honest stance.
+The F2023 parser has known gaps tracked by GitHub Issue #310. The
+failing fixtures are marked as xfail in the test harness with explicit
+references to that issue. This audit documents the current state and
+the specific gaps requiring resolution.
 
 ---
 
@@ -348,25 +348,26 @@ Gaps:
 
 ---
 
-## 8. XPASS fixtures and current limitations
+## 8. Known gaps and failing fixtures (Issue #310)
 
-The generic fixture parser (`tests/test_fixture_parsing.py`) marks many
-Fortran 2023 fixtures as XPASS, with messages that the F2023 parser is
-“intentionally minimal” and still reports syntax errors. These include:
+The generic fixture parser (`tests/test_fixture_parsing.py`) marks the
+following Fortran 2023 fixtures as xfail due to grammar gaps tracked by
+GitHub Issue #310:
 
-- `Fortran2023/test_fortran_2023_comprehensive/basic_program.f90`
-- `boz_array_constructor.f90`
-- `conditional_expression.f90`
-- `f2018_compat_program.f90`
-- `enum_program.f90`
-- `ieee_program.f90`
-- `mixed_era_program.f90`
-- `test_fortran_2023_comprehensive_extra/namelist_enhancements_module.f90`.
+| Fixture | Gap |
+|---------|-----|
+| `boz_array_constructor.f90` | Bracket array constructors `[...]` |
+| `conditional_expression.f90` | F2023 conditional expressions `a ? b : c` |
+| `enum_program.f90` | ENUM TYPE definitions |
+| `f2018_compat_program.f90` | Coarray/image syntax |
+| `ieee_program.f90` | IEEE arithmetic module intrinsics |
+| `mixed_era_program.f90` | `character*n` length syntax |
+| `namelist_enhancements_module.f90` | Module PRIVATE attribute syntax |
 
-The dedicated F2023 tests in `test_fortran_2023_comprehensive.py`
-assert only that the parser returns a tree when invoked directly for
-each fixture; they do *not* require zero errors there, and the XPASS
-configuration makes this explicit in the generic harness.
+Note: `basic_program.f90` now parses successfully and is no longer xfail.
+
+These gaps must be resolved by implementing the missing F2023 grammar
+rules per ISO/IEC 1539-1:2023.
 
 Interpretation:
 
