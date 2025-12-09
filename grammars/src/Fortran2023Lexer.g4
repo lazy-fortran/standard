@@ -145,6 +145,20 @@ TYPEOF           : T Y P E O F ;
 // CLASSOF declares entity with same dynamic type as data-ref (polymorphic)
 CLASSOF          : C L A S S O F ;
 
+// ----------------------------------------------------------------------------
+// String Intrinsics (NEW in F2023)
+// ISO/IEC 1539-1:2023 Section 16.9.180: SPLIT - split string into tokens
+// ISO/IEC 1539-1:2023 Section 16.9.197: TOKENIZE - tokenize string
+// ----------------------------------------------------------------------------
+
+// SPLIT(STRING, SET, TOKENS [, SEPARATOR])
+// Splits STRING into an array of tokens based on delimiters in SET
+SPLIT            : S P L I T ;
+
+// TOKENIZE(STRING, SET [, QUOTE, BACK])
+// Returns iterator for tokenizing STRING based on delimiters in SET
+TOKENIZE         : T O K E N I Z E ;
+
 // Fragments are inherited from Fortran2018Lexer - no need to duplicate
 
 // ============================================================================
