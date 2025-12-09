@@ -383,6 +383,49 @@ class TestFortran2023Parser:
         except Exception as e:
             pytest.fail(f"F2023 conditional expression parsing failed: {e}")
 
+    def test_conditional_expr_rule_basic(self):
+        """Test conditional_expr_f2023 rule parses basic ternary.
+
+        ISO/IEC 1539-1:2023 Section 10.1.5 R1020:
+        conditional-expr is ( conditional-test ? consequent
+                             [ : conditional-test ? consequent ]... : consequent )
+        """
+        code = "(x > y ? x : y)"
+        parser = self.create_parser(code)
+        try:
+            tree = parser.conditional_expr_f2023()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Basic conditional expression parsing failed: {e}")
+
+    def test_conditional_expr_rule_chained(self):
+        """Test conditional_expr_f2023 rule parses chained conditionals.
+
+        ISO/IEC 1539-1:2023 Section 10.1.5 R1020 supports chained:
+        ( cond1 ? val1 : cond2 ? val2 : default )
+        """
+        code = "(c < 0 ? 0 : c > 100 ? 100 : c)"
+        parser = self.create_parser(code)
+        try:
+            tree = parser.conditional_expr_f2023()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Chained conditional expression parsing failed: {e}")
+
+    def test_conditional_expr_rule_with_arithmetic(self):
+        """Test conditional_expr_f2023 rule with arithmetic expressions.
+
+        ISO/IEC 1539-1:2023 Section 10.1.5 R1022:
+        consequent is scalar-expr (any scalar expression is valid)
+        """
+        code = "(a + b > 10 ? a * 2 : b * 3)"
+        parser = self.create_parser(code)
+        try:
+            tree = parser.conditional_expr_f2023()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Conditional with arithmetic parsing failed: {e}")
+
     def test_enhanced_ieee_parsing(self):
         """Test F2023 enhanced IEEE arithmetic function parsing."""
         ieee_input = load_fixture(
