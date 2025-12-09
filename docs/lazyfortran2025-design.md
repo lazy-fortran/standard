@@ -12,34 +12,7 @@ This is a **design document**, not a standard. The ISO text is the normative ref
 
 ---
 
-## LF-TYP-01: Numeric Kinds and Type Inference (#52)
-
-Lazy Fortran 2025 uses an explicit numeric-kind lattice grounded in standard intrinsic types, exposed as a "bytes per component" model.
-
-**Default kinds (per ISO standard):**
-- `integer` without kind specifier defaults to `integer(4)`
-- `real` without kind specifier defaults to `real(4)` (single precision)
-- `complex` without kind specifier defaults to `complex(8)` (single precision complex)
-
-**Kind mappings:**
-
-| Type | Kind | Description |
-|------|------|-------------|
-| `integer(4)` | 4 | 32-bit integer (default integer) |
-| `real(4)` | 4 | Single precision (default real) |
-| `real(8)` | 8 | Double precision |
-| `complex(8)` | 8 | Single precision complex (default complex) |
-| `complex(16)` | 16 | Double precision complex |
-
-**Aliases:**
-- `double precision` maps to `real(8)`
-- `double complex` maps to `complex(16)`
-
-Numeric literals use these built-in kinds. User-defined types are inferred from function return types and constructors.
-
----
-
-## LF-TYP-02: Automatic Type Inference (#53)
+## LF-TYP: Automatic Type Inference (#52, #53)
 
 Lazy Fortran 2025 uses **automatic type inference** - a modern approach that eliminates the legacy I-N naming convention while remaining predictable.
 
@@ -114,12 +87,11 @@ Lazy Fortran specializations are **standard-compatible decorations** that never 
 
 | Issue | ID | Description |
 |-------|-----|-------------|
-| #51 | LF-SYN-03 | World-wide automatic specializations |
-| #52 | LF-TYP-01 | Numeric kind lattice and promotion rules |
-| #53 | LF-TYP-02 | Automatic type inference |
-| #54 | LF-WLD-04 | ISO generic resolution alignment |
-| #55 | LF-WLD-05 | Interoperability with legacy Fortran code |
-| #56 | LF-CODE-01 | Tooling integration and diagnostics |
-| #57 | LF-DOC-01 | Documentation guarantees |
+| #51 | LF-SYN | World-wide automatic specializations |
+| #52, #53 | LF-TYP | Automatic type inference |
+| #54 | LF-WLD | ISO generic resolution alignment |
+| #55 | LF-WLD | Interoperability with legacy Fortran code |
+| #56 | LF-CODE | Tooling integration and diagnostics |
+| #57 | LF-DOC | Documentation guarantees |
 
 Each issue corresponds to a section or implementation plan in this document.
