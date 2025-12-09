@@ -76,20 +76,25 @@ procedure_stmt
 // ISO/IEC 1539:1991 Section 12.5
 
 // External subprogram (enhanced for F90)
-external_subprogram
-    : function_subprogram
-    | subroutine_subprogram
+// Renamed to _f90 to override inherited FORTRAN66 rule
+external_subprogram_f90
+    : function_subprogram_f90
+    | subroutine_subprogram_f90
     | module                        // Modules can be external
     ;
 
-function_subprogram
+// Function subprogram (F90 with RESULT clause support)
+// Renamed to _f90 to override inherited FORTRAN66 rule
+function_subprogram_f90
     : function_stmt specification_part? execution_part?
-      internal_subprogram_part? end_function_stmt
+      internal_subprogram_part_f90? end_function_stmt
     ;
 
-subroutine_subprogram
+// Subroutine subprogram (F90 with enhanced features)
+// Renamed to _f90 to override inherited FORTRAN66 rule
+subroutine_subprogram_f90
     : subroutine_stmt specification_part? execution_part?
-      internal_subprogram_part? end_subroutine_stmt
+      internal_subprogram_part_f90? end_subroutine_stmt
     ;
 
 end_function_stmt
@@ -102,11 +107,11 @@ end_subroutine_stmt
 
 // Internal subprogram part (F90 feature)
 // ISO/IEC 1539:1991 Section 12.5.1
-internal_subprogram_part
-    : contains_stmt NEWLINE* (internal_subprogram NEWLINE*)*
+internal_subprogram_part_f90
+    : contains_stmt NEWLINE* (internal_subprogram_f90 NEWLINE*)*
     ;
 
-internal_subprogram
-    : function_subprogram
-    | subroutine_subprogram
+internal_subprogram_f90
+    : function_subprogram_f90
+    | subroutine_subprogram_f90
     ;
