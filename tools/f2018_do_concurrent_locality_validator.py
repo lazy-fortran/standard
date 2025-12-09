@@ -30,6 +30,8 @@ from Fortran2018Lexer import Fortran2018Lexer
 from Fortran2018Parser import Fortran2018Parser
 from Fortran2018ParserListener import Fortran2018ParserListener
 
+from fortran_intrinsics import FORTRAN_KEYWORDS_AND_INTRINSICS
+
 
 class DiagnosticSeverity(Enum):
     ERROR = auto()
@@ -298,17 +300,14 @@ class F2018DoConcurrentLocalityListener(Fortran2018ParserListener):
             self._current_do_concurrent.referenced_variables.update(rhs_vars)
 
     def _extract_referenced_variables(self, text: str) -> Set[str]:
-        """Extract variable names referenced in an expression."""
-        keywords = {
-            "real", "integer", "logical", "character", "complex", "double",
-            "precision", "kind", "len", "size", "shape", "lbound", "ubound",
-            "allocated", "associated", "present", "abs", "sqrt", "sin", "cos",
-            "tan", "exp", "log", "max", "min", "mod", "nint", "floor", "ceiling",
-            "sum", "product", "maxval", "minval", "any", "all", "count", "pack",
-            "unpack", "merge", "spread", "reshape", "transpose", "matmul", "dot",
-        }
+        """Extract variable names referenced in an expression.
+
+        Uses the centralized FORTRAN_KEYWORDS_AND_INTRINSICS set from
+        fortran_intrinsics module to filter out intrinsic procedure names,
+        reducing false positives in LOC_I001 diagnostics.
+        """
         identifiers = set(re.findall(r"\b([a-z_]\w*)\b", text))
-        return identifiers - keywords
+        return identifiers - FORTRAN_KEYWORDS_AND_INTRINSICS
 
     def enterCall_stmt(self, ctx):
         """Track procedure calls within DO CONCURRENT."""

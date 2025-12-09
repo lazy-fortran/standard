@@ -30,6 +30,8 @@ from Fortran2008Lexer import Fortran2008Lexer
 from Fortran2008Parser import Fortran2008Parser
 from Fortran2008ParserListener import Fortran2008ParserListener
 
+from fortran_intrinsics import FORTRAN_KEYWORDS_AND_INTRINSICS
+
 
 class DiagnosticSeverity(Enum):
     ERROR = auto()
@@ -211,17 +213,13 @@ class F2008DoConcurrentListener(Fortran2008ParserListener):
         must be independent - a variable defined in one iteration shall not be
         referenced in another. This method extracts identifiers that could be
         variable references to enable dependency checking.
+
+        Uses the centralized FORTRAN_KEYWORDS_AND_INTRINSICS set from
+        fortran_intrinsics module to filter out intrinsic procedure names,
+        reducing false positives in DO_CONC_I001 diagnostics.
         """
-        keywords = {
-            "real", "integer", "logical", "character", "complex", "double",
-            "precision", "kind", "len", "size", "shape", "lbound", "ubound",
-            "allocated", "associated", "present", "abs", "sqrt", "sin", "cos",
-            "tan", "exp", "log", "max", "min", "mod", "nint", "floor", "ceiling",
-            "sum", "product", "maxval", "minval", "any", "all", "count", "pack",
-            "unpack", "merge", "spread", "reshape", "transpose", "matmul", "dot",
-        }
         identifiers = set(re.findall(r"\b([a-z_]\w*)\b", text))
-        return identifiers - keywords
+        return identifiers - FORTRAN_KEYWORDS_AND_INTRINSICS
 
     def enterScalar_mask_expr(self, ctx):
         """Track variable references in DO CONCURRENT mask expressions.
