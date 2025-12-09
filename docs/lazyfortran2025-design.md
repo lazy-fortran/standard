@@ -516,29 +516,29 @@ __<module-name>_MOD_<procedure-name>
 
 8.3.2.2 Kind suffixes (using current bit-based convention):
 
-| Type | Kind | Suffix |
-|------|------|--------|
-| integer | 4 | i32 |
-| integer | 8 | i64 |
-| real | 4 | r32 |
-| real | 8 | r64 |
-| complex | 8 | c64 |
-| complex | 16 | c128 |
-| logical | 4 | l32 |
-| character | * | char |
+| Type | Kind | Storage | Suffix |
+|------|------|---------|--------|
+| integer | 4 | 4 bytes | i32 |
+| integer | 8 | 8 bytes | i64 |
+| real | 4 | 4 bytes | r32 |
+| real | 8 | 8 bytes | r64 |
+| complex | 4 | 8 bytes | c64 |
+| complex | 8 | 16 bytes | c128 |
+| logical | 4 | 4 bytes | l32 |
+| character | * | * | char |
 
 8.3.2.3 Kind suffixes (alternative byte-based convention):
 
-| Type | Kind | Suffix |
-|------|------|--------|
-| integer | 4 | i4 |
-| integer | 8 | i8 |
-| real | 4 | r4 |
-| real | 8 | r8 |
-| complex | 8 | c8 |
-| complex | 16 | c16 |
-| logical | 4 | l4 |
-| character | * | char |
+| Type | Kind | Storage | Suffix |
+|------|------|---------|--------|
+| integer | 4 | 4 bytes | i4 |
+| integer | 8 | 8 bytes | i8 |
+| real | 4 | 4 bytes | r4 |
+| real | 8 | 8 bytes | r8 |
+| complex | 4 | 8 bytes | c4 |
+| complex | 8 | 16 bytes | c8 |
+| logical | 4 | 4 bytes | l4 |
+| character | * | * | char |
 
 8.3.2.4 Array rank is indicated by `rank<n>` suffix:
 
