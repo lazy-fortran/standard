@@ -95,9 +95,11 @@ LEN              : L E N ;
 // ====================================================================
 //
 // F2003 adds SOURCE and MOLD specifiers to ALLOCATE.
+// F2003 introduces MOVE_ALLOC intrinsic subroutine (Section 13.7.80).
 
 SOURCE           : S O U R C E ;
 MOLD             : M O L D ;
+MOVE_ALLOC       : M O V E '_' A L L O C ;
 
 // ====================================================================
 // PROCEDURE POINTERS (ISO/IEC 1539-1:2004 Section 12.3.2.3)
@@ -155,7 +157,6 @@ IOMSG            : I O M S G ;   // F2003 (Section 9.10)
 // F2003 introduces ASSOCIATE for creating local aliases.
 
 ASSOCIATE        : A S S O C I A T E ;
-ENDASSOCIATE     : E N D A S S O C I A T E ;
 
 // ====================================================================
 // BLOCK CONSTRUCT (ISO/IEC 1539-1:2010 Section 8.1.4)
