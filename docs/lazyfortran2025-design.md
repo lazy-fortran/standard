@@ -28,6 +28,11 @@ Lazy Fortran 2025 uses **automatic type inference** - a modern approach that eli
 - `x = 5.3` after `x = 4` is valid (real truncated to integer)
 - `y = 7` after `y = 3.14` is valid (integer promoted to real)
 
+**Array bounds inference:**
+- Allocatable arrays have bounds inferred from `allocate` statements or array constructors
+- `arr = [1, 2, 3]` infers `arr` as rank-1 with 3 elements
+- `allocate(matrix(n, m))` infers rank-2 with runtime bounds
+
 **Interaction with `implicit none`:**
 - With `implicit none`: undeclared names are errors; inference is disabled
 - This preserves compatibility with strict coding styles
@@ -40,6 +45,8 @@ Lazy Fortran 2025 uses **automatic type inference** - a modern approach that eli
 | integer + real | real |
 | real + complex | complex |
 | complex + complex | complex (dominant kind) |
+
+> **ISO BEHAVIOR CHANGE:** Standard Fortran requires explicit type declarations or uses the I-N naming convention (variables starting with I-N are integer, others are real). Lazy Fortran's first-assignment-wins inference is a departure from this.
 
 ### Open Questions: Type Inference
 
@@ -66,7 +73,26 @@ call init_particle(p)  ! Should this declare p automatically?
 | A: No (assignment only) | Simple local analysis, predictable | Doesn't support idiomatic Fortran patterns | Simpler - types known locally |
 | B: Yes (inspect callee) | Supports `intent(out)` patterns | Requires cross-procedure analysis, interface files | Requires interface analysis before specialization |
 
-#### TYP-OQ-3: Declaration placement
+#### TYP-OQ-3: Default intent for procedure arguments
+
+What should be the default intent for procedure arguments when not explicitly specified?
+
+> **ISO BEHAVIOR CHANGE:** Standard Fortran has no default intent - arguments without explicit intent can be read and modified. This is error-prone and widely considered a design flaw.
+
+```fortran
+function double(x)
+    x = x * 2    ! Modifies caller's variable - surprise!
+    double = x
+end function
+```
+
+| Option | Pros | Cons | Monomorphization Impact |
+|--------|------|------|------------------------|
+| A: `intent(in)` default | Safe, prevents accidental modification, matches modern practice | Breaks code relying on implicit inout | None |
+| B: `intent(inout)` default | Closer to ISO behavior | Still error-prone | None |
+| C: No default (require explicit) | Forces clarity | Verbose | None |
+
+#### TYP-OQ-4: Declaration placement
 
 Should explicit declarations be allowed anywhere in the code, or only at block beginning?
 
@@ -376,6 +402,151 @@ When automatic specialization creates ambiguity with user code:
 | A: Error at compile time | Safe, predictable | May reject valid-seeming code | Prevents problematic specializations |
 | B: User code always wins | Compatible | May hide optimization | User specific blocks auto-specialization |
 | C: Most specific wins | Optimal dispatch | Complex rules | May choose auto over user if more specific |
+
+---
+
+## Standardizer: Emitting Standard Fortran
+
+This section describes **implementation details** for transforming Lazy Fortran (`.lf`) to standard-conforming Fortran (`.f90`). These are not language features but mechanics of the standardization process.
+
+### Program Structure Wrapping
+
+Lazy Fortran allows bare statements without program structure:
+
+```fortran
+! Input: script.lf
+x = 5
+print *, x
+```
+
+The standardizer wraps this in a valid program unit:
+
+```fortran
+! Output: script.f90
+program main
+    implicit none
+    integer :: x
+    x = 5
+    print *, x
+end program main
+```
+
+**Rules:**
+- Bare statements → wrapped in `program main ... end program`
+- Functions/subroutines at file level → placed in `contains` section
+- When monomorphization generates multiple specializations → wrapped in module with `use` statement
+
+### Declaration Generation
+
+The standardizer generates explicit declarations for all inferred variables:
+
+```fortran
+! Input
+x = 5
+y = 3.14
+arr = [1, 2, 3]
+
+! Output (declarations generated)
+integer :: x
+real :: y
+integer, dimension(3) :: arr
+```
+
+**Placement:** All declarations at block beginning, before executable statements.
+
+### Implicit None Injection
+
+The standardizer injects `implicit none` into all program units to ensure type safety:
+
+```fortran
+program main
+    implicit none    ! Always injected
+    ...
+end program
+```
+
+This prevents accidental use of undeclared variables in the generated code.
+
+### Intent Generation
+
+Based on usage analysis, the standardizer generates appropriate intent attributes:
+
+- Read-only arguments → `intent(in)`
+- Modified arguments → `intent(inout)` or `intent(out)`
+- (Depends on TYP-OQ-3 resolution for default behavior)
+
+### Monomorphization Mechanics
+
+When a generic function is called with multiple type signatures, the standardizer:
+
+1. **Generates specialized procedures** with mangled names
+2. **Creates generic interface** binding all specializations
+3. **Wraps in module** to enable interface resolution
+4. **Injects `use` statement** in the calling code
+
+**Name mangling convention:** `<name>__<kind1>_<kind2>_...`
+
+```fortran
+! Input: script.lf
+function add(a, b)
+    add = a + b
+end function
+x = add(5, 3)
+y = add(2.5, 1.5)
+
+! Output: script.f90
+module auto_add
+    implicit none
+    interface add
+        module procedure add__i32_i32, add__r64_r64
+    end interface add
+contains
+    integer function add__i32_i32(a, b)
+        integer, intent(in) :: a, b
+        add__i32_i32 = a + b
+    end function
+
+    real function add__r64_r64(a, b)
+        real, intent(in) :: a, b
+        add__r64_r64 = a + b
+    end function
+end module auto_add
+
+program main
+    use auto_add
+    implicit none
+    integer :: x
+    real :: y
+    x = add(5, 3)
+    y = add(2.5, 1.5)
+end program main
+```
+
+### Single-Type Optimization
+
+When a function has only one type signature across all call sites, no interface or module wrapping is needed:
+
+```fortran
+! Input: all calls use integers
+function add(a, b)
+    add = a + b
+end function
+x = add(5, 3)
+z = add(10, 20)
+
+! Output: simple contains, no module
+program main
+    implicit none
+    integer :: x, z
+    x = add(5, 3)
+    z = add(10, 20)
+contains
+    integer function add(a, b)
+        integer, intent(in) :: a, b
+        add = a + b
+    end function
+end program main
+```
 
 ---
 
