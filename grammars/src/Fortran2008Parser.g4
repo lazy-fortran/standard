@@ -754,6 +754,7 @@ intrinsic_function_call_f2008
     | image_function_call             // Image intrinsics (Section 13.7)
     | bit_shift_function_call         // Bit shift intrinsics (Section 13.7.158-160)
     | bit_mask_function_call          // Bit mask intrinsics (Section 13.7.110-111)
+    | bit_reduction_function_call     // Bit reduction (Section 13.7.79-80, 94)
     ;
 
 // Bessel function calls (ISO/IEC 1539-1:2010 Section 13.7.22-27)
@@ -805,6 +806,17 @@ bit_shift_function_call
 bit_mask_function_call
     : MASKL LPAREN actual_arg_list RPAREN        // Section 13.7.110
     | MASKR LPAREN actual_arg_list RPAREN        // Section 13.7.111
+    ;
+
+// Bitwise reduction function calls (ISO/IEC 1539-1:2010 Section 13.7.79-80, 94)
+// Bitwise reduction operations across array elements
+// - IALL(ARRAY[,DIM][,MASK]): Bitwise AND reduction (Section 13.7.79)
+// - IANY(ARRAY[,DIM][,MASK]): Bitwise OR reduction (Section 13.7.80)
+// - IPARITY(ARRAY[,DIM][,MASK]): Bitwise XOR reduction (Section 13.7.94)
+bit_reduction_function_call
+    : IALL LPAREN actual_arg_list RPAREN         // Section 13.7.79
+    | IANY LPAREN actual_arg_list RPAREN         // Section 13.7.80
+    | IPARITY LPAREN actual_arg_list RPAREN      // Section 13.7.94
     ;
 
 // ============================================================================
@@ -921,4 +933,8 @@ identifier_or_keyword
     | SHIFTR       // SHIFTR can be used as variable name
     | MASKL        // MASKL can be used as variable name
     | MASKR        // MASKR can be used as variable name
+    // F2008 bitwise reduction intrinsics (Section 13.7.79-80, 13.7.94)
+    | IALL         // IALL can be used as variable name
+    | IANY         // IANY can be used as variable name
+    | IPARITY      // IPARITY can be used as variable name
     ;
