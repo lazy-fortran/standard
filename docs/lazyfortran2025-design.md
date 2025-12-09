@@ -45,59 +45,94 @@ Lazy Fortran 2025 uses **automatic type inference** - a modern approach that eli
 
 ## LF-GEN: Traits and Generics
 
-Lazy Fortran 2025 adopts a traits-based generics system inspired by Swift, Rust, and Go. This enables both compile-time and run-time polymorphism through a unified interface mechanism.
+Lazy Fortran 2025 will adopt a generics system. Two main proposals exist:
 
-### Traits (Named Abstract Interfaces)
+### Approach A: J3 TEMPLATE/REQUIREMENT (Official Fortran 202Y Direction)
 
-Traits define collections of procedure signatures that types can implement:
-
-```fortran
-abstract interface :: INumeric
-   integer | real(real64)              ! Type set syntax
-end interface INumeric
-
-abstract interface :: ISum
-   function sum{INumeric :: T}(x) result(s)
-      type(T), intent(in) :: x(:)
-      type(T)             :: s
-   end function sum
-end interface ISum
-```
-
-**Key features:**
-- **Type sets:** `integer | real(real64)` admits multiple types as constraint
-- **Generic parameters:** `{INumeric :: T}` constrains type parameter T
-- **Wildcard kinds:** `real(*)` matches all real kinds
-- **Associated types:** `itself` refers to the implementing type
-
-### Implements Statement
-
-Types declare trait conformance via `implements`:
+The J3 committee's approach uses explicit TEMPLATE constructs with deferred type parameters:
 
 ```fortran
-type, sealed, implements(ISum) :: SimpleSum
-contains
-   procedure, nopass :: sum
-end type SimpleSum
+! Template definition
+TEMPLATE swap_t(T)
+   TYPE, DEFERRED :: T
+CONTAINS
+   SUBROUTINE swap(x, y)
+      TYPE(T), INTENT(INOUT) :: x, y
+      TYPE(T) :: tmp
+      tmp = x; x = y; y = tmp
+   END SUBROUTINE
+END TEMPLATE
 
-! Or retroactively:
-implements (INumeric + IPrintable) :: MyType
-end implements MyType
+! Explicit instantiation
+INSTANTIATE swap_t(integer), ONLY: swap_int => swap
+INSTANTIATE swap_t(real), ONLY: swap_real => swap
+
+! Inline instantiation (simple template procedures)
+CALL swap{integer}(a, b)
 ```
 
-### Generic Procedures
-
-Procedures parameterized by constrained type parameters:
+**REQUIREMENT construct** for reusable constraints:
 
 ```fortran
-function average{INumeric :: T}(x) result(a)
-   type(T), intent(in) :: x(:)
-   type(T)             :: a
-   a = sum(x) / T(size(x))
-end function average
+REQUIREMENT R_comparable(T, less_than)
+   TYPE, DEFERRED :: T
+   INTERFACE
+      PURE LOGICAL FUNCTION less_than(a, b)
+         TYPE(T), INTENT(IN) :: a, b
+      END FUNCTION
+   END INTERFACE
+END REQUIREMENT
+
+TEMPLATE sort_t(T, less_than)
+   REQUIRES R_comparable(T, less_than)
+CONTAINS
+   SUBROUTINE sort(arr)
+      TYPE(T), INTENT(INOUT) :: arr(:)
+      ...
+   END SUBROUTINE
+END TEMPLATE
 ```
 
-**Instantiation:** Lazy Fortran infers type arguments automatically (no manual instantiation required, as in Swift).
+### Approach B: Traits-for-Fortran (Swift/Rust-inspired)
+
+Named abstract interfaces (traits) with type sets and implicit instantiation:
+
+```fortran
+! Trait with type set constraint
+ABSTRACT INTERFACE :: INumeric
+   integer | real(real64)
+END INTERFACE INumeric
+
+! Trait with generic procedure signature
+ABSTRACT INTERFACE :: ISum
+   FUNCTION sum{INumeric :: T}(x) RESULT(s)
+      TYPE(T), INTENT(IN) :: x(:)
+      TYPE(T) :: s
+   END FUNCTION
+END INTERFACE ISum
+
+! Type implementing trait
+TYPE, SEALED, IMPLEMENTS(ISum) :: SimpleSum
+CONTAINS
+   PROCEDURE, NOPASS :: sum
+END TYPE
+
+! Retroactive trait implementation
+IMPLEMENTS (INumeric + IPrintable) :: MyType
+END IMPLEMENTS MyType
+
+! Usage - automatic instantiation (no manual INSTANTIATE)
+y = average(x)  ! T inferred from x
+```
+
+### Key Differences
+
+| Aspect | J3 TEMPLATE | Traits-for-Fortran |
+|--------|-------------|-------------------|
+| Instantiation | Explicit `INSTANTIATE` or inline `{T}` | Automatic inference (Swift-like) |
+| Constraints | `REQUIREMENT` + `REQUIRES` | Type sets or explicit signatures in traits |
+| Scope | Module-level templates | Traits can be retroactively implemented |
+| Dispatch | Compile-time only | Both static (`type(T)`) and dynamic (`class(ITrait)`) |
 
 ---
 
@@ -135,8 +170,6 @@ Design decisions that need further discussion before finalizing.
 | A: ISO defaults (`real(4)`, `integer(4)`) | Compatible with existing code, predictable, smaller memory | Precision loss, integer overflow at ~2B |
 | B: Double precision (`real(8)`, `integer(8)`) | Safer for scientific computing, no precision surprises | Breaks ISO expectations, 2x memory |
 
-**Chris' preference:** Option A - standard compliance is paramount.
-
 ### OQ-2: Inference from `intent(out)` arguments
 
 Fortran idiomatically uses `intent(out)` arguments instead of function return values.
@@ -149,8 +182,6 @@ call init_particle(p)  ! Should this declare p automatically?
 |--------|------|------|
 | A: No (assignment only) | Simple local analysis, predictable | Doesn't support idiomatic Fortran patterns |
 | B: Yes (inspect callee) | Supports `intent(out)` patterns | Requires cross-procedure analysis, interface files |
-
-**Chris' preference:** No clear preference - both options have merit.
 
 ### OQ-3: Declaration placement
 
@@ -165,82 +196,65 @@ z = x + y
 
 | Option | Pros | Cons |
 |--------|------|------|
-| A: Block beginning only | Clean structure, all declarations visible at once | Verbose, variables far from first use |
+| A: Block beginning only | Clean structure, all declarations visible | Verbose, variables far from first use |
 | B: Anywhere | Declare near use, familiar to C/Rust devs | Scattered declarations, redundant with inference |
 
-**Chris' preference:** Option A - type inference handles convenience; if you want structure, declare at top.
+### OQ-4: Generics approach
 
-### OQ-4: Generic parameter syntax
+Which generics system to adopt?
 
-What syntax for generic type parameters?
+| Option | Pros | Cons |
+|--------|------|------|
+| A: J3 TEMPLATE/REQUIREMENT | Official Fortran direction, type-safe, explicit | Verbose, manual instantiation |
+| B: Traits-for-Fortran | Concise, automatic inference, retroactive impl | Not official, more complex semantics |
+| C: Hybrid | Best of both, flexible | Implementation complexity |
+
+### OQ-5: Generic parameter syntax
+
+What delimiter for generic type parameters?
 
 ```fortran
-! Option A: Curly braces (as in Traits-for-Fortran proposal)
-function sum{INumeric :: T}(x) result(s)
-
-! Option B: Square brackets (Go-style)
-function sum[INumeric :: T](x) result(s)
-
-! Option C: Angle brackets (C++/Rust-style)
-function sum<INumeric :: T>(x) result(s)
+function sum{T}(x)    ! Curly braces (J3 inline, Traits-for-Fortran)
+function sum(T)(x)    ! Parentheses (J3 TEMPLATE)
+function sum<T>(x)    ! Angle brackets (C++/Rust)
 ```
 
 | Option | Pros | Cons |
 |--------|------|------|
-| A: Curly braces `{}` | Distinct from arrays, familiar from Swift | Not used elsewhere in Fortran |
-| B: Square brackets `[]` | Used in Go, clean | Conflicts with array syntax |
-| C: Angle brackets `<>` | Familiar to C++/Rust devs | Conflicts with operators `<` and `>` |
+| A: Curly braces `{T}` | Distinct from arrays, used in J3 inline syntax | Not traditional Fortran |
+| B: Parentheses `(T)` | Used in J3 TEMPLATE, Fortran-like | Ambiguous with function calls |
+| C: Angle brackets `<T>` | Familiar to C++/Rust devs | Conflicts with relational operators |
 
-**Chris' preference:** Option A - curly braces are unambiguous in Fortran context.
+### OQ-6: Instantiation model
 
-### OQ-5: Type sets vs explicit trait signatures
-
-How to define generics constraints?
-
-```fortran
-! Option A: Type sets (Go-style, implicit signatures)
-abstract interface :: INumeric
-   integer | real(real64)
-end interface INumeric
-
-! Option B: Explicit signatures (Rust-style)
-abstract interface :: INumeric
-   function init(n)
-      integer, intent(in) :: n
-   end function init
-   function operator(+)(lhs, rhs) result(res)
-      type(itself), intent(in) :: lhs, rhs
-      type(itself)             :: res
-   end function operator(+)
-end interface INumeric
-```
+How should generic code be instantiated?
 
 | Option | Pros | Cons |
 |--------|------|------|
-| A: Type sets | Concise, leverages intrinsic operations | Implicit, harder to extend to user types |
-| B: Explicit signatures | Clear contract, works for any type | Verbose, requires explicit trait implementations |
+| A: Explicit only (`INSTANTIATE`) | Clear, predictable, J3 approach | Verbose, boilerplate |
+| B: Automatic inference | Concise, Swift-like ergonomics | Magic, harder to debug |
+| C: Both (explicit + inline) | Flexibility, J3 supports both | Two ways to do same thing |
 
-**Chris' preference:** Support both - type sets for intrinsic-heavy code, explicit for OO patterns.
+### OQ-7: Constraint specification
 
-### OQ-6: Trait dispatch mechanism
-
-Should traits support both static (compile-time) and dynamic (run-time) dispatch?
-
-```fortran
-! Static dispatch (zero-cost, monomorphized)
-type(T), intent(in) :: x   ! T known at compile time
-
-! Dynamic dispatch (vtable, existential type)
-class(INumeric), allocatable :: x   ! Type erased, runtime dispatch
-```
+How to specify type constraints for generics?
 
 | Option | Pros | Cons |
 |--------|------|------|
-| A: Static only | Zero runtime overhead, simpler | No runtime polymorphism |
-| B: Dynamic only | Flexible, OO-style | Runtime overhead, no monomorphization |
-| C: Both (Swift/Rust model) | Best of both worlds | More complex implementation |
+| A: REQUIREMENT construct (J3) | Reusable, explicit, type-safe | Verbose |
+| B: Type sets (`integer \| real`) | Concise for intrinsics | Only works for listed types |
+| C: Named traits with signatures | OO-style, extensible | Requires trait implementations |
+| D: All of the above | Maximum flexibility | Complex specification |
 
-**Chris' preference:** Option C - let user choose `type(T)` for static, `class(ITrait)` for dynamic.
+### OQ-8: Dispatch mechanism
+
+Should generics support both compile-time and run-time polymorphism?
+
+| Option | Pros | Cons |
+|--------|------|------|
+| A: Static only (J3 approach) | Zero overhead, simple | No runtime flexibility |
+| B: Dynamic only (`class(ITrait)`) | Runtime polymorphism | Overhead, no monomorphization |
+| C: Both (`type(T)` vs `class(ITrait)`) | User chooses tradeoff | Complex implementation |
 
 ---
 
