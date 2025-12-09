@@ -198,12 +198,15 @@ class F2018IntrinsicValidator:
         for i, line in enumerate(lines, start=1):
             line_lower = line.lower()
 
-            if image_status_pattern.search(line_lower):
+            match = image_status_pattern.search(line_lower)
+            if match:
+                col = match.start() + 1
                 call_info = IntrinsicCallInfo(
                     name="image_status",
                     keyword_args=self._extract_keyword_args(line_lower),
                     in_pure_procedure=self._is_in_pure_procedure(i),
                     line=i,
+                    column=col,
                 )
                 result.image_status_calls.append(call_info)
                 result.intrinsic_calls.append(call_info)
@@ -216,16 +219,20 @@ class F2018IntrinsicValidator:
                         "IMAGE_STATUS(IMAGE [, TEAM]) returns the execution "
                         "status of the specified image.",
                         line=i,
+                        column=col,
                         iso_section="16.9.81",
                     )
                 )
 
-            if failed_images_pattern.search(line_lower):
+            match = failed_images_pattern.search(line_lower)
+            if match:
+                col = match.start() + 1
                 call_info = IntrinsicCallInfo(
                     name="failed_images",
                     keyword_args=self._extract_keyword_args(line_lower),
                     in_pure_procedure=self._is_in_pure_procedure(i),
                     line=i,
+                    column=col,
                 )
                 result.image_status_calls.append(call_info)
                 result.intrinsic_calls.append(call_info)
@@ -238,16 +245,20 @@ class F2018IntrinsicValidator:
                         "FAILED_IMAGES([TEAM, KIND]) returns an array of "
                         "image indices that have failed.",
                         line=i,
+                        column=col,
                         iso_section="16.9.73",
                     )
                 )
 
-            if stopped_images_pattern.search(line_lower):
+            match = stopped_images_pattern.search(line_lower)
+            if match:
+                col = match.start() + 1
                 call_info = IntrinsicCallInfo(
                     name="stopped_images",
                     keyword_args=self._extract_keyword_args(line_lower),
                     in_pure_procedure=self._is_in_pure_procedure(i),
                     line=i,
+                    column=col,
                 )
                 result.image_status_calls.append(call_info)
                 result.intrinsic_calls.append(call_info)
@@ -260,6 +271,7 @@ class F2018IntrinsicValidator:
                         "STOPPED_IMAGES([TEAM, KIND]) returns an array of "
                         "image indices that have stopped.",
                         line=i,
+                        column=col,
                         iso_section="16.9.182",
                     )
                 )
@@ -274,12 +286,15 @@ class F2018IntrinsicValidator:
         for i, line in enumerate(lines, start=1):
             line_lower = line.lower()
 
-            if coshape_pattern.search(line_lower):
+            match = coshape_pattern.search(line_lower)
+            if match:
+                col = match.start() + 1
                 call_info = IntrinsicCallInfo(
                     name="coshape",
                     keyword_args=self._extract_keyword_args(line_lower),
                     in_pure_procedure=self._is_in_pure_procedure(i),
                     line=i,
+                    column=col,
                 )
                 result.collective_function_calls.append(call_info)
                 result.intrinsic_calls.append(call_info)
@@ -292,16 +307,20 @@ class F2018IntrinsicValidator:
                         "COSHAPE(COARRAY [, KIND]) returns the sizes "
                         "of the codimensions of a coarray.",
                         line=i,
+                        column=col,
                         iso_section="16.9.52",
                     )
                 )
 
-            if team_number_pattern.search(line_lower):
+            match = team_number_pattern.search(line_lower)
+            if match:
+                col = match.start() + 1
                 call_info = IntrinsicCallInfo(
                     name="team_number",
                     keyword_args=self._extract_keyword_args(line_lower),
                     in_pure_procedure=self._is_in_pure_procedure(i),
                     line=i,
+                    column=col,
                 )
                 result.collective_function_calls.append(call_info)
                 result.intrinsic_calls.append(call_info)
@@ -314,6 +333,7 @@ class F2018IntrinsicValidator:
                         "TEAM_NUMBER([TEAM]) returns the team number "
                         "of the specified team.",
                         line=i,
+                        column=col,
                         iso_section="16.9.187",
                     )
                 )
@@ -329,7 +349,9 @@ class F2018IntrinsicValidator:
         for i, line in enumerate(lines, start=1):
             line_lower = line.lower()
 
-            if random_init_pattern.search(line_lower):
+            match = random_init_pattern.search(line_lower)
+            if match:
+                col = match.start() + 1
                 kwargs = self._extract_keyword_args(line_lower)
                 in_pure = self._is_in_pure_procedure(i)
 
@@ -338,6 +360,7 @@ class F2018IntrinsicValidator:
                     keyword_args=kwargs,
                     in_pure_procedure=in_pure,
                     line=i,
+                    column=col,
                 )
                 result.random_init_calls.append(call_info)
                 result.intrinsic_calls.append(call_info)
@@ -353,6 +376,7 @@ class F2018IntrinsicValidator:
                             "that modifies the random number generator state "
                             "and shall not appear in a pure subprogram.",
                             line=i,
+                            column=col,
                             iso_section="16.9.152",
                         )
                     )
@@ -371,6 +395,7 @@ class F2018IntrinsicValidator:
                             "argument that controls whether the random "
                             "sequence is repeatable.",
                             line=i,
+                            column=col,
                             iso_section="16.9.152",
                         )
                     )
@@ -386,6 +411,7 @@ class F2018IntrinsicValidator:
                             "argument that controls whether different images "
                             "get different random sequences.",
                             line=i,
+                            column=col,
                             iso_section="16.9.152",
                         )
                     )
@@ -400,6 +426,7 @@ class F2018IntrinsicValidator:
                             "Section 16.9.152, REPEATABLE and IMAGE_DISTINCT "
                             "control random sequence behavior.",
                             line=i,
+                            column=col,
                             iso_section="16.9.152",
                         )
                     )
@@ -413,13 +440,16 @@ class F2018IntrinsicValidator:
         for i, line in enumerate(lines, start=1):
             line_lower = line.lower()
 
-            if reduce_pattern.search(line_lower):
+            match = reduce_pattern.search(line_lower)
+            if match:
+                col = match.start() + 1
                 kwargs = self._extract_keyword_args(line_lower)
                 call_info = IntrinsicCallInfo(
                     name="reduce",
                     keyword_args=kwargs,
                     in_pure_procedure=self._is_in_pure_procedure(i),
                     line=i,
+                    column=col,
                 )
                 result.reduce_calls.append(call_info)
                 result.intrinsic_calls.append(call_info)
@@ -434,6 +464,7 @@ class F2018IntrinsicValidator:
                         "[, IDENTITY] [, ORDERED]) performs a user-defined "
                         "reduction.",
                         line=i,
+                        column=col,
                         iso_section="16.9.161",
                     )
                 )
@@ -448,6 +479,7 @@ class F2018IntrinsicValidator:
                             "Section 16.9.161, when DIM is present, the "
                             "reduction is performed along that dimension.",
                             line=i,
+                            column=col,
                             iso_section="16.9.161",
                         )
                     )
@@ -462,6 +494,7 @@ class F2018IntrinsicValidator:
                             "Section 16.9.161, MASK selects which elements "
                             "participate in the reduction.",
                             line=i,
+                            column=col,
                             iso_section="16.9.161",
                         )
                     )
@@ -477,13 +510,16 @@ class F2018IntrinsicValidator:
         for i, line in enumerate(lines, start=1):
             line_lower = line.lower()
 
-            if out_of_range_pattern.search(line_lower):
+            match = out_of_range_pattern.search(line_lower)
+            if match:
+                col = match.start() + 1
                 kwargs = self._extract_keyword_args(line_lower)
                 call_info = IntrinsicCallInfo(
                     name="out_of_range",
                     keyword_args=kwargs,
                     in_pure_procedure=self._is_in_pure_procedure(i),
                     line=i,
+                    column=col,
                 )
                 result.out_of_range_calls.append(call_info)
                 result.intrinsic_calls.append(call_info)
@@ -498,6 +534,7 @@ class F2018IntrinsicValidator:
                         "can be converted to the type of MOLD without "
                         "overflow.",
                         line=i,
+                        column=col,
                         iso_section="16.9.140",
                     )
                 )
