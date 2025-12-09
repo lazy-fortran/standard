@@ -2,46 +2,43 @@
 marp: true
 theme: default
 paginate: true
-backgroundColor: #0b1020
-color: #f5f7ff
 style: |
   section {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
   }
-  h1, h2 {
-    color: #ffcc66;
+  h1 {
+    color: #2563eb;
   }
-  h3 {
-    color: #9ca3af;
+  h2 {
+    color: #374151;
   }
   code {
-    background: #111827;
+    background: #e5e7eb;
     border-radius: 4px;
     padding: 2px 6px;
   }
   pre {
-    background: #111827;
-    border: 1px solid #374151;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
   }
   table {
     font-size: 0.85em;
   }
   th {
-    background: #1f2937;
+    background: #e5e7eb;
   }
   blockquote {
-    border-left: 4px solid #ffcc66;
-    background: rgba(255, 204, 102, 0.1);
+    border-left: 4px solid #2563eb;
+    background: #eff6ff;
     padding: 0.5em 1em;
     margin: 0.5em 0;
   }
-  .tier1 { color: #4ade80; }
-  .tier2 { color: #facc15; }
-  .tier3 { color: #f87171; }
-  .recommendation {
-    background: rgba(74, 222, 128, 0.15);
-    border: 1px solid #4ade80;
+  .question {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
     border-radius: 8px;
     padding: 0.5em 1em;
     margin-top: 0.5em;
@@ -49,323 +46,399 @@ style: |
 ---
 
 # Lazy Fortran 2025
-## Open Issues Discussion
+## Draft Standard Review
 
-**Draft Standard Review**
-
-Base: ISO/IEC 1539-1:2023 (Fortran 2023)
+Base: ISO/IEC 1539-1:2023
 
 ---
 
-# Agenda
+# Overview
 
-### <span class="tier1">Tier 1: Quick Decisions (5 min each)</span>
-- ISSUE 9: Kind suffix convention
-- ISSUE 10: Character length inference
-- ISSUE 16: @ annotation syntax
+Lazy Fortran extends Fortran 2023 with:
 
-### <span class="tier2">Tier 2: Design Implications (10 min each)</span>
-- ISSUE 1: Default numeric kinds
-- ISSUE 2: Intent(out) inference
-- ISSUE 5: Generics approach
-- ISSUE 15: Fallback type
+1. **Type Inference** - No explicit declarations needed
+2. **Intent Inference** - Automatic intent(in/out/inout)
+3. **Generic Programming** - Templates and traits
+4. **Monomorphization** - Automatic specialization
 
-### <span class="tier3">Tier 3: Deeper Discussion (15+ min)</span>
-- ISSUES 3, 4, 6, 7, 8, 11-14
+Each feature has open design questions to discuss.
 
 ---
 
-<!-- _class: lead -->
+# 1. Type Inference
 
-# Tier 1: Quick Decisions
-
----
-
-# ISSUE 9: Kind Suffix Convention
-
-**Bytes vs Bits for mangled names?**
-
-| Option | Example | Rationale |
-|--------|---------|-----------|
-| **A: Bits** | `add_i32`, `add_r64` | C/Rust convention, current fortfront |
-| **B: Bytes** | `add_i4`, `add_r8` | Matches Fortran kind parameter |
+Variables get their type from first assignment:
 
 ```fortran
-! With bits (i32 = 32 bits = 4 bytes)
-integer(4) function add_i32(a, b)
-
-! With bytes (i4 = 4 bytes)
-integer(4) function add_i4(a, b)
+x = 42           ! integer
+y = 3.14         ! real
+z = (1.0, 2.0)   ! complex
+flag = .true.    ! logical
+s = "hello"      ! character(len=5)
 ```
 
-<div class="recommendation">
+No `implicit none` required. First assignment wins.
 
-**Recommendation:** Option B (Bytes) - Consistency with `integer(4)`, `real(8)`
+---
+
+# Type Inference: Default Kinds
+
+<div class="question">
+
+**OPEN ISSUE 1: What kind for inferred literals?**
+
+| Option | Types | Trade-off |
+|--------|-------|-----------|
+| A | real(4), int(4) | ISO compatible, less memory |
+| B | real(8), int(8) | Safe for scientific computing |
+| C | Context-dependent | Adapts but unpredictable |
 
 </div>
 
 ---
 
-# ISSUE 9: Kind Suffix - Full Table
-
-| Type | Kind | Bits | Bytes |
-|------|------|------|-------|
-| integer | 1 | i8 | i1 |
-| integer | 4 | i32 | i4 |
-| integer | 8 | i64 | i8 |
-| real | 4 | r32 | r4 |
-| real | 8 | r64 | r8 |
-| complex | 4 | c64 | c4 |
-| complex | 8 | c128 | c8 |
-
-**Key insight:** `complex(8)` contains two `real(8)` → should be `c8` not `c128`
-
----
-
-# ISSUE 10: Character Length Inference
-
-**How to handle multiple string assignments?**
+# Type Inference: Characters
 
 ```fortran
 s = "hello"      ! len=5
 s = "goodbye"    ! len=7 - what happens?
 ```
 
-| Option | Description | Pros | Cons |
-|--------|-------------|------|------|
-| A | First wins | Consistent | Truncation |
-| B | Maximum | No truncation | Memory |
-| C | Deferred-length | Dynamic | Overhead |
+<div class="question">
 
-<div class="recommendation">
+**OPEN ISSUE 10: How to handle different string lengths?**
 
-**Recommendation:** Option C (Deferred-length) - Modern Fortran idiom
+| Option | Behavior | Trade-off |
+|--------|----------|-----------|
+| A | First wins | Truncation possible |
+| B | Maximum length | May waste memory |
+| C | Deferred-length | Dynamic, modern idiom |
 
 </div>
 
 ---
 
-# ISSUE 16: @ Annotation Syntax
+# Type Inference: Fallback
 
-**Should trait annotations use `@` prefix?**
+What if type cannot be determined?
 
 ```fortran
-! Option A: No annotations (verbose)
-TYPE, IMPLEMENTS(IComparable) :: MyType
+x = unknown_function()   ! Type unclear
+```
 
-! Option B: @ syntax (concise)
-@IComparable
-integer function compare(a, b)
-    integer, intent(in) :: a, b
-    compare = a - b
+<div class="question">
+
+**OPEN ISSUE 15: Fallback for unresolved inference?**
+
+| Option | Behavior |
+|--------|----------|
+| A | Compile error |
+| B | Default to real(8) |
+| C | Default to ISO kind |
+
+</div>
+
+---
+
+# Type Inference: Declarations
+
+Where can explicit declarations appear?
+
+```fortran
+subroutine example()
+    integer :: x       ! Here only? (Option A)
+    x = 1
+    integer :: y       ! Or anywhere? (Option B)
+    y = 2
+end subroutine
+```
+
+<div class="question">
+
+**OPEN ISSUE 3: Declaration placement?**
+- A: Block beginning only (clean structure)
+- B: Anywhere (declare near use)
+
+</div>
+
+---
+
+# Type Inference: Derived Types
+
+```fortran
+p = particle_t(1.0, 2.0, 3.0)
+! p inferred as type(particle_t)
+```
+
+<div class="question">
+
+**OPEN ISSUE 14: Module scope for derived types?**
+
+| Option | Behavior |
+|--------|----------|
+| A | Type must be in scope (explicit USE) |
+| B | Auto-USE if type found |
+| C | Derived types require explicit declaration |
+
+</div>
+
+---
+
+# Type Inference: Function Results
+
+```fortran
+function add(a, b)
+    add = a + b   ! Return type from expression
 end function
 ```
 
-| Option | Pros | Cons |
-|--------|------|------|
-| A: No @ | Fortran-like | Verbose |
-| B: @ syntax | Familiar (Java/Python) | New symbol |
-| C: Both | Flexibility | Two ways |
+<div class="question">
 
----
+**OPEN ISSUE 13: How to infer function return types?**
 
-<!-- _class: lead -->
-
-# Tier 2: Design Implications
-
----
-
-# ISSUE 1: Default Numeric Kinds
-
-**What kind for inferred numeric literals?**
-
-```fortran
-x = 42          ! integer(??)
-y = 3.14159     ! real(??)
-```
-
-| Option | Types | Pros | Cons |
-|--------|-------|------|------|
-| A | real(4), int(4) | ISO compatible | Precision loss |
-| B | real(8), int(8) | Scientific safe | 2x memory |
-| C | Context | Adapts | Unpredictable |
-
-<div class="recommendation">
-
-**Recommendation:** Option B (Double) for safety, or Option A with promotion rules
+| Option | Source |
+|--------|--------|
+| A | Body only |
+| B | Call site only |
+| C | Body first, call site fallback |
+| D | Must match (error on conflict) |
 
 </div>
 
 ---
 
-# ISSUE 2: Inference from intent(out)
-
-**Should `call init(p)` auto-declare `p`?**
+# Type Inference: intent(out)
 
 ```fortran
 subroutine init(particle)
     type(particle_t), intent(out) :: particle
-    ...
 end subroutine
 
-! In calling code:
-call init(p)    ! Should p be auto-declared as particle_t?
+call init(p)    ! Auto-declare p?
 ```
 
-| Option | Description | Analysis Required |
-|--------|-------------|-------------------|
-| A | No (assignment only) | Local only |
+<div class="question">
+
+**OPEN ISSUE 2: Infer from intent(out) arguments?**
+
+| Option | Analysis |
+|--------|----------|
+| A | No (assignment only) | Local |
 | B | Yes (inspect callee) | Cross-procedure |
 
+</div>
+
 ---
 
-# ISSUE 5: Generics Approach
-
-**Which generics system?**
-
-| Option | Description | Example |
-|--------|-------------|---------|
-| A | J3 TEMPLATE | `TEMPLATE swap_t(T)` |
-| B | Traits only | `IMPLEMENTS IComparable` |
-| C | Hybrid | Both available |
+# Type Inference: Pointer Attribute
 
 ```fortran
-! J3 style
-INSTANTIATE swap_t(integer), ONLY: swap_int => swap
-
-! Traits style
-@IComparable
-TYPE :: MyType
+p => x    ! Pointer assignment
 ```
 
-<div class="recommendation">
+<div class="question">
 
-**Recommendation:** Option C (Hybrid) - Future-proof for J3, ergonomic for users
+**OPEN ISSUE 11: Infer pointer/target attributes?**
+
+| Option | Behavior |
+|--------|----------|
+| A | No inference (explicit required) |
+| B | Infer pointer only |
+| C | Infer both pointer and target |
 
 </div>
 
 ---
 
-# ISSUE 15: Fallback Type
-
-**What if type inference fails?**
+# Type Inference: Allocatable Attribute
 
 ```fortran
-x = some_unresolvable_expression()
-! Cannot determine type - what now?
+allocate(arr(n))    ! Allocate array
 ```
 
-| Option | Behavior | Pros | Cons |
-|--------|----------|------|------|
-| A | Compile error | Catches issues | May reject valid code |
-| B | Default real(8) | fortfront compat | Silent assumption |
-| C | ISO default | Standard | Precision loss |
+<div class="question">
 
-<div class="recommendation">
+**OPEN ISSUE 12: Infer allocatable from allocate?**
 
-**Recommendation:** Option A (Error) - Fail fast, explicit is better
+| Option | Behavior |
+|--------|----------|
+| A | No (require explicit attribute) |
+| B | Yes (infer from allocate statement) |
 
 </div>
 
 ---
 
-<!-- _class: lead -->
+# 2. Intent Inference
 
-# Tier 3: Deeper Discussion
-
----
-
-# ISSUE 3: Declaration Placement
-
-**Where can explicit declarations appear?**
+Arguments get intent from usage analysis:
 
 ```fortran
-! Option A: Block beginning only
-subroutine foo()
-    integer :: x, y    ! Must be here
-    x = 1
-    y = 2
-end subroutine
-
-! Option B: Anywhere
-subroutine bar()
-    x = 1
-    integer :: y       ! Near first use
-    y = 2
+subroutine process(x, y, z)
+    ! x only read     -> intent(in)
+    ! y modified      -> intent(inout)
+    ! z only written  -> intent(out)
+    y = x + 1
+    z = y * 2
 end subroutine
 ```
 
-**Trade-off:** Clean structure vs. declare-near-use
-
 ---
 
-# ISSUE 4: Default Intent
+# Intent Inference: Default
 
-**What intent when not specified?**
+What if usage is inconclusive?
 
 ```fortran
 subroutine process(data)
-    ! No intent specified - what default?
+    ! No clear read/write pattern
 end subroutine
 ```
 
-| Option | Default | ISO Behavior |
-|--------|---------|--------------|
-| A | intent(in) | Different (safer) |
+<div class="question">
+
+**OPEN ISSUE 4: Default intent when not inferable?**
+
+| Option | Default | Trade-off |
+|--------|---------|-----------|
+| A | intent(in) | Safe but breaks ISO patterns |
 | B | intent(inout) | Closer to ISO |
 | C | Required explicit | Forces clarity |
 
-**Key consideration:** Breaking change from ISO Fortran
+</div>
 
 ---
 
-# ISSUE 6: Generic Parameter Syntax
+# 3. Generic Programming
 
-**Delimiter for type parameters?**
+Two approaches available:
+
+**J3 TEMPLATE** (official Fortran direction):
+```fortran
+TEMPLATE swap_t(T)
+    TYPE, DEFERRED :: T
+CONTAINS
+    SUBROUTINE swap(x, y) ...
+END TEMPLATE
+```
+
+**Traits** (Swift/Rust style):
+```fortran
+TYPE, IMPLEMENTS(IComparable) :: MyType
+```
+
+---
+
+# Generics: Which Approach?
+
+<div class="question">
+
+**OPEN ISSUE 5: Which generics system?**
+
+| Option | Description |
+|--------|-------------|
+| A | J3 TEMPLATE only |
+| B | Traits only |
+| C | Hybrid (both) |
+
+</div>
+
+---
+
+# Generics: Parameter Syntax
 
 ```fortran
 ! Option A: Braces (J3 inline)
 call swap{integer}(a, b)
 
-! Option B: Parentheses (Fortran-like)
-call swap(integer)(a, b)    ! Ambiguous!
+! Option B: Parentheses
+call swap(integer)(a, b)    ! Ambiguous
 
-! Option C: Angle brackets (C++/Rust)
+! Option C: Angle brackets
 call swap<integer>(a, b)    ! Conflicts with .lt.
 ```
 
-<div class="recommendation">
+<div class="question">
 
-**Recommendation:** Option A (Braces) - Unambiguous, J3 direction
+**OPEN ISSUE 6: Delimiter for type parameters?**
+- A: Braces `{T}` - J3 direction, unambiguous
+- B: Parentheses `(T)` - Fortran-like but ambiguous
+- C: Angle brackets `<T>` - Familiar but conflicts
 
 </div>
 
 ---
 
-# ISSUE 7: Dispatch Mechanism
-
-**Static vs Dynamic dispatch for generics?**
-
-| Option | Runtime Cost | Flexibility |
-|--------|--------------|-------------|
-| A: Static only | Zero overhead | No runtime poly |
-| B: Dynamic only | Vtable | Full polymorphism |
-| C: Both | User choice | Complex |
+# Generics: Dispatch Mechanism
 
 ```fortran
-! Static (monomorphization)
-call add_i32(x, y)
+! Static dispatch (monomorphization)
+call add_i32(x, y)    ! Compiled for integer(4)
 
-! Dynamic (vtable)
+! Dynamic dispatch (vtable)
 class(IAddable), pointer :: obj
-call obj%add(x, y)
+call obj%add(x, y)    ! Runtime lookup
+```
+
+<div class="question">
+
+**OPEN ISSUE 7: Static vs dynamic dispatch?**
+
+| Option | Trade-off |
+|--------|-----------|
+| A | Static only - zero overhead |
+| B | Dynamic only - runtime flexibility |
+| C | Both - user chooses |
+
+</div>
+
+---
+
+# Generics: Annotation Syntax
+
+```fortran
+! Standard style
+TYPE, IMPLEMENTS(IComparable) :: MyType
+
+! Annotation style
+@IComparable
+integer function compare(a, b)
+```
+
+<div class="question">
+
+**OPEN ISSUE 16: Support @ annotations?**
+
+| Option | Trade-off |
+|--------|-----------|
+| A | No @ - Fortran-like |
+| B | @ syntax - familiar to Java/Python |
+| C | Both supported |
+
+</div>
+
+---
+
+# 4. Monomorphization
+
+Generic code specialized for each type used:
+
+```fortran
+function add(a, b)
+    add = a + b
+end function
+
+x = add(5, 3)       ! Generates add_i4
+y = add(2.5, 1.5)   ! Generates add_r4
 ```
 
 ---
 
-# ISSUE 8: Specialization Scope
+# Monomorphization: Scope
 
-**Where to generate specialized code?**
+<div class="question">
+
+**OPEN ISSUE 8: Where to generate specializations?**
 
 | Option | Scope | Trade-off |
 |--------|-------|-----------|
@@ -373,103 +446,97 @@ call obj%add(x, y)
 | B | Per-program (LTO) | No duplication |
 | C | Lazy (on-demand) | Complex build |
 
-**Consideration:** Build system integration, separate compilation
+</div>
 
 ---
 
-# ISSUES 11-12: Pointer/Allocatable Inference
+# 5. ABI: Name Mangling
 
-**Auto-infer attributes from usage?**
+Specialized functions need unique names:
 
-```fortran
-! ISSUE 11: Pointer
-p => x    ! Auto-declare p as pointer, x as target?
-
-! ISSUE 12: Allocatable
-allocate(arr(n))    ! Auto-declare arr as allocatable?
+```
+add(integer, integer)  ->  add_i4_i4
+add(real(8), real(8))  ->  add_r8_r8
 ```
 
-| Approach | Pros | Cons |
-|----------|------|------|
-| Auto-infer | Concise | Hides semantics |
-| Explicit | Clear intent | Verbose |
-
 ---
 
-# ISSUES 13-14: Advanced Inference
+# ABI: Kind Suffix Convention
 
-### ISSUE 13: Function Result Type
 ```fortran
-function add(a, b)
-    add = a + b   ! Infer return type from body?
-end function
+integer(4) function add_??(a, b)
+! Bits:  add_i32  (32 bits)
+! Bytes: add_i4   (4 bytes = kind parameter)
 ```
 
-### ISSUE 14: Derived Type Inference
-```fortran
-p = particle_t(1.0, 2.0, 3.0)
-! Auto-USE module containing particle_t?
-```
+<div class="question">
 
-**Trade-off:** Convenience vs. explicit dependencies
+**OPEN ISSUE 9: Bits or bytes for kind suffixes?**
 
----
+| Option | Example | Rationale |
+|--------|---------|-----------|
+| A | i32, r64 | C/Rust convention |
+| B | i4, r8 | Matches Fortran kind |
 
-<!-- _class: lead -->
+Note: complex(8) has two real(8) -> c8 not c128
 
-# Summary: Recommended Decisions
-
----
-
-# Quick Wins (Tier 1)
-
-| Issue | Recommendation |
-|-------|----------------|
-| **9: Kind suffix** | Bytes (i4, r8) - Fortran consistency |
-| **10: Char length** | Deferred-length - Modern idiom |
-| **16: @ syntax** | Support both - Flexibility |
+</div>
 
 ---
 
-# Design Decisions (Tier 2)
+# Summary: All Open Issues
 
-| Issue | Recommendation |
-|-------|----------------|
-| **1: Numeric kinds** | Double precision default |
-| **2: Intent(out)** | Yes, inspect callee |
-| **5: Generics** | Hybrid (J3 + Traits) |
-| **15: Fallback** | Compile error |
-
----
-
-# Discussion Items (Tier 3)
-
-| Issue | Key Question |
-|-------|--------------|
-| **3: Declaration** | Structure vs convenience? |
-| **4: Default intent** | Safety vs ISO compat? |
-| **6: Generic syntax** | Braces recommended |
-| **7: Dispatch** | Performance vs flexibility? |
-| **8: Scope** | Build system constraints? |
-| **11-14: Inference** | How much magic? |
+| # | Topic | Key Question |
+|---|-------|--------------|
+| 1 | Numeric kinds | real(4) vs real(8) default? |
+| 2 | Intent(out) | Auto-declare from callee? |
+| 3 | Declarations | Block start vs anywhere? |
+| 4 | Default intent | in vs inout vs explicit? |
+| 5 | Generics | Template vs Traits vs Both? |
+| 6 | Generic syntax | Braces vs parens vs angles? |
+| 7 | Dispatch | Static vs dynamic vs both? |
+| 8 | Specialization | Module vs program scope? |
 
 ---
 
-<!-- _class: lead -->
+# Summary: All Open Issues (continued)
 
-# Questions?
+| # | Topic | Key Question |
+|---|-------|--------------|
+| 9 | Kind suffix | Bits vs bytes? |
+| 10 | Char length | First vs max vs deferred? |
+| 11 | Pointer | Infer attribute? |
+| 12 | Allocatable | Infer from allocate? |
+| 13 | Function result | Body vs call site? |
+| 14 | Derived types | Auto-USE modules? |
+| 15 | Fallback type | Error vs default? |
+| 16 | @ syntax | Support annotations? |
 
-**Next Steps:**
-1. Vote on Tier 1 items
-2. Discuss Tier 2 trade-offs
-3. Schedule deep-dives for Tier 3
+---
+
+# Discussion Order Suggestion
+
+**Simple decisions first:**
+- Issue 9: Kind suffix (bits vs bytes)
+- Issue 3: Declaration placement
+- Issue 16: @ annotation syntax
+
+**Then design choices:**
+- Issue 1: Default numeric kinds
+- Issue 4: Default intent
+- Issue 10: Character length
+- Issue 15: Fallback type
+
+**Finally complex topics:**
+- Issues 5-8: Generics system
+- Issues 11-14: Advanced inference
+- Issue 2: Intent(out) inference
 
 ---
 
 # Resources
 
-- **Design Document:** [lazyfortran2025-design.md](lazyfortran2025-design.md)
-- **GitHub:** [lazy-fortran/standard](https://github.com/lazy-fortran/standard)
+- **Design Document:** [lazyfortran2025-design.md](../lazyfortran2025-design.md)
 - **Base Standard:** ISO/IEC 1539-1:2023
 
 **Document Status:** DRAFT - All provisions subject to change
