@@ -120,12 +120,26 @@ where_stmt
 
 // DO construct - ISO/IEC 1539:1991 Section 8.1.4, R816
 do_construct_f90
-    : do_stmt_f90 execution_part? end_do_stmt
+    : do_stmt_f90 execution_part? end_do
     ;
 
 // DO statement - ISO/IEC 1539:1991 Section 8.1.4.1, R817
 do_stmt_f90
-    : (IDENTIFIER COLON)? DO (loop_control)?
+    : (IDENTIFIER COLON)? DO (label_f90)? (loop_control)?
+    ;
+
+// End-do rule - ISO/IEC 1539:1991 Section 8.1.4.2, R823
+// Supports both F90-style END DO and F77-style terminal statements
+end_do
+    : end_do_stmt
+    | do_terminal_stmt
+    ;
+
+// DO terminal statement - ISO/IEC 1539:1991 Section 8.1.4.3, R831-R832
+// For F77 compatibility: label-DO uses a labeled statement as the construct end
+// The terminal statement is an action statement with a label that terminates a label-DO
+do_terminal_stmt
+    : label_f90 CONTINUE
     ;
 
 // Loop control - ISO/IEC 1539:1991 Section 8.1.4.1.1, R820
