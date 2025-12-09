@@ -1,12 +1,26 @@
 # Lazy Fortran 2025
 
-**Working Draft**
+**DRAFT - Working Document**
 
-> **Status:** Work in progress. Details may change as implementation evolves.
+> **Document type:** Working Draft
+> **Base standard:** ISO/IEC 1539-1:2023 (Fortran 2023)
+> **Status:** This document is a draft specification. All provisions are subject to change.
+
+---
+
+## Foreword
+
+This document specifies Lazy Fortran 2025, a superset extension to the Fortran programming language. It is designed to be read in conjunction with ISO/IEC 1539-1:2023 (Fortran 2023), which serves as the normative base standard.
+
+This document does not duplicate the text of ISO/IEC 1539-1:2023. Where this document is silent, the provisions of ISO/IEC 1539-1:2023 apply. All syntax and semantics defined in ISO/IEC 1539-1:2023 remain in effect unless explicitly modified by this document.
+
+Readers should have access to ISO/IEC 1539-1:2023 for complete understanding of the base language features.
 
 ---
 
 ## Contents
+
+[Foreword](#foreword)
 
 1. [Scope](#1-scope)
 2. [Normative references](#2-normative-references)
@@ -18,57 +32,68 @@
 8. [Application binary interface](#8-application-binary-interface)
 9. [Standardizer](#9-standardizer)
 
-Annex A. [Open questions](#annex-a-open-questions)
+Annex A. [Open questions (informative)](#annex-a-open-questions-informative)
 Annex B. [References](#annex-b-references)
 
 ---
 
 ## 1 Scope
 
-1.1 This document specifies Lazy Fortran 2025, a superset of ISO/IEC 1539-1:2023 (Fortran 2023) that adds automatic type inference, generic programming facilities, and automatic specialization (monomorphization).
+1.1 This document specifies extensions to the Fortran programming language as defined by ISO/IEC 1539-1:2023.
 
-1.2 Lazy Fortran source files use the `.lf` extension and can be transformed to standard-conforming Fortran by a standardizer.
+1.2 The extensions specified in this document constitute Lazy Fortran 2025, a strict superset of ISO/IEC 1539-1:2023.
 
-1.3 This document does not specify:
+1.3 This document adds the following facilities to the base language:
+  - (a) automatic type inference (Section 5);
+  - (b) generic programming constructs (Section 6);
+  - (c) automatic specialization (monomorphization) (Section 7).
+
+1.4 Lazy Fortran source files use the `.lf` extension and can be transformed to standard-conforming Fortran by a standardizer.
+
+1.5 This document does not specify:
   - (a) the mechanism by which Lazy Fortran programs are transformed or executed;
   - (b) the method of transcription of Lazy Fortran programs for execution;
   - (c) the operations required for setup and control of the use of Lazy Fortran programs.
+
+1.6 For all matters not explicitly addressed in this document, ISO/IEC 1539-1:2023 applies.
 
 ---
 
 ## 2 Normative references
 
-2.1 The following documents are referred to in the text in such a way that some or all of their content constitutes requirements of this document.
+2.1 The following documents are referred to in the text in such a way that some or all of their content constitutes requirements of this document. For dated references, only the edition cited applies. For undated references, the latest edition of the referenced document (including any amendments) applies.
 
 2.2 ISO/IEC 1539-1:2023, *Information technology — Programming languages — Fortran — Part 1: Base language*
 
-2.3 ISO/IEC 1539-1:2018, *Information technology — Programming languages — Fortran — Part 1: Base language*, Section 15.4.3.4 (Generic resolution)
+> **NOTE:** ISO/IEC 1539-1:2023 is the base standard for this document. All provisions of ISO/IEC 1539-1:2023 apply to Lazy Fortran 2025 unless explicitly modified by this document.
 
 ---
 
 ## 3 Terms and definitions
 
-3.1 For the purposes of this document, the terms and definitions given in ISO/IEC 1539-1:2023 apply.
+3.1 For the purposes of this document, the terms and definitions given in ISO/IEC 1539-1:2023 Clause 3 apply, together with the following.
 
-3.2 **automatic type inference**
+3.2 ISO/IEC 1539-1:2023 Clause 3 contains terms and definitions that are applicable but not duplicated here.
+
+3.3 **automatic type inference**
 determination of variable types from their usage context without explicit declaration
 
-3.3 **first assignment rule**
+3.4 **first assignment rule**
 the rule that an undeclared variable's type is determined by its first assignment
 
-3.4 **monomorphization**
+3.5 **monomorphization**
 generation of specialized code for each concrete type combination used with a generic procedure
 
-3.5 **specialization**
+3.6 **specialization**
 a specific instantiation of a generic procedure for particular concrete types
 
-3.6 **standardizer**
+3.7 **standardizer**
 a tool that transforms Lazy Fortran source to standard-conforming Fortran
 
-3.7 **trait**
+3.8 **trait**
 a named collection of procedure signatures that types can implement
 
-3.8 **type set**
+3.9 **type set**
 a constraint specifying a set of types that a generic parameter may take
 
 ---
@@ -148,16 +173,9 @@ allocate(matrix(n, m))    ! rank-2, runtime bounds
 
 ### 5.2 Expression type rules
 
-5.2.1 Expression promotion follows ISO/IEC 1539-1:2023 Section 10.1.5.
+5.2.1 Expression type determination follows ISO/IEC 1539-1:2023 Clause 10.1.5 (Numeric intrinsic operations).
 
-5.2.2 Summary of promotion rules:
-
-| Expression | Result Type |
-|------------|-------------|
-| integer + integer | integer |
-| integer + real | real |
-| real + complex | complex |
-| complex + complex | complex (dominant kind) |
+5.2.2 When automatic type inference determines a variable's type from an expression, the type is determined according to the rules specified in ISO/IEC 1539-1:2023.
 
 ### 5.3 Intent inference
 
@@ -336,7 +354,7 @@ END IMPLEMENTS
 
 7.1.1 Lazy Fortran automatically generates specialized (monomorphized) code for each concrete type combination used with a generic procedure.
 
-7.1.2 This is aligned with ISO/IEC 1539-1:2018 Section 15.4.3.4 (generic resolution).
+7.1.2 Generic resolution follows the rules specified in ISO/IEC 1539-1:2023 Clause 15.4.3.4.
 
 ### 7.2 Resolution policy
 
@@ -344,9 +362,9 @@ END IMPLEMENTS
 
 7.2.1.1 User-written specific procedures take precedence over generated specializations.
 
-7.2.1.2 Among remaining candidates, the most specific candidate wins per ISO generic resolution rules.
+7.2.1.2 Among remaining candidates, the most specific candidate wins according to ISO/IEC 1539-1:2023 Clause 15.4.3.4.
 
-7.2.1.3 If two or more candidates are incomparable, a compile-time ambiguity error is raised.
+7.2.1.3 If two or more candidates remain after applying the rules of ISO/IEC 1539-1:2023, a compile-time ambiguity error is raised.
 
 ### 7.3 Specialization scope
 
@@ -589,7 +607,7 @@ end program main
 
 ---
 
-## Annex A Open questions
+## Annex A Open questions (informative)
 
 ### A.1 Default numeric kinds
 
@@ -673,9 +691,15 @@ Should generics support both static and dynamic dispatch?
 
 ## Annex B References
 
-- [J3 Generics Repository](https://github.com/j3-fortran/generics)
+### B.1 Normative references
+
+- ISO/IEC 1539-1:2023, *Information technology — Programming languages — Fortran — Part 1: Base language*
+
+### B.2 Informative references
+
+The following documents are referenced for background information only. They do not constitute requirements of this document.
+
+- [J3 Generics Repository](https://github.com/j3-fortran/generics) - Official J3 committee work on generics
 - [J3 Paper 18-281r1](https://j3-fortran.org/doc/year/18/18-281r1.txt) - Simple templates proposal
 - [J3 Paper 24-107r1](https://j3-fortran.org/doc/year/24/) - TEMPLATE/INSTANTIATE syntax
-- [Traits-for-Fortran](https://github.com/difference-scheme/Traits-for-Fortran) - Swift/Rust-inspired proposal
-- ISO/IEC 1539-1:2018 Section 15.4.3.4 - Generic resolution rules
-- ISO/IEC 1539-1:2023 - Fortran 2023 base language
+- [Traits-for-Fortran](https://github.com/difference-scheme/Traits-for-Fortran) - Swift/Rust-inspired generics proposal
