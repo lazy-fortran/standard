@@ -269,9 +269,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         if "bind" in text and "c" in text:
             self._in_bind_c_procedure = True
 
-    def exitBinding_spec(self, ctx):
-        pass
-
     def enterFunction_stmt(self, ctx):
         text = self._get_token_text(ctx)
         if "bind" in text:
@@ -281,9 +278,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
                 name = ctx.identifier_or_keyword().getText()
                 self._current_procedure_name = name
                 self.result.c_interop_entities.append(name)
-
-    def exitFunction_stmt(self, ctx):
-        pass
 
     def enterSubroutine_stmt(self, ctx):
         text = self._get_token_text(ctx)
@@ -457,9 +451,6 @@ class F2003SemanticListener(Fortran2003ParserListener):
         self._in_abstract_interface = False
         self._current_abstract_interface = None
         self._current_interface_name = None
-
-    def enterInterface_body(self, ctx):
-        pass
 
     def exitInterface_body(self, ctx):
         if self._current_procedure and self._in_abstract_interface:
