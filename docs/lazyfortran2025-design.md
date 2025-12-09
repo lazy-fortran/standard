@@ -18,25 +18,14 @@ Lazy Fortran 2025 uses **automatic type inference** - a modern approach that eli
 
 **First assignment wins:**
 - The type of an undeclared variable is determined by its **first assignment**
-- `x = 4` makes `x` an `integer(4)` (or `integer(8)`? see below)
-- `y = 3.14` makes `y` a `real(4)` (or `real(8)`? see below)
-- `z = (1.0, 2.0)` makes `z` a `complex(8)` (or `complex(16)`? see below)
+- `x = 4` makes `x` an integer
+- `y = 3.14` makes `y` a real
+- `z = (1.0, 2.0)` makes `z` a complex
 - `obj = create_particle()` makes `obj` whatever type `create_particle` returns
-
-**Open question: default kinds**
-- ISO defaults are single precision (`real(4)`, `integer(4)`)
-- Modern scientific computing typically uses double precision (`real(8)`, `integer(8)`)
-- Should Lazy Fortran default to double precision for safety and precision?
-- *To be discussed* - tradeoff between ISO compatibility and modern practice
-
-**Open question: `intent(out)` arguments**
-- Fortran idiomatically uses `intent(out)` arguments instead of function return values
-- Should `call init_particle(p)` automatically declare `p` based on the `intent(out)` signature?
-- *To be discussed* - this would require inspecting callee signatures at the call site
 
 **Subsequent assignments follow standard coercion:**
 - After type is established, later assignments use normal Fortran coercion rules
-- `x = 5.3` after `x = 4` is valid (real truncated to integer, standard behavior)
+- `x = 5.3` after `x = 4` is valid (real truncated to integer)
 - `y = 7` after `y = 3.14` is valid (integer promoted to real)
 
 **Interaction with `implicit none`:**
@@ -52,11 +41,9 @@ Lazy Fortran 2025 uses **automatic type inference** - a modern approach that eli
 | real + complex | complex |
 | complex + complex | complex (dominant kind) |
 
-These rules enable `.lf` code to interoperate seamlessly with legacy Fortran.
-
 ---
 
-## LF-SYN-03: World-Wide Automatic Specializations (#51)
+## LF-SYN: World-Wide Automatic Specializations (#51)
 
 Lazy Fortran 2025 introduces world-wide specialization for generic procedures, aligned with ISO/IEC 1539-1:2018 Section 15.4.3.4.
 
@@ -69,7 +56,7 @@ This enables Lazy Fortran to add optimized implementations (BLAS-backed kernels,
 
 ---
 
-## LF-WLD-04: ISO Generic Resolution Alignment (#54)
+## LF-WLD: ISO Generic Resolution Alignment (#54)
 
 The relationship between Lazy Fortran and the ISO standard:
 
@@ -89,6 +76,36 @@ Lazy Fortran specializations are **standard-compatible decorations** that never 
 
 ---
 
+## Open Questions
+
+Design decisions that need further discussion before finalizing.
+
+### OQ-1: Default numeric kinds
+
+| Option | Description |
+|--------|-------------|
+| A: ISO defaults | `integer(4)`, `real(4)`, `complex(8)` - maximum compatibility |
+| B: Double precision | `integer(8)`, `real(8)`, `complex(16)` - modern scientific computing practice |
+
+**Tradeoff:** ISO compatibility vs. precision/safety for numerical work.
+
+### OQ-2: Inference from `intent(out)` arguments
+
+Fortran idiomatically uses `intent(out)` arguments instead of function return values.
+
+```fortran
+call init_particle(p)  ! Should this declare p automatically?
+```
+
+| Option | Description |
+|--------|-------------|
+| A: No | Only assignment triggers inference |
+| B: Yes | Inspect callee signature to infer `intent(out)` argument types |
+
+**Tradeoff:** Simplicity vs. idiomatic Fortran support. Option B requires cross-procedure analysis.
+
+---
+
 ## Issue Tracking
 
 | Issue | ID | Description |
@@ -99,5 +116,3 @@ Lazy Fortran specializations are **standard-compatible decorations** that never 
 | #55 | LF-WLD | Interoperability with legacy Fortran code |
 | #56 | LF-CODE | Tooling integration and diagnostics |
 | #57 | LF-DOC | Documentation guarantees |
-
-Each issue corresponds to a section or implementation plan in this document.
