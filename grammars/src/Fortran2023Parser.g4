@@ -533,7 +533,7 @@ notify_type_declaration_stmt_f2023
 // Override F2018 executable_construct to include F2023 NOTIFY WAIT statement
 
 // ISO/IEC 1539-1:2023 R514: executable-construct
-// Enhanced executable construct for F2023 (adds NOTIFY WAIT)
+// Enhanced executable construct for F2023 (adds NOTIFY WAIT, includes I/O)
 executable_construct_f2018
     : assignment_stmt                 // Inherit from F2003
     | call_stmt                       // Inherit from F2003
@@ -552,6 +552,11 @@ executable_construct_f2018
     | sync_construct                  // Inherit from F2008
     | wait_stmt                       // Inherit from F2003
     | flush_stmt                      // Inherit from F2003
+    | open_stmt                       // I/O: OPEN (Section 12.5.6)
+    | close_stmt                      // I/O: CLOSE (Section 12.5.7)
+    | write_stmt                      // I/O: WRITE (Section 12.6.2)
+    | read_stmt                       // I/O: READ (Section 12.6.1)
+    | inquire_stmt                    // I/O: INQUIRE (Section 12.10.3)
     | if_construct                    // Inherit from F95
     | do_construct_f2018              // Enhanced in F2018 (R1119-R1132, DO CONCURRENT)
     | select_case_construct           // Inherit from F95
@@ -822,4 +827,21 @@ f2003_io_spec
     | FMT EQUALS primary                         // fmt=*, fmt=100, fmt='(DT)'
     | LEADING_ZERO EQUALS primary                // leading_zero='yes' (F2023)
     | primary                                    // Positional: *, 10, '(DT)', etc.
+    ;
+
+// ============================================================================
+// INQUIRE STATEMENT OVERRIDE (ISO/IEC 1539-1:2023 Section 12.10.3)
+// ============================================================================
+//
+// J3/22-007 Section 12.10.3: INQUIRE statement
+// R1230: inquire-stmt is INQUIRE ( inquire-spec-list )
+//                     or INQUIRE ( IOLENGTH = scalar-int-variable ) output-item-list
+//
+// F2023 adds LEADING_ZERO= specifier to inquire-spec (Section 12.5.6.15).
+//
+// Override to use f2003_io_spec_list which includes LEADING_ZERO.
+
+// INQUIRE statement (ISO/IEC 1539-1:2023 R1230)
+inquire_stmt
+    : INQUIRE LPAREN f2003_io_spec_list RPAREN NEWLINE?
     ;
