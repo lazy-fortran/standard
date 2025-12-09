@@ -268,6 +268,7 @@ execution_construct_f2008
 executable_construct_f2008
     : assignment_stmt                 // Assignment (Section 7.2)
     | call_stmt                       // CALL (Section 12.5.1)
+    | atomic_subroutine_call          // ATOMIC intrinsics (Section 13.7.19-20) - NEW
     | print_stmt                      // PRINT (Section 9.6.3)
     | stop_stmt                       // STOP (Section 8.4)
     | error_stop_stmt                 // ERROR STOP (Section 8.4) - NEW in F2008
@@ -820,6 +821,26 @@ bit_reduction_function_call
     ;
 
 // ============================================================================
+// ATOMIC INTRINSIC SUBROUTINES (ISO/IEC 1539-1:2010 Section 13.7.19-13.7.20)
+// ============================================================================
+// Atomic intrinsic subroutines for coarray programming.
+// These are SUBROUTINES (not functions) and must be invoked via CALL.
+//
+// Key rules from ISO/IEC 1539-1:2010:
+// - ATOMIC_DEFINE(ATOM, VALUE [, STAT]): Section 13.7.19
+//   Atomically defines ATOM with VALUE. ATOM must be a coarray of type
+//   integer(ATOMIC_INT_KIND) or logical(ATOMIC_LOGICAL_KIND).
+// - ATOMIC_REF(VALUE, ATOM [, STAT]): Section 13.7.20
+//   Atomically references ATOM and assigns to VALUE. ATOM must be a coarray.
+
+// Atomic subroutine call statement (ISO/IEC 1539-1:2010 Section 13.7.19-20)
+// Invoked as: CALL ATOMIC_DEFINE(atom, value) or CALL ATOMIC_REF(value, atom)
+atomic_subroutine_call
+    : CALL ATOMIC_DEFINE LPAREN actual_arg_list RPAREN NEWLINE  // Section 13.7.19
+    | CALL ATOMIC_REF LPAREN actual_arg_list RPAREN NEWLINE     // Section 13.7.20
+    ;
+
+// ============================================================================
 // PRIMARY EXPRESSIONS (ISO/IEC 1539-1:2010 Section 7.1.1)
 // ============================================================================
 // Primary expressions are the basic building blocks of Fortran expressions.
@@ -937,4 +958,7 @@ identifier_or_keyword
     | IALL         // IALL can be used as variable name
     | IANY         // IANY can be used as variable name
     | IPARITY      // IPARITY can be used as variable name
+    // F2008 atomic intrinsics (Section 13.7.19-20)
+    | ATOMIC_DEFINE  // ATOMIC_DEFINE can be used as variable name
+    | ATOMIC_REF     // ATOMIC_REF can be used as variable name
     ;
