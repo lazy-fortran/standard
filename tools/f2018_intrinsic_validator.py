@@ -174,12 +174,57 @@ class F2018IntrinsicValidator:
             (r"round\s*=\s*(\.\w+\.|\w+)", "round"),
             (r"identity\s*=\s*(\w+)", "identity"),
             (r"ordered\s*=\s*(\.\w+\.|\w+)", "ordered"),
+            (r"array\s*=\s*(\w+)", "array"),
+            (r"operation\s*=\s*(\w+)", "operation"),
+            (r"x\s*=\s*([^\s,\)]+)", "x"),
+            (r"mold\s*=\s*(\w+)", "mold"),
         ]
         for pattern, key in patterns:
             match = re.search(pattern, text, re.IGNORECASE)
             if match:
                 kwargs[key] = match.group(1)
         return kwargs
+
+    def _count_positional_args(self, text: str, intrinsic_name: str) -> int:
+        """Count positional arguments in an intrinsic call.
+
+        Uses lightweight regex matching to extract the argument list and count
+        comma-separated items that are not keyword arguments.
+        """
+        pattern = re.compile(
+            rf"\b{intrinsic_name}\s*\(([^)]*)\)", re.IGNORECASE
+        )
+        match = pattern.search(text)
+        if not match:
+            return 0
+
+        args_text = match.group(1).strip()
+        if not args_text:
+            return 0
+
+        args = []
+        depth = 0
+        current = ""
+        for char in args_text:
+            if char == "(":
+                depth += 1
+                current += char
+            elif char == ")":
+                depth -= 1
+                current += char
+            elif char == "," and depth == 0:
+                args.append(current.strip())
+                current = ""
+            else:
+                current += char
+        if current.strip():
+            args.append(current.strip())
+
+        positional_count = 0
+        for arg in args:
+            if "=" not in arg:
+                positional_count += 1
+        return positional_count
 
     def _detect_image_status_calls(
         self, lines: List[str], result: F2018IntrinsicValidationResult
@@ -387,13 +432,14 @@ class F2018IntrinsicValidator:
                 if not has_repeatable:
                     result.diagnostics.append(
                         SemanticDiagnostic(
-                            severity=DiagnosticSeverity.WARNING,
-                            code="INTR_W001",
-                            message="RANDOM_INIT call may be missing "
+                            severity=DiagnosticSeverity.ERROR,
+                            code="INTR_E002",
+                            message="RANDOM_INIT call missing required "
                             "REPEATABLE argument. Per ISO/IEC 1539-1:2018 "
-                            "Section 16.9.152, REPEATABLE is a required "
-                            "argument that controls whether the random "
-                            "sequence is repeatable.",
+                            "Section 16.9.152, REPEATABLE is a mandatory "
+                            "argument (INTENT(IN), LOGICAL) that specifies "
+                            "whether the random sequence is repeatable. "
+                            "NON-COMPLIANT: Missing required argument.",
                             line=i,
                             column=col,
                             iso_section="16.9.152",
@@ -403,13 +449,14 @@ class F2018IntrinsicValidator:
                 if not has_image_distinct:
                     result.diagnostics.append(
                         SemanticDiagnostic(
-                            severity=DiagnosticSeverity.WARNING,
-                            code="INTR_W002",
-                            message="RANDOM_INIT call may be missing "
+                            severity=DiagnosticSeverity.ERROR,
+                            code="INTR_E003",
+                            message="RANDOM_INIT call missing required "
                             "IMAGE_DISTINCT argument. Per ISO/IEC 1539-1:2018 "
-                            "Section 16.9.152, IMAGE_DISTINCT is a required "
-                            "argument that controls whether different images "
-                            "get different random sequences.",
+                            "Section 16.9.152, IMAGE_DISTINCT is a mandatory "
+                            "argument (INTENT(IN), LOGICAL) that specifies "
+                            "whether different images get different random "
+                            "sequences. NON-COMPLIANT: Missing required argument.",
                             line=i,
                             column=col,
                             iso_section="16.9.152",
@@ -444,6 +491,7 @@ class F2018IntrinsicValidator:
             if match:
                 col = match.start() + 1
                 kwargs = self._extract_keyword_args(line_lower)
+                positional_count = self._count_positional_args(line_lower, "reduce")
                 call_info = IntrinsicCallInfo(
                     name="reduce",
                     keyword_args=kwargs,
@@ -454,20 +502,57 @@ class F2018IntrinsicValidator:
                 result.reduce_calls.append(call_info)
                 result.intrinsic_calls.append(call_info)
 
-                result.diagnostics.append(
-                    SemanticDiagnostic(
-                        severity=DiagnosticSeverity.INFO,
-                        code="INTR_I008",
-                        message="REDUCE intrinsic detected. Per "
-                        "ISO/IEC 1539-1:2018 Section 16.9.161, "
-                        "REDUCE(ARRAY, OPERATION [, DIM] [, MASK] "
-                        "[, IDENTITY] [, ORDERED]) performs a user-defined "
-                        "reduction.",
-                        line=i,
-                        column=col,
-                        iso_section="16.9.161",
+                has_array = "array" in kwargs or positional_count >= 1
+                has_operation = "operation" in kwargs or positional_count >= 2
+
+                if not has_array:
+                    result.diagnostics.append(
+                        SemanticDiagnostic(
+                            severity=DiagnosticSeverity.ERROR,
+                            code="INTR_E004",
+                            message="REDUCE call missing required ARRAY "
+                            "argument. Per ISO/IEC 1539-1:2018 Section "
+                            "16.9.161, ARRAY is a mandatory argument that "
+                            "shall be an array of any type. "
+                            "NON-COMPLIANT: Missing required argument.",
+                            line=i,
+                            column=col,
+                            iso_section="16.9.161",
+                        )
                     )
-                )
+
+                if not has_operation:
+                    result.diagnostics.append(
+                        SemanticDiagnostic(
+                            severity=DiagnosticSeverity.ERROR,
+                            code="INTR_E005",
+                            message="REDUCE call missing required OPERATION "
+                            "argument. Per ISO/IEC 1539-1:2018 Section "
+                            "16.9.161, OPERATION is a mandatory argument that "
+                            "shall be a pure function with two arguments of "
+                            "the same type as ARRAY elements. "
+                            "NON-COMPLIANT: Missing required argument.",
+                            line=i,
+                            column=col,
+                            iso_section="16.9.161",
+                        )
+                    )
+
+                if has_array and has_operation:
+                    result.diagnostics.append(
+                        SemanticDiagnostic(
+                            severity=DiagnosticSeverity.INFO,
+                            code="INTR_I008",
+                            message="REDUCE intrinsic detected. Per "
+                            "ISO/IEC 1539-1:2018 Section 16.9.161, "
+                            "REDUCE(ARRAY, OPERATION [, DIM] [, MASK] "
+                            "[, IDENTITY] [, ORDERED]) performs a user-defined "
+                            "reduction.",
+                            line=i,
+                            column=col,
+                            iso_section="16.9.161",
+                        )
+                    )
 
                 if "dim" in kwargs:
                     result.diagnostics.append(
@@ -502,7 +587,7 @@ class F2018IntrinsicValidator:
     def _detect_out_of_range_calls(
         self, lines: List[str], result: F2018IntrinsicValidationResult
     ):
-        """Detect OUT_OF_RANGE intrinsic calls."""
+        """Detect OUT_OF_RANGE intrinsic calls and validate per ISO Section 16.9.140."""
         out_of_range_pattern = re.compile(
             r"\bout_of_range\s*\(", re.IGNORECASE
         )
@@ -514,6 +599,9 @@ class F2018IntrinsicValidator:
             if match:
                 col = match.start() + 1
                 kwargs = self._extract_keyword_args(line_lower)
+                positional_count = self._count_positional_args(
+                    line_lower, "out_of_range"
+                )
                 call_info = IntrinsicCallInfo(
                     name="out_of_range",
                     keyword_args=kwargs,
@@ -524,20 +612,73 @@ class F2018IntrinsicValidator:
                 result.out_of_range_calls.append(call_info)
                 result.intrinsic_calls.append(call_info)
 
-                result.diagnostics.append(
-                    SemanticDiagnostic(
-                        severity=DiagnosticSeverity.INFO,
-                        code="INTR_I007",
-                        message="OUT_OF_RANGE intrinsic detected. Per "
-                        "ISO/IEC 1539-1:2018 Section 16.9.140, "
-                        "OUT_OF_RANGE(X, MOLD [, ROUND]) tests whether X "
-                        "can be converted to the type of MOLD without "
-                        "overflow.",
-                        line=i,
-                        column=col,
-                        iso_section="16.9.140",
+                has_x = "x" in kwargs or positional_count >= 1
+                has_mold = "mold" in kwargs or positional_count >= 2
+
+                if not has_x:
+                    result.diagnostics.append(
+                        SemanticDiagnostic(
+                            severity=DiagnosticSeverity.ERROR,
+                            code="INTR_E006",
+                            message="OUT_OF_RANGE call missing required X "
+                            "argument. Per ISO/IEC 1539-1:2018 Section "
+                            "16.9.140, X is a mandatory argument that shall "
+                            "be of type integer or real. "
+                            "NON-COMPLIANT: Missing required argument.",
+                            line=i,
+                            column=col,
+                            iso_section="16.9.140",
+                        )
                     )
-                )
+
+                if not has_mold:
+                    result.diagnostics.append(
+                        SemanticDiagnostic(
+                            severity=DiagnosticSeverity.ERROR,
+                            code="INTR_E007",
+                            message="OUT_OF_RANGE call missing required MOLD "
+                            "argument. Per ISO/IEC 1539-1:2018 Section "
+                            "16.9.140, MOLD is a mandatory argument that "
+                            "shall be of type integer or real and specifies "
+                            "the target type for the conversion test. "
+                            "NON-COMPLIANT: Missing required argument.",
+                            line=i,
+                            column=col,
+                            iso_section="16.9.140",
+                        )
+                    )
+
+                if has_x and has_mold:
+                    result.diagnostics.append(
+                        SemanticDiagnostic(
+                            severity=DiagnosticSeverity.INFO,
+                            code="INTR_I007",
+                            message="OUT_OF_RANGE intrinsic detected. Per "
+                            "ISO/IEC 1539-1:2018 Section 16.9.140, "
+                            "OUT_OF_RANGE(X, MOLD [, ROUND]) tests whether X "
+                            "can be converted to the type of MOLD without "
+                            "overflow.",
+                            line=i,
+                            column=col,
+                            iso_section="16.9.140",
+                        )
+                    )
+
+                if "round" in kwargs:
+                    result.diagnostics.append(
+                        SemanticDiagnostic(
+                            severity=DiagnosticSeverity.INFO,
+                            code="INTR_I011",
+                            message="OUT_OF_RANGE with ROUND argument. Per "
+                            "ISO/IEC 1539-1:2018 Section 16.9.140, ROUND is "
+                            "an optional LOGICAL argument that specifies "
+                            "whether rounding should be considered when "
+                            "testing for overflow.",
+                            line=i,
+                            column=col,
+                            iso_section="16.9.140",
+                        )
+                    )
 
     def _add_summary_diagnostics(self, result: F2018IntrinsicValidationResult):
         """Add summary diagnostics for intrinsic usage patterns."""
