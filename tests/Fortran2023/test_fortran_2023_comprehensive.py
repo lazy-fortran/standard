@@ -549,6 +549,28 @@ class TestFortran2023Parser:
         except Exception as e:
             pytest.fail(f"F2023 string intrinsic parsing failed: {e}")
 
+    def test_at_edit_descriptor_parsing(self):
+        """Test F2023 AT edit descriptor parsing.
+
+        ISO/IEC 1539-1:2023 Section 13 (Input/output editing)
+        J3/22-007 R1307: char-string-edit-desc adds AT edit descriptor
+
+        The AT edit descriptor outputs character values with trailing
+        blanks automatically trimmed. It takes no width specification.
+        """
+        at_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "at_edit_descriptor.f90",
+        )
+        parser = self.create_parser(at_input)
+
+        try:
+            tree = parser.program_unit_f2023()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F2023 AT edit descriptor parsing failed: {e}")
+
 
 class TestFortran2023Foundation:
     """Test F2023 as foundation for LazyFortran2025."""

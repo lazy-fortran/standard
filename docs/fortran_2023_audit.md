@@ -432,14 +432,20 @@ Other Missing Features:
 | R1179 | `notify-wait-stmt` | NOT IMPLEMENTED |
 | -- | NOTIFY_TYPE derived type | NOT IMPLEMENTED |
 | -- | C_F_STRPOINTER procedure | NOT IMPLEMENTED |
-| -- | AT edit descriptor | NOT IMPLEMENTED |
+| -- | AT edit descriptor | IMPLEMENTED (Issue #347) |
 | -- | LEADING_ZERO I/O specifier | NOT IMPLEMENTED |
 
 - R821 rank-clause gap tracked by Issue #345.
 - R1029 / conditional-expression integration tracked by Issue #334.
 - R1179 and NOTIFY_TYPE tracked by Issue #333.
 - C_F_STRPOINTER tracked by Issue #346.
-- AT edit descriptor tracked by Issue #347.
+- AT edit descriptor: Implemented via Issue #347. The AT edit descriptor
+  (ISO/IEC 1539-1:2023 Section 13, R1307) trims trailing blanks from
+  character output. It is used in FORMAT specifications as `AT` with no
+  width parameter. The grammar already supports this syntax since format
+  strings are treated as opaque character literals, and for legacy FORMAT
+  statements the `AT` is recognized as an IDENTIFIER by the existing
+  format_item rules.
 - LEADING_ZERO I/O specifier tracked by Issue #348.
 
 **Missing Intrinsic Functions (remaining gaps):**
