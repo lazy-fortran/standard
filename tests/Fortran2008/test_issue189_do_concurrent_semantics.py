@@ -305,6 +305,158 @@ end program assign_ref_test
         assert info_diags[0].iso_section == "8.1.6.6.4"
         assert "x" in info_diags[0].message
 
+    def test_mask_expression_variables_tracked(self):
+        """Variables in DO CONCURRENT mask should be tracked for dependencies.
+
+        Per ISO/IEC 1539-1:2010 Section 8.1.6.6, the mask expression is
+        evaluated for each iteration. Variables in the mask must be tracked
+        to detect potential iteration dependencies.
+        """
+        code = """
+module mask_var_mod
+    implicit none
+contains
+    subroutine mask_var_test()
+        integer :: i
+        real :: a(10), b(10), thresh
+        thresh = 0.5
+        b = 1.0
+        do concurrent (i = 1:10, b(i) > thresh)
+            a(i) = real(i)
+        end do
+    end subroutine mask_var_test
+end module mask_var_mod
+"""
+        result = self.validator.validate_code(code)
+        assert not result.has_errors
+        assert len(result.do_concurrent_constructs) >= 1
+        construct = result.do_concurrent_constructs[0]
+        assert construct.has_mask
+        assert "b" in construct.referenced_variables
+        assert "thresh" in construct.referenced_variables
+
+    def test_if_condition_variables_tracked(self):
+        """Variables in IF conditions within DO CONCURRENT should be tracked.
+
+        Per ISO/IEC 1539-1:2010 Section 8.1.6.6.4, all variable references
+        within DO CONCURRENT must be tracked for iteration independence,
+        including those in conditional expressions.
+        """
+        code = """
+module if_cond_mod
+    implicit none
+contains
+    subroutine if_cond_test()
+        integer :: i
+        real :: a(10), cond_flag(10)
+        cond_flag = 1.0
+        do concurrent (i = 1:10)
+            if (cond_flag(i) > 0.5) then
+                a(i) = real(i)
+            end if
+        end do
+    end subroutine if_cond_test
+end module if_cond_mod
+"""
+        result = self.validator.validate_code(code)
+        assert not result.has_errors
+        assert len(result.do_concurrent_constructs) >= 1
+        construct = result.do_concurrent_constructs[0]
+        assert "cond_flag" in construct.referenced_variables
+
+    def test_multiple_if_conditions_tracked(self):
+        """Variables in multiple IF conditions within DO CONCURRENT are tracked.
+
+        Per ISO/IEC 1539-1:2010 Section 8.1.6.6.4, all variable references
+        within DO CONCURRENT must be tracked for iteration independence,
+        including those in multiple conditional expressions.
+        """
+        code = """
+module multi_if_mod
+    implicit none
+contains
+    subroutine multi_if_test()
+        integer :: i
+        real :: a(10), cond_flag(10), cond_val(10)
+        cond_flag = 1.0
+        cond_val = 2.0
+        do concurrent (i = 1:10)
+            if (cond_flag(i) > 0.5) then
+                a(i) = 1.0
+            end if
+            if (cond_val(i) < 1.0) then
+                a(i) = 2.0
+            end if
+        end do
+    end subroutine multi_if_test
+end module multi_if_mod
+"""
+        result = self.validator.validate_code(code)
+        assert not result.has_errors
+        assert len(result.do_concurrent_constructs) >= 1
+        construct = result.do_concurrent_constructs[0]
+        assert "cond_flag" in construct.referenced_variables
+        assert "cond_val" in construct.referenced_variables
+
+    def test_procedure_argument_variables_tracked(self):
+        """Variables passed to procedure calls within DO CONCURRENT are tracked.
+
+        Per ISO/IEC 1539-1:2010 Section 8.1.6.6.4, variables passed as
+        procedure arguments must be tracked for iteration independence,
+        as they may be modified or referenced across iterations.
+        """
+        code = """
+module proc_arg_mod
+    implicit none
+contains
+    subroutine proc_arg_test()
+        integer :: i
+        real :: a(10), b(10)
+        b = 1.0
+        do concurrent (i = 1:10)
+            call work_proc(a(i), b(i))
+        end do
+    end subroutine proc_arg_test
+    subroutine work_proc(x, y)
+        real :: x, y
+        x = y * 2.0
+    end subroutine work_proc
+end module proc_arg_mod
+"""
+        result = self.validator.validate_code(code)
+        assert not result.has_errors
+        assert len(result.do_concurrent_constructs) >= 1
+        construct = result.do_concurrent_constructs[0]
+        assert "a" in construct.referenced_variables
+        assert "b" in construct.referenced_variables
+
+    def test_mask_with_assigned_variable_produces_info(self):
+        """Mask referencing assigned variable should produce DO_CONC_I001.
+
+        Per ISO/IEC 1539-1:2010 Section 8.1.6.6.4, if a variable is both
+        assigned in the loop body and referenced in the mask expression,
+        an INFO diagnostic should flag this potential dependency.
+        """
+        code = """
+module mask_assign_mod
+    implicit none
+contains
+    subroutine mask_assign_test()
+        integer :: i
+        real :: a(10)
+        a = 0.0
+        do concurrent (i = 1:10, a(i) < 10.0)
+            a(i) = real(i)
+        end do
+    end subroutine mask_assign_test
+end module mask_assign_mod
+"""
+        result = self.validator.validate_code(code)
+        assert not result.has_errors
+        info_diags = [d for d in result.diagnostics if d.code == "DO_CONC_I001"]
+        assert len(info_diags) > 0
+        assert any("a" in d.message for d in info_diags)
+
 
 class TestDoConcurrentProcedureCalls:
     """Tests for procedure calls within DO CONCURRENT."""
