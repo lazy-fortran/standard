@@ -456,9 +456,15 @@ __auto_add_MOD_add__r64_r64
 
 9.2.1.2 Bare statements without program structure are wrapped in `program main ... end program`.
 
+9.2.1.3 When the source file contains only procedure definitions (no executable statements at file level), the default is a module named after the file (without extension).
+
+9.2.1.4 Example: `mathlib.lf` containing only functions becomes `module mathlib`.
+
 9.2.2 **Contained procedures**
 
 9.2.2.1 Functions and subroutines at file level are placed in the `contains` section of the default program unit.
+
+9.2.2.2 When the default is a module (9.2.1.3), procedures are placed in the module's `contains` section.
 
 9.2.3 Example:
 
