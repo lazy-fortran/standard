@@ -450,9 +450,15 @@ __auto_add_MOD_add__r64_r64
 
 ### 9.2 Program structure wrapping
 
-9.2.1 Bare statements without program structure are wrapped in `program main ... end program`.
+9.2.1 **Default program unit**
 
-9.2.2 Functions and subroutines at file level are placed in the `contains` section.
+9.2.1.1 When no program unit is specified, the default is `program main`.
+
+9.2.1.2 Bare statements without program structure are wrapped in `program main ... end program`.
+
+9.2.2 **Contained procedures**
+
+9.2.2.1 Functions and subroutines at file level are placed in the `contains` section of the default program unit.
 
 9.2.3 Example:
 
