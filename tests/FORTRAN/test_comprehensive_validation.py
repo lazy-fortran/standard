@@ -161,8 +161,8 @@ class TestComprehensiveValidation(unittest.TestCase):
             (".EQ.", "EQ"), (".NE.", "NE"), (".LT.", "LT"), 
             (".LE.", "LE"), (".GT.", "GT"), (".GE.", "GE"),
             
-            # Delimiters (including newly added colon)
-            ("(", "LPAREN"), (")", "RPAREN"), (",", "COMMA"), (":", "COLON"),
+            # Delimiters
+            ("(", "LPAREN"), (")", "RPAREN"), (",", "COMMA"),
             
             # Literals
             ("123", "INTEGER_LITERAL"), ("3.14", "REAL_LITERAL"), ("1.23E-4", "REAL_LITERAL"),
@@ -322,14 +322,7 @@ class TestComprehensiveValidation(unittest.TestCase):
         lexer = FORTRANLexer(input_stream)
         token = lexer.nextToken()
         self.assertEqual(token.text, "VAR_NAME")  # Should be single token
-        
-        # Issue: Colon token not supported
-        input_stream = InputStream(":")
-        lexer = FORTRANLexer(input_stream)
-        token = lexer.nextToken()
-        token_name = lexer.symbolicNames[token.type]
-        self.assertEqual(token_name, "COLON")
-        
+
         # Issue: Comments caused identifier conflicts (C vs comment)
         tree = self.parse_program("C = 1 ! This is a comment")
         self.assertIsNotNone(tree)

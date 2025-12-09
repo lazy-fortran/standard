@@ -51,6 +51,23 @@ RETURN       : R E T U R N ;
 COMMON       : C O M M O N ;
 
 // ============================================================================
+// OPTIONAL FUNCTION RETURN TYPE SPECIFIERS
+// C28-6000-2 Part I, Chapter 3, Section 3.3 (Function Subprograms)
+// ============================================================================
+// FORTRAN II allows optional type specification for function subprograms.
+// The type (INTEGER or REAL) precedes the FUNCTION keyword in function definitions.
+// Example: INTEGER FUNCTION factorial(n)
+// Note: These are NOT used for variable declarations (which don't exist in F2)
+//       They are only valid as function return type specifiers.
+// These will be re-defined in FORTRAN 66 lexer for type declarations.
+
+// INTEGER type - for function return type specification - C28-6000-2 Section 3.3
+INTEGER      : I N T E G E R ;
+
+// REAL type - for function return type specification - C28-6000-2 Section 3.3
+REAL         : R E A L ;
+
+// ============================================================================
 // STATEMENT LABELS
 // C28-6000-2 Part I, Chapter 2: Coding for FORTRAN II (columns 1-5)
 // ============================================================================

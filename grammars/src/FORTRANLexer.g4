@@ -91,10 +91,8 @@ OVERFLOW     : O V E R F L O W ;     // Used in overflow IF statements
 // Data Type Keywords
 // C28-6003 Chapter II.A (Constants) and Chapter II.B (Variables)
 // Note: In 1957 FORTRAN, types were determined by naming convention (I-N = integer)
-// Explicit type declarations (INTEGER, REAL) were extensions in some implementations
-INTEGER      : I N T E G E R ;      // Explicit integer declaration (extension)
-REAL         : R E A L ;            // Explicit real declaration (extension)
-IMPLICIT     : I M P L I C I T ;    // Implicit typing (I-N = integer, else real)
+// Type declaration statements (INTEGER, REAL, IMPLICIT) were introduced in FORTRAN 66,
+// not FORTRAN 1957. See FORTRAN 66 grammar (FORTRAN66Lexer.g4) for these.
 
 // ============================================================================
 // OPERATORS: Arithmetic
@@ -128,7 +126,6 @@ GE           : '.' G E '.' ;    // Greater or equal - C28-6003 Chapter II.C
 LPAREN       : '(' ;    // Subscripts, function args, lists - C28-6003 Chapter II.B
 RPAREN       : ')' ;    // Subscripts, function args, lists - C28-6003 Chapter II.B
 COMMA        : ',' ;    // List separator - C28-6003 throughout
-COLON        : ':' ;    // Array slice notation (later standards)
 
 // ============================================================================
 // HOLLERITH CONSTANTS

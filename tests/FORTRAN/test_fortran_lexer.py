@@ -66,12 +66,17 @@ class TestFORTRANLexer(unittest.TestCase):
                 )
     
     def test_data_types_universal(self):
-        """Test universal data type keywords"""
+        """Test that INTEGER and REAL are not keywords in FORTRAN 1957
+
+        INTEGER and REAL type declaration keywords were introduced in FORTRAN 66
+        (ANSI X3.9-1966 Section 4), not in FORTRAN 1957. In FORTRAN 1957,
+        types were determined by naming convention (I-N = integer, else real).
+        """
         test_cases = [
-            ("INTEGER", "INTEGER"),
-            ("REAL", "REAL")
+            ("INTEGER", "IDENTIFIER"),  # Should be parsed as identifier, not keyword
+            ("REAL", "IDENTIFIER")      # Should be parsed as identifier, not keyword
         ]
-        
+
         for text, expected_type in test_cases:
             with self.subTest(datatype=text):
                 tokens = self.get_tokens(text)
@@ -132,8 +137,7 @@ class TestFORTRANLexer(unittest.TestCase):
         test_cases = [
             ("(", "LPAREN"),
             (")", "RPAREN"),
-            (",", "COMMA"),
-            (":", "COLON")
+            (",", "COMMA")
         ]
         
         for text, expected_type in test_cases:
@@ -229,10 +233,7 @@ class TestFORTRANLexer(unittest.TestCase):
             ("IF", "IF"),
             ("goto", "GOTO"),
             ("GoTo", "GOTO"),
-            ("GOTO", "GOTO"),
-            ("real", "REAL"),
-            ("Real", "REAL"),
-            ("REAL", "REAL")
+            ("GOTO", "GOTO")
         ]
         
         for text, expected_type in test_cases:
