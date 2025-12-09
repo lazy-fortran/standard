@@ -234,6 +234,7 @@ executable_stmt_f2023
     | random_init_stmt_f2023
     | system_clock_stmt_f2023
     | string_intrinsic_stmt_f2023  // NEW in F2023 (Section 16.9.180, 16.9.197)
+    | c_interop_stmt_f2023         // NEW in F2023 (Section 18.2.3.7)
     | notify_wait_stmt_f2023       // NEW in F2023 (Section 11.6, R1179)
     | NEWLINE
     ;
@@ -490,6 +491,53 @@ tokenize_spec_f2023
 string_intrinsic_stmt_f2023
     : split_stmt_f2023
     | tokenize_stmt_f2023
+    ;
+
+// ============================================================================
+// C INTEROPERABILITY PROCEDURES (ISO/IEC 1539-1:2023 Section 18)
+// ============================================================================
+//
+// J3/22-007 Section 18.2.3.7: C_F_STRPOINTER procedure
+// J3/22-007 Section 18.2.3.8: F_C_STRING function
+//
+// These procedures are part of the ISO_C_BINDING module and provide
+// conversion between C null-terminated strings and Fortran character types.
+//
+
+// ISO/IEC 1539-1:2023 Section 18.2.3.7: C_F_STRPOINTER
+// C_F_STRPOINTER(CSTRARRAY, FSTRPTR [, NCHARS])
+// Impure subroutine that converts a C null-terminated string to a Fortran
+// deferred-length character pointer.
+// Arguments:
+//   CSTRARRAY (IN): Character array of kind C_CHAR with null terminator
+//   FSTRPTR (OUT): Deferred-length character pointer of kind C_CHAR
+//   NCHARS (IN, optional): Integer scalar limiting the output length
+c_f_strpointer_stmt_f2023
+    : CALL C_F_STRPOINTER LPAREN
+      expr_f2003 COMMA                           // CSTRARRAY argument
+      expr_f2003                                 // FSTRPTR argument
+      (COMMA expr_f2003)?                        // NCHARS (optional)
+      RPAREN NEWLINE
+    ;
+
+// ISO/IEC 1539-1:2023 Section 18.2.3.8: F_C_STRING
+// F_C_STRING(STRING [, ASIS])
+// Transformational function that returns a C-compatible null-terminated string.
+// Arguments:
+//   STRING (IN): Character scalar of kind C_CHAR
+//   ASIS (IN, optional): Logical scalar; if true, preserves embedded nulls
+// Returns: A character array of kind C_CHAR with null terminator
+f_c_string_expr_f2023
+    : F_C_STRING LPAREN
+      expr_f2003                                 // STRING argument
+      (COMMA expr_f2003)?                        // ASIS (optional)
+      RPAREN
+    ;
+
+// C interoperability intrinsic statement wrapper for executable context
+// Allows C_F_STRPOINTER calls within executable_stmt_f2023
+c_interop_stmt_f2023
+    : c_f_strpointer_stmt_f2023
     ;
 
 // ============================================================================
@@ -763,6 +811,9 @@ identifier_or_keyword
     | NOTIFY_TYPE  // NOTIFY_TYPE can be used as type name
     // F2023 I/O specifiers (Section 12.5.6.15)
     | LEADING_ZERO // LEADING_ZERO can be used as variable name in I/O
+    // F2023 C interoperability procedures (Section 18.2.3)
+    | C_F_STRPOINTER // C_F_STRPOINTER can be used as subroutine name
+    | F_C_STRING     // F_C_STRING can be used as function name
     ;
 
 // ============================================================================

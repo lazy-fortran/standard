@@ -325,6 +325,44 @@ class TestFortran2023Lexer:
                 f"'{keyword}' expected type {expected_token}, got {tokens[0].type}"
             )
 
+    def test_c_interop_procedure_keywords(self):
+        """Test F2023 C interoperability procedure keywords.
+
+        ISO/IEC 1539-1:2023 Section 18.2.3:
+        - Section 18.2.3.7: C_F_STRPOINTER - convert C string to Fortran pointer
+        - Section 18.2.3.8: F_C_STRING - convert Fortran string to C format
+        """
+        c_interop_procedures = {
+            'C_F_STRPOINTER': Fortran2023Lexer.C_F_STRPOINTER,
+            'F_C_STRING': Fortran2023Lexer.F_C_STRING
+        }
+
+        for proc, expected_token in c_interop_procedures.items():
+            tokens = self.get_tokens(proc)
+            assert len(tokens) >= 1
+            assert tokens[0].type == expected_token, (
+                f"C interop procedure '{proc}' expected type "
+                f"{expected_token}, got {tokens[0].type}"
+            )
+
+    def test_c_interop_procedure_case_insensitive(self):
+        """Test C_F_STRPOINTER/F_C_STRING keywords are case-insensitive."""
+        test_cases = [
+            ('c_f_strpointer', Fortran2023Lexer.C_F_STRPOINTER),
+            ('C_F_STRPOINTER', Fortran2023Lexer.C_F_STRPOINTER),
+            ('C_f_StrPointer', Fortran2023Lexer.C_F_STRPOINTER),
+            ('f_c_string', Fortran2023Lexer.F_C_STRING),
+            ('F_C_STRING', Fortran2023Lexer.F_C_STRING),
+            ('F_c_String', Fortran2023Lexer.F_C_STRING)
+        ]
+
+        for keyword, expected_token in test_cases:
+            tokens = self.get_tokens(keyword)
+            assert len(tokens) >= 1
+            assert tokens[0].type == expected_token, (
+                f"'{keyword}' expected type {expected_token}, got {tokens[0].type}"
+            )
+
 
 @pytest.mark.skipif(not PARSER_AVAILABLE, reason="Parser not available")
 class TestFortran2023Parser:
@@ -594,6 +632,50 @@ class TestFortran2023Parser:
         except Exception as e:
             pytest.fail(f"F2023 DO CONCURRENT REDUCE parsing failed: {e}")
 
+    def test_c_f_strpointer_parsing(self):
+        """Test F2023 C_F_STRPOINTER procedure parsing.
+
+        ISO/IEC 1539-1:2023 Section 18.2.3.7:
+        C_F_STRPOINTER(CSTRARRAY, FSTRPTR [, NCHARS])
+
+        Converts a C null-terminated string to a Fortran deferred-length
+        character pointer. Part of the ISO_C_BINDING module.
+        """
+        c_interop_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "c_f_strpointer.f90",
+        )
+        parser = self.create_parser(c_interop_input)
+
+        try:
+            tree = parser.program_unit_f2023()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F2023 C_F_STRPOINTER parsing failed: {e}")
+
+    def test_f_c_string_parsing(self):
+        """Test F2023 F_C_STRING function parsing.
+
+        ISO/IEC 1539-1:2023 Section 18.2.3.8:
+        F_C_STRING(STRING [, ASIS])
+
+        Transformational function that returns a C-compatible null-terminated
+        string. Part of the ISO_C_BINDING module.
+        """
+        f_c_string_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "f_c_string.f90",
+        )
+        parser = self.create_parser(f_c_string_input)
+
+        try:
+            tree = parser.program_unit_f2023()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F2023 F_C_STRING parsing failed: {e}")
+
 
 class TestFortran2023Foundation:
     """Test F2023 as foundation for LazyFortran2025."""
@@ -635,7 +717,9 @@ class TestFortran2023Foundation:
             # F2023 TYPEOF/CLASSOF type inference (Section 7.3.2.1)
             'TYPEOF', 'CLASSOF',
             # F2023 string intrinsics (Section 16.9.180, 16.9.197)
-            'SPLIT', 'TOKENIZE'
+            'SPLIT', 'TOKENIZE',
+            # F2023 C interoperability procedures (Section 18.2.3)
+            'C_F_STRPOINTER', 'F_C_STRING'
         ]
         
         for feature in required_features:

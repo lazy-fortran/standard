@@ -186,6 +186,26 @@ NOTIFY_TYPE      : N O T I F Y '_' T Y P E ;
 // LEADING_ZERO I/O specifier keyword
 LEADING_ZERO     : L E A D I N G '_' Z E R O ;
 
+// ----------------------------------------------------------------------------
+// C Interoperability Enhancements (NEW in F2023)
+// ISO/IEC 1539-1:2023 Section 18: Interoperation with C
+// J3/22-007 Section 18.2.3.7: C_F_STRPOINTER procedure
+// J3/22-007 Section 18.2.3.8: F_C_STRING function
+// ----------------------------------------------------------------------------
+
+// C_F_STRPOINTER(CSTRARRAY, FSTRPTR [, NCHARS])
+// Converts a C null-terminated string to a Fortran deferred-length pointer
+// CSTRARRAY: character array of kind C_CHAR containing null-terminated string
+// FSTRPTR: deferred-length character pointer of kind C_CHAR (intent out)
+// NCHARS: optional integer scalar limiting the length (intent in)
+C_F_STRPOINTER   : C '_' F '_' S T R P O I N T E R ;
+
+// F_C_STRING(STRING [, ASIS])
+// Transformational function that returns a C-compatible string
+// STRING: character scalar of kind C_CHAR
+// ASIS: optional logical, if true, preserves embedded nulls
+F_C_STRING       : F '_' C '_' S T R I N G ;
+
 // ============================================================================
 // FORTRAN 2023 STANDARD OVERVIEW (ISO/IEC 1539-1:2023)
 // ============================================================================
