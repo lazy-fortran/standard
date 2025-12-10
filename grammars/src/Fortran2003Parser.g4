@@ -1551,6 +1551,7 @@ attr_spec
     : PUBLIC
     | PRIVATE
     | ALLOCATABLE
+    | ASYNCHRONOUS      // F2003 (Section 5.1.2.1)
     | POINTER
     | INTENT LPAREN intent_spec RPAREN
     | OPTIONAL
