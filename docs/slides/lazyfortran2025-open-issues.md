@@ -56,225 +56,178 @@ Base: ISO/IEC 1539-1:2023
 
 Lazy Fortran extends Fortran 2023 with a source-to-source front-end that:
 
-- Reduces boilerplate (types, intents, generics)
+- Uses strongly typed generics/traits with explicit instantiation
+- **No whole-program analysis** - avoids C++ template hell and Julia recompilation
+- Provides sensible defaults (real=8 bytes, int=4 bytes, `intent(in)`, `implicit none`)
+- Adds unsigned integers with Rust-like safety
+- Offers modern syntax (dot notation `a.b` in addition to `a%b`)
+- Optional infer mode for rapid prototyping (intrinsic types only)
 - Emits standard-conforming Fortran 2023 for any back-end compiler
-- Classifies features by compile-time cost (local vs whole-program)
+
+---
+
+# Design Decisions (Resolved)
+
+| Decision | Resolution |
+|----------|------------|
+| Generics approach | Strongly typed traits, explicit instantiation |
+| Whole-program analysis | **NOT supported** - all features single-pass |
+| Type inference | Infer mode only (intrinsic types) |
+| Default precision | real=8 bytes, int=4 bytes (like Rust) |
+| Default intent | `intent(in)` |
+| Implicit typing | `implicit none` default |
+| Member access | Both `a.b` and `a%b` supported |
 
 ---
 
 # Feature Classification
 
-| Single-pass (local) | Semantic analysis (multi-pass / whole-program) |
-|---------------------|-----------------------------------------------|
-| Type inference (first assignment) | Monomorphization |
-| Default `intent(in)` | Function result types |
-| Expression type rules | Infer from `intent(out)` (Issue 2) |
-| Declaration placement | Infer pointer/allocatable (Issues 11, 12) |
-| Explicit templates/traits | Auto-USE derived types (Issue 14) |
+**All features are single-pass (local or module-local):**
 
-Single-pass features can be implemented as a local pre-pass with ISO Fortran semantics; semantic analysis features require additional passes and whole-program information.
+| Feature | Analysis |
+|---------|----------|
+| Dot notation (`a.b` -> `a%b`) | Local |
+| Default `intent(in)` | Local |
+| Default `implicit none` | Local |
+| Default precision (real=8, int=4) | Local |
+| Infer mode (intrinsic types) | Local |
+| Explicit template instantiation | Module-local |
+
+**Explicitly NOT supported (would require whole-program analysis):**
+- Implicit monomorphization from call sites
+- Function result type inference from body
+- Automatic specialization across compilation units
 
 ---
 
-# 1. Type Inference
+# 1. Dot Notation (RESOLVED)
 
-Variables get their type from first assignment:
+**Both `.` and `%` supported for member access:**
 
 ```fortran
-x = 42           ! integer
-y = 3.14         ! real
-z = (1.0, 2.0)   ! complex
-flag = .true.    ! logical
-s = "hello"      ! character(len=5)
-```
-First assignment wins; analysis is purely local (single-pass).
-With `implicit none`, undeclared names remain errors and inference is disabled (strict style is preserved).
+! Both syntaxes are valid
+particle.x = 1.0           ! Dot notation (modern style)
+particle%x = 1.0           ! Standard Fortran (also supported)
 
----
-
-# Type Inference: Default Kinds
-
-<div class="question">
-
-**OPEN ISSUE 1: What kind for inferred literals?**
-
-| Option | Types | Trade-off |
-|--------|-------|-----------|
-| A | real(4), int(4) | ISO compatible, less memory |
-| B | real(8), int(8) | Safe for scientific computing |
-| C | Context-dependent | Adapts but unpredictable |
-
-</div>
-
----
-
-# Type Inference: Characters
-
-```fortran
-s = "hello"      ! len=5
-s = "goodbye"    ! len=7 - what happens?
+! Standardizer output uses %
+particle%x = 1.0
+particle%velocity%vx = 2.0
+call particle%move(dt)
 ```
 
-<div class="question">
-
-**OPEN ISSUE 10: How to handle different string lengths?**
-
-| Option | Behavior | Trade-off |
-|--------|----------|-----------|
-| A | First wins | Truncation possible |
-| B | Maximum length | May waste memory |
-| C | Deferred-length | Dynamic, modern idiom |
-
-</div>
+**Disambiguation:** User-defined operators require spaces: `a .op. b`
 
 ---
 
-# Type Inference: Fallback
+# 2. Default Precision (RESOLVED)
 
-What if type cannot be determined?
+**Different defaults for reals vs integers (like Rust):**
 
 ```fortran
-x = unknown_function()   ! Type unclear
+x = 1.0              ! real(8) - 64-bit for precision
+y = 1.0e3            ! real(8)
+n = 42               ! integer - 32-bit for performance
+integer :: count     ! integer (4 bytes)
+real :: value        ! real(8)
+
+! Explicit sizes when needed
+integer(8) :: big_count    ! 64-bit for large arrays/counts
+real(4) :: single_precision
 ```
 
-<div class="question">
-
-**OPEN ISSUE 15: Fallback for unresolved inference?**
-
-| Option | Behavior |
-|--------|----------|
-| A | Compile error |
-| B | Default to real(8) |
-| C | Default to ISO kind |
-
-</div>
+- **Reals at 8 bytes:** Scientific precision, matches Python/Julia/NumPy
+- **Integers at 4 bytes:** Better cache/SIMD, use `integer(8)` when needed
 
 ---
 
-# Type Inference: Declarations
+# Unsigned Integers (NEW)
 
-Where can explicit declarations appear?
+**Attribute syntax with Rust-like safety:**
 
 ```fortran
-subroutine example()
-    integer :: x       ! Here only? (Option A)
-    x = 1
-    integer :: y       ! Or anywhere? (Option B)
-    y = 2
-end subroutine
+integer, unsigned :: count          ! 4-byte unsigned
+integer(8), unsigned :: big_count   ! 8-byte unsigned
+
+! No implicit mixing - explicit conversion required
+integer :: i = 5
+integer, unsigned :: u = 10
+u + uint(i)                 ! OK
+i + int(u)                  ! OK
+! u + i                     ! ERROR
 ```
 
-<div class="question">
+**Overflow:** Wrap around (or runtime error with `-fcheck=overflow`)
 
-**OPEN ISSUE 3: Declaration placement?**
-- A: Block beginning only (clean structure)
-- B: Anywhere (declare near use)
-
-</div>
+**Use cases:** Array indexing, bit manipulation, C interop
 
 ---
 
-# Type Inference: Derived Types
+# 3. Type Inference (Infer Mode Only)
+
+**RESOLVED:** Type inference is optional, enabled with `--infer` flag.
 
 ```fortran
-p = particle_t(1.0, 2.0, 3.0)
-! p inferred as type(particle_t)
+! Infer mode only - intrinsic types
+x = 42           ! integer (4 bytes)
+y = 3.14         ! real(8)
+s = "hello"      ! character(:), allocatable
+arr = [1, 2, 3]  ! integer, allocatable - NOT reallocated on assignment
+
+! NOT inferred - requires explicit declaration
+p = particle_t() ! ERROR in infer mode
 ```
 
-<div class="question">
-
-**OPEN ISSUE 14: Module scope for derived types?**
-
-| Option | Behavior |
-|--------|----------|
-| A | Type must be in scope (explicit USE) |
-| B | Auto-USE if type found |
-| C | Derived types require explicit declaration |
-
-</div>
+**Key restrictions:**
+- Only intrinsic types (int, real, complex, logical, character)
+- Derived types always require explicit declaration
+- Arrays are NOT reallocated on assignment (unlike standard Fortran)
+- Derived type instances ARE reallocated on assignment
 
 ---
 
-# Type Inference: Function Results
+# Type Inference: Resolved Issues (Infer Mode)
 
+| Issue | Decision |
+|-------|----------|
+| Declaration placement | **Anywhere in scope** |
+| Fallback for unresolved type | **Compile error** |
+
+No implicit defaults - if the type cannot be determined, the programmer must provide an explicit declaration.
+
+---
+
+# Why No Implicit Monomorphization?
+
+**Problem with C++/Julia approach:**
 ```fortran
-function add(a, b)
-    add = a + b   ! Return type from expression
+! WRONG - requires whole-program analysis
+function add(a, b)      ! What types? Unknown
+    add = a + b
 end function
-
-x = add(5, 3)         ! e.g. add__i32_i32 / add__i4_i4 (Issue 9)
-y = add(2.5d0, 1.5d0) ! e.g. add__r64_r64 / add__r8_r8 (Issue 9)
+x = add(5, 3)           ! Must scan all call sites
 ```
 
-With monomorphization, return type is inferred from body expression given input types. Call site provides argument types -> determines specialization -> return type comes from body.
-
----
-
-# Type Inference: intent(out)
-
+**Lazy Fortran approach - explicit instantiation:**
 ```fortran
-subroutine init(particle)
-    type(particle_t), intent(out) :: particle
-end subroutine
+template add_t(T)
+    type, deferred :: T
+contains
+    function add(a, b) result(res)
+        type(T), intent(in) :: a, b
+        type(T) :: res
+        res = a + b
+    end function
+end template
 
-call init(p)    ! Auto-declare p?
+instantiate add_t(integer), only: add_int => add
+x = add_int(5, 3)       ! No whole-program analysis needed
 ```
-
-<div class="question">
-
-**OPEN ISSUE 2: Infer from intent(out) arguments?**
-
-| Option | Analysis |
-|--------|----------|
-| A | No (assignment only) | Local |
-| B | Yes (inspect callee) | Cross-procedure |
-
-</div>
 
 ---
 
-# Type Inference: Pointer Attribute
+# 4. Default Intent (RESOLVED)
 
-```fortran
-p => x    ! Pointer assignment
-```
-
-<div class="question">
-
-**OPEN ISSUE 11: Infer pointer/target attributes?**
-
-| Option | Behavior |
-|--------|----------|
-| A | No inference (explicit required) |
-| B | Infer pointer only |
-| C | Infer both pointer and target |
-
-</div>
-
----
-
-# Type Inference: Allocatable Attribute
-
-```fortran
-allocate(arr(n))    ! Allocate array
-```
-
-<div class="question">
-
-**OPEN ISSUE 12: Infer allocatable from allocate?**
-
-| Option | Behavior |
-|--------|----------|
-| A | No (require explicit attribute) |
-| B | Yes (infer from allocate statement) |
-
-</div>
-
----
-
-# 2. Default Intent
-
-All arguments default to `intent(in)` - stricter than ISO Fortran:
+**All arguments default to `intent(in)`:**
 
 ```fortran
 subroutine process(x, y, z)
@@ -288,30 +241,51 @@ end subroutine
 
 Without explicit intent, `y` and `z` would be `intent(in)` and assignments would error.
 
-Compile effort: single-pass check; runtime semantics of ISO Fortran are unchanged, but more argument writes become compile-time errors.
+**Principle of least privilege:** arguments are read-only unless explicitly declared otherwise (like Rust).
 
 ---
 
-# Default Intent: Rationale
+# 5. Implicit None (RESOLVED)
 
-**No inference** - just a stricter default than ISO Fortran.
+**`implicit none` is the default in all program units.**
 
-| Standard Fortran | Lazy Fortran |
-|-----------------|--------------|
-| No default intent | `intent(in)` default |
-| Arguments modifiable | Read-only unless explicit |
+```fortran
+! Lazy Fortran - no implicit none needed
+subroutine example()
+    integer :: x
+    x = 1
+end subroutine
 
-**Principle of least privilege:** arguments are read-only unless explicitly declared otherwise.
+! Standardized output
+subroutine example()
+    implicit none
+    integer :: x
+    x = 1
+end subroutine
+```
 
-Aligns with modern language design (Rust immutable-by-default).
+This is already best practice in modern Fortran - Lazy Fortran makes it mandatory.
 
 ---
 
-# 3. Generic Programming
+# 6. Generic Programming (RESOLVED)
 
-Two approaches available:
+**RESOLVED:** Strongly typed generics/traits with **explicit instantiation only**.
 
-**J3 TEMPLATE** (official Fortran direction):
+No implicit monomorphization - avoids:
+- C++ template compilation explosion
+- Julia-style recompilation on new types
+- Whole-program analysis requirements
+
+Two complementary approaches:
+
+1. **J3 Procedural Templates** - Explicit instantiation required
+2. **Traits (Swift/Rust style)** - Strongly typed constraints
+
+---
+
+# Generics: J3 Templates
+
 ```fortran
 template swap_t(T)
     type, deferred :: T
@@ -322,225 +296,113 @@ contains
         tmp = x; x = y; y = tmp
     end subroutine
 end template
-```
 
-**Traits** (Swift/Rust style):
-```fortran
-type, implements(IComparable) :: my_type_t
-```
+! Explicit instantiation
+instantiate swap_t(integer), only: swap_int => swap
 
----
-
-# Generics: Which Approach?
-
-<div class="question">
-
-**OPEN ISSUE 5: Which generics system?**
-
-| Option | Description |
-|--------|-------------|
-| A | J3 TEMPLATE only |
-| B | Traits only |
-| C | Hybrid (both) |
-
-</div>
-
----
-
-# Generics: Parameter Syntax
-
-```fortran
-! Option A: Braces (J3 inline)
+! Inline instantiation
 call swap{integer}(a, b)
-
-! Option B: Parentheses
-call swap(integer)(a, b)    ! Ambiguous
-
-! Option C: Angle brackets
-call swap<integer>(a, b)    ! Conflicts with .lt.
 ```
-
-<div class="question">
-
-**OPEN ISSUE 6: Delimiter for type parameters?**
-- A: Braces `{T}` - J3 direction, unambiguous
-- B: Parentheses `(T)` - Fortran-like but ambiguous
-- C: Angle brackets `<T>` - Familiar but conflicts
-
-</div>
 
 ---
 
-# Generics: Dispatch Mechanism
+# Generics: Strongly Typed Traits
 
 ```fortran
-! Static dispatch (monomorphization)
-call add(x, y)        ! Compiled to a specialized version
+trait IComparable(T)
+    pure logical function less_than(a, b)
+        type(T), intent(in) :: a, b
+    end function
+end trait
 
-! Dynamic dispatch (vtable)
-class(IAddable), pointer :: obj
-call obj%add(x, y)    ! Runtime lookup
+! Retroactive conformance for intrinsic types
+implements IComparable :: integer
+    procedure :: less_than => builtin_less_than
+end implements
 ```
 
-<div class="question">
-
-**OPEN ISSUE 7: Static vs dynamic dispatch?**
-
-| Option | Trade-off |
-|--------|-----------|
-| A | Static only - zero overhead |
-| B | Dynamic only - runtime flexibility |
-| C | Both - user chooses |
-
-</div>
+All type parameters must be bounded - no unconstrained generics.
 
 ---
 
-# Generics: Annotation Syntax
+# Generics: Syntax Status
+
+**J3 TEMPLATE** (official proposal for Fortran 202Y):
+- `TEMPLATE foo(T)` with standard parentheses
+- `^()` for inline instantiation: `CALL sub^(INTEGER)(x)`
+- Explicit `INSTANTIATE` statements
+
+**Traits** ([Traits-for-Fortran](https://github.com/difference-scheme/Traits-for-Fortran)):
+- `abstract interface` for trait definitions
+- `implements` blocks for conformance
+- **Curly braces `{T}`** for generic parameters:
+  ```fortran
+  function sum{INumeric :: T}(x) result(s)
+  ```
+
+Lazy Fortran adopts curly braces `{T}` for generic parameters.
+
+---
+
+# Generics: Resolved Issues
+
+**Issue 7 - Dispatch mechanism: BOTH**
+
+| Syntax | Dispatch | Use case |
+|--------|----------|----------|
+| `type(T)` | Static | Zero overhead, inlinable |
+| `class(Trait)` | Dynamic | Runtime polymorphism |
+
+**Issue 16 - @ annotations: NO**
+
+Use curly braces `{Constraint :: T}` syntax instead:
 
 ```fortran
-! Standard style
-type, implements(IComparable) :: my_type_t
+! Lazy Fortran - curly braces
+function sum{INumeric :: T}(x) result(s)
 
-! Annotation style
-@IComparable
-integer function compare(a, b)
-    integer, intent(in) :: a, b
-    compare = a - b
-end function
+! NOT supported
+@INumeric
+function sum(x) result(s)
 ```
 
 ---
 
-# Generics: Annotation Syntax (open issue)
+# Summary: Resolved Decisions
 
-<div class="question">
-
-**OPEN ISSUE 16: Support @ annotations?**
-
-- A: No `@` (pure Fortran style)
-- B: `@` syntax (familiar from Java/Python)
-- C: Support both forms
-
-</div>
-
----
-
-# 4. Monomorphization
-
-Generic code specialized for each type used:
-
-```fortran
-function add(a, b)
-    add = a + b
-end function
-
-x = add(5, 3)       ! Generates a specialized integer version
-y = add(2.5, 1.5)   ! Generates a specialized real version
-```
+| Decision | Resolution |
+|----------|------------|
+| Whole-program analysis | **NOT supported** |
+| Generics | Strongly typed traits, explicit instantiation |
+| Type inference | Infer mode only (intrinsic types) |
+| Default precision | real=8 bytes, int=4 bytes (like Rust) |
+| Default intent | `intent(in)` |
+| Implicit typing | `implicit none` default |
+| Member access | Both `a.b` and `a%b` supported |
+| Arrays (infer mode) | NOT reallocated on assignment |
+| Types (infer mode) | ARE reallocated on assignment |
 
 ---
 
-# Monomorphization: Scope
+# Summary: All Issues Resolved
 
-<div class="question">
-
-**OPEN ISSUE 8: Where to generate specializations?**
-
-| Option | Scope | Trade-off |
-|--------|-------|-----------|
-| A | Per-module | May duplicate |
-| B | Per-program (LTO) | No duplication |
-| C | Lazy (on-demand) | Complex build |
-
-</div>
-
----
-
-# 5. ABI: Name Mangling
-
-Specialized functions need unique names:
-
-```
-add(integer(4), integer(4))  ->  add_i4_i4 / add_i32_i32
-add(real(8), real(8))        ->  add_r8_r8 / add_r64_r64
-```
-
----
-
-# ABI: Kind Suffix Convention
-
-```fortran
-integer(4) function add_??(a, b)
-! Bits:  add_i32  (32 bits)
-! Bytes: add_i4   (4 bytes = kind parameter)
-```
-
-<div class="question">
-
-**OPEN ISSUE 9: Bits or bytes for kind suffixes?**
-
-| Option | Example | Rationale |
-|--------|---------|-----------|
-| A | i32, r64 | C/Rust convention |
-| B | i4, r8 | Matches Fortran kind |
-
-Note: complex(8) has two real(8) -> c8 not c128
-
-</div>
-
----
-
-# Summary: Single-pass Open Issues
-
-These require only local analysis (traditional Fortran style):
-
-| # | Topic | Key Question |
-|---|-------|--------------|
-| 1 | Numeric kinds | real(4) vs real(8) default? |
-| 3 | Declarations | Block start vs anywhere? |
-| 10 | Char length | First vs max vs deferred? |
-| 15 | Fallback type | Error vs default? |
-| 5 | Generics | Template vs Traits vs Both? |
-| 6 | Generic syntax | Braces vs parens vs angles? |
-| 9 | Kind suffix | Bits vs bytes? |
-| 16 | @ syntax | Support annotations? |
-
----
-
-# Summary: Semantic Analysis Open Issues
-
-These require multi-pass or whole-program analysis:
-
-| # | Topic | Key Question |
-|---|-------|--------------|
-| 2 | Intent(out) | Auto-declare from callee? |
-| 7 | Dispatch | Static vs dynamic vs both? |
-| 8 | Specialization | Module vs program scope? |
-| 11 | Pointer | Infer attribute? |
-| 12 | Allocatable | Infer from allocate? |
-| 14 | Derived types | Auto-USE modules? |
-
-**Resolved:** Issue 4 (default intent = `intent(in)`), Issue 13 (function result types from body + monomorphization)
-
----
-
-# Discussion Order Suggestion
-
-**Single-pass issues first (simpler to implement):**
-- Issue 9: Kind suffix (bits vs bytes)
-- Issue 3: Declaration placement
-- Issue 16: @ annotation syntax
-- Issue 1: Default numeric kinds
-- Issue 10: Character length
-- Issue 15: Fallback type
-- Issues 5-6: Generics syntax
-
-**Then semantic analysis issues:**
-- Issues 7-8: Dispatch and specialization scope
-- Issues 11-12: Pointer/allocatable inference
-- Issue 14: Derived type auto-USE
-- Issue 2: Intent(out) inference
+| Decision | Resolution |
+|----------|------------|
+| Whole-program analysis | **NOT supported** |
+| Generics | Strongly typed traits, explicit instantiation |
+| Generic syntax | Curly braces `{Constraint :: T}` |
+| Dispatch | **Both** - `type(T)` static, `class(Trait)` dynamic |
+| @ annotations | **No** - use curly braces syntax |
+| Type inference | Infer mode only (intrinsic types) |
+| Default precision | real=8 bytes, int=4 bytes (like Rust) |
+| Unsigned integers | `integer, unsigned` attribute, Rust-like safety |
+| Default intent | `intent(in)` |
+| Implicit typing | `implicit none` default |
+| Member access | Both `a.b` and `a%b` supported |
+| Declaration placement | Anywhere in scope |
+| Fallback for unclear type | Compile error |
+| Arrays (infer mode) | NOT reallocated on assignment |
+| Types (infer mode) | ARE reallocated on assignment |
 
 ---
 
