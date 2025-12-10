@@ -49,10 +49,11 @@ IMAGE_STATUS_STOPPED   : I M A G E '_' S T A T U S '_' S T O P P E D ;
 // ISO/IEC 1539-1:2018 Section 11.1.10: SELECT RANK construct
 // ISO/IEC 1539-1:2018 R1148-R1151: select-rank-construct, select-rank-stmt,
 // select-rank-case-stmt, end-select-rank-stmt
-// Note: RANK (*) and RANK DEFAULT use keyword tokens, not compound tokens
-// See Fortran2018Parser.g4 rank_case_stmt rule
-// ----------------------------------------------------------------------------
-SELECT_RANK      : S E L E C T '_' R A N K ;
+// Note: SELECT RANK uses separate SELECT and RANK_KEYWORD tokens, not compound token
+// Parser correctly implements: SELECT RANK_KEYWORD LPAREN ... RPAREN
+// See Fortran2018Parser.g4 select_rank_stmt rule (line 227)
+// Compound token SELECT_RANK was removed - it was never used by parser
+// --------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
 // Random Initialization (NEW in F2018)
