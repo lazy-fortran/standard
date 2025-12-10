@@ -357,6 +357,7 @@ Grammar implementation:
 - `do_concurrent_stmt_f2018`:
   - Optional construct name + `DO CONCURRENT concurrent_header_f2018 concurrent_locality_list?`.
 - `concurrent_header_f2018`:
+  - Supports optional `INTEGER (kind_selector)? ::` prefix (R1125).
   - Reuses `forall_triplet_spec_list` and an optional `scalar_mask_expr`.
 - `concurrent_locality_list`:
   - One or more `concurrent_locality` items.
@@ -369,15 +370,17 @@ Tests:
   - `do_concurrent_locality.f90` exercises DO CONCURRENT with:
     - A full concurrent header.
     - Both a mask and locality list.
+- `test_basic_f2018_features.py::test_do_concurrent_typed_header`:
+  - `do_concurrent_typed_header.f90` exercises DO CONCURRENT with:
+    - Typed concurrent header with `INTEGER ::` (R1125).
+    - Typed header with kind selector `INTEGER(kind=4) ::`.
+    - Typed header combined with mask and locality specs.
 
 Gaps:
 
 - Semantic constraints (e.g. which variables can be LOCAL/SHARED, and
   whether the locality list is consistent with the loop body) are not
   encoded.
-- The header syntax reuses FORALL triplet rules; any subtle syntactic
-  differences between the F2018 DO CONCURRENT header and FORALL
-  control list are not distinguished.
 
 ---
 

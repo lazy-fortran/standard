@@ -491,7 +491,8 @@ do_concurrent_stmt_f2018
 // concurrent-header is
 // ( [integer-type-spec ::] concurrent-control-list [, scalar-mask-expr] )
 concurrent_header_f2018
-    : LPAREN forall_triplet_spec_list (COMMA scalar_mask_expr)? RPAREN
+    : LPAREN (INTEGER (kind_selector)? DOUBLE_COLON)?
+      forall_triplet_spec_list (COMMA scalar_mask_expr)? RPAREN
     ;
 
 // List wrapper for R1129 concurrent-locality
