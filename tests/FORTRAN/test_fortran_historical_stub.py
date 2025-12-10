@@ -238,6 +238,77 @@ class TestFORTRANHistoricalStub:
         except Exception as e:
             pytest.fail(f"ASSIGN/assigned GOTO combined parsing failed: {e}")
 
+    def test_statement_function_basic(self):
+        """Test parsing of statement functions (1957 compile-time substitutable functions).
+
+        Per IBM 704 manual (C28-6003) Chapter II.E and Appendix B row 17,
+        statement functions provide compile-time substitution of arithmetic
+        expressions. Format: f(a1, a2, ..., an) = expr
+        Example: POLYF(X) = C0 + X*(C1 + X*C2)
+
+        Note: Statement functions are made OBSOLESCENT in Fortran 90
+        (ISO/IEC 1539:1991 Annex B.2.2). Retained here for historical accuracy.
+        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "statement_function_basic.f",
+        )
+
+        parser = self.create_parser(test_input)
+
+        try:
+            tree = parser.program_unit_core()
+            assert tree is not None
+            assert parser.getNumberOfSyntaxErrors() == 0
+        except Exception as e:
+            pytest.fail(f"Statement function basic parsing failed: {e}")
+
+    def test_statement_function_nested(self):
+        """Test parsing of multiple statement functions with nested references.
+
+        This tests a program with several statement functions that reference
+        each other, demonstrating typical 1957 usage patterns.
+        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "statement_function_nested.f",
+        )
+
+        parser = self.create_parser(test_input)
+
+        try:
+            tree = parser.program_unit_core()
+            assert tree is not None
+            assert parser.getNumberOfSyntaxErrors() == 0
+        except Exception as e:
+            pytest.fail(f"Statement function nested parsing failed: {e}")
+
+    def test_statement_function_program(self):
+        """Test complete program using statement functions.
+
+        This tests a realistic 1957 program that:
+        1. Defines statement functions at the beginning
+        2. Initializes variables
+        3. Calls the statement functions
+        4. Outputs results via PRINT statement
+        """
+        test_input = load_fixture(
+            "FORTRAN",
+            "test_fortran_historical_stub",
+            "statement_function_program.f",
+        )
+
+        parser = self.create_parser(test_input)
+
+        try:
+            tree = parser.program_unit_core()
+            assert tree is not None
+            assert parser.getNumberOfSyntaxErrors() == 0
+        except Exception as e:
+            pytest.fail(f"Statement function program parsing failed: {e}")
+
     def test_do_loop_with_label(self):
         """Test parsing of DO loops with mandatory labels (1957 style)."""
         # DO loops REQUIRED labels in 1957 (no END DO statement)

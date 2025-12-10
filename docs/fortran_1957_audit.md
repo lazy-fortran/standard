@@ -139,6 +139,22 @@ Mapping that Appendix‑B list to the current grammar:
     (`frequency_stmt.f`, `frequency_test_1957.f`) that assert
     `getNumberOfSyntaxErrors() == 0`.
 
+- **Statement Functions**
+  - Status: **implemented and tested.**
+  - Evidence: `statement_function_stmt` rule and `identifier_list` rule in
+    `FORTRANParser.g4` implementing `f(a1, a2, ..., an) = expr` per C28-6003
+    Chapter II.E and Appendix B row 17. Test fixtures
+    `statement_function_basic.f`, `statement_function_nested.f`, and
+    `statement_function_program.f` in the `test_fortran_historical_stub`
+    directory parse with zero syntax errors. Dedicated tests in
+    `tests/FORTRAN/test_fortran_historical_stub.py` validate statement
+    functions with explicit `getNumberOfSyntaxErrors() == 0` assertions.
+  - **NON-COMPLIANT with ISO/IEC 1539-1:1991 (Fortran 90 and later):**
+    - Statement functions are made OBSOLESCENT in Fortran 90
+      (ISO/IEC 1539:1991 Annex B.2.2).
+    - Historically accurate for IBM 704 FORTRAN (1957) and retained in
+      this grammar for educational and archival purposes only.
+
 ## 3. Statements and control flow (implemented subset)
 
 Implemented and tested in `tests/FORTRAN/test_fortran_historical_stub.py`
@@ -391,8 +407,8 @@ Today the FORTRAN (1957) grammar is:
     - Tape I/O: READ TAPE, WRITE TAPE (unformatted/binary)
     - Drum I/O: READ DRUM, WRITE DRUM (binary)
     - File-control: END FILE, REWIND, BACKSPACE
-- Remaining gap:
-  - Statement functions (f(a,b,...) = e) per Appendix B row 17
+    - Statement functions (f(a,b,...) = e) per Appendix B row 17
+- No remaining gaps in Appendix B coverage.
 
 Further work on this standard should reference this audit together with
 the open issues for expanding 1957 coverage.

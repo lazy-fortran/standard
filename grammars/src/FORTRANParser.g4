@@ -70,6 +70,7 @@ statement_body
     | do_stmt_basic                 // Appendix B row 18: DO n i = m1,m2,m3
     | frequency_stmt                // Appendix B row 13: FREQUENCY n(i,j,...)
     | format_stmt                   // Appendix B row 16: FORMAT (specification)
+    | statement_function_stmt       // Appendix B row 17: f(a,b,...) = expr
     | read_tape_drum_stmt            // Appendix B rows 21-24: READ tape/drum forms
     | read_stmt_basic               // Appendix B row 20, 24: READ n, list / READ n
     | write_tape_drum_stmt          // Appendix B rows 25-27: WRITE tape/drum forms
@@ -129,6 +130,33 @@ equivalence_stmt
 // C28-6003: At least two variables per set
 equivalence_set
     : LPAREN variable (COMMA variable)+ RPAREN
+    ;
+
+// STATEMENT FUNCTION - Appendix B row 17
+// C28-6003 Chapter II.E (Function Statements) and Appendix B row 17
+// Statement functions are compile-time-substitutable functions defined as:
+//   f(a1, a2, ..., an) = expr
+// where:
+// - f is the function name (typically 4-7 chars, often ending in F)
+// - a1, a2, ..., an are formal parameters (identifiers)
+// - expr is an arithmetic expression using the parameters
+// Must appear before any executable statements in the program.
+//
+// Examples:
+//   POLYF(X) = C0 + X*(C1 + X*C2)      ! Floating-point polynomial
+//   MULTF(I,J) = I*J                   ! Integer multiplication
+//   XMULTF(X,Y) = X*Y                  ! Fixed-point multiplication
+//
+// Note: STATEMENT FUNCTIONS are made OBSOLESCENT in Fortran 90
+// (ISO/IEC 1539:1991 Annex B.2.2). Retained here for historical accuracy
+// in the 1957 FORTRAN grammar.
+statement_function_stmt
+    : IDENTIFIER LPAREN identifier_list RPAREN EQUALS expr
+    ;
+
+// Identifier list for statement function arguments
+identifier_list
+    : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
 // ============================================================================
