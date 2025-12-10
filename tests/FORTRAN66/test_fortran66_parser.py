@@ -531,6 +531,61 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
         self.assertIsNotNone(tree)
 
     # ====================================================================
+    # FORTRAN 66 WRITE STATEMENT (X3.9-1966 Section 7.1.3.1)
+    # ====================================================================
+
+    def test_write_statement_simple(self):
+        """Test simple WRITE statement (X3.9-1966 Section 7.1.3.1)"""
+        test_cases = [
+            "WRITE (6, 100) X, Y, Z",
+            "WRITE (1, 200) A",
+            "WRITE (NOUT, 300) I, J, K",
+            "WRITE (6, 400)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(write_stmt=text):
+                tree = self.parse(text, 'write_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_write_statement_with_expressions(self):
+        """Test WRITE statement with complex expressions"""
+        test_cases = [
+            "WRITE (6, 100) X + Y, Z * 2.0",
+            "WRITE (6, 200) A(I), B(J, K)",
+            "WRITE (6, 300) SIN(X), COS(Y), SQRT(Z)",
+            "WRITE (UNIT, FORMAT) A**2 + B**2",
+        ]
+
+        for text in test_cases:
+            with self.subTest(write_expr=text):
+                tree = self.parse(text, 'write_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_write_statement_in_statement_body(self):
+        """Test WRITE as statement_body alternative"""
+        test_cases = [
+            "WRITE (6, 100) X, Y, Z",
+            "WRITE (1, 200) A",
+        ]
+
+        for text in test_cases:
+            with self.subTest(stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree)
+
+    def test_write_statement_fixture(self):
+        """Test program with WRITE statements"""
+        program = load_fixture(
+            "FORTRAN66",
+            "test_fortran66_parser",
+            "write_stmt.f",
+        )
+
+        tree = self.parse(program, 'main_program')
+        self.assertIsNotNone(tree)
+
+    # ====================================================================
     # FORTRAN 66 GO TO ASSIGNMENT AND ASSIGNED GO TO (X3.9-1966 Sections 7.1.1.3/7.1.2.1.2)
     # ====================================================================
 
