@@ -173,6 +173,10 @@ FINDLOC          : F I N D L O C ;
 // - STORAGE_SIZE(A[,KIND]): Storage size in bits (Section 13.7.163)
 STORAGE_SIZE     : S T O R A G E '_' S I Z E ;
 
+// Array contiguity inquiry function (Section 13.7.87)
+// - IS_CONTIGUOUS(ARRAY): Inquire if array is contiguous in memory (Section 13.7.87)
+IS_CONTIGUOUS    : I S '_' C O N T I G U O U S ;
+
 // Bit shift intrinsics (Section 13.7.158-13.7.160)
 // - SHIFTA(I,SHIFT): Arithmetic right shift (Section 13.7.158)
 // - SHIFTL(I,SHIFT): Logical left shift (Section 13.7.159)
