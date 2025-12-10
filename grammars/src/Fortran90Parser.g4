@@ -82,7 +82,13 @@ options {
 // F90 program unit (major enhancement - adds modules)
 // ISO/IEC 1539:1991 Section 2.1, R202
 program_unit_f90
-    : NEWLINE* (main_program | module | external_subprogram_f90) NEWLINE*
+    : NEWLINE*
+      (main_program
+       | module
+       | external_subprogram_f90
+       | block_data_subprogram
+      )
+      NEWLINE*
     ;
 
 // ====================================================================
