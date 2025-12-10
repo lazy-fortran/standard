@@ -788,6 +788,7 @@ executable_stmt_f95
     | nullify_stmt
     | where_stmt_f95
     | forall_stmt                 // F95 addition (Section 7.5.4)
+    | entry_stmt_f90              // F95 ENTRY (Section 12.5.4, obsolescent)
     ;
 
 // Construct (Section 8.1, R216)
