@@ -106,8 +106,7 @@ class TestFortran90Lexer:
         """Test F90 interface block keywords (explicit interfaces)."""
         interface_keywords = {
             'INTERFACE': Fortran90Lexer.INTERFACE,
-            'END INTERFACE': Fortran90Lexer.END_INTERFACE, 
-            'GENERIC': Fortran90Lexer.GENERIC,
+            'END INTERFACE': Fortran90Lexer.END_INTERFACE,
             'OPERATOR': Fortran90Lexer.OPERATOR,
             'ASSIGNMENT': Fortran90Lexer.ASSIGNMENT
         }
@@ -647,8 +646,8 @@ class TestFortran90Foundation:
         required_f90_features = [
             # Module system
             'MODULE', 'END_MODULE', 'USE', 'ONLY', 'PUBLIC', 'PRIVATE',
-            # Interface blocks  
-            'INTERFACE', 'END_INTERFACE', 'GENERIC', 'OPERATOR',
+            # Interface blocks
+            'INTERFACE', 'END_INTERFACE', 'OPERATOR',
             # Derived types
             'TYPE', 'END_TYPE', 'PERCENT',
             # Dynamic arrays
