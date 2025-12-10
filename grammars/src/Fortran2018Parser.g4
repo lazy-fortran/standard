@@ -189,6 +189,7 @@ execution_construct_f2018
 // Enhanced executable construct for F2018
 executable_construct_f2018
     : assignment_stmt                 // Inherit from F2003
+    | collective_subroutine_call      // NEW in F2018 (must be BEFORE call_stmt)
     | call_stmt                       // Inherit from F2003
     | print_stmt                      // Inherit from F2003
     | stop_stmt_f2018                 // Enhanced in F2018 (R1160)
@@ -198,7 +199,6 @@ executable_construct_f2018
     | associate_construct             // Inherit from F2003
     | block_construct_f2008           // Inherit from F2008
     | allocate_stmt_f2008             // Inherit from F2008
-    | collective_subroutine_call      // NEW in F2018 (Section 16.9.46-50)
     | team_construct                  // NEW in F2018 (teams: R1111-R1115, R1175-R1178)
     | event_construct                 // NEW in F2018 (events: R1170-R1173)
     | sync_construct                  // Inherit from F2008
