@@ -89,6 +89,10 @@ COMPLEX         : C O M P L E X ;
 // Used in DOUBLE PRECISION constants: 1.0D0, 3.14159D0
 D               : [Dd] ;
 
+// Exponent fragment override - X3.9-1966 Section 4.3.2
+// Ensures D exponent notation is available starting with FORTRAN 66
+fragment EXPONENT : [eEdD] [+-]? DIGIT+ ;
+
 // ============================================================================
 // LOGICAL CONSTANTS - X3.9-1966 Section 4.5.2
 // ============================================================================
