@@ -49,10 +49,10 @@ IMAGE_STATUS_STOPPED   : I M A G E '_' S T A T U S '_' S T O P P E D ;
 // ISO/IEC 1539-1:2018 Section 11.1.10: SELECT RANK construct
 // ISO/IEC 1539-1:2018 R1148-R1151: select-rank-construct, select-rank-stmt,
 // select-rank-case-stmt, end-select-rank-stmt
+// Note: RANK (*) and RANK DEFAULT use keyword tokens, not compound tokens
+// See Fortran2018Parser.g4 rank_case_stmt rule
 // ----------------------------------------------------------------------------
 SELECT_RANK      : S E L E C T '_' R A N K ;
-RANK_STAR        : R A N K '_' S T A R ;
-RANK_DEFAULT     : R A N K '_' D E F A U L T ;
 
 // ----------------------------------------------------------------------------
 // Random Initialization (NEW in F2018)
@@ -105,15 +105,15 @@ EVENT_QUERY      : E V E N T WS+ Q U E R Y ;
 // Assumed Rank Support (NEW in F2018)
 // ISO/IEC 1539-1:2018 Section 8.5.8.7: Assumed-rank entity
 // ISO/IEC 1539-1:2018 R825: assumed-rank-spec is ..
+// Note: Parser uses DOT_DOT (..) syntax, not ASSUMED_RANK keyword
+// See Fortran2018Parser.g4 assumed_rank_declaration rule
 // ----------------------------------------------------------------------------
-ASSUMED_RANK     : A S S U M E D '_' R A N K ;
 RANK_KEYWORD     : R A N K ;
 
 // ----------------------------------------------------------------------------
-// Default Accessibility (NEW in F2018)
-// ISO/IEC 1539-1:2018 Section 8.6: Attribute statements and specifications
-// ----------------------------------------------------------------------------
-DEFAULT_ACCESS   : D E F A U L T '_' A C C E S S ;
+// NOTE: DEFAULT_ACCESS was previously defined but NOT in ISO standard
+// F2018 uses DEFAULT keyword with PUBLIC/PRIVATE, not DEFAULT_ACCESS token
+// Token removed during dead code cleanup (issue #434)
 
 // ----------------------------------------------------------------------------
 // C Descriptor Support (NEW in F2018)
@@ -137,8 +137,9 @@ QUIET            : Q U I E T ;
 // Locality Specifier (NEW in F2018)
 // ISO/IEC 1539-1:2018 Section 11.1.7.5: Additional semantics for DO CONCURRENT
 // ISO/IEC 1539-1:2018 R1129: concurrent-locality, R1130 locality-spec
+// Note: LOCALITY is a grammar rule name, not a keyword (use LOCAL, LOCAL_INIT)
+// See Fortran2018Parser.g4 concurrent_locality rule
 // ----------------------------------------------------------------------------
-LOCALITY         : L O C A L I T Y ;
 LOCAL_INIT       : L O C A L '_' I N I T ;
 LOCAL            : L O C A L ;
 SHARED           : S H A R E D ;
