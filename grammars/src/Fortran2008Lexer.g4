@@ -102,6 +102,15 @@ SUBMODULE        : S U B M O D U L E ;
 END_SUBMODULE    : E N D WS+ S U B M O D U L E ;
 
 // ============================================================================
+// MASKED ELSEWHERE STATEMENT (ISO/IEC 1539-1:2010 Section 8.1.4.3, R807)
+// ============================================================================
+// Fortran 2008 enhances WHERE constructs with MASKED ELSEWHERE for clarity:
+// - R807: elsewhere-stmt -> ELSEWHERE | ELSEWHERE (scalar-mask-expr)
+//                         | MASKED ELSEWHERE | MASKED ELSEWHERE (scalar-mask-expr)
+// MASKED ELSEWHERE explicitly indicates a condition-guarded ELSEWHERE clause.
+MASKED           : M A S K E D ;
+
+// ============================================================================
 // DO CONCURRENT CONSTRUCT (ISO/IEC 1539-1:2010 Section 8.1.6.6)
 // ============================================================================
 // DO CONCURRENT enables explicit loop parallelization:
