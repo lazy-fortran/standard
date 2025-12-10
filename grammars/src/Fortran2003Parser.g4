@@ -357,6 +357,7 @@ specification_element_f2003
 // (Section 12.3.2.3), enum-def (Section 4.6)
 declaration_construct_f2003
     : derived_type_def_f2003        // TYPE definitions (Section 4.5)
+    | enum_def_f2003                // ENUM definitions (Section 4.6)
     | interface_block               // Interface blocks (Section 12.3.2)
     | class_declaration_stmt        // CLASS declarations (Section 4.5.6)
     | procedure_declaration_stmt    // PROCEDURE declarations (Section 12.3.2.3)
@@ -653,6 +654,58 @@ type_attr_spec
     | ABSTRACT              // Abstract type (Section 4.5.6)
     | EXTENDS LPAREN IDENTIFIER RPAREN  // Type extension (Section 4.5.6)
     | BIND LPAREN C RPAREN  // C interoperability (Section 15.3.3)
+    ;
+
+// ====================================================================
+// ENUMERATION TYPES (ISO/IEC 1539-1:2004 Section 4.6)
+// ====================================================================
+//
+// ISO/IEC 1539-1:2004 Section 4.6: Enumeration types
+// Enumerations for C interoperability via BIND(C)
+//
+// Key rules:
+// - R460 (enum-def) -> enum-def-stmt enumerator-def-stmt... end-enum-stmt
+// - R461 (enum-def-stmt) -> ENUM, BIND(C)
+// - R462 (enumerator-def-stmt) -> ENUMERATOR [::] enumerator-list
+// - R463 (enumerator) -> named-constant [= scalar-int-initialization-expr]
+// - R464 (end-enum-stmt) -> END ENUM
+
+// Enumeration definition (ISO/IEC 1539-1:2004 R460)
+// R460: enum-def -> enum-def-stmt enumerator-def-stmt [enumerator-def-stmt]...
+//                   end-enum-stmt
+enum_def_f2003
+    : enum_def_stmt_f2003
+      enumerator_def_stmt_f2003*
+      end_enum_stmt_f2003
+    ;
+
+// Enumeration definition statement (ISO/IEC 1539-1:2004 R461)
+// R461: enum-def-stmt -> ENUM, BIND(C)
+enum_def_stmt_f2003
+    : ENUM COMMA BIND LPAREN C RPAREN NEWLINE
+    ;
+
+// Enumerator definition statement (ISO/IEC 1539-1:2004 R462)
+// R462: enumerator-def-stmt -> ENUMERATOR [::] enumerator-list
+enumerator_def_stmt_f2003
+    : ENUMERATOR (DOUBLE_COLON)? enumerator_list_f2003 NEWLINE
+    ;
+
+// Enumerator list (ISO/IEC 1539-1:2004 R462)
+enumerator_list_f2003
+    : enumerator_f2003 (COMMA enumerator_f2003)*
+    ;
+
+// Enumerator definition (ISO/IEC 1539-1:2004 R463)
+// R463: enumerator -> named-constant [= scalar-int-initialization-expr]
+enumerator_f2003
+    : IDENTIFIER (EQUALS INTEGER_LITERAL)?
+    ;
+
+// End enumeration statement (ISO/IEC 1539-1:2004 R464)
+// R464: end-enum-stmt -> END ENUM
+end_enum_stmt_f2003
+    : END ENUM NEWLINE
     ;
 
 // ====================================================================
