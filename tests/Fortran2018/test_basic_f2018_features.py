@@ -230,5 +230,20 @@ end module"""
             f"with zero errors, got {errors}"
         )
 
+    def test_do_concurrent_typed_header(self):
+        """REAL TEST: DO CONCURRENT with typed header (ISO/IEC 1539-1:2018 R1125)."""
+        code = load_fixture(
+            "Fortran2018",
+            "test_basic_f2018_features",
+            "do_concurrent_typed_header.f90",
+        )
+
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "DO CONCURRENT with typed header should parse"
+        assert errors == 0, (
+            "DO CONCURRENT with integer-type-spec :: should parse "
+            f"with zero errors, got {errors}"
+        )
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
