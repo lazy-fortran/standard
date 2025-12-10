@@ -371,9 +371,15 @@ control_info_list
     ;
 
 // Control information item - ISO 1539:1980 Section 12.6
+// Extended to support REC=, IOSTAT=, ERR=, and END= specifiers
 control_info_item
-    : integer_expr          // Unit number
-    | format_identifier     // Format specifier
+    : integer_expr          // Unit number (positional)
+    | format_identifier     // Format specifier (positional)
+    | unit_spec             // UNIT=u (keyword form)
+    | rec_spec              // REC=rn (direct-access record number)
+    | iostat_spec           // IOSTAT=ios (I/O status variable)
+    | err_spec              // ERR=s (error branch label)
+    | end_spec              // END=s (end-of-file branch, READ only)
     ;
 
 // Format identifier - ISO 1539:1980 Section 12.6
@@ -1046,6 +1052,20 @@ unformatted_spec
 // NEXTREC=nr where nr is an integer variable
 nextrec_spec
     : IDENTIFIER EQUALS variable
+    ;
+
+// REC specifier - ISO 1539:1980 Section 12.6
+// REC=rn where rn is a positive integer expression (record number)
+// Used in direct-access READ/WRITE to specify record number
+rec_spec
+    : IDENTIFIER EQUALS integer_expr
+    ;
+
+// END specifier - ISO 1539:1980 Section 12.6 (READ only)
+// END=s where s is a statement label for end-of-file branching
+// Used in READ statements to branch on end-of-file condition
+end_spec
+    : IDENTIFIER EQUALS label
     ;
 
 // ====================================================================
