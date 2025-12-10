@@ -389,12 +389,12 @@ or are out of scope for the current grammar:
 |--------------------------------------|--------------------------------|-----------------|
 | ASSIGN i TO n                        | (FORTRAN I: `assign_stmt`)     | FORTRAN I only  |
 | GO TO n, (n1, n2, ...)               | (FORTRAN I: `assigned_goto_stmt`) | FORTRAN I only |
-| IF (SENSE SWITCH i) n1, n2           | (FORTRAN I: `if_stmt_sense_switch`) | FORTRAN I only |
-| IF (SENSE LIGHT i) n1, n2            | (FORTRAN I: `if_stmt_sense_light`) | FORTRAN I only |
-| IF ACCUMULATOR OVERFLOW n1, n2       | (FORTRAN I: see FORTRANParser) | FORTRAN I only  |
-| IF QUOTIENT OVERFLOW n1, n2          | (FORTRAN I: see FORTRANParser) | FORTRAN I only  |
-| IF DIVIDE CHECK n1, n2               | (FORTRAN I: see FORTRANParser) | FORTRAN I only  |
-| SENSE LIGHT i                        | (FORTRAN I: `sense_light_stmt`) | FORTRAN I only |
+| IF (SENSE SWITCH i) n1, n2           | `if_stmt_sense_switch`         | Implemented     |
+| IF (SENSE LIGHT i) n1, n2            | `if_stmt_sense_light`          | Implemented     |
+| IF ACCUMULATOR OVERFLOW n1, n2       | `if_stmt_accumulator_overflow` | Implemented     |
+| IF QUOTIENT OVERFLOW n1, n2          | `if_stmt_quotient_overflow`    | Implemented     |
+| IF DIVIDE CHECK n1, n2               | `if_stmt_divide_check`         | Implemented     |
+| SENSE LIGHT i                        | `sense_light_stmt`             | Implemented     |
 | READ INPUT TAPE i, n, list           | Not implemented                | Gap: see #153   |
 | READ TAPE i, list                    | Not implemented                | Gap: see #153   |
 | READ DRUM i, j, list                 | Not implemented                | Gap: see #153   |
@@ -416,7 +416,10 @@ been addressed:
   remain FORTRAN I–only in this repository.
 - **FORMAT and Hollerith**: Implemented (issue #154, closed)
 - **Sense switch/light and hardware IFs**: Implemented in FORTRAN I parser
-  and available via the FORTRAN I entry points
+  and wired into FORTRAN II `statement_body` and `statement_body_strict`
+  (issue #395, closed). Includes IF (SENSE SWITCH i), IF (SENSE LIGHT i),
+  IF ACCUMULATOR OVERFLOW, IF QUOTIENT OVERFLOW, IF DIVIDE CHECK, and
+  SENSE LIGHT statements per C28-6003 Appendix B rows 4–8, 11.
 - **Strict fixed-form card layout**: Implemented via `tools/strict_fixed_form.py`
   preprocessor (issue #143, closed). Validates IBM 704 card layout per
   C28-6000-2 and converts to lenient form for parsing.
