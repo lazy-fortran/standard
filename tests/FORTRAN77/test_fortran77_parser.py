@@ -614,6 +614,90 @@ END
         self.assertIsNotNone(tree)
 
     # ====================================================================
+    # FORTRAN 77 ASSIGN AND ASSIGNED GO TO TESTS
+    # ====================================================================
+    # ISO 1539:1980 Sections 10.4 and 11.2 define ASSIGN and assigned GO TO
+    # statements. These features were inherited from FORTRAN 66 (X3.9-1966
+    # Sections 7.1.1.3 and 7.1.2.1.2) and remain part of FORTRAN 77.
+    #
+    # ASSIGN statement: Assigns a statement label to an integer variable
+    # Assigned GO TO: Branches to the label stored in an integer variable
+    # ====================================================================
+
+    def test_assign_statement(self):
+        """Test ASSIGN statement (ISO 1539:1980 Section 10.4)
+
+        Per ISO 1539:1980 Section 10.4, the ASSIGN statement stores a
+        statement label in an integer variable.
+
+        Syntax: ASSIGN label TO variable
+        """
+        test_cases = [
+            "ASSIGN 100 TO ILAB",
+            "ASSIGN 200 TO TARGET",
+            "ASSIGN 500 TO LABEL_VAR",
+            "ASSIGN 1 TO X",
+        ]
+
+        for text in test_cases:
+            with self.subTest(assign_stmt=text):
+                tree = self.parse(text, 'assign_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_assigned_goto_statement(self):
+        """Test Assigned GO TO statement (ISO 1539:1980 Section 11.2)
+
+        Per ISO 1539:1980 Section 11.2, the assigned GO TO statement
+        branches to a label stored in an integer variable.
+
+        Syntax: GO TO variable, (label1, label2, ...)
+        """
+        test_cases = [
+            "GO TO ILAB, (100, 200, 300)",
+            "GO TO TARGET, (10, 20)",
+            "GO TO LABEL_VAR, (1, 2, 3, 4, 5)",
+            "GO TO X, (50)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(assigned_goto=text):
+                tree = self.parse(text, 'assigned_goto_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_assign_and_goto_in_program(self):
+        """Test ASSIGN and assigned GO TO in program context
+
+        This test verifies that both ASSIGN and assigned GO TO statements
+        parse correctly within a complete FORTRAN 77 program.
+        """
+        program_text = """
+        PROGRAM ASSIGN_TEST
+        INTEGER ILAB
+        ASSIGN 100 TO ILAB
+        GO TO ILAB, (100, 200)
+ 100    PRINT *, 'LABEL 100'
+        GO TO 300
+ 200    PRINT *, 'LABEL 200'
+ 300    END
+        """
+        tree = self.parse(program_text, 'main_program')
+        self.assertIsNotNone(tree)
+
+    def test_assign_and_goto_in_block_if(self):
+        """Test assigned GO TO within block IF construct
+
+        Per ISO 1539:1980 Section 11.2, assigned GO TO can appear within
+        an IF-THEN-ELSE block as part of executable constructs.
+        """
+        block_if_text = """IF (X .GT. 0) THEN
+    GOTO ILAB, (100, 200)
+ELSE
+    GOTO ILAB, (100, 200)
+END IF"""
+        tree = self.parse(block_if_text, 'block_if_construct')
+        self.assertIsNotNone(tree)
+
+    # ====================================================================
     # FORTRAN 77 STATEMENT FUNCTION TESTS
     # ====================================================================
     # Note: Statement function tests, negative tests (array element
