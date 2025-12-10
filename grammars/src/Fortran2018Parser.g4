@@ -223,8 +223,10 @@ select_rank_construct
     ;
 
 // ISO/IEC 1539-1:2018 R1149: select-rank-stmt
+// R1149: [select-construct-name :] SELECT RANK ( [associate-name =>] selector )
 select_rank_stmt
-    : (IDENTIFIER COLON)? SELECT RANK_KEYWORD LPAREN expr_f90 RPAREN NEWLINE
+    : (IDENTIFIER COLON)? SELECT RANK_KEYWORD LPAREN
+      (IDENTIFIER POINTER_ASSIGN)? expr_f90 RPAREN NEWLINE
     ;
 
 // ISO/IEC 1539-1:2018 R1148: select-rank-construct
