@@ -54,26 +54,25 @@ Base: ISO/IEC 1539-1:2023
 
 # Overview
 
-Lazy Fortran extends Fortran 2023 with:
+Lazy Fortran extends Fortran 2023 with a source-to-source front-end that:
 
-1. **Type Inference** - No explicit declarations needed
-2. **Strict Intent Default** - `intent(in)` by default, explicit override required
-3. **Generic Programming** - Templates and traits
-4. **Monomorphization** - Automatic specialization
+- Reduces boilerplate (types, intents, generics)
+- Emits standard-conforming Fortran 2023 for any back-end compiler
+- Classifies features by compile-time cost (local vs whole-program)
 
 ---
 
 # Feature Classification
 
-| Single-pass (local) | Semantic analysis (multi-pass) |
-|---------------------|-------------------------------|
+| Single-pass (local) | Semantic analysis (multi-pass / whole-program) |
+|---------------------|-----------------------------------------------|
 | Type inference (first assignment) | Monomorphization |
 | Default `intent(in)` | Function result types |
 | Expression type rules | Infer from `intent(out)` (Issue 2) |
 | Declaration placement | Infer pointer/allocatable (Issues 11, 12) |
 | Explicit templates/traits | Auto-USE derived types (Issue 14) |
 
-Single-pass features work like traditional Fortran. Semantic analysis features require collecting information across the program.
+Single-pass features can be implemented as a local pre-pass with ISO Fortran semantics; semantic analysis features require additional passes and whole-program information.
 
 ---
 
@@ -88,8 +87,8 @@ z = (1.0, 2.0)   ! complex
 flag = .true.    ! logical
 s = "hello"      ! character(len=5)
 ```
-
-No `implicit none` required. First assignment wins.
+First assignment wins; analysis is purely local (single-pass).
+With `implicit none`, undeclared names remain errors and inference is disabled (strict style is preserved).
 
 ---
 
@@ -203,8 +202,8 @@ function add(a, b)
     add = a + b   ! Return type from expression
 end function
 
-x = add(5, 3)         ! add__i32_i32 returns integer
-y = add(2.5d0, 1.5d0) ! add__r64_r64 returns real(8)
+x = add(5, 3)         ! e.g. add__i32_i32 / add__i4_i4 (Issue 9)
+y = add(2.5d0, 1.5d0) ! e.g. add__r64_r64 / add__r8_r8 (Issue 9)
 ```
 
 With monomorphization, return type is inferred from body expression given input types. Call site provides argument types -> determines specialization -> return type comes from body.
@@ -288,6 +287,8 @@ end subroutine
 ```
 
 Without explicit intent, `y` and `z` would be `intent(in)` and assignments would error.
+
+Compile effort: single-pass check; runtime semantics of ISO Fortran are unchanged, but more argument writes become compile-time errors.
 
 ---
 
@@ -374,7 +375,7 @@ call swap<integer>(a, b)    ! Conflicts with .lt.
 
 ```fortran
 ! Static dispatch (monomorphization)
-call add_i4(x, y)     ! Compiled for integer(4)
+call add(x, y)        ! Compiled to a specialized version
 
 ! Dynamic dispatch (vtable)
 class(IAddable), pointer :: obj
@@ -409,15 +410,17 @@ integer function compare(a, b)
 end function
 ```
 
+---
+
+# Generics: Annotation Syntax (open issue)
+
 <div class="question">
 
 **OPEN ISSUE 16: Support @ annotations?**
 
-| Option | Trade-off |
-|--------|-----------|
-| A | No @ - Fortran-like |
-| B | @ syntax - familiar to Java/Python |
-| C | Both supported |
+- A: No `@` (pure Fortran style)
+- B: `@` syntax (familiar from Java/Python)
+- C: Support both forms
 
 </div>
 
@@ -432,8 +435,8 @@ function add(a, b)
     add = a + b
 end function
 
-x = add(5, 3)       ! Generates add_i4
-y = add(2.5, 1.5)   ! Generates add_r4
+x = add(5, 3)       ! Generates a specialized integer version
+y = add(2.5, 1.5)   ! Generates a specialized real version
 ```
 
 ---
@@ -459,8 +462,8 @@ y = add(2.5, 1.5)   ! Generates add_r4
 Specialized functions need unique names:
 
 ```
-add(integer, integer)  ->  add_i4_i4
-add(real(8), real(8))  ->  add_r8_r8
+add(integer(4), integer(4))  ->  add_i4_i4 / add_i32_i32
+add(real(8), real(8))        ->  add_r8_r8 / add_r64_r64
 ```
 
 ---
