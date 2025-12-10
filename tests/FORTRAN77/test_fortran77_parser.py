@@ -389,6 +389,36 @@ END
                 tree = self.parse(text, 'character_expr')
                 self.assertIsNotNone(tree)
 
+    def test_array_element_substrings(self):
+        """Test array element substring references (FORTRAN 77)
+
+        Per ISO 1539:1980 Section 5.7, a substring is a contiguous portion
+        of a character variable or array element. Array element substrings
+        combine array subscripting with substring references:
+            array-name (subscript-list) (e1:e2)
+
+        Examples:
+        - NAMES(I)(1:5) - substring of 1D array element
+        - MATRIX(I,J)(start:end) - substring of 2D array element
+        - ARRAY(1,2,3)(2:10) - substring of 3D array element
+        """
+        array_substring_expressions = [
+            "NAMES(I)(1:5)",
+            "NAMES(1)(1:5)",
+            "MATRIX(I,J)(start:end)",
+            "MATRIX(1,2)(1:10)",
+            "ARRAY(I)(2:)",
+            "DATA(1)(:",
+            "WORDS(INDEX)(:",
+            "GRID(X,Y,Z)(pos:)",
+            "TABLE(1,2)(1:end)",
+        ]
+
+        for text in array_substring_expressions:
+            with self.subTest(array_substring=text):
+                tree = self.parse(text, 'character_expr')
+                self.assertIsNotNone(tree)
+
     def test_character_concatenation_combinations(self):
         """Test character concatenation with mixed operand types (FORTRAN 77)
 
@@ -403,6 +433,8 @@ END
             "NAME(1:5) // SUFFIX",
             "'(' // CODE // ')'",
             "A // B // C // D",
+            "NAMES(I)(1:5) // SUFFIX",
+            "PREFIX // ARRAY(J,K)(2:10)",
         ]
 
         for text in concat_expressions:

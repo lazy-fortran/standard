@@ -661,9 +661,11 @@ character_literal_constant
     ;
 
 // Character variable - ISO 1539:1980 Section 5.7
-// May include substring reference
+// Supports scalar and array element character variables with substring reference
+// - Scalar: NAME(1:5) or NAME(:10)
+// - Array element: NAMES(I)(1:5) or MATRIX(I,J)(start:end)
 character_variable
-    : IDENTIFIER substring_range?
+    : IDENTIFIER (LPAREN expr_list RPAREN)? substring_range?
     ;
 
 // ====================================================================
