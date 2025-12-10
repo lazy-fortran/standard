@@ -119,6 +119,10 @@ Grammar coverage:
 
 - `substring_range`:
   - `IDENTIFIER(L:U)` with integer expressions for start/end.
+  - ISO 1539:1980 Section 5.7 allows either bound to be omitted, enabling
+    `(:5)`, `(1:)`, and `(:)` forms. The grammar models these optional bounds
+    through `substring_range`'s `substr_start_expr?` / `substr_end_expr?`
+    pairing.
 
 Lexer:
 
@@ -154,11 +158,21 @@ Fixture coverage:
   character declarations, character assignment, and character
   expressions in I/O and IF constructs per ANSI X3.9-1978.
 
-Note: Concatenation (`//`) and substring (`(start:end)`) operations
-work when parsed via the `character_expr` rule directly (as in the
-unit tests), but the `main_program` entry rule's `assignment_stmt`
-uses `expr` which does not yet include `character_expr`. This is a
-grammar integration gap, not a test gap.
+- **Substring assignment integration (ISO 1539:1980 Section 10.3)**
+  - `assignment_target` extends the base `variable` rule to allow substring
+    references (`IDENTIFIER` optionally followed by subscripts and
+    `substring_range`) on the left-hand side, covering `NAME(1:5)` and
+    `ARRAY(I)(1:)`, including omitted bounds.
+  - `assignment_rhs` accepts both `character_expr` and `expr`, letting
+    character/substring expressions and numeric/logical expressions share the
+    same assignment statement syntax.
+  - `tests/fixtures/FORTRAN77/test_fortran77_parser/substring_assignment.f`
+    exercises the new capability, including:
+    `NAME(1:5) = 'JANE '`, `NAME = CITY(1:5)`, and omitted-bound writes like
+    `NAME(:5) = 'HELLO'` and `NAME(10:) = 'WORLD'`.
+  - This resolves issue #466, which tracked the previous gap where
+    `assignment_stmt` lacked full character-substring support and only parsed
+    `expr` on the RHS. The new fixture and parser rules verify the correction.
 
 ## 4. Structured IF and DO constructs
 
