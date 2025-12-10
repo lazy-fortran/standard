@@ -76,7 +76,7 @@ class TestIssue443MaskedElsewhere:
         """Verify elsewhere_stmt is overridden in Fortran2008Parser"""
         # Issue #443 requires overriding elsewhere_stmt to support MASKED ELSEWHERE
         # Check grammar file was updated with the new rule
-        source_file = "/Users/ert/code/standard/grammars/src/Fortran2008Parser.g4"
+        source_file = Path(__file__).parent.parent.parent / "grammars" / "src" / "Fortran2008Parser.g4"
         with open(source_file, "r") as f:
             content = f.read()
 
@@ -91,7 +91,7 @@ class TestIssue443MaskedElsewhere:
     def test_masked_token_in_fortran2008_lexer_grammar(self):
         """Verify MASKED token is defined in Fortran2008Lexer.g4 grammar"""
         # Issue #443 requires moving MASKED token from F2003 to F2008 lexer
-        source_file = "/Users/ert/code/standard/grammars/src/Fortran2008Lexer.g4"
+        source_file = Path(__file__).parent.parent.parent / "grammars" / "src" / "Fortran2008Lexer.g4"
         with open(source_file, "r") as f:
             content = f.read()
 
@@ -107,7 +107,7 @@ class TestIssue443MaskedElsewhere:
     def test_masked_removed_from_fortran2003_lexer_grammar(self):
         """Verify MASKED token is removed from Fortran2003Lexer.g4 grammar"""
         # Issue #443 requires removing MASKED from F2003 where it was incorrectly placed
-        source_file = "/Users/ert/code/standard/grammars/src/Fortran2003Lexer.g4"
+        source_file = Path(__file__).parent.parent.parent / "grammars" / "src" / "Fortran2003Lexer.g4"
         with open(source_file, "r") as f:
             content = f.read()
 
