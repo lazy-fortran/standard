@@ -239,3 +239,27 @@ class TestFortran95Parser:
         assert tree is not None
         assert parser.getNumberOfSyntaxErrors() == 0
 
+    def test_entry_statement_in_f95(self):
+        """ENTRY statement is now supported in F95 executable context.
+
+        ISO/IEC 1539-1:1997 Section 12.5.4 defines ENTRY statements as an
+        obsolescent feature inherited from earlier standards. Although marked
+        obsolescent, ENTRY statements must be supported for F95 standard
+        compliance (fixes #449).
+
+        The ENTRY statement allows multiple entry points in a single
+        subroutine or function subprogram.
+        """
+        code = load_fixture(
+            "Fortran95",
+            "test_entry_statement_f95",
+            "entry_stmt_f95.f90",
+        )
+        parser = self.create_parser_for_rule(code)
+        tree = parser.program_unit_f95()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0, (
+            f"Expected no syntax errors parsing ENTRY statements via "
+            f"program_unit_f95, but got {parser.getNumberOfSyntaxErrors()}"
+        )
+
