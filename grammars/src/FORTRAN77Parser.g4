@@ -120,15 +120,21 @@ entry_dummy_arg
 // NOTE: ANTLR4 does not support true rule extension, so we must
 // redefine type_spec with all inherited types plus CHARACTER.
 
-// Type specification - ISO 1539:1980 Section 8.4
-// Redefines FORTRAN 66 type_spec to add CHARACTER type
-type_spec
+// Base type specification excluding CHARACTER
+// (used for non-character declarations without per-variable lengths)
+non_character_type_spec
     : INTEGER                    // ISO 1539:1980 Section 4.2
     | REAL                       // ISO 1539:1980 Section 4.3
     | LOGICAL                    // ISO 1539:1980 Section 4.6
     | DOUBLE PRECISION           // ISO 1539:1980 Section 4.4
     | COMPLEX                    // ISO 1539:1980 Section 4.5
-    | CHARACTER character_length? // ISO 1539:1980 Section 4.8
+    ;
+
+// Type specification - ISO 1539:1980 Section 8.4
+// Includes the non-character types and CHARACTER with optional length
+type_spec
+    : non_character_type_spec
+    | CHARACTER character_length?
     ;
 
 // Character length specification - ISO 1539:1980 Section 8.4.2
@@ -152,30 +158,21 @@ character_length
 //  2. Per-variable length: CHARACTER A*10, B*20, C (C has default length)
 //  3. Mixed: CHARACTER*5 A, B*10, C (A,C get 5, B gets 10)
 //
-// The type_spec may have an optional character_length (for type-level).
-// Each entity_decl may have an optional character_length (for per-variable).
-// Per-variable lengths override type-level lengths.
-
-// Type declaration - ISO 1539:1980 Section 8.4
-// Override from FORTRAN 66 to support entity declarations with per-variable
-// CHARACTER length specifications
+// Non-character declarations remain simple variable lists
+// (CHARACTER handles per-variable lengths separately)
 type_declaration
-    : type_spec entity_decl_list
+    : non_character_type_spec variable_list
+    | CHARACTER character_length? character_entity_decl_list
     ;
 
-// Entity declaration list - ISO 1539:1980 Section 8.4
-// Comma-separated list of entity declarations
-entity_decl_list
-    : entity_decl (COMMA entity_decl)*
+// CHARACTER entity declarations with optional per-variable lengths
+character_entity_decl_list
+    : character_entity_decl (COMMA character_entity_decl)*
     ;
 
-// Entity declaration - ISO 1539:1980 Section 8.4
-// A variable or array with optional per-variable CHARACTER length
-// For CHARACTER type: variable_name or array_declarator, each optionally
-// followed by a character_length (e.g., NAME*30, CITY*20)
-entity_decl
-    : variable character_length?      // Simple variable with optional length
-    | array_declarator character_length?  // Array with optional length
+character_entity_decl
+    : variable character_length?
+    | array_declarator character_length?
     ;
 
 // ====================================================================
