@@ -475,6 +475,9 @@ The Fortran 2008 layer in this repository:
     and fixture (#323).
   - New intrinsic procedures (BESSEL family, ERF/ERFC, GAMMA/LOG_GAMMA,
     NORM2, PARITY, FINDLOC, STORAGE_SIZE).
+  - Compiler inquiry intrinsics `COMPILER_VERSION` and `COMPILER_OPTIONS`
+    (Section 13.7.41-42) with grammar coverage, fixture
+    `compiler_inquiry_intrinsics.f90`, and issue #454.
   - Atomic subroutine intrinsics (`ATOMIC_DEFINE`/`ATOMIC_REF`, ISO/IEC 1539-1:2010 Sections 13.7.19-13.7.20) with lexer/parser coverage and fixture `atomic_intrinsics.f90` (#327).
   - Integration of all of the above into F2008 specification and
     execution parts and program units.
@@ -651,6 +654,8 @@ rules to grammar rules in `Fortran2008Lexer.g4` and `Fortran2008Parser.g4`.
 | 13.7.160 | SHIFTR | `bit_shift_function_call` |
 | 13.7.163 | STORAGE_SIZE | `image_function_call` |
 | 13.7.165 | THIS_IMAGE | `image_function_call` |
+| 13.7.41 | COMPILER_OPTIONS | `compiler_inquiry_function_call` |
+| 13.7.42 | COMPILER_VERSION | `compiler_inquiry_function_call` |
 
 ### A.11 Lexer Tokens
 
@@ -685,6 +690,8 @@ rules to grammar rules in `Fortran2008Lexer.g4` and `Fortran2008Parser.g4`.
 | Section 13.7.159 | SHIFTL | `SHIFTL` |
 | Section 13.7.160 | SHIFTR | `SHIFTR` |
 | Section 13.7.163 | STORAGE_SIZE | `STORAGE_SIZE` |
+| Section 13.7.41 | COMPILER_OPTIONS | `COMPILER_OPTIONS` |
+| Section 13.7.42 | COMPILER_VERSION | `COMPILER_VERSION` |
 | Section 8.1.5 | CRITICAL | `CRITICAL` |
 | Section 8.1.5 | END CRITICAL | `END_CRITICAL` |
 | Section 8.5.6 | LOCK | `LOCK` |
