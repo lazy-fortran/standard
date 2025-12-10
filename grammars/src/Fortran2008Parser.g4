@@ -295,18 +295,19 @@ execution_construct_f2008
 // Enhanced with F2008-specific constructs
 executable_construct_f2008
     : assignment_stmt                 // Assignment (Section 7.2)
+    | atomic_subroutine_call          // ATOMIC intrinsics (13.7.19-20) - NEW
+    | collective_subroutine_call      // COLLECTIVE intrinsics (13.7.34-38)
     | call_stmt                       // CALL (Section 12.5.1)
-    | atomic_subroutine_call          // ATOMIC intrinsics (Section 13.7.19-20) - NEW
     | print_stmt                      // PRINT (Section 9.6.3)
     | stop_stmt                       // STOP (Section 8.4)
     | error_stop_stmt                 // ERROR STOP (Section 8.4) - NEW in F2008
-    | critical_construct              // CRITICAL (Section 8.1.5) - NEW in F2008
+    | critical_construct              // CRITICAL (Section 8.1.5) - NEW
     | lock_stmt                       // LOCK (Section 8.5.6) - NEW in F2008
     | unlock_stmt                     // UNLOCK (Section 8.5.6) - NEW in F2008
     | select_type_construct           // SELECT TYPE (Section 8.1.9)
     | associate_construct             // ASSOCIATE (Section 8.1.3)
-    | block_construct_f2008           // BLOCK (Section 8.1.4) - Enhanced in F2008
-    | allocate_stmt_f2008             // ALLOCATE (Section 6.7.1) - Enhanced in F2008
+    | block_construct_f2008           // BLOCK (Section 8.1.4) - Enhanced
+    | allocate_stmt_f2008             // ALLOCATE (6.7.1) - Enhanced in F2008
     | sync_construct                  // SYNC (Section 8.5) - NEW in F2008
     | wait_stmt                       // WAIT (Section 9.7.1)
     | flush_stmt                      // FLUSH (Section 9.7.2)
@@ -875,11 +876,50 @@ bit_reduction_function_call
 // - ATOMIC_REF(VALUE, ATOM [, STAT]): Section 13.7.20
 //   Atomically references ATOM and assigns to VALUE. ATOM must be a coarray.
 
-// Atomic subroutine call statement (ISO/IEC 1539-1:2010 Section 13.7.19-20)
-// Invoked as: CALL ATOMIC_DEFINE(atom, value) or CALL ATOMIC_REF(value, atom)
+// ============================================================================
+// ATOMIC INTRINSIC SUBROUTINES (ISO/IEC 1539-1:2010 Section 13.7.19-20)
+// ============================================================================
+// Atomic subroutine call statement
 atomic_subroutine_call
-    : CALL ATOMIC_DEFINE LPAREN actual_arg_list RPAREN NEWLINE  // Section 13.7.19
-    | CALL ATOMIC_REF LPAREN actual_arg_list RPAREN NEWLINE     // Section 13.7.20
+    : CALL ATOMIC_DEFINE LPAREN actual_arg_list RPAREN NEWLINE  // 13.7.19
+    | CALL ATOMIC_REF LPAREN actual_arg_list RPAREN NEWLINE     // 13.7.20
+    ;
+
+// ============================================================================
+// COLLECTIVE INTRINSIC SUBROUTINES (ISO/IEC 1539-1:2010 Section 13.7.34-38)
+// ============================================================================
+// Collective subroutine calls for coarray reduction operations
+collective_subroutine_call
+    : co_broadcast_stmt
+    | co_max_stmt
+    | co_min_stmt
+    | co_sum_stmt
+    | co_reduce_stmt
+    ;
+
+// ISO/IEC 1539-1:2010 Section 13.7.34: CO_BROADCAST
+co_broadcast_stmt
+    : CALL CO_BROADCAST LPAREN actual_arg_list RPAREN NEWLINE
+    ;
+
+// ISO/IEC 1539-1:2010 Section 13.7.35: CO_MAX
+co_max_stmt
+    : CALL CO_MAX LPAREN actual_arg_list RPAREN NEWLINE
+    ;
+
+// ISO/IEC 1539-1:2010 Section 13.7.36: CO_MIN
+co_min_stmt
+    : CALL CO_MIN LPAREN actual_arg_list RPAREN NEWLINE
+    ;
+
+// ISO/IEC 1539-1:2010 Section 13.7.38: CO_SUM
+co_sum_stmt
+    : CALL CO_SUM LPAREN actual_arg_list RPAREN NEWLINE
+    ;
+
+// ISO/IEC 1539-1:2010 Section 13.7.37: CO_REDUCE
+co_reduce_stmt
+    : CALL CO_REDUCE LPAREN actual_arg_list RPAREN NEWLINE
     ;
 
 // ============================================================================
@@ -1020,6 +1060,12 @@ identifier_or_keyword
     // F2008 atomic intrinsics (Section 13.7.19-20)
     | ATOMIC_DEFINE  // ATOMIC_DEFINE can be used as variable name
     | ATOMIC_REF     // ATOMIC_REF can be used as variable name
+    // F2008 collective intrinsic subroutines (Section 13.7.34-38)
+    | CO_BROADCAST   // CO_BROADCAST can be used as variable name
+    | CO_MAX         // CO_MAX can be used as variable name
+    | CO_MIN         // CO_MIN can be used as variable name
+    | CO_SUM         // CO_SUM can be used as variable name
+    | CO_REDUCE      // CO_REDUCE can be used as variable name
     // F2008 WHERE construct enhancements (Section 8.1.4.3)
     | MASKED         // MASKED can be used as variable name (MASKED ELSEWHERE keyword)
     // F2008 mathematical intrinsics (Section 13.7.77)

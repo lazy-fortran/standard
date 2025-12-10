@@ -134,5 +134,60 @@ class TestF2008Coarrays:
             f"Expected 0 errors for coarray section reference, got {errors}"
         )
 
+    def test_co_broadcast_intrinsic(self):
+        """Test CO_BROADCAST collective intrinsic (Section 13.7.34)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "co_broadcast_test.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "CO_BROADCAST failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for CO_BROADCAST, got {errors}"
+
+    def test_co_max_intrinsic(self):
+        """Test CO_MAX collective intrinsic (Section 13.7.35)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "co_max_test.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "CO_MAX failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for CO_MAX, got {errors}"
+
+    def test_co_min_intrinsic(self):
+        """Test CO_MIN collective intrinsic (Section 13.7.36)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "co_min_test.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "CO_MIN failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for CO_MIN, got {errors}"
+
+    def test_co_sum_intrinsic(self):
+        """Test CO_SUM collective intrinsic (Section 13.7.38)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "co_sum_test.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "CO_SUM failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for CO_SUM, got {errors}"
+
+    def test_co_reduce_intrinsic(self):
+        """Test CO_REDUCE collective intrinsic (Section 13.7.37)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "co_reduce_test.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "CO_REDUCE failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for CO_REDUCE, got {errors}"
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
