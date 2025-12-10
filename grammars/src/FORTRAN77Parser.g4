@@ -669,6 +669,37 @@ character_variable
     ;
 
 // ====================================================================
+// ASSIGNMENT TARGET - ISO 1539:1980 Section 10.3
+// ====================================================================
+//
+// ISO 1539:1980 Section 10.3 defines assignment targets that can be:
+// - Numeric/logical variables: X = expr
+// - Array elements: A(I) = expr or A(I,J) = expr
+// - CHARACTER with substring: NAME(1:5) = expr
+// - CHARACTER array element with substring: NAMES(I)(1:5) = expr
+
+// Assignment target - allows substring on character variables
+// Per ISO 1539:1980 Section 10.3
+assignment_target
+    : IDENTIFIER (LPAREN expr_list RPAREN)? substring_range?
+    ;
+
+// Override assignment_stmt to support substring assignment
+// ISO 1539:1980 Section 10.3 allows substring on LHS for CHARACTER assignment
+// Section 10.1-10.3: CHARACTER assignment can use character_expr (with substrings)
+// or numeric expr depending on the variable type
+assignment_stmt
+    : assignment_target EQUALS assignment_rhs
+    ;
+
+// Assignment RHS - accepts both numeric and character expressions
+// Per ISO 1539:1980 Sections 10.1-10.3
+assignment_rhs
+    : character_expr    // CHARACTER expressions with optional substrings
+    | expr              // Numeric and logical expressions
+    ;
+
+// ====================================================================
 // SUBSTRINGS - ISO 1539:1980 Section 5.7
 // ====================================================================
 //
@@ -676,16 +707,20 @@ character_variable
 // Syntax: character-variable (start : end)
 
 // Substring range - ISO 1539:1980 Section 5.7
+// Syntax: (start:end) where start and/or end can be omitted
+// Examples: (1:5), (1:), (:5), (:)
 substring_range
-    : LPAREN substr_start_expr COLON substr_end_expr? RPAREN
+    : LPAREN substr_start_expr? COLON substr_end_expr? RPAREN
     ;
 
 // Substring start - ISO 1539:1980 Section 5.7
+// Optional: if omitted, defaults to 1
 substr_start_expr
     : integer_expr
     ;
 
 // Substring end - ISO 1539:1980 Section 5.7
+// Optional: if omitted, defaults to string length
 substr_end_expr
     : integer_expr
     ;
