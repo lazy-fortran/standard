@@ -234,14 +234,24 @@ IANY             : I A N Y ;
 IPARITY          : I P A R I T Y ;
 
 // ============================================================================
-// ATOMIC INTRINSICS (ISO/IEC 1539-1:2010 Section 13.7.19-13.7.20)
+// ATOMIC INTRINSICS (ISO/IEC 1539-1:2010 Section 13.7.19-13.7.21)
 // ============================================================================
 // Atomic subroutines for coarray programming provide atomic memory operations:
 // - ATOMIC_DEFINE(ATOM,VALUE): Atomically define a variable (Section 13.7.19)
 // - ATOMIC_REF(VALUE,ATOM): Atomically reference a variable (Section 13.7.20)
+// - ATOMIC_CAS(ATOM,OLD,COMPARE,NEW): Atomic compare-and-swap (Section 13.7.21)
+// - ATOMIC_ADD(ATOM,VALUE): Atomic addition (Section 13.7.15)
+// - ATOMIC_AND(ATOM,VALUE): Atomic bitwise AND (Section 13.7.16)
+// - ATOMIC_OR(ATOM,VALUE): Atomic bitwise OR (Section 13.7.17)
+// - ATOMIC_XOR(ATOM,VALUE): Atomic bitwise XOR (Section 13.7.18)
 // These are subroutines, not functions, called via CALL statement.
 ATOMIC_DEFINE    : A T O M I C '_' D E F I N E ;
 ATOMIC_REF       : A T O M I C '_' R E F ;
+ATOMIC_CAS       : A T O M I C '_' C A S ;
+ATOMIC_ADD       : A T O M I C '_' A D D ;
+ATOMIC_AND       : A T O M I C '_' A N D ;
+ATOMIC_OR        : A T O M I C '_' O R ;
+ATOMIC_XOR       : A T O M I C '_' X O R ;
 
 // ============================================================================
 // COLLECTIVE INTRINSIC SUBROUTINES (ISO/IEC 1539-1:2010 Section 13.7.34-38)
