@@ -196,7 +196,59 @@ Gaps that warrant explicit issues:
 
 ---
 
-## 3. Parameterized derived types (PDTs)
+## 3. Enumeration types (ISO/IEC 1539‑1:2004 Section 4.6)
+
+Specification:
+
+- Fortran 2003 introduces enumeration types for C interoperability.
+- Enumerations use `ENUM, BIND(C)` to define a sequence of named constants.
+- Each enumerator is a named constant with an optional integer value.
+- Enumerators can be referenced directly as integer values in expressions.
+- Enumerations must include the `BIND(C)` attribute for C interoperability.
+
+Grammar implementation:
+
+- Enumeration definition (R460):
+  - `enum_def_f2003`:
+    - `enum_def_stmt_f2003` + zero or more `enumerator_def_stmt_f2003` + `end_enum_stmt_f2003`.
+  - `enum_def_stmt_f2003`:
+    - `ENUM COMMA BIND LPAREN C RPAREN NEWLINE`.
+    - Mandatory `BIND(C)` attribute for F2003 enumerations.
+  - `enumerator_def_stmt_f2003` (R462):
+    - `ENUMERATOR (DOUBLE_COLON)? enumerator_list_f2003 NEWLINE`.
+    - Optional `::` separator allows `ENUMERATOR red = 1` or `ENUMERATOR :: red = 1`.
+  - `enumerator_f2003` (R463):
+    - `IDENTIFIER (EQUALS expr_f90)?`.
+    - Named constant with optional scalar-integer initialization expression (e.g., `1 + 1`).
+  - `end_enum_stmt_f2003` (R464):
+    - `END ENUM NEWLINE`.
+- Declaration construct integration:
+  - `enum_def_f2003` is wired into `declaration_construct_f2003` (R207).
+  - Enumerations can appear in specification parts of programs, modules,
+    and subprograms alongside other declarations.
+
+Tests:
+
+- `test_issue405_enum_construct.py` (via fixture auto‑discovery):
+  - `enum_bind_c_simple.f90`: Basic enumeration in a main program.
+  - `enum_bind_c_no_values.f90`: Enumerators without explicit values.
+  - `enum_bind_c_module.f90`: Enumeration in a module with contained subroutine.
+
+Gaps / simplifications:
+
+- Semantic constraints not enforced:
+  - Enumerators must have unique values (not validated in grammar).
+  - BIND(C) is mandatory in F2003 but future extensions might support
+    unbound enumerations (e.g., F2023 allows ENUMERATION TYPE).
+
+Gaps that warrant explicit issues:
+
+- (None currently identified; enumeration support is complete for F2003
+  use cases per ISO/IEC 1539‑1:2004 Section 4.6.)
+
+---
+
+## 4. Parameterized derived types (PDTs)
 
 Specification:
 
@@ -251,7 +303,7 @@ Gaps that warrant explicit issues:
 
 ---
 
-## 4. Procedure pointers, interfaces, and binding specifications
+## 5. Procedure pointers, interfaces, and binding specifications
 
 Specification:
 
@@ -307,7 +359,7 @@ Gaps that warrant explicit issues:
 
 ---
 
-## 5. ASSOCIATE, BLOCK, and control constructs
+## 6. ASSOCIATE, BLOCK, and control constructs
 
 Specification:
 
@@ -342,7 +394,7 @@ Gaps:
 
 ---
 
-## 6. Enhanced ALLOCATE, DEALLOCATE, and dynamic memory
+## 7. Enhanced ALLOCATE, DEALLOCATE, and dynamic memory
 
 Specification:
 
@@ -381,7 +433,7 @@ Gaps:
 
 ---
 
-## 7. Enhanced I/O, WAIT, FLUSH, and defined derived‑type I/O
+## 8. Enhanced I/O, WAIT, FLUSH, and defined derived‑type I/O
 
 Specification:
 
@@ -456,7 +508,7 @@ Gap issues (resolved):
 
 ---
 
-## 8. C interoperability and IEEE arithmetic
+## 9. C interoperability and IEEE arithmetic
 
 Specification:
 
@@ -562,7 +614,7 @@ Gaps that warrant explicit issues:
 
 ---
 
-## 9. Fixed‑form vs free‑form and layout
+## 10. Fixed‑form vs free‑form and layout
 
 Specification:
 
