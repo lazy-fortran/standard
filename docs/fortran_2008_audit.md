@@ -245,8 +245,15 @@ Grammar implementation:
 - `do_concurrent_stmt`:
   - Optional construct name + `DO CONCURRENT concurrent_header NEWLINE`.
 - `concurrent_header`:
-  - `LPAREN forall_triplet_spec_list (COMMA scalar_mask_expr)? RPAREN`.
+  - `LPAREN forall_triplet_spec_list (COMMA scalar_mask_expr)? (COMMA concurrent_locality)? RPAREN`.
   - Reuses the existing FORALL triplet syntax.
+  - Supports optional `concurrent_locality` specifier (F2008, issue #428).
+- `concurrent_locality` (ISO/IEC 1539-1:2010 Section 8.1.6.6, R821):
+  - `LOCAL LPAREN local_variable_list RPAREN`.
+  - Declares variables that are private to each DO CONCURRENT iteration.
+  - Each iteration gets its own copy of LOCAL variables, preventing race conditions.
+- `local_variable_list`:
+  - Comma-separated list of IDENTIFIER tokens.
 - `scalar_mask_expr`:
   - Aliased to a general `logical_expr`.
 
@@ -255,6 +262,14 @@ Tests:
 - `test_basic_f2008_features.py::test_do_concurrent_tokens` uses
   `do_concurrent.f90` to parse a basic DO CONCURRENT example via
   `program_unit_f2008`.
+- `test_basic_f2008_features.py::test_do_concurrent_local_specifier` uses
+  `do_concurrent_local.f90` to parse DO CONCURRENT with LOCAL specifier,
+  including:
+  - Basic LOCAL with single variable.
+  - Multiple LOCAL variables.
+  - LOCAL with mask expression.
+  - LOCAL with multiple loop indices.
+  - LOCAL keyword used as identifier outside DO CONCURRENT context.
 
 Gaps:
 
@@ -265,6 +280,9 @@ Gaps:
   grammar relies on F2003 FORALL syntax; any subtle syntactic
   differences between DO CONCURRENT and FORALL control lists are
   not distinguished here.
+- F2018 extensions (LOCAL_INIT, SHARED, DEFAULT, and REDUCE) are not
+  implemented in F2008 grammar as they are F2018+ features (tracked
+  separately in F2018 audit).
 
 ---
 

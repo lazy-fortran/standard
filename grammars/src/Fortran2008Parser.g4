@@ -623,9 +623,12 @@ do_concurrent_stmt
     ;
 
 // Concurrent header (ISO/IEC 1539-1:2010 R819)
-// R819: concurrent-header -> (concurrent-spec [, scalar-mask-expr])
+// R819: concurrent-header -> (concurrent-spec [, scalar-mask-expr]
+// [, concurrent-locality])
+// Enhanced with F2008 LOCAL specifier for iteration-private variables.
 concurrent_header
-    : LPAREN forall_triplet_spec_list (COMMA scalar_mask_expr)? RPAREN
+    : LPAREN forall_triplet_spec_list (COMMA scalar_mask_expr)?
+      (COMMA concurrent_locality)? RPAREN
     ;
 
 // Concurrent control list (ISO/IEC 1539-1:2010 R820)
@@ -646,6 +649,20 @@ forall_triplet_spec
 // Optional logical mask to filter iterations
 scalar_mask_expr
     : logical_expr
+    ;
+
+// Concurrent locality specifier (ISO/IEC 1539-1:2010 R821)
+// R821: concurrent-locality -> LOCAL ( local-variable-list )
+// Declares variables that are private to each DO CONCURRENT iteration.
+// Each iteration gets its own copy of LOCAL variables, preventing race conditions.
+concurrent_locality
+    : LOCAL LPAREN local_variable_list RPAREN
+    ;
+
+// Local variable list (ISO/IEC 1539-1:2010 R821)
+// Variables declared in LOCAL() are iteration-private within DO CONCURRENT.
+local_variable_list
+    : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
 // ============================================================================
@@ -1045,6 +1062,8 @@ identifier_or_keyword
     | ALL          // ALL can be used as variable name (SYNC ALL keyword)
     | MEMORY       // MEMORY can be used as variable name (SYNC MEMORY keyword)
     | CONCURRENT   // CONCURRENT can be used as variable name (DO CONCURRENT)
+    | LOCAL        // LOCAL can be used as variable name
+                   // (DO CONCURRENT locality specifier)
     | CONTIGUOUS   // CONTIGUOUS can be used as variable name
     | CODIMENSION  // CODIMENSION can be used as variable name
     | SUBMODULE    // SUBMODULE can be used as a name
