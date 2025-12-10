@@ -791,9 +791,10 @@ array_function_call
 // Image inquiry function calls (ISO/IEC 1539-1:2010 Section 13.7)
 // Coarray image inquiry and storage inquiry
 image_function_call
-    : THIS_IMAGE LPAREN actual_arg_list? RPAREN  // Section 13.7.165
-    | NUM_IMAGES LPAREN actual_arg_list? RPAREN  // Section 13.7.121
-    | STORAGE_SIZE LPAREN actual_arg_list RPAREN // Section 13.7.163
+    : THIS_IMAGE LPAREN actual_arg_list? RPAREN      // Section 13.7.165
+    | NUM_IMAGES LPAREN actual_arg_list? RPAREN      // Section 13.7.121
+    | STORAGE_SIZE LPAREN actual_arg_list RPAREN     // Section 13.7.163
+    | IS_CONTIGUOUS LPAREN actual_arg_list RPAREN    // Section 13.7.87
     ;
 
 // Compiler inquiry function calls (ISO/IEC 1539-1:2010 Section 13.7.41-42)
