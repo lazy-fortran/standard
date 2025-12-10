@@ -129,9 +129,16 @@ NON_RECURSIVE    : N O N '_' R E C U R S I V E ;
 // ============================================================================
 // DO CONCURRENT enables explicit loop parallelization:
 // - R818: loop-control -> ... | CONCURRENT concurrent-header
-// - R819: concurrent-header -> (concurrent-spec [, scalar-mask-expr])
+// - R819: concurrent-header -> (concurrent-spec [, scalar-mask-expr] [, concurrent-locality])
+// - R821: concurrent-locality -> LOCAL ( local-variable-list )
 // DO CONCURRENT indicates iterations may execute in any order or concurrently.
 CONCURRENT       : C O N C U R R E N T ;
+
+// LOCAL specifier for DO CONCURRENT (ISO/IEC 1539-1:2010 Section 8.1.6.6, R821)
+// Declares variables that are private to each DO CONCURRENT iteration.
+// Each iteration gets its own copy of LOCAL variables, preventing race conditions.
+// - R821: concurrent-locality -> LOCAL ( local-variable-list )
+LOCAL            : L O C A L ;
 
 // ============================================================================
 // CONTIGUOUS ATTRIBUTE (ISO/IEC 1539-1:2010 Section 5.3.7)
