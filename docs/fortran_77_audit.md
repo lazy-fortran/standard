@@ -68,6 +68,21 @@ In this grammar:
     (inherited from FORTRAN 66/IV).
   - `CHARACTER character_length?` (new in FORTRAN 77).
 
+**COMPLEX constants** (inherited from FORTRAN 66/IV, ISO 1539:1980
+Section 4.4.2):
+
+- `complex_literal : LPAREN complex_part COMMA complex_part RPAREN`
+- `complex_part` supports signed integer and real parts.
+- Examples: `(1.0, 2.0)`, `(3, -4)`, `(-1.5E2, +2.5E-1)`.
+- Tests (`tests/FORTRAN77/test_fortran77_parser.py`):
+  - `test_complex_literals_fortran77` covers all forms of complex constants
+    as literals (passing individual `(r,i)` forms to the `literal` rule).
+  - `test_complex_literals_in_assignment_fortran77` exercises complex
+    constants in assignment statements (assignment to variables with
+    complex-constant RHS).
+  - `test_complex_literals_in_data_statement_fortran77` exercises complex
+    constants in DATA statements.
+
 - `character_length` supports:
   - `CHARACTER*10`
   - `CHARACTER*(* )`
