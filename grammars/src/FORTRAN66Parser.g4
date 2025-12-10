@@ -566,6 +566,34 @@ literal
     | LABEL                      // Accept LABEL as integer (token precedence)
     | REAL_LITERAL               // X3.9-1966 Section 4.2.2
     | logical_literal            // X3.9-1966 Section 4.5.2
+    | complex_literal            // X3.9-1966 Section 4.4.2
+    ;
+
+// Complex constant - X3.9-1966 Section 4.4.2
+// Form: (real-or-int-const, real-or-int-const)
+// Examples: (1.0, 2.0), (3, -4), (-1.5E2, 2.5E-1)
+complex_literal
+    : LPAREN complex_part COMMA complex_part RPAREN
+    ;
+
+// Complex part - either signed real or signed integer
+complex_part
+    : signed_real_literal
+    | signed_int_literal
+    ;
+
+// Signed real literal (optional sign)
+signed_real_literal
+    : PLUS? REAL_LITERAL
+    | MINUS REAL_LITERAL
+    ;
+
+// Signed integer literal (optional sign)
+signed_int_literal
+    : PLUS? INTEGER_LITERAL
+    | PLUS? LABEL               // LABEL also matches integers
+    | MINUS INTEGER_LITERAL
+    | MINUS LABEL               // LABEL also matches integers
     ;
 
 // ============================================================================

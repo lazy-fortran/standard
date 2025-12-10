@@ -126,6 +126,10 @@ INQUIRE         : I N Q U I R E ;
 // Result length is sum of operand lengths
 CONCAT          : '//' ;
 
+// Colon operator - ISO 1539:1980 Section 5.7
+// Used in substring notation: NAME(start:end), NAMES(I)(1:5)
+COLON           : ':' ;
+
 // --------------------------------------------------------------------
 // Character Constants - ISO 1539:1980 Section 4.8.2
 // --------------------------------------------------------------------
