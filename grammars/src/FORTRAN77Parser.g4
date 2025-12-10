@@ -120,15 +120,21 @@ entry_dummy_arg
 // NOTE: ANTLR4 does not support true rule extension, so we must
 // redefine type_spec with all inherited types plus CHARACTER.
 
-// Type specification - ISO 1539:1980 Section 8.4
-// Redefines FORTRAN 66 type_spec to add CHARACTER type
-type_spec
+// Base type specification excluding CHARACTER
+// (used for non-character declarations without per-variable lengths)
+non_character_type_spec
     : INTEGER                    // ISO 1539:1980 Section 4.2
     | REAL                       // ISO 1539:1980 Section 4.3
     | LOGICAL                    // ISO 1539:1980 Section 4.6
     | DOUBLE PRECISION           // ISO 1539:1980 Section 4.4
     | COMPLEX                    // ISO 1539:1980 Section 4.5
-    | CHARACTER character_length? // ISO 1539:1980 Section 4.8
+    ;
+
+// Type specification - ISO 1539:1980 Section 8.4
+// Includes the non-character types and CHARACTER with optional length
+type_spec
+    : non_character_type_spec
+    | CHARACTER character_length?
     ;
 
 // Character length specification - ISO 1539:1980 Section 8.4.2
@@ -137,6 +143,36 @@ character_length
     : MULTIPLY integer_expr      // CHARACTER*10
     | MULTIPLY LPAREN MULTIPLY RPAREN  // CHARACTER*(*) - assumed length
     | MULTIPLY LPAREN integer_expr RPAREN  // CHARACTER*(len-expr)
+    ;
+
+// ====================================================================
+// TYPE DECLARATION WITH ENTITY DECLARATIONS
+// ISO 1539:1980 Section 8.4
+// ====================================================================
+//
+// Override FORTRAN 66 type_declaration to support per-variable
+// CHARACTER length specifications in FORTRAN 77.
+//
+// Forms supported:
+//  1. Type-level length: CHARACTER*10 A, B, C (all get length 10)
+//  2. Per-variable length: CHARACTER A*10, B*20, C (C has default length)
+//  3. Mixed: CHARACTER*5 A, B*10, C (A,C get 5, B gets 10)
+//
+// Non-character declarations remain simple variable lists
+// (CHARACTER handles per-variable lengths separately)
+type_declaration
+    : non_character_type_spec variable_list
+    | CHARACTER character_length? character_entity_decl_list
+    ;
+
+// CHARACTER entity declarations with optional per-variable lengths
+character_entity_decl_list
+    : character_entity_decl (COMMA character_entity_decl)*
+    ;
+
+character_entity_decl
+    : variable character_length?
+    | array_declarator character_length?
     ;
 
 // ====================================================================
