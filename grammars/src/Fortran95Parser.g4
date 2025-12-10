@@ -208,6 +208,8 @@ identifier_or_keyword_f95
     | CEILING_INTRINSIC
     | FLOOR_INTRINSIC
     | MODULO_INTRINSIC
+    // F95 pointer intrinsic (Section 13.10.79)
+    | NULL_INTRINSIC
     // F90/F95 bit manipulation intrinsics (Section 13.10)
     | BIT_SIZE_INTRINSIC
     | BTEST_INTRINSIC

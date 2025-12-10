@@ -119,6 +119,11 @@ CEILING_INTRINSIC     : ('c'|'C') ('e'|'E') ('i'|'I') ('l'|'L')
 FLOOR_INTRINSIC       : ('f'|'F') ('l'|'L') ('o'|'O') ('o'|'O') ('r'|'R') ;
 MODULO_INTRINSIC      : ('m'|'M') ('o'|'O') ('d'|'D') ('u'|'U') ('l'|'L') ('o'|'O') ;
 
+// Pointer intrinsic (ISO/IEC 1539-1:1997 Section 13.10.79)
+// NULL: Returns a disassociated pointer with optional MOLD argument
+//
+NULL_INTRINSIC        : ('n'|'N') ('u'|'U') ('l'|'L') ('l'|'L') ;
+
 // --------------------------------------------------------------------
 // Bit manipulation intrinsics (ISO/IEC 1539-1:1997 Section 13.10)
 // --------------------------------------------------------------------
@@ -185,7 +190,7 @@ SYSTEM_CLOCK_INTRINSIC : ('s'|'S') ('y'|'Y') ('s'|'S') ('t'|'T') ('e'|'E') ('m'|
 // ✅ Enhanced WHERE/ELSEWHERE constructs and nesting (Section 7.5.3)
 // ✅ PURE/ELEMENTAL procedure prefixes (Section 12.6)
 // ✅ Modern intrinsic functions from the F90/F95 core (Section 13)
-//    (CEILING, FLOOR, MODULO, bit intrinsics, TRANSFER, etc.)
+//    (CEILING, FLOOR, MODULO, NULL, bit intrinsics, TRANSFER, etc.)
 // ✅ CPU_TIME intrinsic (Section 13.11.2) and related timing intrinsics
 //
 // BACKWARD COMPATIBILITY:

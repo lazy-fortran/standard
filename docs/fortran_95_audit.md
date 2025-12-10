@@ -671,8 +671,9 @@ until they are addressed:
 
 1. **Automatic deallocation** (Section 6.3.3): Semantic behavior, not syntax –
    **NON-COMPLIANT** (semantic deallocation rules not modeled).
-2. **NULL() intrinsic** (Section 13.10.79): Lexer token not defined –
-   **NON-COMPLIANT** (intrinsic missing from token set).
+2. **NULL() intrinsic** (Section 13.10.79): Implemented NULL_INTRINSIC token and
+   added to identifier_or_keyword_f95 rule (fixes #376) –
+   **STANDARD-COMPLIANT** (intrinsic function with optional MOLD argument).
 3. **FORALL index variable restrictions**: Semantic, not syntactic –
    **NON-COMPLIANT** (index restrictions not enforced).
 4. **Initialization expression restrictions** (Section 7.1.6): Grammar accepts
