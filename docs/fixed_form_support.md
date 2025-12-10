@@ -155,7 +155,7 @@ available for modern tooling.
   - FORTRAN IV logical operators and data types (LOGICAL, DOUBLE PRECISION,
     COMPLEX).
   - Standardized labels, BLOCK/BLOCK DATA, EXTERNAL/INTRINSIC (F66).
-  - CHARACTER, IF–THEN–ELSE/ENDIF, PARAMETER, SAVE, PROGRAM, ENDDO,
+  - CHARACTER, IF–THEN–ELSE/ENDIF, PARAMETER, SAVE, PROGRAM,
     expanded I/O (F77).
 - Fixed-form handling:
   - Inherits the **layout‑lenient** model from earlier grammars.
