@@ -676,7 +676,8 @@ contiguous_stmt
 // Attribute specification (ISO/IEC 1539-1:2010 R502)
 // R502: attr-spec -> access-spec | ALLOCATABLE | ASYNCHRONOUS | CODIMENSION [...]
 //                  | CONTIGUOUS | DIMENSION (array-spec) | EXTERNAL | ...
-// Extended with CONTIGUOUS (Section 5.3.7) - NEW in F2008
+// Extended with CONTIGUOUS (Section 5.3.7) and CODIMENSION (Section 5.3.6)
+// NEW in F2008
 attr_spec
     : PUBLIC
     | PRIVATE
@@ -690,6 +691,7 @@ attr_spec
     | PARAMETER
     | VALUE
     | CONTIGUOUS                      // NEW in F2008 (Section 5.3.7)
+    | CODIMENSION coarray_spec?       // NEW in F2008 (Section 5.3.6)
     ;
 
 // ============================================================================
@@ -970,6 +972,7 @@ identifier_or_keyword
     | MEMORY       // MEMORY can be used as variable name (SYNC MEMORY keyword)
     | CONCURRENT   // CONCURRENT can be used as variable name (DO CONCURRENT)
     | CONTIGUOUS   // CONTIGUOUS can be used as variable name
+    | CODIMENSION  // CODIMENSION can be used as variable name
     | SUBMODULE    // SUBMODULE can be used as a name
     | BLOCK        // BLOCK can be used as variable name
     | ERROR_STOP   // ERROR_STOP is compound keyword, not typically used as name
