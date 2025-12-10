@@ -152,9 +152,9 @@ Specification:
 Grammar implementation:
 
 - Lexer:
-  - Tokens `SELECT_RANK`, `RANK_STAR`, `RANK_DEFAULT`, and `RANK_KEYWORD`
-    exist, but the parser uses the general `RANK_KEYWORD` token and the
-    existing `DEFAULT` token rather than the “underscored” variants.
+  - Token `SELECT_RANK` and `RANK_KEYWORD` are defined and used.
+  - Note: Dead tokens `RANK_STAR` and `RANK_DEFAULT` were removed in issue #434
+    (these were never used in the parser).
 - Parser:
   - `select_rank_construct`:
     - `select_rank_stmt rank_construct* end_select_rank_stmt`.
@@ -177,11 +177,6 @@ Tests:
 
 Gaps:
 
-- The grammar doesn’t use the underscored `SELECT_RANK`, `RANK_STAR`,
-  or `RANK_DEFAULT` tokens; instead it relies on the keyword `RANK` and
-  `DEFAULT`. This is consistent with the actual Fortran syntax (e.g.
-  `SELECT RANK (a)`, `RANK (n)`, `RANK DEFAULT`), but the extra tokens
-  are not used and are effectively redundant.
 - Semantic requirements (e.g., selector must be assumed‑rank, constant
   rank selectors) are not encoded; these must be handled by semantic
   analysis.
@@ -686,3 +681,14 @@ syntax rules to grammar rules in `Fortran2018Lexer.g4` and `Fortran2018Parser.g4
 | Section 16.9.187 | TEAM_NUMBER | `TEAM_NUMBER` |
 | R1178 | NEW_INDEX | `NEW_INDEX` |
 | R1173 | UNTIL_COUNT | `UNTIL_COUNT` |
+
+### A.12 Dead Token Cleanup (Issue #434)
+
+The following tokens were removed as dead code in issue #434:
+- `RANK_STAR` and `RANK_DEFAULT`: R1150 select-rank-case-stmt uses MULTIPLY (*) and
+  DEFAULT keywords instead of compound tokens.
+- `ASSUMED_RANK`: R825 assumed-rank-spec uses DOT_DOT (..) syntax, not ASSUMED_RANK keyword.
+- `LOCALITY`: Grammar rule name, not a keyword. Actual keywords are LOCAL, LOCAL_INIT, SHARED.
+- `DEFAULT_ACCESS`: Not in ISO standard. F2018 uses DEFAULT with PUBLIC/PRIVATE keywords.
+
+All 5 tokens had zero references in Fortran2018Parser.g4, confirming they were unused.
