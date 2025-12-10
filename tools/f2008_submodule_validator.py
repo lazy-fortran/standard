@@ -212,9 +212,11 @@ class F2008SubmoduleListener(Fortran2008ParserListener):
             self._current_interface_name = name_match.group(1).lower()
 
     def enterFunction_stmt_f2008(self, ctx):
-        """Track function declarations in interface blocks."""
+        """Track function declarations in interface blocks and module procedures."""
         if self._in_interface_block and self._current_module:
             self._record_interface_function(ctx)
+        elif self._has_module_prefix(ctx):
+            self._record_module_subprogram(ctx, is_function=True)
 
     def enterFunction_stmt_interface(self, ctx):
         """Track function declarations in interface body."""
@@ -251,9 +253,11 @@ class F2008SubmoduleListener(Fortran2008ParserListener):
                 )
 
     def enterSubroutine_stmt_f2008(self, ctx):
-        """Track subroutine declarations in interface blocks."""
+        """Track subroutine declarations in interface blocks and module procedures."""
         if self._in_interface_block and self._current_module:
             self._record_interface_subroutine(ctx)
+        elif self._has_module_prefix(ctx):
+            self._record_module_subprogram(ctx, is_function=False)
 
     def enterSubroutine_stmt_interface(self, ctx):
         """Track subroutine declarations in interface body."""
@@ -319,64 +323,11 @@ class F2008SubmoduleListener(Fortran2008ParserListener):
 
     def enterModule_subroutine_stmt_f2008(self, ctx):
         """Track MODULE SUBROUTINE in submodule."""
-        text = self._get_token_text(ctx)
-        line, col = self._get_location(ctx)
-
-        name_match = re.search(r"module\s*subroutine\s*(\w+)", text, re.IGNORECASE)
-        if name_match:
-            name = name_match.group(1).lower()
-            dummy_args = self._extract_dummy_args(text)
-
-            proc = ModuleProcedure(
-                name=name,
-                is_function=False,
-                is_subroutine=True,
-                submodule_name=self._current_submodule,
-                dummy_args=dummy_args,
-                line=line,
-                column=col,
-            )
-            self.result.module_procedures.append(proc)
-
-            if (
-                self._current_submodule
-                and self._current_submodule in self.result.submodules
-            ):
-                self.result.submodules[self._current_submodule].module_procedures.add(
-                    name
-                )
+        self._record_module_subprogram(ctx, is_function=False)
 
     def enterModule_function_stmt_f2008(self, ctx):
         """Track MODULE FUNCTION in submodule."""
-        text = self._get_token_text(ctx)
-        line, col = self._get_location(ctx)
-
-        name_match = re.search(r"module\s*function\s*(\w+)", text, re.IGNORECASE)
-        if name_match:
-            name = name_match.group(1).lower()
-            dummy_args = self._extract_dummy_args(text)
-            result_name = self._extract_result_name(text)
-
-            proc = ModuleProcedure(
-                name=name,
-                is_function=True,
-                is_subroutine=False,
-                submodule_name=self._current_submodule,
-                has_result=result_name is not None,
-                result_name=result_name,
-                dummy_args=dummy_args,
-                line=line,
-                column=col,
-            )
-            self.result.module_procedures.append(proc)
-
-            if (
-                self._current_submodule
-                and self._current_submodule in self.result.submodules
-            ):
-                self.result.submodules[self._current_submodule].module_procedures.add(
-                    name
-                )
+        self._record_module_subprogram(ctx, is_function=True)
 
     def _extract_dummy_args(self, text: str) -> List[str]:
         """Extract dummy argument names from procedure statement."""
@@ -395,6 +346,52 @@ class F2008SubmoduleListener(Fortran2008ParserListener):
         if result_match:
             return result_match.group(1).lower()
         return None
+
+    def _has_module_prefix(self, ctx) -> bool:
+        """Return True if the statement context has MODULE in its prefix spec."""
+        if ctx is None:
+            return False
+        prefix = ctx.prefix_f2008()
+        if not prefix:
+            return False
+        for spec in prefix.prefix_spec_f2008():
+            if spec.MODULE():
+                return True
+        return False
+
+    def _record_module_subprogram(self, ctx, is_function: bool):
+        """Record a MODULE FUNCTION/SUBROUTINE from any applicable statement."""
+        text = self._get_token_text(ctx)
+        line, col = self._get_location(ctx)
+        pattern = r"function\s*(\w+)" if is_function else r"subroutine\s*(\w+)"
+        name_match = re.search(pattern, text, re.IGNORECASE)
+        if not name_match:
+            return
+
+        name = name_match.group(1).lower()
+        dummy_args = self._extract_dummy_args(text)
+        result_name = self._extract_result_name(text) if is_function else None
+
+        proc = ModuleProcedure(
+            name=name,
+            is_function=is_function,
+            is_subroutine=not is_function,
+            submodule_name=self._current_submodule,
+            has_result=result_name is not None,
+            result_name=result_name,
+            dummy_args=dummy_args,
+            line=line,
+            column=col,
+        )
+        self.result.module_procedures.append(proc)
+
+        if (
+            self._current_submodule
+            and self._current_submodule in self.result.submodules
+        ):
+            self.result.submodules[self._current_submodule].module_procedures.add(
+                name
+            )
 
 
 class F2008SubmoduleValidator:
