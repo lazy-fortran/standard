@@ -131,6 +131,8 @@ Tests:
   simple submodule via F2008's entry.
 - `test_basic_f2008_features.py::test_module_prefix_spec` exercises
   combined MODULE prefixes with PURE and ELEMENTAL keywords.
+- `test_basic_f2008_features.py::test_non_recursive_procedures` exercises
+  NON_RECURSIVE prefix with various combinations (PURE, ELEMENTAL).
 - `test_f2008_submodules.py` exercises:
   - Basic SUBMODULE declarations.
   - Parent module + parent submodule hierarchies.
