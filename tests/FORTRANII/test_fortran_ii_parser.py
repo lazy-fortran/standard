@@ -155,7 +155,7 @@ class TestFORTRANIIParser(unittest.TestCase):
             ("COMMON /BLOCK1/ X, Y, Z", "BLOCK1", ["X", "Y", "Z"]),
             ("COMMON /DATA/ ARRAY(100)", "DATA", ["ARRAY"])
         ]
-        
+
         for text, block_name, vars in test_cases:
             with self.subTest(common_stmt=text):
                 tree = self.parse(text, 'common_stmt')
@@ -168,6 +168,50 @@ class TestFORTRANIIParser(unittest.TestCase):
                 # Verify variables
                 for var in vars:
                     self.assertIn(var, tree.getText())
+
+    def test_return_statement(self):
+        """Test RETURN statement (NEW in FORTRAN II)"""
+        # Test standalone RETURN statement
+        text = "RETURN"
+        tree = self.parse(text, 'statement_body')
+        self.assertIsNotNone(tree)
+        self.assertEqual(tree.getText(), 'RETURN')
+
+        # Test RETURN within labeled statement
+        labeled_text = "100 RETURN"
+        labeled_tree = self.parse(labeled_text, 'statement')
+        self.assertIsNotNone(labeled_tree)
+        self.assertIn('RETURN', labeled_tree.getText())
+
+    def test_return_in_function(self):
+        """Test RETURN statement in function definition (NEW in FORTRAN II)"""
+        function_text = load_fixture(
+            "FORTRANII",
+            "test_fortran_ii_parser",
+            "function_text.f",
+        )
+
+        tree = self.parse(function_text, 'function_subprogram')
+        self.assertIsNotNone(tree)
+        # Verify RETURN appears in function
+        text_content = tree.getText()
+        self.assertIn('RETURN', text_content)
+        # Should have exactly 2 RETURN statements (one for each branch)
+        self.assertEqual(text_content.count('RETURN'), 2)
+
+    def test_return_in_subroutine(self):
+        """Test RETURN statement in subroutine definition (NEW in FORTRAN II)"""
+        subroutine_text = load_fixture(
+            "FORTRANII",
+            "test_fortran_ii_parser",
+            "subroutine_text.f",
+        )
+
+        tree = self.parse(subroutine_text, 'subroutine_subprogram')
+        self.assertIsNotNone(tree)
+        # Verify RETURN appears in subroutine
+        text_content = tree.getText()
+        self.assertIn('RETURN', text_content)
     
     def test_not_a_stub(self):
         """Verify FORTRAN II grammar is a real implementation, not a stub"""
