@@ -477,11 +477,13 @@ data_stmt_value
 
 // Repeat count - X3.9-1966 Section 7.2.6
 // Unsigned integer followed by asterisk (e.g., 3* in 3*0.0)
+// FORTRAN 77 (ISO 1539:1980 Section 9.3) inherits this syntax
 data_stmt_repeat
     : unsigned_int MULTIPLY
     ;
 
 // Unsigned integer - X3.9-1966 Section 4.1.2
+// FORTRAN 77 (ISO 1539:1980) accepts the same syntax
 unsigned_int
     : INTEGER_LITERAL
     | LABEL               // LABEL tokens match 1-5 digit integers
@@ -489,6 +491,7 @@ unsigned_int
 
 // Data constant - X3.9-1966 Section 7.2.6
 // Optionally signed literal constant
+// FORTRAN 77 (ISO 1539:1980 Section 9.3) extends to support repetition
 data_stmt_constant
     : PLUS? literal
     | MINUS literal

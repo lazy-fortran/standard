@@ -551,6 +551,68 @@ END
                 self.assertIsNotNone(tree)
                 self.assertIn(expected_type, tree.getText())
 
+    def test_data_repetition_factors_fixture(self):
+        """Test DATA statement with repetition factors from fixture file
+
+        ISO 1539:1980 Section 9.3 defines data constant lists with optional
+        repetition factors for initializing multiple array elements with the
+        same value. Examples: DATA A /10*0/, DATA B /3*1, 2*0/.
+        """
+        fixture_text = load_fixture(
+            "FORTRAN77",
+            "test_fortran77_parser",
+            "data_repetition_factors.f",
+        )
+
+        tree = self.parse(fixture_text, 'main_program')
+        self.assertIsNotNone(tree)
+
+    def test_data_simple_repetition(self):
+        """Test DATA statement with simple repetition factors"""
+        test_cases = [
+            "DATA A /10*0/",
+            "DATA X /100*0.0/",
+            "DATA FLAG /4*.TRUE./",
+        ]
+
+        for text in test_cases:
+            with self.subTest(data_stmt=text):
+                # DATA statement is part of a declaration or main program
+                program = f"""      PROGRAM TEST
+      INTEGER A(10)
+      REAL X(100)
+      LOGICAL FLAG(4)
+      {text}
+      END"""
+                tree = self.parse(program, 'main_program')
+                self.assertIsNotNone(tree)
+
+    def test_data_mixed_repetition(self):
+        """Test DATA with mixed repetition and non-repetition factors"""
+        test_cases = [
+            "DATA B /3*1, 2*0/",
+            "DATA Y /1.0, 2*2.0, 3*3.0/",
+        ]
+
+        for text in test_cases:
+            with self.subTest(data_stmt=text):
+                program = f"""      PROGRAM TEST
+      INTEGER B(5)
+      REAL Y(6)
+      {text}
+      END"""
+                tree = self.parse(program, 'main_program')
+                self.assertIsNotNone(tree)
+
+    def test_data_signed_repetition(self):
+        """Test DATA with repetition of signed constants"""
+        program = """      PROGRAM TEST
+      INTEGER B(5)
+      DATA B /5*(-1)/
+      END"""
+        tree = self.parse(program, 'main_program')
+        self.assertIsNotNone(tree)
+
     # ====================================================================
     # FORTRAN 77 STATEMENT FUNCTION TESTS
     # ====================================================================
