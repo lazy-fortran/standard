@@ -791,7 +791,9 @@ procedure_entity_decl
 // Procedure pointer target (procedure or null)
 proc_target
     : IDENTIFIER                    // Target procedure name
-    | IDENTIFIER LPAREN RPAREN      // null() or other function call
+    | IDENTIFIER LPAREN RPAREN      // Procedure call (including function pointers)
+    | NULL_INTRINSIC                // Null intrinsic without parentheses
+    | NULL_INTRINSIC LPAREN RPAREN  // NULL() disassociates pointer
     ;
 
 // Procedure component definition statement (ISO/IEC 1539-1:2004 R438)
