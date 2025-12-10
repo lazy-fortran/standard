@@ -20,6 +20,7 @@ All standard Fortran 2023 programs remain valid Lazy Fortran programs.
 5. **intent(in) default** - Arguments are read-only unless explicitly declared otherwise.
 6. **implicit none default** - All program units have `implicit none` by default.
 7. **Dot notation** - Member access uses `a.b` instead of `a%b`, with spacing rules to disambiguate user-defined operators.
+8. **Unsigned integers** - `integer, unsigned` attribute for unsigned integers with safe Rust-like semantics.
 
 ### Feature Classification
 
@@ -197,6 +198,68 @@ integer :: n
 x = 1.0_8
 n = 42
 ```
+
+---
+
+## Unsigned Integers
+
+**NEW:** Lazy Fortran adds an `unsigned` attribute for integers:
+
+```fortran
+integer, unsigned :: count          ! 4-byte unsigned (0 to 4,294,967,295)
+integer(8), unsigned :: big_count   ! 8-byte unsigned
+```
+
+### Semantics (Rust-like Safety)
+
+**No implicit mixing of signed and unsigned:**
+
+```fortran
+integer :: i = 5
+integer, unsigned :: u = 10
+
+! u + i                     ! ERROR: mixed signed/unsigned
+u + uint(i)                 ! OK: explicit conversion to unsigned
+i + int(u)                  ! OK: explicit conversion to signed
+```
+
+**Overflow behavior:**
+
+- Default: wrap around (modular arithmetic)
+- With overflow checking enabled (`-fcheck=overflow`): runtime error
+
+```fortran
+integer, unsigned :: u = 0
+u = u - 1                   ! wraps to 4,294,967,295 (or error if checked)
+```
+
+### Use Cases
+
+**Array indexing** - the primary use case:
+
+```fortran
+integer, unsigned :: idx
+do idx = 0, n-1             ! Zero-based indexing natural with unsigned
+    arr(idx+1) = ...
+end do
+```
+
+**Bit manipulation:**
+
+```fortran
+integer, unsigned :: flags = 0
+flags = ior(flags, bit_mask)
+```
+
+**Interoperability with C:**
+
+```fortran
+integer(c_size_t), unsigned :: size    ! size_t equivalent
+```
+
+### Standardizer Behavior
+
+The standardizer emits unsigned operations using appropriate intrinsics or compiler extensions where available, or emulates with range checks where necessary.
 
 ---
 

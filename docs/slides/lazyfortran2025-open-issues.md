@@ -59,6 +59,7 @@ Lazy Fortran extends Fortran 2023 with a source-to-source front-end that:
 - Uses strongly typed generics/traits with explicit instantiation
 - **No whole-program analysis** - avoids C++ template hell and Julia recompilation
 - Provides sensible defaults (real=8 bytes, int=4 bytes, `intent(in)`, `implicit none`)
+- Adds unsigned integers with Rust-like safety
 - Offers modern syntax (dot notation `a.b` instead of `a%b`)
 - Optional infer mode for rapid prototyping (intrinsic types only)
 - Emits standard-conforming Fortran 2023 for any back-end compiler
@@ -137,6 +138,28 @@ real(4) :: single_precision
 
 - **Reals at 8 bytes:** Scientific precision, matches Python/Julia/NumPy
 - **Integers at 4 bytes:** Better cache/SIMD, use `integer(8)` when needed
+
+---
+
+# Unsigned Integers (NEW)
+
+**Attribute syntax with Rust-like safety:**
+
+```fortran
+integer, unsigned :: count          ! 4-byte unsigned
+integer(8), unsigned :: big_count   ! 8-byte unsigned
+
+! No implicit mixing - explicit conversion required
+integer :: i = 5
+integer, unsigned :: u = 10
+u + uint(i)                 ! OK
+i + int(u)                  ! OK
+! u + i                     ! ERROR
+```
+
+**Overflow:** Wrap around (or runtime error with `-fcheck=overflow`)
+
+**Use cases:** Array indexing, bit manipulation, C interop
 
 ---
 
@@ -373,6 +396,7 @@ function sum(x) result(s)
 | @ annotations | **No** - use curly braces syntax |
 | Type inference | Infer mode only (intrinsic types) |
 | Default precision | real=8 bytes, int=4 bytes (like Rust) |
+| Unsigned integers | `integer, unsigned` attribute, Rust-like safety |
 | Default intent | `intent(in)` |
 | Implicit typing | `implicit none` default |
 | Member access | Dot notation `a.b` |
