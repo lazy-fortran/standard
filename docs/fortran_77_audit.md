@@ -259,8 +259,18 @@ New and enhanced declaration statements in FORTRAN 77:
 - `DATA`:
   - Lexer: `DATA` token in `FORTRAN77Lexer.g4`.
   - Grammar: `data_stmt` and related rules (`data_stmt_set`,
+    `data_variable_list`, `data_variable`, `implied_do_data`,
     `data_constant_list`, `data_constant`) for initializing variables.
+  - Features:
+    - Simple variable lists: `DATA A, B, C / values /` (via `data_variable`).
+    - Implied-DO lists for array initialization: `DATA (A(I), I=1,10) / values /`
+      (via `implied_do_data` rule, ISO 1539:1980 Section 9.2).
+    - Nested implied-DO for matrix initialization: `DATA ((B(I,J), J=1,5), I=1,5) / values /`.
+    - Repetition factors: `DATA A / 10*0.0 /` (via `data_repetition` rule,
+      ISO 1539:1980 Section 9.3).
   - Included twice in `statement_body` (a harmless duplication).
+  - Tests: `test_data_implied_do_single_fixture` and
+    `test_data_implied_do_nested_fixture` in `tests/FORTRAN77/test_fortran77_parser.py`.
 
 Statement coverage:
 
