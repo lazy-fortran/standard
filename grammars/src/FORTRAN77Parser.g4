@@ -332,7 +332,7 @@ executable_construct
 // Forms: READ fmt, iolist  OR  READ (cilist) iolist
 read_stmt
     : READ format_identifier (COMMA input_item_list_f77)?
-    | READ LPAREN control_info_list RPAREN input_item_list_f77?
+    | READ LPAREN read_control_info_list RPAREN input_item_list_f77?
     ;
 
 // Input item list - ISO 1539:1980 Section 12.6.1
@@ -370,8 +370,18 @@ control_info_list
     : control_info_item (COMMA control_info_item)*
     ;
 
+read_control_info_list
+    : read_control_info_item (COMMA read_control_info_item)*
+    ;
+
+// READ-only control information items (END= only valid for READ)
+read_control_info_item
+    : control_info_item
+    | end_spec
+    ;
+
 // Control information item - ISO 1539:1980 Section 12.6
-// Extended to support REC=, IOSTAT=, ERR=, and END= specifiers
+// Extended to support REC=, IOSTAT=, and ERR= specifiers
 control_info_item
     : integer_expr          // Unit number (positional)
     | format_identifier     // Format specifier (positional)
@@ -379,7 +389,6 @@ control_info_item
     | rec_spec              // REC=rn (direct-access record number)
     | iostat_spec           // IOSTAT=ios (I/O status variable)
     | err_spec              // ERR=s (error branch label)
-    | end_spec              // END=s (end-of-file branch, READ only)
     ;
 
 // Format identifier - ISO 1539:1980 Section 12.6
