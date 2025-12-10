@@ -193,6 +193,9 @@ statement_body
     | write_stmt_basic   // C28-6003 Chap III: WRITE output_list (from FORTRAN I)
     | print_stmt         // Appendix A: PRINT n, list
     | punch_stmt         // Appendix A: PUNCH n, list
+    | end_file_stmt      // C28-6003 Chapter III.F: END FILE i
+    | rewind_stmt        // C28-6003 Chapter III.F: REWIND i
+    | backspace_stmt     // C28-6003 Chapter III.F: BACKSPACE i
     | format_stmt        // Appendix A: FORMAT (specification)
     | dimension_stmt     // Appendix A: DIMENSION v, v, ...
     | equivalence_stmt   // Appendix A: EQUIVALENCE (a,b,...), ...
@@ -226,6 +229,9 @@ statement_body_strict
     | write_stmt_basic   // C28-6003 Chap III: WRITE output_list (from FORTRAN I)
     | print_stmt         // Appendix A: PRINT n, list
     | punch_stmt         // Appendix A: PUNCH n, list
+    | end_file_stmt      // C28-6003 Chapter III.F: END FILE i
+    | rewind_stmt        // C28-6003 Chapter III.F: REWIND i
+    | backspace_stmt     // C28-6003 Chapter III.F: BACKSPACE i
     | format_stmt        // Appendix A: FORMAT (specification)
     | dimension_stmt     // Appendix A: DIMENSION v, v, ...
     | equivalence_stmt   // Appendix A: EQUIVALENCE (a,b,...), ...

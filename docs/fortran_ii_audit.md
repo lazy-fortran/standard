@@ -11,8 +11,9 @@ repository currently supports, based on:
 
 This is a descriptive audit of the current implementation. Full
 conformance to the IBM 704 FORTRAN II manual (C28-6000-2, 1958) requires
-resolving the gaps documented in section 8 below. Tape/drum I/O and
-file-control statements are tracked by issue #153 (reopened).
+resolving the gaps documented in section 8 below. Tape/drum I/O
+statements are tracked by issue #153 (reopened). File-control statements
+(END FILE, REWIND, BACKSPACE) are implemented per issue #384.
 
 ## 1. Program structure and subprograms
 
@@ -401,9 +402,9 @@ or are out of scope for the current grammar:
 | WRITE OUTPUT TAPE i, n, list         | Not implemented                | Gap: see #153   |
 | WRITE TAPE i, list                   | Not implemented                | Gap: see #153   |
 | WRITE DRUM i, j, list                | Not implemented                | Gap: see #153   |
-| END FILE i                           | Not implemented                | Gap: see #153   |
-| REWIND i                             | Not implemented                | Gap: see #153   |
-| BACKSPACE i                          | Not implemented                | Gap: see #153   |
+| END FILE i                           | `end_file_stmt`                | Implemented     |
+| REWIND i                             | `rewind_stmt`                  | Implemented     |
+| BACKSPACE i                          | `backspace_stmt`               | Implemented     |
 
 ### 8.4 Implementation Status
 
@@ -420,6 +421,10 @@ been addressed:
   (issue #395, closed). Includes IF (SENSE SWITCH i), IF (SENSE LIGHT i),
   IF ACCUMULATOR OVERFLOW, IF QUOTIENT OVERFLOW, IF DIVIDE CHECK, and
   SENSE LIGHT statements per C28-6003 Appendix B rows 4–8, 11.
+- **File-control statements**: END FILE, REWIND, and BACKSPACE are
+  implemented in FORTRAN I parser and wired into FORTRAN II `statement_body`
+  and `statement_body_strict` (issue #384, closed). These statements
+  control magnetic tape operations per C28-6003 Chapter III.F.
 - **Strict fixed-form card layout**: Implemented via `tools/strict_fixed_form.py`
   preprocessor (issue #143, closed). Validates IBM 704 card layout per
   C28-6000-2 and converts to lenient form for parsing.
@@ -427,8 +432,7 @@ been addressed:
 The following features remain as gaps to be resolved:
 
 - Tape/drum I/O forms (READ INPUT TAPE, WRITE OUTPUT TAPE, READ/WRITE
-  TAPE/DRUM) and auxiliary file control (END FILE, REWIND, BACKSPACE)
-  are not implemented. These are tracked by issue #153 (reopened).
+  TAPE/DRUM) are not implemented. These are tracked by issue #153 (reopened).
 
 ## 9. Summary
 
