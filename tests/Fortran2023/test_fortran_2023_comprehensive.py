@@ -208,10 +208,12 @@ class TestFortran2023Lexer:
     def test_f2018_compatibility(self):
         """Test that F2023 maintains full F2018 compatibility."""
         # Test key F2018 constructs still work
+        # Note: RANK_STAR, RANK_DEFAULT, ASSUMED_RANK, LOCALITY, DEFAULT_ACCESS removed
+        # in issue #434 - these were dead tokens with no parser usage
         f2018_keywords = [
             'CO_SUM', 'CO_MIN', 'CO_MAX', 'CO_REDUCE', 'CO_BROADCAST',
             'IMAGE_STATUS', 'FAILED_IMAGES', 'STOPPED_IMAGES',
-            'SELECT_RANK', 'RANK_STAR', 'RANK_DEFAULT',
+            'SELECT_RANK',
             'RANDOM_INIT', 'REPEATABLE', 'IMAGE_DISTINCT',
             'REDUCE', 'OUT_OF_RANGE', 'COSHAPE', 'TEAM_NUMBER',
             'FORM_TEAM', 'CHANGE_TEAM', 'END_TEAM', 'TEAM_TYPE'
