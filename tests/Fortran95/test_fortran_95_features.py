@@ -68,7 +68,7 @@ class TestFortran95Lexer:
     def test_f95_intrinsic_tokens(self):
         """
         Modern intrinsic function tokens used by the F90/F95 core
-        should be present (CPU_TIME is new in Fortran 95; the others
+        should be present (CPU_TIME and NULL are new in Fortran 95; the others
         originate in Fortran 90 but remain part of the F95 baseline).
         """
         intrinsic_examples = {
@@ -82,6 +82,7 @@ class TestFortran95Lexer:
             "transfer": Fortran95Lexer.TRANSFER_INTRINSIC,
             "cpu_time": Fortran95Lexer.CPU_TIME_INTRINSIC,
             "system_clock": Fortran95Lexer.SYSTEM_CLOCK_INTRINSIC,
+            "null_intrinsic": Fortran95Lexer.NULL_INTRINSIC,
         }
 
         for stem, expected_type in intrinsic_examples.items():
@@ -195,8 +196,8 @@ class TestFortran95Parser:
         """F95 intrinsic function tokens can be used in function references.
 
         ISO/IEC 1539-1:1997 Section 13 defines intrinsic procedures.
-        The parser should accept calls like CEILING(x), FLOOR(y), etc.
-        (fixes #180).
+        The parser should accept calls like CEILING(x), FLOOR(y), NULL(), etc.
+        (fixes #180, #376).
         """
         intrinsic_calls = [
             ("ceiling_call.f90", "function_reference_f95"),
@@ -204,6 +205,8 @@ class TestFortran95Parser:
             ("ceiling_kind_call.f90", "function_reference_f95"),
             ("iand_call.f90", "function_reference_f95"),
             ("transfer_call.f90", "function_reference_f95"),
+            ("null_intrinsic.f90", "function_reference_f95"),
+            ("null_with_mold.f90", "function_reference_f95"),
         ]
 
         for fixture, rule in intrinsic_calls:
@@ -235,3 +238,4 @@ class TestFortran95Parser:
         tree = parser.call_stmt_f95()
         assert tree is not None
         assert parser.getNumberOfSyntaxErrors() == 0
+
