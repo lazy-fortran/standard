@@ -77,7 +77,6 @@ CHARACTER       : C H A R A C T E R ;
 // - END IF statement (Section 11.9): END IF
 THEN            : T H E N ;
 ELSE            : E L S E ;
-ELSEIF          : E L S E I F ;
 ENDIF           : E N D I F ;
 
 // --------------------------------------------------------------------
@@ -167,7 +166,7 @@ STRING_LITERAL  : '\'' (~'\'' | '\'\'')* '\'' ;
 //   - Section 9.1: DATA statement -> DATA token
 //
 // Section 11 (Control Statements):
-//   - Section 11.6-11.9: Block IF -> THEN, ELSE, ELSEIF, ENDIF tokens
+//   - Section 11.6-11.9: Block IF -> THEN, ELSE, ENDIF tokens (ELSE IF is two tokens)
 //
 // Section 12 (I/O Statements):
 //   - Section 12.10.1: OPEN statement -> OPEN token
