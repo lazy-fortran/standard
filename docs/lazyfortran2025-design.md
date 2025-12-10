@@ -94,8 +94,8 @@ function add(a, b)
     add = a + b       ! return type = type of (a + b)
 end function
 
-x = add(5, 3)         ! add__i32_i32 returns integer
-y = add(2.5d0, 1.5d0) ! add__r64_r64 returns real(8)
+x = add(5, 3)         ! e.g. add__i32_i32 / add__i4_i4 (Issue 9)
+y = add(2.5d0, 1.5d0) ! e.g. add__r64_r64 / add__r8_r8 (Issue 9)
 ```
 
 The call site provides argument types, which determines which specialization to generate. That specialization's return type comes from the body expression.
@@ -261,8 +261,8 @@ function add(a, b)
     add = a + b
 end function
 
-x = add(5, 3)       ! generates add__i32_i32
-y = add(2.5, 1.5)   ! generates add__r64_r64
+x = add(5, 3)       ! generates a specialized integer version (see ABI)
+y = add(2.5, 1.5)   ! generates a specialized real version (see ABI)
 ```
 
 User-written specific procedures take precedence over generated specializations. Ambiguity is a compile-time error.
@@ -295,7 +295,7 @@ Specialized procedures use kind suffixes:
 <procedure-name>__<kind-suffix-1>_<kind-suffix-2>_...
 ```
 
-Kind suffix table (bits convention):
+Kind suffix table (Option A: bits convention):
 
 | Type | Kind | Storage | Suffix |
 |------|------|---------|--------|
@@ -314,7 +314,7 @@ Kind suffix table (bits convention):
 | logical | 4 | 4 bytes | l32 |
 | character | N | N bytes | chN |
 
-Alternative byte-based convention (matches Fortran kind parameters):
+Alternative byte-based convention (Option B: matches Fortran kind parameters):
 
 | Type | Kind | Suffix |
 |------|------|--------|
@@ -329,9 +329,11 @@ Alternative byte-based convention (matches Fortran kind parameters):
 | logical | 1 | l1 |
 | logical | 4 | l4 |
 
-Array rank uses `rank<n>` suffix: `sum__r64rank1`
+Array rank uses `rank<n>` suffix: e.g. `sum__r64rank1` (Option A) or `sum__r8rank1` (Option B).
 
-Examples:
+For concreteness, examples below assume Option A (bits); if Option B (bytes) is chosen in Issue 9, `i32`/`r64` would become `i4`/`r8` consistently.
+
+Examples (assuming Option A):
 - `add(integer, integer)` -> `add__i32_i32`
 - `add(real(8), real(8))` -> `add__r64_r64`
 - `sum(real(8), dimension(:))` -> `sum__r64rank1`
@@ -341,7 +343,7 @@ Multiple specializations are wrapped in a generic interface within an auto-gener
 ```fortran
 module auto_add
     interface add
-        module procedure add__i32_i32, add__r64_r64
+        module procedure add__i32_i32, add__r64_r64  ! assuming Option A (bits)
     end interface
 end module
 ```
@@ -401,7 +403,7 @@ Output (script.f90):
 module auto_add
     implicit none
     interface add
-        module procedure add__i32_i32, add__r64_r64
+        module procedure add__i32_i32, add__r64_r64  ! assuming Option A (bits)
     end interface add
 contains
     integer function add__i32_i32(a, b)
