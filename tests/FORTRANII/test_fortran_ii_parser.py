@@ -545,6 +545,203 @@ class TestFORTRANIIParser(unittest.TestCase):
                     f"'{text}' should be lexed as LABEL token"
                 )
 
+    def test_dimension_statement(self):
+        """Test DIMENSION statement (inherited from FORTRAN I, per C28-6000-2 Appendix A)
+
+        The FORTRAN II manual (C28-6000-2) documents that FORTRAN II includes
+        all FORTRAN I specification statements, including DIMENSION.
+
+        DIMENSION declares the size of arrays before they are used:
+            DIMENSION v, v, ...
+        where v is an array declarator: IDENTIFIER(dimension_list)
+        """
+        test_cases = [
+            ("DIMENSION A(10)", ["A"], [10]),
+            ("DIMENSION X(5, 10)", ["X"], [5, 10]),
+            ("DIMENSION Y(20)", ["Y"], [20]),
+            ("DIMENSION MATRIX(3, 3, 3)", ["MATRIX"], [3, 3, 3]),
+            ("DIMENSION A(10), B(20), C(5, 5)", ["A", "B", "C"], None),
+            ("DIMENSION A(100), B(50)", ["A", "B"], None),
+        ]
+
+        for text, expected_names, expected_dims in test_cases:
+            with self.subTest(dimension_stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree)
+                # Verify DIMENSION keyword present
+                self.assertIn('DIMENSION', tree.getText())
+                # Verify array names appear in parse tree
+                tree_text = tree.getText()
+                for name in expected_names:
+                    self.assertIn(name, tree_text,
+                                f"Array name '{name}' not found in DIMENSION statement")
+                # Verify opening and closing parentheses for array declarations
+                self.assertIn('(', tree_text)
+                self.assertIn(')', tree_text)
+
+    def test_dimension_statement_with_constants(self):
+        """Test DIMENSION statement with constant dimension values"""
+        test_cases = [
+            "DIMENSION SMALL(1)",
+            "DIMENSION MEDIUM(10, 20)",
+            "DIMENSION LARGE(100, 100, 100)",
+            "DIMENSION MIXED(5), ARRAY1(10, 10), ARR2(3, 4, 5)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(dim_const=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree, f"Failed to parse: {text}")
+                self.assertIn('DIMENSION', tree.getText())
+
+    def test_equivalence_statement(self):
+        """Test EQUIVALENCE statement (inherited from FORTRAN I, per C28-6000-2 Appendix A)
+
+        The FORTRAN II manual (C28-6000-2) documents that FORTRAN II includes
+        all FORTRAN I specification statements, including EQUIVALENCE.
+
+        EQUIVALENCE allows variables or array elements to share the same memory location:
+            EQUIVALENCE (a,b,...), ...
+        where each set (a,b,...) declares memory overlay relationships.
+        """
+        test_cases = [
+            ("EQUIVALENCE (A, B)", ["A", "B"]),
+            ("EQUIVALENCE (X, Y, Z)", ["X", "Y", "Z"]),
+            ("EQUIVALENCE (A, B), (C, D)", ["A", "B", "C", "D"]),
+            ("EQUIVALENCE (A(1), B(5))", ["A", "B"]),
+            ("EQUIVALENCE (M, N), (X, Y, Z)", None),
+        ]
+
+        for text, expected_names in test_cases:
+            with self.subTest(equivalence_stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree, f"Failed to parse: {text}")
+                # Verify EQUIVALENCE keyword present
+                self.assertIn('EQUIVALENCE', tree.getText())
+                # Verify variable names appear if specified
+                if expected_names:
+                    tree_text = tree.getText()
+                    for name in expected_names:
+                        self.assertIn(name, tree_text,
+                                    f"Variable '{name}' not found in EQUIVALENCE statement")
+                # Verify parentheses for sets
+                tree_text = tree.getText()
+                self.assertIn('(', tree_text)
+                self.assertIn(')', tree_text)
+
+    def test_equivalence_multiple_sets(self):
+        """Test EQUIVALENCE statement with multiple memory overlay sets"""
+        test_cases = [
+            "EQUIVALENCE (A, B), (C, D)",
+            "EQUIVALENCE (X, Y), (Z, W), (P, Q)",
+            "EQUIVALENCE (VAR1, VAR2), (ARR1(1), ARR2(5))",
+            "EQUIVALENCE (A, B, C), (D, E)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(equiv_multi=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree, f"Failed to parse: {text}")
+                self.assertIn('EQUIVALENCE', tree.getText())
+                # Multiple sets should have multiple comma-separated parentheses groups
+                self.assertGreaterEqual(tree.getText().count('('), 2,
+                                       f"Statement should have multiple equivalence sets: {text}")
+
+    def test_frequency_statement(self):
+        """Test FREQUENCY statement (unique to FORTRAN I/II, per C28-6000-2 Appendix A)
+
+        The FORTRAN II manual (C28-6000-2) documents that FORTRAN II includes
+        the FREQUENCY statement from FORTRAN I.
+
+        FREQUENCY provides optimization hints for branch prediction:
+            FREQUENCY n (i1, i2, ...)
+        where n is an integer constant label and (i1, i2, ...) are statement labels.
+
+        This statement was unique to 1957 FORTRAN and removed in FORTRAN 66 and later.
+        The n value represents how frequently the corresponding branch is expected
+        to be taken (optimization hint for IBM 704).
+        """
+        test_cases = [
+            ("FREQUENCY 100 (1, 2, 3)", "100", ["1", "2", "3"]),
+            ("FREQUENCY 50 (10)", "50", ["10"]),
+            ("FREQUENCY 25 (5, 10, 15, 20)", "25", ["5", "10", "15", "20"]),
+            ("FREQUENCY 75 (100, 200)", "75", ["100", "200"]),
+        ]
+
+        for text, freq_value, label_values in test_cases:
+            with self.subTest(frequency_stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree, f"Failed to parse: {text}")
+                # Verify FREQUENCY keyword present
+                self.assertIn('FREQUENCY', tree.getText())
+                # Verify frequency value appears
+                tree_text = tree.getText()
+                self.assertIn(freq_value, tree_text,
+                            f"Frequency value '{freq_value}' not found in statement")
+                # Verify statement labels appear
+                for label in label_values:
+                    self.assertIn(label, tree_text,
+                                f"Label '{label}' not found in FREQUENCY statement")
+                # Verify parentheses
+                self.assertIn('(', tree_text)
+                self.assertIn(')', tree_text)
+
+    def test_frequency_statement_single_label(self):
+        """Test FREQUENCY statement with single label"""
+        test_cases = [
+            "FREQUENCY 100 (50)",
+            "FREQUENCY 10 (999)",
+            "FREQUENCY 80 (25)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(freq_single=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree, f"Failed to parse: {text}")
+                self.assertIn('FREQUENCY', tree.getText())
+
+    def test_frequency_statement_multiple_labels(self):
+        """Test FREQUENCY statement with multiple labels"""
+        test_cases = [
+            "FREQUENCY 50 (1, 2, 3, 4, 5)",
+            "FREQUENCY 100 (10, 20, 30)",
+            "FREQUENCY 25 (100, 200, 300, 400)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(freq_multi=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree, f"Failed to parse: {text}")
+                self.assertIn('FREQUENCY', tree.getText())
+                # Should have multiple labels separated by commas
+                self.assertIn(',', tree.getText())
+
+    def test_specification_statements_in_program(self):
+        """Test specification statements in a complete FORTRAN II program context
+
+        This integration test verifies that DIMENSION, EQUIVALENCE, and FREQUENCY
+        statements parse correctly within a full program structure.
+        """
+        program = """
+        DIMENSION A(10), B(5, 5)
+        EQUIVALENCE (X, Y), (Z, W)
+        FREQUENCY 50 (100, 200)
+        X = 1.0
+        Y = 2.0
+        STOP
+        END
+        """
+        tree = self.parse(program, 'main_program')
+        self.assertIsNotNone(tree)
+        text = tree.getText()
+        # Verify all specification statements are present
+        self.assertIn('DIMENSION', text)
+        self.assertIn('EQUIVALENCE', text)
+        self.assertIn('FREQUENCY', text)
+        # Verify executable statements are also present
+        self.assertIn('STOP', text)
+        self.assertIn('END', text)
+
 
 class TestStrictCommon(unittest.TestCase):
     """Test strict 1958 COMMON mode (blank COMMON only, per issue #156)"""
