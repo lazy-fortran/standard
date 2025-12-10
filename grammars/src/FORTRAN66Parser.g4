@@ -346,6 +346,7 @@ statement_body
     | return_stmt              // X3.9-1966 Section 7.1.2.7 (RETURN)
     // I/O statements - Section 7.1.3
     | read_stmt                // X3.9-1966 Section 7.1.3.1 (READ)
+    | write_stmt               // X3.9-1966 Section 7.1.3.1 (WRITE)
     | print_stmt               // X3.9-1966 Section 7.1.3.2 (output)
     | punch_stmt               // X3.9-1966 Section 7.1.3.2 (output)
     | rewind_stmt              // X3.9-1966 Section 7.1.3.3 (auxiliary I/O)
@@ -380,6 +381,27 @@ backspace_stmt
 // Writes an end-of-file record on the specified unit
 endfile_stmt
     : ENDFILE integer_expr
+    ;
+
+// ============================================================================
+// WRITE STATEMENT - X3.9-1966 Section 7.1.3.1
+// ============================================================================
+// X3.9-1966 Section 7.1.3.1 defines the WRITE statement:
+//   WRITE (u, f) list
+// where:
+//   u = unit number (integer expression)
+//   f = FORMAT statement label
+//   list = optional output list (expressions separated by commas)
+//
+// The WRITE statement writes one record to a sequential file on the
+// specified unit using the format specified by the FORMAT label.
+// If no output list is provided, the statement writes an empty record.
+// ============================================================================
+
+// WRITE statement - X3.9-1966 Section 7.1.3.1
+// Form: WRITE (u, f) [list]
+write_stmt
+    : WRITE LPAREN integer_expr COMMA label RPAREN output_list?
     ;
 
 // ============================================================================

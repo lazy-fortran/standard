@@ -250,10 +250,12 @@ Mapping these families to the current grammar:
 - **Input/output statements**
   - Implemented:
     - READ / WRITE:
-      - `read_stmt` / `write_stmt` inherited from FORTRAN II implement
-        the “READ (u, f) list” and “WRITE (u, f) list” forms, and use
-        `input_list` / `output_list` with DO‑implied lists; tests
-        cover logical/relational expressions and fixed‑form fixtures.
+      - `read_stmt` inherited from FORTRAN II implements the
+        "READ (u, f) list" form using `input_list`.
+      - `write_stmt` implemented in FORTRAN66Parser.g4 per X3.9-1966
+        Section 7.1.3.1 implements the "WRITE (u, f) list" form using
+        `output_list`; tests cover various forms and a comprehensive
+        fixture (`write_stmt.f`).
     - PRINT, PUNCH:
       - Implemented via `print_stmt` and `punch_stmt`.
     - FORMAT:
@@ -404,6 +406,9 @@ The FORTRAN 66 grammar in this repository:
   80‑column semantics.
 - Implements `EXTERNAL` and `INTRINSIC` declaration statements per
   X3.9-1966 Section 7.2.
+- Implements the WRITE statement per X3.9-1966 Section 7.1.3.1 with
+  syntax `WRITE (unit, format) [output-list]`, supporting expressions
+  and optional output list (empty writes are also accepted).
 - Implements auxiliary I/O statements (`REWIND`, `BACKSPACE`, `ENDFILE`)
   per X3.9-1966 Section 7.1.3.3.
 - Implements GO TO assignment (`ASSIGN k TO i`) and assigned GO TO
