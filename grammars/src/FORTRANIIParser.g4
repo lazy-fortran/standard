@@ -180,11 +180,11 @@ statement_body
     | assign_stmt         // C28-6003 Appendix B row 12: ASSIGN i TO n
     | assigned_goto_stmt  // C28-6003 Appendix B row 2: GO TO n, (n1, ...)
     | arithmetic_if_stmt  // Appendix A: IF (e) n1, n2, n3
-    | if_stmt_sense_light          // C28-6003 Appendix B row 8: IF (SENSE LIGHT i) n1, n2
-    | if_stmt_sense_switch         // C28-6003 Appendix B row 4: IF (SENSE SWITCH i) n1, n2
-    | if_stmt_accumulator_overflow // C28-6003 Appendix B row 5: IF ACCUMULATOR OVERFLOW n1, n2
-    | if_stmt_quotient_overflow    // C28-6003 Appendix B row 6: IF QUOTIENT OVERFLOW n1, n2
-    | if_stmt_divide_check         // C28-6003 Appendix B row 7: IF DIVIDE CHECK n1, n2
+    | if_stmt_sense_light          // Appendix B row 8: IF (SENSE LIGHT i)
+    | if_stmt_sense_switch         // Appendix B row 4: IF (SENSE SWITCH i)
+    | if_stmt_accumulator_overflow // Appendix B row 5: IF ACCUMULATOR OVERFLOW
+    | if_stmt_quotient_overflow    // Appendix B row 6: IF QUOTIENT OVERFLOW
+    | if_stmt_divide_check         // Appendix B row 7: IF DIVIDE CHECK
     | do_stmt            // Appendix A: DO n i = m1, m2 [, m3]
     | continue_stmt      // Appendix A: CONTINUE
     | stop_stmt          // Appendix A: STOP [n]
@@ -213,11 +213,11 @@ statement_body_strict
     | assign_stmt         // C28-6003 Appendix B row 12: ASSIGN i TO n
     | assigned_goto_stmt  // C28-6003 Appendix B row 2: GO TO n, (n1, ...)
     | arithmetic_if_stmt  // Appendix A: IF (e) n1, n2, n3
-    | if_stmt_sense_light          // C28-6003 Appendix B row 8: IF (SENSE LIGHT i) n1, n2
-    | if_stmt_sense_switch         // C28-6003 Appendix B row 4: IF (SENSE SWITCH i) n1, n2
-    | if_stmt_accumulator_overflow // C28-6003 Appendix B row 5: IF ACCUMULATOR OVERFLOW n1, n2
-    | if_stmt_quotient_overflow    // C28-6003 Appendix B row 6: IF QUOTIENT OVERFLOW n1, n2
-    | if_stmt_divide_check         // C28-6003 Appendix B row 7: IF DIVIDE CHECK n1, n2
+    | if_stmt_sense_light          // Appendix B row 8: IF (SENSE LIGHT i)
+    | if_stmt_sense_switch         // Appendix B row 4: IF (SENSE SWITCH i)
+    | if_stmt_accumulator_overflow // Appendix B row 5: IF ACCUMULATOR OVERFLOW
+    | if_stmt_quotient_overflow    // Appendix B row 6: IF QUOTIENT OVERFLOW
+    | if_stmt_divide_check         // Appendix B row 7: IF DIVIDE CHECK
     | do_stmt            // Appendix A: DO n i = m1, m2 [, m3]
     | continue_stmt      // Appendix A: CONTINUE
     | stop_stmt          // Appendix A: STOP [n]
