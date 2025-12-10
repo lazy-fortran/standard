@@ -912,6 +912,22 @@ program_unit
     ;
 
 // ============================================================================
+// WHERE CONSTRUCT ENHANCEMENTS (ISO/IEC 1539-1:2010 Section 8.1.4.3, R807)
+// ============================================================================
+// Fortran 2008 extends ELSEWHERE with MASKED keyword for clarity.
+// MASKED ELSEWHERE explicitly indicates a condition-guarded ELSEWHERE clause.
+
+// ELSEWHERE statement override (ISO/IEC 1539-1:2010 R807)
+// Original (F90): ELSEWHERE [(scalar-mask-expr)] [construct-name]
+// Enhanced (F2008): ELSEWHERE [(scalar-mask-expr)] [construct-name]
+//                  | MASKED ELSEWHERE [(scalar-mask-expr)] [construct-name]
+// Both forms are valid in F2008; MASKED is optional for clarity.
+elsewhere_stmt
+    : ELSEWHERE (LPAREN logical_expr_f90 RPAREN)? (IDENTIFIER)?
+    | MASKED ELSEWHERE (LPAREN logical_expr_f90 RPAREN)? (IDENTIFIER)?
+    ;
+
+// ============================================================================
 // IDENTIFIER OR KEYWORD OVERRIDE (F2008 Extension)
 // ============================================================================
 // F2008 adds several new keywords that can also be used as identifiers.
@@ -971,6 +987,8 @@ identifier_or_keyword
     // F2008 atomic intrinsics (Section 13.7.19-20)
     | ATOMIC_DEFINE  // ATOMIC_DEFINE can be used as variable name
     | ATOMIC_REF     // ATOMIC_REF can be used as variable name
+    // F2008 WHERE construct enhancements (Section 8.1.4.3)
+    | MASKED         // MASKED can be used as variable name (MASKED ELSEWHERE keyword)
     // F2008 mathematical intrinsics (Section 13.7.77)
     | HYPOT          // HYPOT can be used as variable name
     ;

@@ -170,8 +170,6 @@ ASSOCIATE        : A S S O C I A T E ;
 
 BLOCK            : B L O C K ;
 
-// Enhanced WHERE (Section 7.4.3)
-MASKED           : M A S K E D ;
 
 // ====================================================================
 // IMPORT STATEMENT (ISO/IEC 1539-1:2004 Section 12.3.2.1)
