@@ -699,7 +699,7 @@ enumerator_list_f2003
 // Enumerator definition (ISO/IEC 1539-1:2004 R463)
 // R463: enumerator -> named-constant [= scalar-int-initialization-expr]
 enumerator_f2003
-    : IDENTIFIER (EQUALS INTEGER_LITERAL)?
+    : IDENTIFIER (EQUALS expr_f90)?
     ;
 
 // End enumeration statement (ISO/IEC 1539-1:2004 R464)
