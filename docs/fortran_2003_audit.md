@@ -218,8 +218,8 @@ Grammar implementation:
     - `ENUMERATOR (DOUBLE_COLON)? enumerator_list_f2003 NEWLINE`.
     - Optional `::` separator allows `ENUMERATOR red = 1` or `ENUMERATOR :: red = 1`.
   - `enumerator_f2003` (R463):
-    - `IDENTIFIER (EQUALS INTEGER_LITERAL)?`.
-    - Named constant with optional explicit integer value.
+    - `IDENTIFIER (EQUALS expr_f90)?`.
+    - Named constant with optional scalar-integer initialization expression (e.g., `1 + 1`).
   - `end_enum_stmt_f2003` (R464):
     - `END ENUM NEWLINE`.
 - Declaration construct integration:
@@ -236,13 +236,6 @@ Tests:
 
 Gaps / simplifications:
 
-- Enumeration values must be `INTEGER_LITERAL`.
-  - The grammar does not support arbitrary constant expressions or
-    references to previously‑defined enumerators.
-  - F2003 standard allows scalar‑int‑initialization‑expr but the grammar
-    simplifies to literals for determinism.
-  - This matches Fortran 2023 treatment and is adequate for typical C
-    interop use cases.
 - Semantic constraints not enforced:
   - Enumerators must have unique values (not validated in grammar).
   - BIND(C) is mandatory in F2003 but future extensions might support
