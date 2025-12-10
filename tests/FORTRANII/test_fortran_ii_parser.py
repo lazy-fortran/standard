@@ -53,7 +53,7 @@ class TestFORTRANIIParser(unittest.TestCase):
             ("CALL PROCESS(A, B)", "PROCESS", 2),
             ("CALL INIT", "INIT", 0)
         ]
-        
+
         for text, expected_name, expected_args in test_cases:
             with self.subTest(call_stmt=text):
                 tree = self.parse(text, 'call_stmt')
@@ -68,7 +68,40 @@ class TestFORTRANIIParser(unittest.TestCase):
                     self.assertGreater(len(tree.children), 2)
                     # Check for opening parenthesis
                     self.assertIn('(', tree.getText())
-    
+
+    def test_write_statements(self):
+        """Test WRITE statements (inherited from FORTRAN I, 1957)"""
+        test_cases = [
+            "WRITE X",
+            "WRITE X, Y, Z",
+            "WRITE 1.0, 2.0",
+            "WRITE A, B(1), C(I, J)"
+        ]
+
+        for text in test_cases:
+            with self.subTest(write_stmt=text):
+                tree = self.parse(text, 'write_stmt_basic')
+                self.assertIsNotNone(tree)
+                # Verify WRITE keyword
+                self.assertEqual(tree.children[0].getText(), 'WRITE')
+
+    def test_write_in_main_program(self):
+        """Test WRITE statement in a complete FORTRAN II main program"""
+        program_text = """
+        X = 1.0
+        Y = 2.0
+        WRITE X, Y
+        STOP
+        END
+        """
+        tree = self.parse(program_text, 'main_program')
+        self.assertIsNotNone(tree)
+        # Verify WRITE appears in parse tree
+        text = tree.getText()
+        self.assertIn('WRITE', text)
+        self.assertIn('X', text)
+        self.assertIn('Y', text)
+
     def test_function_definition(self):
         """Test FUNCTION definitions (introduced in FORTRAN II)"""
         function_text = load_fixture(
