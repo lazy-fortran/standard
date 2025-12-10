@@ -297,6 +297,7 @@ execution_part_construct
 // Executable statements allowed within block IF constructs
 executable_construct
     : assignment_stmt    // Section 10
+    | assign_stmt        // Section 10.4 (inherited from FORTRAN 66 ASSIGN)
     | assigned_goto_stmt // Section 11.2 (inherited from F66) - precede goto_stmt
     | computed_goto_stmt // Section 11.3
     | goto_stmt          // Section 11.1
