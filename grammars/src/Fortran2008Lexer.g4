@@ -76,8 +76,10 @@ ACQUIRED_LOCK    : A C Q U I R E D '_' L O C K ;
 // Image inquiry intrinsics (Section 13.7)
 // THIS_IMAGE(): Returns image index (Section 13.7.165)
 // NUM_IMAGES(): Returns number of images (Section 13.7.121)
+// IMAGE_INDEX(COARRAY,SUB): Converts cosubscripts to image index (Section 13.7.81)
 THIS_IMAGE       : T H I S '_' I M A G E ;
 NUM_IMAGES       : N U M '_' I M A G E S ;
+IMAGE_INDEX      : I M A G E '_' I N D E X ;
 
 // SYNC keyword for image control (Section 8.5.3-8.5.5)
 // R858: sync-all-stmt -> SYNC ALL [(sync-stat-list)]
