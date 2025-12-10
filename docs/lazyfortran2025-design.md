@@ -7,98 +7,261 @@
 
 ## Summary
 
-Lazy Fortran 2025 extends Fortran 2023 with automatic type inference, intent deduction, and generic programming. The goal is reduced boilerplate while maintaining compatibility with standard Fortran compilers through a source-to-source standardizer.
+Lazy Fortran 2025 extends Fortran 2023 with strongly typed generics/traits, sensible defaults, and modern syntax. The goal is reduced boilerplate while maintaining compatibility with standard Fortran compilers through a source-to-source standardizer.
 
 All standard Fortran 2023 programs remain valid Lazy Fortran programs.
 
+### Design Principles
+
+1. **Strongly typed generics** - Traits with explicit type bounds. No weak generics or whole-program type inference. Procedural templates from standard Fortran are included when available.
+2. **No whole-program analysis** - All features are single-pass or module-local. No C++ template hell or Julia-style recompilation.
+3. **Infer mode** - Optional mode for interactive use and rapid prototyping that infers intrinsic types (int, real, string, etc.) from first assignment. Arrays are NOT reallocated on assignment (unlike standard Fortran). Derived type instances ARE reallocated on assignment.
+4. **Default precision** - Reals default to 8 bytes (64-bit) for scientific precision. Integers default to 4 bytes (32-bit) like Rust/C/Java for performance.
+5. **intent(in) default** - Arguments are read-only unless explicitly declared otherwise.
+6. **implicit none default** - All program units have `implicit none` by default.
+7. **Dot notation** - Member access supports `a.b` in addition to standard `a%b`, with spacing rules to disambiguate user-defined operators.
+8. **Unsigned integers** - `integer, unsigned` attribute for unsigned integers with safe Rust-like semantics.
+
 ### Feature Classification
 
-Features are classified by compilation complexity:
+All features are **single-pass (local or module-local analysis only)**:
 
-**Single-pass (local analysis only):**
-- Type inference from first assignment
+- Dot notation transformation (`a.b` -> `a%b`)
 - Default `intent(in)` for arguments
-- Expression type rules
+- Default `implicit none` injection
+- Expression type rules (real=8 bytes, integer=4 bytes)
 - Declaration placement
-- Explicit template/trait declarations
+- Explicit template/trait instantiation
+- Infer mode: type inference from first assignment (intrinsic types only)
 
-**Semantic analysis (multi-pass or whole-program):**
-- Monomorphization (collect all call sites)
-- Function result type inference (with monomorphization)
-- Infer from `intent(out)` arguments (Open Issue 2)
-- Infer pointer/allocatable attributes (Open Issues 11, 12)
-- Auto-USE for derived types (Open Issue 14)
+**Explicitly NOT supported (would require whole-program analysis):**
+- Implicit monomorphization from call sites
+- Function result type inference from body
+- Automatic specialization across compilation units
 
 ---
 
-## Type Inference
+## Dot Notation for Member Access
 
-### First Assignment Rule
-
-Variables get their type from the first value assigned:
+**RESOLVED:** Lazy Fortran supports both `.` (dot) and `%` for derived type member access:
 
 ```fortran
-x = 42             ! integer
-y = 3.14           ! real
-z = (1.0, 2.0)     ! complex
-flag = .true.      ! logical
-s = "hello"        ! character(len=5)
-p = particle_t()   ! derived type from constructor
+! Both syntaxes are valid
+particle.x = 1.0           ! Dot notation (modern style)
+particle%x = 1.0           ! Standard Fortran (also supported)
+
+particle.velocity.vx = 2.0
+particle%velocity%vx = 2.0  ! Can even mix (though not recommended)
+
+call particle.move(dt)
+call particle%move(dt)
 ```
+
+The standardizer converts dot notation to `%` for standard Fortran output.
+
+### Disambiguation from User-Defined Operators
+
+User-defined operators like `.add.` could conflict with member access. Lazy Fortran uses spacing rules:
+
+```fortran
+a .op. b     ! User-defined operator (spaces required)
+a.member     ! Member access (no spaces)
+```
+
+The standardizer enforces this by requiring spaces around user-defined operators. Violations are compile-time errors.
+
+### Rationale
+
+The dot notation is familiar from most modern languages and improves readability. Supporting both syntaxes ensures full backward compatibility with standard Fortran code while allowing modern style for new code.
+
+---
+
+## Type Inference (Infer Mode)
+
+Type inference is available in **infer mode**, designed for interactive use and rapid prototyping. In standard mode, all variables require explicit declarations.
+
+### First Assignment Rule (Infer Mode Only)
+
+In infer mode, variables get their type from the first value assigned:
+
+```fortran
+x = 42             ! integer (default integer, 4 bytes)
+y = 3.14           ! real(8)
+z = (1.0, 2.0)     ! complex(8)
+flag = .true.      ! logical
+s = "hello"        ! character(:), allocatable
+p = particle_t()   ! ERROR: derived types require explicit declaration
+```
+
+**Key restrictions:**
+- Only intrinsic types (integer, real, complex, logical, character) are inferred
+- Derived types always require explicit declaration
+- Inferred strings are deferred-length allocatable
+- Inferred arrays are NOT reallocated on assignment (unlike standard Fortran allocatable arrays)
+- Derived type instances ARE reallocated on assignment
 
 Subsequent assignments use standard Fortran coercion rules.
 
-### Arrays
+### Allocation Semantics (Infer Mode)
 
-Array types come from constructors or allocate statements:
+**Arrays are NOT reallocated on assignment** - this differs from standard Fortran allocatable array behavior:
 
 ```fortran
-arr = [1, 2, 3]           ! rank-1 integer array, 3 elements
-allocate(matrix(n, m))    ! rank-2, runtime bounds
+arr = [1, 2, 3]    ! integer, allocatable, size 3
+arr = [4, 5, 6]    ! OK: same shape
+arr = [7, 8]       ! ERROR: shape mismatch (Lazy Fortran rejects this)
+```
+
+This prevents accidental reallocation and the associated performance/memory issues. To resize an array, use explicit `deallocate`/`allocate` or `reshape`.
+
+**Derived type instances ARE reallocated on assignment:**
+
+```fortran
+type(particle_t), allocatable :: p
+p = particle_t(x=1.0, y=2.0)    ! allocates
+p = other_particle              ! reallocates if needed
+```
+
+**Strings are deferred-length allocatable:**
+
+```fortran
+s = "hello"        ! character(:), allocatable, len=5
+s = "goodbye"      ! reallocates to len=7 (standard Fortran behavior)
 ```
 
 ### Expression Type Rules
 
-Expression types follow ISO/IEC 1539-1:2023 Clause 10.1.5 (Numeric intrinsic operations). Mixed numeric array constructors use type promotion: `[1, 2.0, 3]` promotes all elements to real.
+Expression types follow ISO/IEC 1539-1:2023 Clause 10.1.5 (Numeric intrinsic operations). Mixed numeric array constructors use type promotion: `[1, 2.0, 3]` promotes all elements to real(8).
 
 ### Interaction with implicit none
 
-When `implicit none` is present, undeclared names are errors and inference is disabled. This preserves compatibility with strict coding styles.
+`implicit none` is the default in Lazy Fortran. In standard mode, undeclared names are errors. In infer mode, undeclared intrinsic-typed variables are inferred; derived types still require explicit declaration.
 
-### Open Issues
+### Resolved Issues (Infer Mode)
 
-**Single-pass (local analysis):**
+| Issue | Decision |
+|-------|----------|
+| 3 | Declaration placement: **Anywhere in scope** |
+| 15 | Fallback when type unclear: **Compile error** |
 
-| Issue | Question | Options |
-|-------|----------|---------|
-| 1 | Default numeric kinds? | A: ISO default (real(4)) B: Double precision (real(8)) C: Context-dependent |
-| 3 | Declaration placement? | A: Block beginning only B: Anywhere in scope |
-| 10 | Character length handling? | A: First assignment wins B: Maximum length seen C: Allocatable deferred-length |
-| 15 | Fallback when type unclear? | A: Compile error B: Default to real(8) C: ISO default kind |
+---
 
-**Semantic analysis (multi-pass):**
+## Default Precision
 
-| Issue | Question | Options |
-|-------|----------|---------|
-| 2 | Infer from intent(out)? | A: No (assignment only) B: Yes (inspect callee signature) |
-| 11 | Infer pointer attribute? | A: No B: From pointer assignment C: Both pointer and target |
-| 12 | Infer allocatable? | A: No B: From allocate statements |
-| 14 | Derived type scope? | A: Explicit USE required B: Auto-USE C: Explicit declaration required |
+**RESOLVED:** Lazy Fortran uses different defaults for reals and integers:
 
-### Function Result Types
+- **Reals:** 8 bytes (64-bit) - precision matters for scientific computing
+- **Integers:** 4 bytes (32-bit) - like Rust/C/Java, better performance
 
-Function result types are inferred from the body expression given the input types. With monomorphization, each specialization gets its return type from evaluating the body:
+This applies to:
+
+1. **Literal values** - `1.0`, `1.0e3` are real(8); `42` is default integer
+2. **Type inference** - Reals inferred as 8-byte, integers as 4-byte
+3. **Unqualified declarations** - `real :: x` means `real(8) :: x`; `integer :: n` stays default
 
 ```fortran
-function add(a, b)
-    add = a + b       ! return type = type of (a + b)
-end function
+! Lazy Fortran
+x = 1.0              ! real(8)
+y = 1.0e3            ! real(8)
+n = 42               ! integer (4 bytes)
+integer :: count     ! integer (4 bytes)
+real :: value        ! real(8)
 
-x = add(5, 3)         ! e.g. add__i32_i32 / add__i4_i4 (Issue 9)
-y = add(2.5d0, 1.5d0) ! e.g. add__r64_r64 / add__r8_r8 (Issue 9)
+! Explicit larger/smaller types supported
+integer(8) :: big_count    ! 64-bit integer when needed
+real(4) :: single_precision
 ```
 
-The call site provides argument types, which determines which specialization to generate. That specialization's return type comes from the body expression.
+### Rationale
+
+**Reals at 8 bytes:**
+- Scientific computing requires precision
+- Prevents accumulation of rounding errors
+- Matches Python/Julia/NumPy defaults
+
+**Integers at 4 bytes (like Rust):**
+- Most integers don't need 64-bit range
+- Better cache utilization for integer arrays
+- Twice as many per SIMD register
+- Use `integer(8)` explicitly when needed (large array indexing, big counts)
+
+### Standardizer Behavior
+
+The standardizer generates explicit kind specifiers for reals:
+
+```fortran
+! Input (Lazy Fortran)
+x = 1.0
+n = 42
+
+! Output (Standard Fortran)
+real(8) :: x
+integer :: n
+x = 1.0_8
+n = 42
+```
+
+---
+
+## Unsigned Integers
+
+**NEW:** Lazy Fortran adds an `unsigned` attribute for integers:
+
+```fortran
+integer, unsigned :: count          ! 4-byte unsigned (0 to 4,294,967,295)
+integer(8), unsigned :: big_count   ! 8-byte unsigned
+```
+
+### Semantics (Rust-like Safety)
+
+**No implicit mixing of signed and unsigned:**
+
+```fortran
+integer :: i = 5
+integer, unsigned :: u = 10
+
+! u + i                     ! ERROR: mixed signed/unsigned
+u + uint(i)                 ! OK: explicit conversion to unsigned
+i + int(u)                  ! OK: explicit conversion to signed
+```
+
+**Overflow behavior:**
+
+- Default: wrap around (modular arithmetic)
+- With overflow checking enabled (`-fcheck=overflow`): runtime error
+
+```fortran
+integer, unsigned :: u = 0
+u = u - 1                   ! wraps to 4,294,967,295 (or error if checked)
+```
+
+### Use Cases
+
+**Array indexing** - the primary use case:
+
+```fortran
+integer, unsigned :: idx
+do idx = 0, n-1             ! Zero-based indexing natural with unsigned
+    arr(idx+1) = ...
+end do
+```
+
+**Bit manipulation:**
+
+```fortran
+integer, unsigned :: flags = 0
+flags = ior(flags, bit_mask)
+```
+
+**Interoperability with C:**
+
+```fortran
+integer(c_size_t), unsigned :: size    ! size_t equivalent
+```
+
+### Standardizer Behavior
+
+The standardizer emits unsigned operations using appropriate intrinsics or compiler extensions where available, or emulates with range checks where necessary.
 
 ---
 
@@ -145,11 +308,44 @@ end subroutine
 
 ## Generic Programming
 
-Two complementary approaches are available.
+**RESOLVED:** Lazy Fortran uses **strongly typed generics/traits** with explicit instantiation. No implicit monomorphization or whole-program type inference.
+
+Two complementary approaches are available:
+
+1. **J3 Procedural Templates** - When available in standard Fortran, will be supported directly with explicit instantiation
+2. **Traits (Swift/Rust style)** - Strongly typed constraints with explicit type bounds
+
+### Key Design Decision: No Implicit Monomorphization
+
+Unlike C++ templates or Julia, Lazy Fortran does NOT automatically generate specializations from call sites. All generic instantiation is explicit:
+
+```fortran
+! WRONG (would require whole-program analysis):
+function add(a, b)      ! What types? Unknown until call site
+    add = a + b
+end function
+x = add(5, 3)           ! Would need to infer types and generate code
+
+! CORRECT (explicit instantiation):
+template add_t(T)
+    type, deferred :: T
+contains
+    function add(a, b) result(res)
+        type(T), intent(in) :: a, b
+        type(T) :: res
+        res = a + b
+    end function
+end template
+
+instantiate add_t(integer), only: add_int => add
+instantiate add_t(real(8)), only: add_real => add
+
+x = add_int(5, 3)       ! Explicit, no whole-program analysis needed
+```
 
 ### Templates (J3 Direction)
 
-The TEMPLATE construct defines parameterized procedures:
+The TEMPLATE construct defines parameterized procedures with explicit instantiation:
 
 ```fortran
 template swap_t(T)
@@ -162,11 +358,11 @@ contains
     end subroutine
 end template
 
-! Explicit instantiation
+! Explicit instantiation required
 instantiate swap_t(integer), only: swap_int => swap
 instantiate swap_t(real), only: swap_real => swap
 
-! Inline instantiation
+! Inline instantiation (still explicit)
 call swap{integer}(a, b)
 ```
 
@@ -183,176 +379,84 @@ requirement r_comparable(T, less_than)
 end requirement
 ```
 
-### Traits (Swift/Rust Style)
+### Traits (Strongly Typed)
 
-Type sets specify constraints as unions:
-
-```fortran
-abstract interface :: INumeric
-    integer | real(real64)
-end interface INumeric
-```
-
-Traits can specify required procedure signatures:
+Traits define explicit type constraints. All type parameters must be bounded:
 
 ```fortran
-abstract interface :: ISum
-    function sum{INumeric :: T}(x) result(s)
-        type(T), intent(in) :: x(:)
-        type(T) :: s
+trait INumeric
+    integer | real(8) | complex(8)
+end trait
+
+trait IComparable(T)
+    pure logical function less_than(a, b)
+        type(T), intent(in) :: a, b
     end function
-end interface ISum
+end trait
 ```
 
 Types declare trait conformance:
 
 ```fortran
-type, implements(ISum) :: simple_sum_t
+type, implements(IComparable) :: my_type_t
 contains
-    procedure, nopass :: sum
+    procedure :: less_than => my_less_than
 end type
 
-! Retroactive conformance
+! Retroactive conformance for intrinsic types
 implements IComparable :: integer
     procedure :: less_than => builtin_less_than
 end implements
 ```
 
-### Trait Annotation Syntax
-
-An alternative `@` annotation syntax for trait declarations:
+### Generic Procedures with Trait Bounds
 
 ```fortran
-@IComparable
-integer function compare(a, b)
-    integer, intent(in) :: a, b
-    compare = a - b
+! T must satisfy IComparable - explicit instantiation required
+function min_value{IComparable :: T}(a, b) result(res)
+    type(T), intent(in) :: a, b
+    type(T) :: res
+    if (less_than(a, b)) then
+        res = a
+    else
+        res = b
+    end if
 end function
+
+! Must instantiate explicitly
+instantiate min_value{integer}, only: min_int => min_value
 ```
 
 ### Combining Approaches
 
 | Use Case | Recommended |
 |----------|-------------|
-| Generic containers | J3 TEMPLATE |
-| Numeric algorithms | Traits type sets |
+| Generic containers | J3 TEMPLATE with explicit instantiation |
+| Numeric algorithms | Traits with INumeric bounds |
 | Retroactive conformance | Traits IMPLEMENTS |
 | Runtime polymorphism | Traits with class(ITrait) |
-| Explicit instantiation | J3 TEMPLATE |
-| Ergonomic call sites | Traits automatic inference |
 
-### Open Issues
+### Resolved Issues
 
-| Issue | Question | Options |
-|-------|----------|---------|
-| 5 | Which generics system? | A: J3 TEMPLATE only B: Traits only C: Hybrid (both) |
-| 6 | Generic parameter delimiter? | A: Braces {T} B: Parentheses (T) C: Angle brackets <T> |
-| 7 | Dispatch mechanism? | A: Static only B: Dynamic only C: Both |
-| 16 | Support @ annotations? | A: No B: Yes C: Both styles |
+| Issue | Decision |
+|-------|----------|
+| 7 | Dispatch mechanism: **Both** - `type(T)` for static, `class(Trait)` for dynamic |
+| 16 | @ annotations: **No** - use curly braces `{Constraint :: T}` syntax |
 
----
+### Syntax Alignment
 
-## Monomorphization
+**J3 TEMPLATE** (official proposal for Fortran 202Y):
+- Uses `^()` for inline instantiation: `CALL sub^(INTEGER)(x)`
+- Standard parentheses for template parameters: `TEMPLATE foo(T)`
+- Explicit `INSTANTIATE` statements
 
-Generic procedures are automatically specialized for each type combination used:
+**Traits** ([Traits-for-Fortran proposal](https://github.com/difference-scheme/Traits-for-Fortran)):
+- Uses `abstract interface` for trait definitions
+- Uses `implements` blocks for trait conformance
+- Uses **curly braces `{T}`** for generic type parameters: `function sum{INumeric :: T}(x)`
+- Type constraints precede parameter name: `{ITrait :: T}` or inline `{integer | real :: T}`
 
-```fortran
-function add(a, b)
-    add = a + b
-end function
-
-x = add(5, 3)       ! generates a specialized integer version (see ABI)
-y = add(2.5, 1.5)   ! generates a specialized real version (see ABI)
-```
-
-User-written specific procedures take precedence over generated specializations. Ambiguity is a compile-time error.
-
-### Open Issue
-
-| Issue | Question | Options |
-|-------|----------|---------|
-| 8 | Specialization scope? | A: Per-module B: Per-program (LTO) C: Lazy (on-demand) |
-
----
-
-## Application Binary Interface
-
-### gfortran Compatibility
-
-Module procedures follow gfortran conventions:
-
-```
-__<module-name>_MOD_<procedure-name>
-```
-
-Main program entry is `MAIN__`.
-
-### Specialization Mangling
-
-Specialized procedures use kind suffixes:
-
-```
-<procedure-name>__<kind-suffix-1>_<kind-suffix-2>_...
-```
-
-Kind suffix table (Option A: bits convention):
-
-| Type | Kind | Storage | Suffix |
-|------|------|---------|--------|
-| integer | 1 | 1 byte | i8 |
-| integer | 2 | 2 bytes | i16 |
-| integer | 4 | 4 bytes | i32 |
-| integer | 8 | 8 bytes | i64 |
-| integer | 16 | 16 bytes | i128 |
-| real | 4 | 4 bytes | r32 |
-| real | 8 | 8 bytes | r64 |
-| real | 16 | 16 bytes | r128 |
-| complex | 4 | 8 bytes | c64 |
-| complex | 8 | 16 bytes | c128 |
-| complex | 16 | 32 bytes | c256 |
-| logical | 1 | 1 byte | l8 |
-| logical | 4 | 4 bytes | l32 |
-| character | N | N bytes | chN |
-
-Alternative byte-based convention (Option B: matches Fortran kind parameters):
-
-| Type | Kind | Suffix |
-|------|------|--------|
-| integer | 1 | i1 |
-| integer | 2 | i2 |
-| integer | 4 | i4 |
-| integer | 8 | i8 |
-| real | 4 | r4 |
-| real | 8 | r8 |
-| complex | 4 | c4 |
-| complex | 8 | c8 |
-| logical | 1 | l1 |
-| logical | 4 | l4 |
-
-Array rank uses `rank<n>` suffix: e.g. `sum__r64rank1` (Option A) or `sum__r8rank1` (Option B).
-
-For concreteness, examples below assume Option A (bits); if Option B (bytes) is chosen in Issue 9, `i32`/`r64` would become `i4`/`r8` consistently.
-
-Examples (assuming Option A):
-- `add(integer, integer)` -> `add__i32_i32`
-- `add(real(8), real(8))` -> `add__r64_r64`
-- `sum(real(8), dimension(:))` -> `sum__r64rank1`
-
-Multiple specializations are wrapped in a generic interface within an auto-generated module:
-
-```fortran
-module auto_add
-    interface add
-        module procedure add__i32_i32, add__r64_r64  ! assuming Option A (bits)
-    end interface
-end module
-```
-
-### Open Issue
-
-| Issue | Question | Options |
-|-------|----------|---------|
-| 9 | Kind suffix convention? | A: Bits (i32, r64) B: Bytes (i4, r8) |
+Lazy Fortran adopts the traits syntax with curly braces for generic parameters.
 
 ---
 
@@ -362,68 +466,104 @@ The standardizer transforms Lazy Fortran (.lf) to standard Fortran (.f90).
 
 ### Transformations
 
-1. **Program wrapping** - Bare statements become `program main`; files with only procedures become `module <filename>`
-2. **Declaration generation** - Inferred types become explicit declarations
-3. **implicit none injection** - Added to all program units
-4. **Intent generation** - Default `intent(in)` becomes explicit
-5. **Monomorphization** - Generic calls become specialized procedures
+1. **Dot notation** - `a.b` becomes `a%b`
+2. **Program wrapping** - Bare statements become `program main`; files with only procedures become `module <filename>`
+3. **Declaration generation** - Inferred types become explicit declarations (infer mode)
+4. **Kind promotion** - Unqualified types get 8-byte kind specifiers
+5. **Literal promotion** - Numeric literals get 8-byte kind suffixes
+6. **implicit none injection** - Added to all program units
+7. **Intent generation** - Default `intent(in)` becomes explicit
+8. **Template expansion** - Explicit template instantiations become concrete procedures
 
-### Simple Example
+### Simple Example (Standard Mode)
 
 Input (script.lf):
 ```fortran
-x = 5
-print *, x
+type(particle_t) :: p
+p.x = 5.0
+p.y = 3.0
+print *, p.x + p.y
 ```
 
 Output (script.f90):
 ```fortran
 program main
     implicit none
-    integer :: x
-    x = 5
-    print *, x
+    type(particle_t) :: p
+    p%x = 5.0_8
+    p%y = 3.0_8
+    print *, p%x + p%y
 end program main
 ```
 
-### Monomorphization Example
+### Simple Example (Infer Mode)
 
-Input (script.lf):
+Input (script.lf with `--infer`):
 ```fortran
-function add(a, b)
-    add = a + b
-end function
-
-x = add(5, 3)
-y = add(2.5, 1.5)
+x = 5
+y = 3.14
+s = "hello"
+print *, x, y, s
 ```
 
 Output (script.f90):
 ```fortran
-module auto_add
-    implicit none
-    interface add
-        module procedure add__i32_i32, add__r64_r64  ! assuming Option A (bits)
-    end interface add
-contains
-    integer function add__i32_i32(a, b)
-        integer, intent(in) :: a, b
-        add__i32_i32 = a + b
-    end function
-
-    real(8) function add__r64_r64(a, b)
-        real(8), intent(in) :: a, b
-        add__r64_r64 = a + b
-    end function
-end module auto_add
-
 program main
-    use auto_add
     implicit none
     integer :: x
     real(8) :: y
-    x = add(5, 3)
-    y = add(2.5d0, 1.5d0)
+    character(:), allocatable :: s
+    x = 5
+    y = 3.14_8
+    s = "hello"
+    print *, x, y, s
+end program main
+```
+
+### Template Instantiation Example
+
+Input (script.lf):
+```fortran
+template add_t(T)
+    type, deferred :: T
+contains
+    function add(a, b) result(res)
+        type(T), intent(in) :: a, b
+        type(T) :: res
+        res = a + b
+    end function
+end template
+
+instantiate add_t(integer), only: add_int => add
+instantiate add_t(real(8)), only: add_real => add
+
+x = add_int(5, 3)
+y = add_real(2.5, 1.5)
+```
+
+Output (script.f90):
+```fortran
+module script_templates
+    implicit none
+contains
+    integer function add_int(a, b)
+        integer, intent(in) :: a, b
+        add_int = a + b
+    end function
+
+    real(8) function add_real(a, b)
+        real(8), intent(in) :: a, b
+        add_real = a + b
+    end function
+end module script_templates
+
+program main
+    use script_templates
+    implicit none
+    integer :: x
+    real(8) :: y
+    x = add_int(5, 3)
+    y = add_real(2.5_8, 1.5_8)
 end program main
 ```
 
