@@ -474,10 +474,13 @@ Grammar implementation:
   - `binding_spec` accepts `BIND(C)` and
     `BIND(C, NAME="...")` for procedures.
   - `type_attr_spec` supports `BIND(C)` for derived types.
-  - `use_stmt` recognizes `USE, INTRINSIC :: IEEE_EXCEPTIONS /
-    IEEE_ARITHMETIC / IEEE_FEATURES` with a dedicated `ieee_only_list`
-    (`ieee_entity` rule) that includes exception types, special values,
-    rounding modes, feature names, and generic identifiers.
+  - `use_stmt` recognizes (ISO/IEC 1539-1:2004 R1109-R1110):
+    - `USE, INTRINSIC :: IEEE_EXCEPTIONS / IEEE_ARITHMETIC / IEEE_FEATURES`
+      with a dedicated `ieee_only_list` (`ieee_entity` rule) that includes
+      exception types, special values, rounding modes, feature names, and
+      generic identifiers.
+    - `USE, NON_INTRINSIC :: module-name` (both plain and with ONLY clause)
+      for explicit user-defined module selection.
   - `c_interop_type` lists all the C interop types for use in IMPORT
     and declarations.
   - `ieee_constant`, `ieee_function_call`, `intrinsic_function_call`
@@ -496,6 +499,11 @@ Tests:
   - `test_issue27_ieee_arithmetic.py` exercises:
     - USE of IEEE intrinsic modules and ONLY lists.
     - Selected IEEE constants and inquiry/value functions in expressions.
+- Module nature (R1110):
+  - `test_issue444_non_intrinsic.py` (added in fix #444) exercises:
+    - NON_INTRINSIC with user-defined modules.
+    - NON_INTRINSIC with ONLY clause for selective imports.
+    - Mixing INTRINSIC and NON_INTRINSIC in same program.
 
 Gaps:
 
