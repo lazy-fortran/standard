@@ -208,6 +208,14 @@ ENDFILE         : E N D F I L E ;
 // ============================================================================
 
 // ============================================================================
+// DELIMITERS FOR COMPLEX CONSTANTS - X3.9-1966 Section 4.4.2
+// ============================================================================
+// Colon used in FORTRAN 77 for substring notation (inherited by F77)
+// Added here for consistency with complex constant syntax even though
+// complex constants are primarily a FORTRAN 66+ feature
+COLON           : ':' ;
+
+// ============================================================================
 // FORTRAN 66 (X3.9-1966) HISTORICAL SIGNIFICANCE
 // ============================================================================
 //
