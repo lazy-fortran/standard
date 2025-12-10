@@ -33,7 +33,7 @@ Grammar:
     - External subroutines/functions (`subroutine_subprogram`,
       `function_subprogram`).
     - Modules (`module`).
-    - Block data program units are inherited from earlier standards.
+    - Block data program units (`block_data_subprogram` per ISO/IEC 1539:1991 R202, inherited from earlier standards).
 - Modules:
   - `module` and `end_module_stmt` define a MODULE unit with:
     - `specification_part` (USE/import + declarations).
