@@ -577,8 +577,30 @@ data_stmt
 
 // Data statement set - ISO 1539:1980 Section 9.1
 // Associates a name list with a constant list
+// Note: variable_list here is used as data_variable_list (supports implied-DO)
 data_stmt_set
-    : variable_list SLASH data_constant_list SLASH
+    : data_variable_list SLASH data_constant_list SLASH
+    ;
+
+// Data variable list - ISO 1539:1980 Section 9.2
+// Supports variables and implied-DO lists in DATA statements
+data_variable_list
+    : data_variable (COMMA data_variable)*
+    ;
+
+// Data variable - ISO 1539:1980 Section 9.2
+// A variable in a DATA statement may be a simple variable or an implied-DO list
+data_variable
+    : variable                      // Simple variable or array element
+    | implied_do_data              // Implied-DO list for DATA
+    ;
+
+// Implied-DO list for DATA statements - ISO 1539:1980 Section 9.2
+// Syntax: (data_variable_list, integer_var = expr, expr [, expr])
+// Used to initialize ranges of array elements
+implied_do_data
+    : LPAREN data_variable_list COMMA integer_variable EQUALS integer_expr COMMA
+      integer_expr (COMMA integer_expr)? RPAREN
     ;
 
 // Data constant list - ISO 1539:1980 Section 9.3
