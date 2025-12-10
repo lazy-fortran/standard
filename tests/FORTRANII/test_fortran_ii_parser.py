@@ -941,6 +941,118 @@ class TestStrictCommon(unittest.TestCase):
                     f"Named COMMON '{text}' should fail in strict mode"
                 )
 
+    def test_hardware_if_sense_switch_in_fortran_ii(self):
+        """Test IF (SENSE SWITCH i) statements in FORTRAN II context
+
+        Hardware IF statements from FORTRAN I (C28-6003 Appendix B) should
+        parse in FORTRAN II per C28-6000-2 Appendix A statement set.
+        Issue #395: Hardware IF and SENSE LIGHT statements not wired into statement_body
+        """
+        test_cases = [
+            "IF (SENSE SWITCH 1) 100, 200",
+            "IF (SENSE SWITCH 2) 150, 250",
+            "IF (SENSE SWITCH 3) 300, 400",
+        ]
+        for text in test_cases:
+            with self.subTest(if_stmt=text):
+                tree = self.parse(text, 'if_stmt_sense_switch')
+                self.assertIsNotNone(tree)
+                self.assertIn('SENSE', tree.getText())
+                self.assertIn('SWITCH', tree.getText())
+
+    def test_hardware_if_sense_light_in_fortran_ii(self):
+        """Test IF (SENSE LIGHT i) statements in FORTRAN II context
+
+        Hardware IF statements from FORTRAN I (C28-6003 Appendix B) should
+        parse in FORTRAN II per C28-6000-2 Appendix A statement set.
+        Issue #395: Hardware IF and SENSE LIGHT statements not wired into statement_body
+        """
+        test_cases = [
+            "IF (SENSE LIGHT 1) 100, 200",
+            "IF (SENSE LIGHT 2) 150, 250",
+            "IF (SENSE LIGHT 4) 300, 400",
+        ]
+        for text in test_cases:
+            with self.subTest(if_stmt=text):
+                tree = self.parse(text, 'if_stmt_sense_light')
+                self.assertIsNotNone(tree)
+                self.assertIn('SENSE', tree.getText())
+                self.assertIn('LIGHT', tree.getText())
+
+    def test_hardware_if_accumulator_overflow_in_fortran_ii(self):
+        """Test IF ACCUMULATOR OVERFLOW statements in FORTRAN II context
+
+        Hardware IF statements from FORTRAN I (C28-6003 Appendix B) should
+        parse in FORTRAN II per C28-6000-2 Appendix A statement set.
+        Issue #395: Hardware IF and SENSE LIGHT statements not wired into statement_body
+        """
+        test_cases = [
+            "IF ACCUMULATOR OVERFLOW 100, 200",
+            "IF ACCUMULATOR OVERFLOW 150, 250",
+        ]
+        for text in test_cases:
+            with self.subTest(if_stmt=text):
+                tree = self.parse(text, 'if_stmt_accumulator_overflow')
+                self.assertIsNotNone(tree)
+                self.assertIn('ACCUMULATOR', tree.getText())
+                self.assertIn('OVERFLOW', tree.getText())
+
+    def test_hardware_if_quotient_overflow_in_fortran_ii(self):
+        """Test IF QUOTIENT OVERFLOW statements in FORTRAN II context
+
+        Hardware IF statements from FORTRAN I (C28-6003 Appendix B) should
+        parse in FORTRAN II per C28-6000-2 Appendix A statement set.
+        Issue #395: Hardware IF and SENSE LIGHT statements not wired into statement_body
+        """
+        test_cases = [
+            "IF QUOTIENT OVERFLOW 100, 200",
+            "IF QUOTIENT OVERFLOW 150, 250",
+        ]
+        for text in test_cases:
+            with self.subTest(if_stmt=text):
+                tree = self.parse(text, 'if_stmt_quotient_overflow')
+                self.assertIsNotNone(tree)
+                self.assertIn('QUOTIENT', tree.getText())
+                self.assertIn('OVERFLOW', tree.getText())
+
+    def test_hardware_if_divide_check_in_fortran_ii(self):
+        """Test IF DIVIDE CHECK statements in FORTRAN II context
+
+        Hardware IF statements from FORTRAN I (C28-6003 Appendix B) should
+        parse in FORTRAN II per C28-6000-2 Appendix A statement set.
+        Issue #395: Hardware IF and SENSE LIGHT statements not wired into statement_body
+        """
+        test_cases = [
+            "IF DIVIDE CHECK 100, 200",
+            "IF DIVIDE CHECK 150, 250",
+        ]
+        for text in test_cases:
+            with self.subTest(if_stmt=text):
+                tree = self.parse(text, 'if_stmt_divide_check')
+                self.assertIsNotNone(tree)
+                self.assertIn('DIVIDE', tree.getText())
+                self.assertIn('CHECK', tree.getText())
+
+    def test_sense_light_statement_in_fortran_ii(self):
+        """Test SENSE LIGHT statements in FORTRAN II context
+
+        SENSE LIGHT statement from FORTRAN I (C28-6003 Appendix B row 11)
+        should parse in FORTRAN II per C28-6000-2 Appendix A statement set.
+        Issue #395: Hardware IF and SENSE LIGHT statements not wired into statement_body
+        """
+        test_cases = [
+            "SENSE LIGHT 1",
+            "SENSE LIGHT 2",
+            "SENSE LIGHT 3",
+            "SENSE LIGHT 4",
+        ]
+        for text in test_cases:
+            with self.subTest(sense_light=text):
+                tree = self.parse(text, 'sense_light_stmt')
+                self.assertIsNotNone(tree)
+                self.assertIn('SENSE', tree.getText())
+                self.assertIn('LIGHT', tree.getText())
+
     def test_strict_program_entry_point_exists(self):
         """Verify strict mode entry points are available"""
         import os
