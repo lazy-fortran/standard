@@ -183,6 +183,7 @@ statement_body
     | stop_stmt          // Appendix A: STOP [n]
     | pause_stmt         // Appendix A: PAUSE [n]
     | read_stmt          // Appendix A: READ forms
+    | write_stmt_basic   // C28-6003 Chap III: WRITE output_list (from FORTRAN I)
     | print_stmt         // Appendix A: PRINT n, list
     | punch_stmt         // Appendix A: PUNCH n, list
     | format_stmt        // Appendix A: FORMAT (specification)
@@ -207,6 +208,7 @@ statement_body_strict
     | stop_stmt          // Appendix A: STOP [n]
     | pause_stmt         // Appendix A: PAUSE [n]
     | read_stmt          // Appendix A: READ forms
+    | write_stmt_basic   // C28-6003 Chap III: WRITE output_list (from FORTRAN I)
     | print_stmt         // Appendix A: PRINT n, list
     | punch_stmt         // Appendix A: PUNCH n, list
     | format_stmt        // Appendix A: FORMAT (specification)
