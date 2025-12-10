@@ -206,6 +206,16 @@ ATOMIC_DEFINE    : A T O M I C '_' D E F I N E ;
 ATOMIC_REF       : A T O M I C '_' R E F ;
 
 // ============================================================================
+// COMPILER INQUIRY FUNCTIONS (ISO/IEC 1539-1:2010 Section 13.7.41-42)
+// ============================================================================
+// Compiler inquiry functions return CHARACTER values describing the compilation:
+// - COMPILER_VERSION(): Returns compiler version string (Section 13.7.42)
+// - COMPILER_OPTIONS(): Returns compiler options string (Section 13.7.41)
+// These enable reproducibility tracking and runtime diagnostics.
+COMPILER_VERSION : C O M P I L E R '_' V E R S I O N ;
+COMPILER_OPTIONS : C O M P I L E R '_' O P T I O N S ;
+
+// ============================================================================
 // ENHANCED INTEGER/REAL KINDS (ISO/IEC 1539-1:2010 Section 13.8.2)
 // ============================================================================
 // Named constants from ISO_FORTRAN_ENV for specific bit sizes:

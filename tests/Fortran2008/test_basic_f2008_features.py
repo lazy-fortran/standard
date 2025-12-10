@@ -255,6 +255,19 @@ class TestBasicF2008Features:
         assert tree is not None, "HYPOT intrinsic failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for HYPOT intrinsic, got {errors}"
 
+    def test_compiler_inquiry_intrinsics(self):
+        """Test COMPILER_VERSION and COMPILER_OPTIONS intrinsics (ISO 13.7.41-42)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "compiler_inquiry_intrinsics.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "Compiler inquiry intrinsics failed to produce parse tree"
+        assert errors == 0, (
+            f"Expected 0 errors for compiler inquiry intrinsics, got {errors}"
+        )
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

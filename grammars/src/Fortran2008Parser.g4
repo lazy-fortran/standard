@@ -753,6 +753,7 @@ intrinsic_function_call_f2008
     | math_function_call              // Error/gamma functions (Section 13.7)
     | array_function_call             // Array functions (Section 13.7)
     | image_function_call             // Image intrinsics (Section 13.7)
+    | compiler_inquiry_function_call  // Compiler inquiry (Section 13.7.41-42)
     | bit_shift_function_call         // Bit shift intrinsics (Section 13.7.158-160)
     | bit_mask_function_call          // Bit mask intrinsics (Section 13.7.110-111)
     | bit_reduction_function_call     // Bit reduction (Section 13.7.79-80, 94)
@@ -793,6 +794,13 @@ image_function_call
     : THIS_IMAGE LPAREN actual_arg_list? RPAREN  // Section 13.7.165
     | NUM_IMAGES LPAREN actual_arg_list? RPAREN  // Section 13.7.121
     | STORAGE_SIZE LPAREN actual_arg_list RPAREN // Section 13.7.163
+    ;
+
+// Compiler inquiry function calls (ISO/IEC 1539-1:2010 Section 13.7.41-42)
+// Compiler inquiry functions return CHARACTER values describing compilation
+compiler_inquiry_function_call
+    : COMPILER_VERSION LPAREN actual_arg_list? RPAREN  // Section 13.7.42
+    | COMPILER_OPTIONS LPAREN actual_arg_list? RPAREN  // Section 13.7.41
     ;
 
 // Bit shift intrinsic function calls (ISO/IEC 1539-1:2010 Section 13.7.158-160)
