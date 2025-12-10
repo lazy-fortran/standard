@@ -676,7 +676,8 @@ contiguous_stmt
 // Attribute specification (ISO/IEC 1539-1:2010 R502)
 // R502: attr-spec -> access-spec | ALLOCATABLE | ASYNCHRONOUS | CODIMENSION [...]
 //                  | CONTIGUOUS | DIMENSION (array-spec) | EXTERNAL | ...
-// Extended with CONTIGUOUS (Section 5.3.7) and CODIMENSION (Section 5.3.6) - NEW in F2008
+// Extended with CONTIGUOUS (Section 5.3.7) and CODIMENSION (Section 5.3.6)
+// NEW in F2008
 attr_spec
     : PUBLIC
     | PRIVATE
