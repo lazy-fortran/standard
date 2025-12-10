@@ -103,7 +103,7 @@ subroutine_subprogram_f2008
 // R1224: function-stmt -> [prefix] FUNCTION function-name
 //                         ( [dummy-arg-name-list] ) [suffix]
 function_stmt_f2008
-    : prefix? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN
+    : prefix_f2008? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN
       suffix? binding_spec? NEWLINE
     ;
 
@@ -111,8 +111,36 @@ function_stmt_f2008
 // R1232: subroutine-stmt -> [prefix] SUBROUTINE subroutine-name
 //                           [( [dummy-arg-list] )] [proc-language-binding-spec]
 subroutine_stmt_f2008
-    : prefix? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)?
+    : prefix_f2008? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)?
       binding_spec? NEWLINE
+    ;
+
+// ============================================================================
+// PROCEDURE PREFIX (ISO/IEC 1539-1:2010 Section 12.6.2.2, R1225-R1226)
+// ============================================================================
+// F2008 extends F95 prefix to add MODULE, IMPURE, and NON_RECURSIVE keywords.
+// This allows combined prefix specifications for procedure declarations.
+
+// F2008 prefix (ISO/IEC 1539-1:2010 R1225)
+// R1225: prefix -> prefix-spec [prefix-spec]...
+// F2008 allows multiple prefix specifications in any order
+prefix_f2008
+    : prefix_spec_f2008+
+    ;
+
+// F2008 prefix specification (ISO/IEC 1539-1:2010 R1226)
+// R1226: prefix-spec -> declaration-type-spec | ELEMENTAL | IMPURE |
+//                       MODULE | PURE | RECURSIVE | NON_RECURSIVE
+// F2008 adds MODULE (for separate module procedures), IMPURE (for non-pure
+// elemental procedures), and NON_RECURSIVE (explicit non-recursive mark).
+prefix_spec_f2008
+    : RECURSIVE                     // F90 recursive procedures (Section 12.6.2.4)
+    | PURE                          // F95 pure procedures (Section 12.7)
+    | ELEMENTAL                     // F95 elemental procedures (Section 12.8)
+    | IMPURE                        // F2008 IMPURE (Section 12.7)
+    | MODULE                        // F2008 MODULE procedures (Section 12.6.2.5)
+    | NON_RECURSIVE                 // F2008 NON_RECURSIVE (Section 12.6.2.2)
+    | type_spec                     // Function return type (Section 5.1)
     ;
 
 // ============================================================================
