@@ -73,33 +73,46 @@ type_spec
 // ============================================================================
 // LOGICAL EXPRESSIONS - X3.9-1966 Section 6.4
 // ============================================================================
-// X3.9-1966 Section 6.4 defines logical expressions with these operators
+// X3.9-1966 Section 6.4 defines logical expressions with five operators
 // (in order of precedence, lowest to highest):
-//   .OR.   - logical disjunction (lowest precedence)
+//   .NEQV./.EQV. - logical equivalence/non-equivalence (lowest precedence)
+//   .OR.   - logical disjunction
 //   .AND.  - logical conjunction
 //   .NOT.  - logical negation (highest precedence, unary)
 //
-// Operator precedence: .NOT. > .AND. > .OR.
+// Operator precedence: .NOT. > .AND. > .OR. > .EQV./.NEQV.
 // Operators of equal precedence associate left to right.
 //
 // A logical expression evaluates to .TRUE. or .FALSE.
 // ============================================================================
 
 // Logical expression - X3.9-1966 Section 6.4
-// Lowest precedence: .OR. disjunction
+// Lowest precedence: .EQV. and .NEQV. equivalence operators
 logical_expr
-    : logical_term (DOT_OR logical_term)*
+    : logical_or_expr (logical_equiv_op logical_or_expr)*
     ;
 
-// Logical term - X3.9-1966 Section 6.4
-// Higher precedence: .AND. conjunction
-logical_term
-    : logical_factor (DOT_AND logical_factor)*
+// Logical equivalence operators - X3.9-1966 Section 6.4
+logical_equiv_op
+    : DOT_EQV                     // X3.9-1966 Section 6.4 - logical equivalence
+    | DOT_NEQV                    // X3.9-1966 Section 6.4 - logical non-equivalence
     ;
 
-// Logical factor - X3.9-1966 Section 6.4
+// Logical OR level - X3.9-1966 Section 6.4
+// Higher precedence than .EQV./.NEQV.
+logical_or_expr
+    : logical_and_expr (DOT_OR logical_and_expr)*
+    ;
+
+// Logical AND level - X3.9-1966 Section 6.4
+// Higher precedence than .OR.
+logical_and_expr
+    : logical_not_expr (DOT_AND logical_not_expr)*
+    ;
+
+// Logical NOT level - X3.9-1966 Section 6.4
 // Highest precedence: .NOT. negation (unary)
-logical_factor
+logical_not_expr
     : DOT_NOT logical_primary
     | logical_primary
     ;
