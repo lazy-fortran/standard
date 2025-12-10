@@ -148,9 +148,6 @@ INTERFACE       : ('i'|'I') ('n'|'N') ('t'|'T') ('e'|'E') ('r'|'R')
 // END INTERFACE - ISO/IEC 1539:1991 Section 12.3, R1201
 END_INTERFACE   : ('e'|'E') ('n'|'N') ('d'|'D') WS+ ('i'|'I') ('n'|'N') ('t'|'T')
                   ('e'|'E') ('r'|'R') ('f'|'F') ('a'|'A') ('c'|'C') ('e'|'E') ;
-// GENERIC keyword - ISO/IEC 1539:1991 Section 12.3.2.1
-GENERIC         : ('g'|'G') ('e'|'E') ('n'|'N') ('e'|'E')
-                  ('r'|'R') ('i'|'I') ('c'|'C') ;
 // OPERATOR keyword - ISO/IEC 1539:1991 Section 12.3, R1203
 OPERATOR        : ('o'|'O') ('p'|'P') ('e'|'E') ('r'|'R')
                   ('a'|'A') ('t'|'T') ('o'|'O') ('r'|'R') ;
@@ -691,7 +688,7 @@ fragment DIGIT : [0-9] ;
 // Section 9 (I/O)             -> NAMELIST, ADVANCE, SIZE, STAT, EOR, IOSTAT,
 //                                UNIT, FMT, REC, ERR
 // Section 11 (Program units)  -> MODULE, END_MODULE, USE, ONLY, CONTAINS
-// Section 12 (Procedures)     -> INTERFACE, END_INTERFACE, GENERIC, OPERATOR,
+// Section 12 (Procedures)     -> INTERFACE, END_INTERFACE, OPERATOR,
 //                                ASSIGNMENT, RECURSIVE, RESULT, PROCEDURE
 // Section 13 (Intrinsics)     -> *_INTRINSIC tokens, SELECTED_*_KIND,
 //                                ASSOCIATED, ALLOCATED, PRESENT
