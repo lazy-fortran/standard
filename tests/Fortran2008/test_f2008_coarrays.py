@@ -99,6 +99,17 @@ class TestF2008Coarrays:
         assert tree is not None, "NUM_IMAGES() failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for NUM_IMAGES, got {errors}"
 
+    def test_image_index_function(self):
+        """Test IMAGE_INDEX() intrinsic function"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_f2008_coarrays",
+            "image_index_test.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "IMAGE_INDEX() failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for IMAGE_INDEX, got {errors}"
+
     def test_coarray_with_sync_comprehensive(self):
         """Comprehensive coarray example with sync operations"""
         code = load_fixture(
