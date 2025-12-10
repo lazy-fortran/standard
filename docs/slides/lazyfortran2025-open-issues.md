@@ -60,7 +60,7 @@ Lazy Fortran extends Fortran 2023 with a source-to-source front-end that:
 - **No whole-program analysis** - avoids C++ template hell and Julia recompilation
 - Provides sensible defaults (real=8 bytes, int=4 bytes, `intent(in)`, `implicit none`)
 - Adds unsigned integers with Rust-like safety
-- Offers modern syntax (dot notation `a.b` instead of `a%b`)
+- Offers modern syntax (dot notation `a.b` in addition to `a%b`)
 - Optional infer mode for rapid prototyping (intrinsic types only)
 - Emits standard-conforming Fortran 2023 for any back-end compiler
 
@@ -76,7 +76,7 @@ Lazy Fortran extends Fortran 2023 with a source-to-source front-end that:
 | Default precision | real=8 bytes, int=4 bytes (like Rust) |
 | Default intent | `intent(in)` |
 | Implicit typing | `implicit none` default |
-| Member access | Dot notation `a.b` |
+| Member access | Both `a.b` and `a%b` supported |
 
 ---
 
@@ -102,15 +102,14 @@ Lazy Fortran extends Fortran 2023 with a source-to-source front-end that:
 
 # 1. Dot Notation (RESOLVED)
 
-**Member access uses `.` instead of `%`:**
+**Both `.` and `%` supported for member access:**
 
 ```fortran
-! Lazy Fortran
-particle.x = 1.0
-particle.velocity.vx = 2.0
-call particle.move(dt)
+! Both syntaxes are valid
+particle.x = 1.0           ! Dot notation (modern style)
+particle%x = 1.0           ! Standard Fortran (also supported)
 
-! Standardized output
+! Standardizer output uses %
 particle%x = 1.0
 particle%velocity%vx = 2.0
 call particle%move(dt)
@@ -379,7 +378,7 @@ function sum(x) result(s)
 | Default precision | real=8 bytes, int=4 bytes (like Rust) |
 | Default intent | `intent(in)` |
 | Implicit typing | `implicit none` default |
-| Member access | Dot notation `a.b` |
+| Member access | Both `a.b` and `a%b` supported |
 | Arrays (infer mode) | NOT reallocated on assignment |
 | Types (infer mode) | ARE reallocated on assignment |
 
@@ -399,7 +398,7 @@ function sum(x) result(s)
 | Unsigned integers | `integer, unsigned` attribute, Rust-like safety |
 | Default intent | `intent(in)` |
 | Implicit typing | `implicit none` default |
-| Member access | Dot notation `a.b` |
+| Member access | Both `a.b` and `a%b` supported |
 | Declaration placement | Anywhere in scope |
 | Fallback for unclear type | Compile error |
 | Arrays (infer mode) | NOT reallocated on assignment |

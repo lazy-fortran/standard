@@ -19,7 +19,7 @@ All standard Fortran 2023 programs remain valid Lazy Fortran programs.
 4. **Default precision** - Reals default to 8 bytes (64-bit) for scientific precision. Integers default to 4 bytes (32-bit) like Rust/C/Java for performance.
 5. **intent(in) default** - Arguments are read-only unless explicitly declared otherwise.
 6. **implicit none default** - All program units have `implicit none` by default.
-7. **Dot notation** - Member access uses `a.b` instead of `a%b`, with spacing rules to disambiguate user-defined operators.
+7. **Dot notation** - Member access supports `a.b` in addition to standard `a%b`, with spacing rules to disambiguate user-defined operators.
 8. **Unsigned integers** - `integer, unsigned` attribute for unsigned integers with safe Rust-like semantics.
 
 ### Feature Classification
@@ -43,19 +43,21 @@ All features are **single-pass (local or module-local analysis only)**:
 
 ## Dot Notation for Member Access
 
-**RESOLVED:** Lazy Fortran uses `.` (dot) instead of `%` for derived type member access:
+**RESOLVED:** Lazy Fortran supports both `.` (dot) and `%` for derived type member access:
 
 ```fortran
-! Lazy Fortran
-particle.x = 1.0
-particle.velocity.vx = 2.0
-call particle.move(dt)
+! Both syntaxes are valid
+particle.x = 1.0           ! Dot notation (modern style)
+particle%x = 1.0           ! Standard Fortran (also supported)
 
-! Standardized output
-particle%x = 1.0
-particle%velocity%vx = 2.0
+particle.velocity.vx = 2.0
+particle%velocity%vx = 2.0  ! Can even mix (though not recommended)
+
+call particle.move(dt)
 call particle%move(dt)
 ```
+
+The standardizer converts dot notation to `%` for standard Fortran output.
 
 ### Disambiguation from User-Defined Operators
 
@@ -70,7 +72,7 @@ The standardizer enforces this by requiring spaces around user-defined operators
 
 ### Rationale
 
-The dot notation is familiar from most modern languages and improves readability. The `%` symbol is unusual and adds friction for programmers coming from other languages. Spacing rules provide unambiguous parsing while maintaining backward compatibility with user-defined operators.
+The dot notation is familiar from most modern languages and improves readability. Supporting both syntaxes ensures full backward compatibility with standard Fortran code while allowing modern style for new code.
 
 ---
 
