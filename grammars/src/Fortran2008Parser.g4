@@ -1095,5 +1095,6 @@ identifier_or_keyword
     // F2008 mathematical intrinsics (Section 13.7.77)
     | HYPOT          // HYPOT can be used as variable name
     // F2008 procedure prefix keywords (Section 12.6.2.2)
-    | NON_RECURSIVE  // NON_RECURSIVE can be used as variable name when not in prefix context
+    | NON_RECURSIVE  // NON_RECURSIVE can be used as variable name when
+                     // not in prefix context
     ;
