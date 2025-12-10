@@ -661,6 +661,47 @@ Gaps that warrant explicit issues:
   F2003‑specific grammar change is required, but any future tightening
   should consider the full F90–F2003 chain holistically.
 
+**F2003 Intrinsic Functions (Issue #429):**
+
+The following F2003 intrinsic functions (ISO/IEC 1539-1:2004 Section 13.7)
+are now fully implemented and tested:
+
+- **EXTENDS_TYPE_OF(A, MOLD)** (Section 13.7.42):
+  - Inquiry function returning `.TRUE.` if A's dynamic type is an extension
+    of MOLD's type.
+  - Essential for polymorphic type checking in OOP.
+  - Grammar: added token `EXTENDS_TYPE_OF` to Fortran2003Lexer and parser
+    rule in `intrinsic_function_call`.
+  - Test fixtures: `extends_type_of.f90`.
+
+- **SAME_TYPE_AS(A, B)** (Section 13.7.102):
+  - Inquiry function returning `.TRUE.` if A and B have the same dynamic
+    type.
+  - Essential for polymorphic type comparison in OOP.
+  - Grammar: added token `SAME_TYPE_AS` to Fortran2003Lexer and parser rule
+    in `intrinsic_function_call`.
+  - Test fixtures: `same_type_as.f90`.
+
+- **MOVE_ALLOC(FROM, TO)** (Section 13.7.81):
+  - Intrinsic subroutine transferring allocation from FROM to TO without
+    copying data.
+  - Essential for efficient memory management with allocatables.
+  - Grammar: token `MOVE_ALLOC` was already defined in Fortran2003Lexer;
+    subroutine call support confirmed via statement parsing.
+  - Test fixtures: `move_alloc.f90`.
+
+- **NEW_LINE(A)** (Section 13.7.84):
+  - Inquiry function returning the newline character for the character kind
+    of A.
+  - Essential for portable formatted I/O.
+  - Grammar: added token `NEW_LINE` to Fortran2003Lexer and parser rule in
+    `intrinsic_function_call`.
+  - Test fixtures: `new_line.f90`.
+
+All test fixtures are located in
+`tests/fixtures/Fortran2003/test_issue_429_f2003_intrinsics/` and are
+automatically verified by the fixture parsing test suite.
+
 ---
 
 ## 11. Summary and issue mapping

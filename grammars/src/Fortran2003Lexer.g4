@@ -101,6 +101,11 @@ SOURCE           : S O U R C E ;
 MOLD             : M O L D ;
 MOVE_ALLOC       : M O V E '_' A L L O C ;
 
+// F2003 OOP and memory intrinsic functions (Section 13.7)
+EXTENDS_TYPE_OF  : E X T E N D S '_' T Y P E '_' O F ;
+SAME_TYPE_AS     : S A M E '_' T Y P E '_' A S ;
+NEW_LINE         : N E W '_' L I N E ;
+
 // ====================================================================
 // PROCEDURE POINTERS (ISO/IEC 1539-1:2004 Section 12.3.2.3)
 // ====================================================================
