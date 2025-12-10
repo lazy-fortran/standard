@@ -783,6 +783,12 @@ executable_stmt_f95
     | read_stmt_f95
     | write_stmt_f95
     | print_stmt_f90              // F90 print (inherited)
+    | open_stmt_f90                  // Section 9.3.1 - File connection (R904)
+    | close_stmt_f90                 // Section 9.3.2 - File disconnection (R908)
+    | inquire_stmt_f90               // Section 9.5.3 - File inquiry (R929)
+    | backspace_stmt_f90             // Section 9.4.1 - File positioning (R923)
+    | endfile_stmt_f90               // Section 9.4.2 - File positioning (R924)
+    | rewind_stmt_f90                // Section 9.4.3 - File positioning (R925)
     | allocate_stmt
     | deallocate_stmt
     | nullify_stmt

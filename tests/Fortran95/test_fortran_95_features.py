@@ -263,3 +263,34 @@ class TestFortran95Parser:
             f"program_unit_f95, but got {parser.getNumberOfSyntaxErrors()}"
         )
 
+    def test_io_statements_in_f95(self):
+        """F95 I/O statements (OPEN, CLOSE, INQUIRE, BACKSPACE, ENDFILE, REWIND).
+
+        ISO/IEC 1539-1:1997 Section 9 defines file I/O statements. These are
+        inherited from Fortran 90 and must be available via executable_stmt_f95
+        entry point. The issue #447 tracks that these statements were not wired
+        into the F95 grammar.
+        """
+        io_statements = [
+            ("open_stmt_f95.f90", "program_unit_f95"),
+            ("close_stmt_f95.f90", "program_unit_f95"),
+            ("inquire_stmt_f95.f90", "program_unit_f95"),
+            ("backspace_stmt_f95.f90", "program_unit_f95"),
+            ("endfile_stmt_f95.f90", "program_unit_f95"),
+            ("rewind_stmt_f95.f90", "program_unit_f95"),
+        ]
+
+        for fixture, rule in io_statements:
+            code = load_fixture(
+                "Fortran95",
+                "test_fortran_95_features",
+                fixture,
+            )
+            parser = self.create_parser_for_rule(code)
+            tree = getattr(parser, rule)()
+            assert tree is not None, f"Failed to parse {fixture}"
+            assert parser.getNumberOfSyntaxErrors() == 0, (
+                f"Syntax errors parsing {fixture}: expected 0, got "
+                f"{parser.getNumberOfSyntaxErrors()}"
+            )
+
