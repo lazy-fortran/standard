@@ -857,6 +857,108 @@ class TestFORTRANIIParser(unittest.TestCase):
                 self.assertIn('(', tree.getText())
                 self.assertIn(')', tree.getText())
 
+    def test_end_file_statement(self):
+        """Test END FILE statement (inherited from FORTRAN I, per C28-6000-2 Appendix A)
+
+        The FORTRAN II manual (C28-6000-2) documents that FORTRAN II includes
+        all FORTRAN I statements including file-control statements.
+
+        END FILE writes an end-of-file mark on a tape unit:
+            END FILE i
+        where i is a tape unit number (integer expression).
+        Reference: IBM Form C28-6003 Chapter III.F
+        Issue #384: File-control statements not wired into FORTRAN II statement_body
+        """
+        test_cases = [
+            ("END FILE 1", 1),
+            ("END FILE 10", 10),
+            ("END FILE ITAPE", None),
+        ]
+
+        for text, unit_num in test_cases:
+            with self.subTest(end_file_stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree, f"Failed to parse: {text}")
+                # Verify END FILE keywords present
+                tree_text = tree.getText()
+                self.assertIn('END', tree_text)
+                self.assertIn('FILE', tree_text)
+
+    def test_rewind_statement(self):
+        """Test REWIND statement (inherited from FORTRAN I, per C28-6000-2 Appendix A)
+
+        The FORTRAN II manual (C28-6000-2) documents that FORTRAN II includes
+        all FORTRAN I statements including file-control statements.
+
+        REWIND rewinds tape unit to the beginning:
+            REWIND i
+        where i is a tape unit number (integer expression).
+        Reference: IBM Form C28-6003 Chapter III.F
+        Issue #384: File-control statements not wired into FORTRAN II statement_body
+        """
+        test_cases = [
+            ("REWIND 1", 1),
+            ("REWIND 5", 5),
+            ("REWIND ITAPE", None),
+        ]
+
+        for text, unit_num in test_cases:
+            with self.subTest(rewind_stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree, f"Failed to parse: {text}")
+                # Verify REWIND keyword present
+                tree_text = tree.getText()
+                self.assertIn('REWIND', tree_text)
+
+    def test_backspace_statement(self):
+        """Test BACKSPACE statement (inherited from FORTRAN I, per C28-6000-2 Appendix A)
+
+        The FORTRAN II manual (C28-6000-2) documents that FORTRAN II includes
+        all FORTRAN I statements including file-control statements.
+
+        BACKSPACE repositions tape unit back one logical record:
+            BACKSPACE i
+        where i is a tape unit number (integer expression).
+        Reference: IBM Form C28-6003 Chapter III.F
+        Issue #384: File-control statements not wired into FORTRAN II statement_body
+        """
+        test_cases = [
+            ("BACKSPACE 1", 1),
+            ("BACKSPACE 7", 7),
+            ("BACKSPACE ITAPE", None),
+        ]
+
+        for text, unit_num in test_cases:
+            with self.subTest(backspace_stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree, f"Failed to parse: {text}")
+                # Verify BACKSPACE keyword present
+                tree_text = tree.getText()
+                self.assertIn('BACKSPACE', tree_text)
+
+    def test_file_control_statements_in_program(self):
+        """Test file-control statements in a complete FORTRAN II program
+
+        Verify END FILE, REWIND, and BACKSPACE parse correctly within
+        a full FORTRAN II program structure (issue #384).
+        """
+        program_text = """
+        DIMENSION DATA(100)
+        REWIND 1
+        BACKSPACE 1
+        END FILE 1
+        STOP
+        END
+        """
+        tree = self.parse(program_text, 'main_program')
+        self.assertIsNotNone(tree)
+        text = tree.getText()
+        # Verify all file-control statements are present
+        self.assertIn('REWIND', text)
+        self.assertIn('BACKSPACE', text)
+        self.assertIn('END', text)
+        self.assertIn('FILE', text)
+
 
 class TestStrictCommon(unittest.TestCase):
     """Test strict 1958 COMMON mode (blank COMMON only, per issue #156)"""
