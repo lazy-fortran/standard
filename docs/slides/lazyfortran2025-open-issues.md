@@ -57,11 +57,23 @@ Base: ISO/IEC 1539-1:2023
 Lazy Fortran extends Fortran 2023 with:
 
 1. **Type Inference** - No explicit declarations needed
-2. **Intent Inference** - Automatic intent(in/out/inout)
+2. **Strict Intent Default** - `intent(in)` by default, explicit override required
 3. **Generic Programming** - Templates and traits
 4. **Monomorphization** - Automatic specialization
 
-Each feature has open design questions to discuss.
+---
+
+# Feature Classification
+
+| Single-pass (local) | Semantic analysis (multi-pass) |
+|---------------------|-------------------------------|
+| Type inference (first assignment) | Monomorphization |
+| Default `intent(in)` | Function result types |
+| Expression type rules | Infer from `intent(out)` (Issue 2) |
+| Declaration placement | Infer pointer/allocatable (Issues 11, 12) |
+| Explicit templates/traits | Auto-USE derived types (Issue 14) |
+
+Single-pass features work like traditional Fortran. Semantic analysis features require collecting information across the program.
 
 ---
 
@@ -190,20 +202,12 @@ p = particle_t(1.0, 2.0, 3.0)
 function add(a, b)
     add = a + b   ! Return type from expression
 end function
+
+x = add(5, 3)         ! add__i32_i32 returns integer
+y = add(2.5d0, 1.5d0) ! add__r64_r64 returns real(8)
 ```
 
-<div class="question">
-
-**OPEN ISSUE 13: How to infer function return types?**
-
-| Option | Source |
-|--------|--------|
-| A | Body only |
-| B | Call site only |
-| C | Body first, call site fallback |
-| D | Must match (error on conflict) |
-
-</div>
+With monomorphization, return type is inferred from body expression given input types. Call site provides argument types -> determines specialization -> return type comes from body.
 
 ---
 
@@ -269,43 +273,36 @@ allocate(arr(n))    ! Allocate array
 
 ---
 
-# 2. Intent Inference
+# 2. Default Intent
 
-Arguments get intent from usage analysis:
+All arguments default to `intent(in)` - stricter than ISO Fortran:
 
 ```fortran
 subroutine process(x, y, z)
-    ! x only read     -> intent(in)
-    ! y modified      -> intent(inout)
-    ! z only written  -> intent(out)
+    integer, intent(in) :: x       ! Explicit (same as default)
+    integer, intent(inout) :: y    ! Explicit override required
+    integer, intent(out) :: z      ! Explicit override required
     y = x + 1
     z = y * 2
 end subroutine
 ```
 
+Without explicit intent, `y` and `z` would be `intent(in)` and assignments would error.
+
 ---
 
-# Intent Inference: Default
+# Default Intent: Rationale
 
-What if usage is inconclusive?
+**No inference** - just a stricter default than ISO Fortran.
 
-```fortran
-subroutine process(data)
-    ! No clear read/write pattern
-end subroutine
-```
+| Standard Fortran | Lazy Fortran |
+|-----------------|--------------|
+| No default intent | `intent(in)` default |
+| Arguments modifiable | Read-only unless explicit |
 
-<div class="question">
+**Principle of least privilege:** arguments are read-only unless explicitly declared otherwise.
 
-**OPEN ISSUE 4: Default intent when not inferable?**
-
-| Option | Default | Trade-off |
-|--------|---------|-----------|
-| A | intent(in) | Safe but breaks ISO patterns |
-| B | intent(inout) | Closer to ISO |
-| C | Required explicit | Forces clarity |
-
-</div>
+Aligns with modern language design (Rust immutable-by-default).
 
 ---
 
@@ -491,52 +488,55 @@ Note: complex(8) has two real(8) -> c8 not c128
 
 ---
 
-# Summary: All Open Issues
+# Summary: Single-pass Open Issues
+
+These require only local analysis (traditional Fortran style):
 
 | # | Topic | Key Question |
 |---|-------|--------------|
 | 1 | Numeric kinds | real(4) vs real(8) default? |
-| 2 | Intent(out) | Auto-declare from callee? |
 | 3 | Declarations | Block start vs anywhere? |
-| 4 | Default intent | in vs inout vs explicit? |
+| 10 | Char length | First vs max vs deferred? |
+| 15 | Fallback type | Error vs default? |
 | 5 | Generics | Template vs Traits vs Both? |
 | 6 | Generic syntax | Braces vs parens vs angles? |
-| 7 | Dispatch | Static vs dynamic vs both? |
-| 8 | Specialization | Module vs program scope? |
+| 9 | Kind suffix | Bits vs bytes? |
+| 16 | @ syntax | Support annotations? |
 
 ---
 
-# Summary: All Open Issues (continued)
+# Summary: Semantic Analysis Open Issues
+
+These require multi-pass or whole-program analysis:
 
 | # | Topic | Key Question |
 |---|-------|--------------|
-| 9 | Kind suffix | Bits vs bytes? |
-| 10 | Char length | First vs max vs deferred? |
+| 2 | Intent(out) | Auto-declare from callee? |
+| 7 | Dispatch | Static vs dynamic vs both? |
+| 8 | Specialization | Module vs program scope? |
 | 11 | Pointer | Infer attribute? |
 | 12 | Allocatable | Infer from allocate? |
-| 13 | Function result | Body vs call site? |
 | 14 | Derived types | Auto-USE modules? |
-| 15 | Fallback type | Error vs default? |
-| 16 | @ syntax | Support annotations? |
+
+**Resolved:** Issue 4 (default intent = `intent(in)`), Issue 13 (function result types from body + monomorphization)
 
 ---
 
 # Discussion Order Suggestion
 
-**Simple decisions first:**
+**Single-pass issues first (simpler to implement):**
 - Issue 9: Kind suffix (bits vs bytes)
 - Issue 3: Declaration placement
 - Issue 16: @ annotation syntax
-
-**Then design choices:**
 - Issue 1: Default numeric kinds
-- Issue 4: Default intent
 - Issue 10: Character length
 - Issue 15: Fallback type
+- Issues 5-6: Generics syntax
 
-**Finally complex topics:**
-- Issues 5-8: Generics system
-- Issues 11-14: Advanced inference
+**Then semantic analysis issues:**
+- Issues 7-8: Dispatch and specialization scope
+- Issues 11-12: Pointer/allocatable inference
+- Issue 14: Derived type auto-USE
 - Issue 2: Intent(out) inference
 
 ---
