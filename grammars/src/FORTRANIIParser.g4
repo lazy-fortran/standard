@@ -177,6 +177,8 @@ statement_body
     | assignment_stmt      // Appendix A: v = e (assignment)
     | goto_stmt           // Appendix A: GO TO n
     | computed_goto_stmt  // Appendix A: GO TO (n1, n2, ...), i
+    | assign_stmt         // C28-6003 Appendix B row 12: ASSIGN i TO n
+    | assigned_goto_stmt  // C28-6003 Appendix B row 2: GO TO n, (n1, ...)
     | arithmetic_if_stmt  // Appendix A: IF (e) n1, n2, n3
     | do_stmt            // Appendix A: DO n i = m1, m2 [, m3]
     | continue_stmt      // Appendix A: CONTINUE
@@ -202,6 +204,8 @@ statement_body_strict
     | assignment_stmt      // Appendix A: v = e (assignment)
     | goto_stmt           // Appendix A: GO TO n
     | computed_goto_stmt  // Appendix A: GO TO (n1, n2, ...), i
+    | assign_stmt         // C28-6003 Appendix B row 12: ASSIGN i TO n
+    | assigned_goto_stmt  // C28-6003 Appendix B row 2: GO TO n, (n1, ...)
     | arithmetic_if_stmt  // Appendix A: IF (e) n1, n2, n3
     | do_stmt            // Appendix A: DO n i = m1, m2 [, m3]
     | continue_stmt      // Appendix A: CONTINUE
