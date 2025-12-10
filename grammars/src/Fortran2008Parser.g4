@@ -824,6 +824,7 @@ array_function_call
 image_function_call
     : THIS_IMAGE LPAREN actual_arg_list? RPAREN      // Section 13.7.165
     | NUM_IMAGES LPAREN actual_arg_list? RPAREN      // Section 13.7.121
+    | IMAGE_INDEX LPAREN actual_arg_list RPAREN      // Section 13.7.81
     | STORAGE_SIZE LPAREN actual_arg_list RPAREN     // Section 13.7.163
     | IS_CONTIGUOUS LPAREN actual_arg_list RPAREN    // Section 13.7.87
     ;
