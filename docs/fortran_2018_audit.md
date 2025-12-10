@@ -149,12 +149,11 @@ Specification:
     - `RANK (*)` for the assumed‑rank case.
     - `RANK DEFAULT` for the default branch.
 
-Grammar implementation:
-
 - Lexer:
-  - Token `SELECT_RANK` and `RANK_KEYWORD` are defined and used.
-  - Note: Dead tokens `RANK_STAR` and `RANK_DEFAULT` were removed in issue #434
-    (these were never used in the parser).
+- Token `RANK_KEYWORD` is defined and used; the compound token `SELECT_RANK`
+- was removed in issue #441 because the parser uses `SELECT + RANK_KEYWORD`.
+- Note: Dead tokens `RANK_STAR` and `RANK_DEFAULT` were removed in issue #434
+-  (these were never used in the parser).
 - Parser:
   - `select_rank_construct`:
     - `select_rank_stmt rank_construct* end_select_rank_stmt`.
@@ -645,7 +644,7 @@ syntax rules to grammar rules in `Fortran2018Lexer.g4` and `Fortran2018Parser.g4
 
 | ISO Reference | Token | Lexer Rule |
 |---------------|-------|------------|
-| Section 11.1.10 | SELECT RANK | `SELECT_RANK` (compound) |
+| Section 11.1.10 | SELECT RANK | `SELECT` + `RANK_KEYWORD` (compound `SELECT_RANK` removed in #441) |
 | Section 11.1.10 | RANK | `RANK_KEYWORD` |
 | Section 11.4 | QUIET | `QUIET` |
 | Section 11.6.7 | CHANGE TEAM | `CHANGE_TEAM` |
@@ -682,9 +681,11 @@ syntax rules to grammar rules in `Fortran2018Lexer.g4` and `Fortran2018Parser.g4
 | R1178 | NEW_INDEX | `NEW_INDEX` |
 | R1173 | UNTIL_COUNT | `UNTIL_COUNT` |
 
-### A.12 Dead Token Cleanup (Issue #434)
+### A.12 Dead Token Cleanup (Issues #434, #441)
 
-The following tokens were removed as dead code in issue #434:
+The following tokens were removed as dead code:
+- `SELECT_RANK`: never used by the parser (SELECT RANK is implemented as
+  `SELECT + RANK_KEYWORD`); removed in issue #441.
 - `RANK_STAR` and `RANK_DEFAULT`: R1150 select-rank-case-stmt uses MULTIPLY (*) and
   DEFAULT keywords instead of compound tokens.
 - `ASSUMED_RANK`: R825 assumed-rank-spec uses DOT_DOT (..) syntax, not ASSUMED_RANK keyword.
