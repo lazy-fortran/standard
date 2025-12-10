@@ -1298,6 +1298,9 @@ use_stmt
     | USE COMMA INTRINSIC DOUBLE_COLON ieee_module_name NEWLINE
     | USE COMMA INTRINSIC DOUBLE_COLON ieee_module_name COMMA
       ONLY COLON ieee_only_list NEWLINE
+    | USE COMMA NON_INTRINSIC DOUBLE_COLON IDENTIFIER NEWLINE
+    | USE COMMA NON_INTRINSIC DOUBLE_COLON IDENTIFIER COMMA
+      ONLY COLON only_list NEWLINE
     ;
 
 // ====================================================================

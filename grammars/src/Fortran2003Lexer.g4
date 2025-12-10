@@ -180,6 +180,16 @@ BLOCK            : B L O C K ;
 IMPORT           : I M P O R T ;
 
 // ====================================================================
+// USE STATEMENT MODULE NATURE (ISO/IEC 1539-1:2004 Section 11.2.1)
+// ====================================================================
+//
+// F2003 introduces module-nature specifiers (R1110) for USE statements:
+// - INTRINSIC: marks a module as intrinsic (e.g., IEEE modules)
+// - NON_INTRINSIC: explicitly marks a module as user-defined
+
+NON_INTRINSIC    : N O N '_' I N T R I N S I C ;
+
+// ====================================================================
 // VOLATILE AND PROTECTED (ISO/IEC 1539-1:2004 Section 5.1.2)
 // ====================================================================
 //
