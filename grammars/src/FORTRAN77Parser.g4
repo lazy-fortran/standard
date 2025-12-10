@@ -587,8 +587,27 @@ data_constant_list
     ;
 
 // Data constant - ISO 1539:1980 Section 9.3
-// Optionally signed constant
+// Optional repetition factor followed by optionally signed constant
 data_constant
+    : data_repetition? signed_constant
+    ;
+
+// Data repetition - ISO 1539:1980 Section 9.3
+// Unsigned integer followed by asterisk (e.g., 10* in 10*0)
+data_repetition
+    : unsigned_int MULTIPLY
+    ;
+
+// Unsigned integer for repetition factors
+// Used in DATA statement repetition (e.g., 10*0.0)
+unsigned_int
+    : INTEGER_LITERAL
+    | LABEL               // LABEL tokens match 1-5 digit integers
+    ;
+
+// Signed constant - ISO 1539:1980 Section 9.3
+// Used by data_constant rule for repetition factor support
+signed_constant
     : literal
     | PLUS literal
     | MINUS literal
