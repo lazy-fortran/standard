@@ -595,12 +595,22 @@ The cross-walk is organized by standard section for easy reference.
 
 | Spec Rule | ISO Section | Grammar Rule | Status |
 |-----------|-------------|--------------|--------|
+| R904 open-stmt | 9.3.1 | `open_stmt_f90` | Implemented (wired through `executable_stmt_f95`; issue #447) |
+| R908 close-stmt | 9.3.2 | `close_stmt_f90` | Implemented (wired through `executable_stmt_f95`; issue #447) |
 | R908 read-stmt | 9.4 | `read_stmt_f95` | Implemented |
 | R909 write-stmt | 9.4 | `write_stmt_f95` | Implemented |
 | R912 io-control-spec | 9.4 | `io_control_spec_f95` | Implemented |
 | R914-R915 input-item | 9.4.1 | `input_item_f95` | Implemented |
 | R916-R917 output-item | 9.4.2 | `output_item_f95` | Implemented |
 | R918 io-implied-do | 9.4 | `io_implied_do_f95` | Implemented |
+| R923 backspace-stmt | 9.4.1 | `backspace_stmt_f90` | Implemented (wired through `executable_stmt_f95`; issue #447) |
+| R924 endfile-stmt | 9.4.2 | `endfile_stmt_f90` | Implemented (wired through `executable_stmt_f95`; issue #447) |
+| R925 rewind-stmt | 9.4.3 | `rewind_stmt_f90` | Implemented (wired through `executable_stmt_f95`; issue #447) |
+| R929 inquire-stmt | 9.5.3 | `inquire_stmt_f90` | Implemented (wired through `executable_stmt_f95`; issue #447) |
+
+These statements are inherited from the F90 layer and are now reachable
+via `executable_stmt_f95`, restoring the missing I/O coverage tracked
+in issue #447.
 
 ### Section 11 - Program Units (R1101-R1117)
 
@@ -703,10 +713,12 @@ The Fortran 95 layer in this repository:
   - (Resolved in #182: PURE/ELEMENTAL in F90 grammar is now documented as a
     deliberate forward extension, with clear comments in the grammar files
     and a dedicated section in the F90 audit.)
-  - (Resolved: Square‑bracket array constructors were removed from the
+  - (Resolved: Square-bracket array constructors were removed from the
     F95 grammar; only the standard `(/ ... /)` form is now accepted.)
   - (Resolved in #179: F95 constructs are now integrated into program
     structure via `program_unit_f95` entry point.)
+  - (Resolved in #447: `executable_stmt_f95` now exposes the F90-derived
+    OPEN/CLOSE/INQUIRE/BACKSPACE/ENDFILE/REWIND statements.)
 
 Existing issues:
 
