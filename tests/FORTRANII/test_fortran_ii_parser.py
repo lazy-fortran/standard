@@ -1132,6 +1132,79 @@ class TestStrictCommon(unittest.TestCase):
         errors_count = tree.parser.getNumberOfSyntaxErrors()
         self.assertEqual(errors_count, 0)
 
+    def test_format_statement_basic(self):
+        """Test FORMAT statement with basic descriptors (ISO/ANSI section 13)
+
+        Per IBM Form C28-6000-2 Appendix A, FORMAT statements are inherited
+        from FORTRAN I and consist of a label followed by FORMAT keyword and
+        parenthesized format specification.
+        """
+        test_cases = [
+            ("10 FORMAT(I5, F10.2, E12.4)", ["I5", "F10.2", "E12.4"]),
+            ("20 FORMAT(A20, I10)", ["A20", "I10"]),
+            ("30 FORMAT(/)", []),
+        ]
+
+        for text, descriptors in test_cases:
+            with self.subTest(format_stmt=text):
+                tree = self.parse(text, 'statement')
+                self.assertIsNotNone(tree)
+                tree_text = tree.getText()
+                self.assertIn('FORMAT', tree_text)
+                # Verify that format contains at least the expected descriptors
+                for descriptor in descriptors:
+                    self.assertIn(descriptor, tree_text)
+
+    def test_format_statement_with_hollerith(self):
+        """Test FORMAT statement with Hollerith constants (legacy text format)
+
+        Per ISO 1539:1980 Section 13.1.2, Hollerith constants in FORMAT
+        specify literal text output. Format: nHtext where n is character count.
+        """
+        test_cases = [
+            ("30 FORMAT(5HHELLO, I5)", "HHELLO"),
+            ("40 FORMAT(1H1, 10X, 10HTITLE LINE)", "HTITLE"),
+            ("50 FORMAT(4HTEST)", "HTEST"),
+        ]
+
+        for text, hollerith_part in test_cases:
+            with self.subTest(format_hollerith=text):
+                tree = self.parse(text, 'statement')
+                self.assertIsNotNone(tree)
+                tree_text = tree.getText()
+                self.assertIn('FORMAT', tree_text)
+                self.assertIn(hollerith_part, tree_text)
+
+    def test_format_statement_in_complete_program(self):
+        """Test FORMAT statement in a complete FORTRAN II program
+
+        Verify FORMAT statements parse correctly when part of a full
+        FORTRAN II program structure with variables and I/O operations.
+        """
+        program_text = """
+        X = 1.0
+        Y = 2.0
+        10 FORMAT(I5, F10.2, E12.4)
+        20 FORMAT(A20, I10)
+        WRITE X, Y
+        END
+        """
+
+        tree = self.parse(program_text, 'main_program')
+        self.assertIsNotNone(tree)
+        tree_text = tree.getText()
+
+        # Verify FORMAT statements are present
+        self.assertIn('FORMAT', tree_text)
+        self.assertIn('I5', tree_text)
+        self.assertIn('F10.2', tree_text)
+        self.assertIn('E12.4', tree_text)
+
+        # Verify no syntax errors
+        errors = tree.parser.getNumberOfSyntaxErrors()
+        self.assertEqual(errors, 0,
+                        f"FORMAT statements should parse without errors, got {errors}")
+
 
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail
