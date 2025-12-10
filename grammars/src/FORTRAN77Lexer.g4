@@ -103,12 +103,6 @@ EXTERNAL        : E X T E R N A L ;
 // Syntax: INTRINSIC name-list
 INTRINSIC       : I N T R I N S I C ;
 
-// --------------------------------------------------------------------
-// DO Loop Extensions
-// --------------------------------------------------------------------
-// Standard FORTRAN 77 (Section 11.10) terminates DO loops on labeled
-// statements. ENDDO is a widely-used vendor extension not in ISO 1539:1980.
-ENDDO           : E N D D O ;
 
 // --------------------------------------------------------------------
 // File I/O Statements - ISO 1539:1980 Section 12.10
