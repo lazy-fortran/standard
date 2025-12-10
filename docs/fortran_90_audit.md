@@ -161,8 +161,14 @@ Grammar:
   - `stat_variable` and `io_control_spec` cover `STAT=` and related
     status/control specifiers.
 - Intrinsic inquiry functions (subset):
-  - `intrinsic_function_f90` includes SIZE, SHAPE, LBOUND, UBOUND,
-    ALLOCATED and PRESENT, SELECTED_REAL_KIND, SELECTED_INT_KIND.
+  - `intrinsic_function_f90` includes a broad set of intrinsics:
+    - Inquiry forms such as SIZE, SHAPE, LBOUND, UBOUND, ALLOCATED,
+      PRESENT, SELECTED_REAL_KIND, SELECTED_INT_KIND.
+    - Array reductions, helper operations, and character procedures from
+      §13.8 (ALL, ANY, COUNT, DOT_PRODUCT, MATMUL, MAXVAL, MINVAL,
+      PRODUCT, PACK, UNPACK, SPREAD, MERGE, TRANSPOSE, REPEAT, TRIM,
+      ADJUSTL, ADJUSTR) matching ISO/IEC 1539:1991 coverage for
+      intrinsic procedures.
 
 Gaps:
 
