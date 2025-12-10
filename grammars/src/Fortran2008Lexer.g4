@@ -129,6 +129,17 @@ CONCURRENT       : C O N C U R R E N T ;
 CONTIGUOUS       : C O N T I G U O U S ;
 
 // ============================================================================
+// CODIMENSION ATTRIBUTE (ISO/IEC 1539-1:2010 Section 5.3.6)
+// ============================================================================
+// CODIMENSION specifies that a variable is a coarray with specified codimensions.
+// Used in variable declarations to designate coarray dimensions.
+// - R502: attr-spec -> ... | CODIMENSION [coarray-spec]
+// - R509: coarray-spec -> deferred-coshape-spec-list | explicit-coshape-spec
+// - R510: deferred-coshape-spec -> :
+// - R511: explicit-coshape-spec -> [lower-cobound:] upper-cobound [, ...]
+CODIMENSION      : C O D I M E N S I O N ;
+
+// ============================================================================
 // ERROR STOP STATEMENT (ISO/IEC 1539-1:2010 Section 8.4)
 // ============================================================================
 // ERROR STOP initiates error termination of execution:
