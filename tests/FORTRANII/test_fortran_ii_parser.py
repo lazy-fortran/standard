@@ -742,6 +742,121 @@ class TestFORTRANIIParser(unittest.TestCase):
         self.assertIn('STOP', text)
         self.assertIn('END', text)
 
+    def test_assign_statement(self):
+        """Test ASSIGN statements (inherited from FORTRAN I per C28-6000-2 Appendix A).
+
+        ASSIGN stores a statement label in an integer variable for later use with
+        assigned GOTO. Syntax: ASSIGN label TO variable
+        """
+        assign_text = load_fixture(
+            "FORTRANII",
+            "test_fortran_ii_assign_goto",
+            "assign_stmt.f",
+        )
+
+        tree = self.parse(assign_text, 'main_program')
+        self.assertIsNotNone(tree)
+        text = tree.getText()
+        # Verify ASSIGN statements are present
+        self.assertIn('ASSIGN', text)
+        # Verify labels (100, 200, 300) are present
+        self.assertIn('100', text)
+        self.assertIn('200', text)
+        self.assertIn('300', text)
+        # Verify variable names
+        self.assertIn('N', text)
+        self.assertIn('M', text)
+        self.assertIn('JUMP', text)
+
+    def test_assigned_goto_statement(self):
+        """Test assigned GOTO statements (inherited from FORTRAN I per C28-6000-2 Appendix A).
+
+        Assigned GOTO branches to one of several labels based on the value stored
+        in a variable. Syntax: GOTO variable, (label1, label2, ...)
+        """
+        goto_text = load_fixture(
+            "FORTRANII",
+            "test_fortran_ii_assign_goto",
+            "assigned_goto_stmt.f",
+        )
+
+        tree = self.parse(goto_text, 'main_program')
+        self.assertIsNotNone(tree)
+        text = tree.getText()
+        # Verify ASSIGN statement
+        self.assertIn('ASSIGN', text)
+        # Verify assigned GOTO statement (GOTO variable, (labels))
+        self.assertIn('GOTO', text)
+        # Verify target labels
+        self.assertIn('100', text)
+        self.assertIn('200', text)
+        self.assertIn('300', text)
+        # Verify variable name
+        self.assertIn('N', text)
+
+    def test_assign_and_goto_combined(self):
+        """Test ASSIGN and assigned GOTO used together in typical pattern.
+
+        This integration test verifies that ASSIGN and assigned GOTO work
+        together in a realistic FORTRAN II program.
+        """
+        combined_text = load_fixture(
+            "FORTRANII",
+            "test_fortran_ii_assign_goto",
+            "assign_goto_combined.f",
+        )
+
+        tree = self.parse(combined_text, 'main_program')
+        self.assertIsNotNone(tree)
+        text = tree.getText()
+
+        # Verify both ASSIGN and assigned GOTO are present
+        self.assertIn('ASSIGN', text)
+        self.assertIn('GOTO', text)
+
+        # Verify labels
+        self.assertIn('100', text)
+        self.assertIn('200', text)
+        self.assertIn('300', text)
+
+        # Verify variable name
+        self.assertIn('JUMP', text)
+
+    def test_assign_statement_direct(self):
+        """Test parsing ASSIGN statement directly as statement_body rule"""
+        test_cases = [
+            "ASSIGN 100 TO N",
+            "ASSIGN 999 TO LABEL",
+            "ASSIGN 50 TO JUMP_VAR",
+        ]
+
+        for text in test_cases:
+            with self.subTest(assign_stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree)
+                # Verify ASSIGN keyword
+                self.assertIn('ASSIGN', tree.getText())
+                # Verify TO keyword
+                self.assertIn('TO', tree.getText())
+
+    def test_assigned_goto_statement_direct(self):
+        """Test parsing assigned GOTO statement directly as statement_body rule"""
+        test_cases = [
+            "GOTO N, (100, 200, 300)",
+            "GOTO JUMP, (10, 20, 30, 40)",
+            "GOTO VAR, (1, 2)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(assigned_goto_stmt=text):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree)
+                # Verify GOTO keyword
+                self.assertIn('GOTO', tree.getText())
+                # Verify labels in parentheses
+                self.assertIn('(', tree.getText())
+                self.assertIn(')', tree.getText())
+
 
 class TestStrictCommon(unittest.TestCase):
     """Test strict 1958 COMMON mode (blank COMMON only, per issue #156)"""
