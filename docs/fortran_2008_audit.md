@@ -114,11 +114,23 @@ Grammar implementation:
     - `MODULE FUNCTION name(args...) [suffix] [binding_spec]`.
   - `module_subprogram` is overridden to include these new forms in
     addition to the F2008 regular function/subroutine subprogram rules.
+- Procedure prefix specifications (ISO/IEC 1539-1:2010 R1225-R1226):
+  - `prefix_f2008` and `prefix_spec_f2008` rules allow MODULE as a
+    prefix-spec keyword, enabling combined syntax like `MODULE PURE FUNCTION`.
+  - `prefix_spec_f2008` includes:
+    - `RECURSIVE` (F90), `PURE` (F95), `ELEMENTAL` (F95)
+    - `IMPURE` (F2008, issue #392), `MODULE` (F2008, issue #464),
+      `NON_RECURSIVE` (F2008, issue #411)
+    - `type_spec` (function return type)
+  - These prefixes apply to both regular procedures (`function_stmt_f2008`,
+    `subroutine_stmt_f2008`) and separate module procedures.
 
 Tests:
 
 - `test_basic_f2008_features.py::test_submodule_basic_syntax` parses a
-  simple submodule via F2008’s entry.
+  simple submodule via F2008's entry.
+- `test_basic_f2008_features.py::test_module_prefix_spec` exercises
+  combined MODULE prefixes with PURE and ELEMENTAL keywords.
 - `test_f2008_submodules.py` exercises:
   - Basic SUBMODULE declarations.
   - Parent module + parent submodule hierarchies.

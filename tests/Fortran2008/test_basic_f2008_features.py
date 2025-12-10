@@ -268,6 +268,19 @@ class TestBasicF2008Features:
             f"Expected 0 errors for compiler inquiry intrinsics, got {errors}"
         )
 
+    def test_module_prefix_spec(self):
+        """Test MODULE prefix-spec combined with other prefixes (ISO 1539-1:2010 R1226)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "module_prefix.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "MODULE prefix-spec failed to produce parse tree"
+        assert errors == 0, (
+            f"Expected 0 errors for MODULE prefix-spec test, got {errors}"
+        )
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

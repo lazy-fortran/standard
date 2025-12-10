@@ -111,6 +111,18 @@ END_SUBMODULE    : E N D WS+ S U B M O D U L E ;
 MASKED           : M A S K E D ;
 
 // ============================================================================
+// PROCEDURE PREFIX KEYWORDS (ISO/IEC 1539-1:2010 Section 12.6.2.2, R1226)
+// ============================================================================
+// F2008 adds MODULE, IMPURE, and NON_RECURSIVE to procedure prefixes:
+// - IMPURE: Explicitly mark non-pure elemental procedures (Section 12.7)
+// - MODULE: Indicates separate module procedure implementation (Section 12.6.2.5)
+// - NON_RECURSIVE: Explicitly mark non-recursive procedures (Section 12.6.2.2)
+// - R1226: prefix-spec -> declaration-type-spec | ELEMENTAL | IMPURE |
+//                         MODULE | PURE | RECURSIVE | NON_RECURSIVE
+IMPURE           : I M P U R E ;
+NON_RECURSIVE    : N O N '_' R E C U R S I V E ;
+
+// ============================================================================
 // DO CONCURRENT CONSTRUCT (ISO/IEC 1539-1:2010 Section 8.1.6.6)
 // ============================================================================
 // DO CONCURRENT enables explicit loop parallelization:
