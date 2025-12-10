@@ -133,12 +133,6 @@ Gaps (spec vs grammar):
   - That KIND and LEN selectors are integer constant expressions.
   - Many fine‑grained attribute ordering and consistency rules (e.g.
     not all attribute combinations are valid for every context).
-- IMPLICIT and IMPLICIT NONE:
-  - F90’s `IMPLICIT` statement is not modeled explicitly; implicit
-    typing is inherited from earlier grammars via naming conventions.
-  - IMPLICIT NONE is therefore not recognized as a statement. This
-    limitation is tracked at a higher level (see issue #167 and the
-    planned F90 IMPLICIT work).
 
 ## 4. Arrays, pointers, ALLOCATABLE and dynamic memory
 
@@ -281,23 +275,11 @@ Grammar:
     names.
 - `namelist_stmt`:
   - Included in `declaration_construct` as an F90 declaration form.
-
-**CRITICAL Gaps (Issue #311):**
-
-File I/O statements from N692 Section 9 are NOT integrated into F90:
-
-| ISO Rule | Statement | Status |
-|----------|-----------|--------|
-| R904 | `open-stmt` | NOT IMPLEMENTED in F90 |
-| R908 | `close-stmt` | NOT IMPLEMENTED in F90 |
-| R923 | `backspace-stmt` | NOT IMPLEMENTED in F90 |
-| R924 | `endfile-stmt` | NOT IMPLEMENTED in F90 |
-| R925 | `rewind-stmt` | NOT IMPLEMENTED in F90 |
-| R929 | `inquire-stmt` | NOT IMPLEMENTED in F90 |
-
-These statements exist at the FORTRAN 77 level but are NOT wired into
-`execution_part_f90` or `executable_construct_f90`. Real F90 programs
-using file operations will fail to parse correctly.
+- File I/O statements (N692 §9):
+  - `open_stmt_f90`, `close_stmt_f90`, `backspace_stmt_f90`,
+    `endfile_stmt_f90`, `rewind_stmt_f90`, `inquire_stmt_f90` are
+    all wired into `executable_construct_f90` with proper ISO section
+    references (R904, R908, R923, R924, R925, R929).
 
 ## 8. Fixtures and integration status
 
@@ -374,7 +356,7 @@ rules:
 | Section 5.1 | Type Declarations | `F90TypesParser.g4`: `type_declaration_stmt_f90`, `attr_spec_f90` |
 | Section 5.1.2.3 | INTENT Attribute | `F90TypesParser.g4`: `intent_spec`; Lexer: `INTENT`, `IN`, `OUT`, `INOUT` |
 | Section 5.1.2.4 | Array Specifications | `F90TypesParser.g4`: `array_spec_f90`, `deferred_shape_spec_list` |
-| Section 5.3 | IMPLICIT Statement | `Fortran90Lexer.g4`: `IMPLICIT`, `NONE` |
+| Section 5.3 | IMPLICIT Statement | `Fortran90Parser.g4`: `implicit_stmt_f90`, `specification_part` |
 | Section 5.4 | NAMELIST Statement | `F90IOParser.g4`: `namelist_stmt` |
 | Section 6.3 | Dynamic Allocation | `F90MemoryParser.g4`: `allocate_stmt`, `deallocate_stmt`, `nullify_stmt` |
 | Section 7 | Expressions | `F90ExprsParser.g4`: `expr_f90`, `primary_f90` |
@@ -384,7 +366,10 @@ rules:
 | Section 8.1.1 | IF Construct | `F90ControlParser.g4`: `if_construct`, `if_then_stmt_f90`, `else_if_stmt_f90`, `else_stmt_f90`, `end_if_stmt_f90` |
 | Section 8.1.3 | CASE Construct | `F90ControlParser.g4`: `select_case_construct`, `case_stmt`, `case_selector` |
 | Section 8.1.4 | DO Construct | `F90ControlParser.g4`: `do_construct_f90`, `loop_control`, `cycle_stmt`, `exit_stmt` |
-| Section 9 | Input/Output | `F90IOParser.g4`: `read_stmt_f90`, `write_stmt_f90`, `io_control_spec` |
+| Section 9.3 | Read Statement | `F90IOParser.g4`: `read_stmt_f90` |
+| Section 9.4 | Write Statement | `F90IOParser.g4`: `write_stmt_f90` |
+| Section 9.6 | File Positioning | `Fortran90Parser.g4`: `backspace_stmt_f90`, `endfile_stmt_f90`, `rewind_stmt_f90` |
+| Section 9.7 | File Connection/Inquiry | `Fortran90Parser.g4`: `open_stmt_f90`, `close_stmt_f90`, `inquire_stmt_f90` |
 | Section 11.1 | Main Program | `Fortran90Parser.g4`: `main_program`, `program_stmt`, `end_program_stmt` |
 | Section 11.3 | Modules | `F90ModulesParser.g4`: `module`, `module_stmt`, `use_stmt` |
 | Section 12.3 | Interface Blocks | `F90ModulesParser.g4`: `interface_block`, `interface_stmt`, `generic_spec` |
@@ -412,27 +397,19 @@ The Fortran 90 grammar in this repository:
 - Passes a broad comprehensive test suite targeted at individual F90
   features.
 
-**CRITICAL Gaps (Issue #311):**
+**Known Gaps and Limitations:**
 
 | ISO Rule | Description | Status |
 |----------|-------------|--------|
-| R904 | `open-stmt` | NOT IMPLEMENTED |
-| R908 | `close-stmt` | NOT IMPLEMENTED |
-| R923 | `backspace-stmt` | NOT IMPLEMENTED |
-| R924 | `endfile-stmt` | NOT IMPLEMENTED |
-| R925 | `rewind-stmt` | NOT IMPLEMENTED |
-| R929 | `inquire-stmt` | NOT IMPLEMENTED |
 | R620 | `section-subscript` with vector subscript | Partial |
 | R531 | `data-implied-do` nested forms | Partial |
-| R1219 | `entry-stmt` | NOT IMPLEMENTED |
+| R1219 | `entry-stmt` | Implemented (F90 extension via `entry_stmt_f90`) |
 
 **xfail Fixtures:** 0 (Issue #311 resolved; fixtures corrected)
 
 Future work should:
 
-- **HIGH PRIORITY:** Integrate OPEN/CLOSE/INQUIRE/BACKSPACE/REWIND/ENDFILE
-  statements into F90 execution part (N692 §9)
 - Tighten module/program‑unit integration and internal procedures
-- Add explicit IMPLICIT and IMPLICIT NONE statement support (N692 §5.2.2)
-- Implement ENTRY statement (R1219)
+- Complete vector subscript support in array sections (R620)
+- Implement nested data-implied-do forms (R531)
 - Keep the grammar and tests in sync with spec‑section annotations (#173)
