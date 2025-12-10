@@ -285,6 +285,7 @@ executable_construct_f2008
     | if_construct                    // IF (Section 8.1.7)
     | do_construct_f2008              // DO (Section 8.1.6) - Enhanced in F2008
     | select_case_construct           // SELECT CASE (Section 8.1.8)
+    | where_construct                // WHERE construct (Section 7.5.3)
     | type_declaration_stmt_f2008     // F2008 allows mixed declarations
     | executable_construct            // Inherit F2003 constructs
     ;
