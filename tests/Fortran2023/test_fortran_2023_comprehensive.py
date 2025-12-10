@@ -210,10 +210,10 @@ class TestFortran2023Lexer:
         # Test key F2018 constructs still work
         # Note: RANK_STAR, RANK_DEFAULT, ASSUMED_RANK, LOCALITY, DEFAULT_ACCESS removed
         # in issue #434 - these were dead tokens with no parser usage
+        # Note: SELECT_RANK removed in issue #441 - compound token never used (parser uses SELECT + RANK_KEYWORD)
         f2018_keywords = [
             'CO_SUM', 'CO_MIN', 'CO_MAX', 'CO_REDUCE', 'CO_BROADCAST',
             'IMAGE_STATUS', 'FAILED_IMAGES', 'STOPPED_IMAGES',
-            'SELECT_RANK',
             'RANDOM_INIT', 'REPEATABLE', 'IMAGE_DISTINCT',
             'REDUCE', 'OUT_OF_RANGE', 'COSHAPE', 'TEAM_NUMBER',
             'FORM_TEAM', 'CHANGE_TEAM', 'END_TEAM', 'TEAM_TYPE'
@@ -700,7 +700,7 @@ class TestFortran2023Foundation:
         required_features = [
             # FORTRAN era
             'IF', 'DO', 'GOTO', 'INTEGER', 'REAL',
-            # F77 structured programming  
+            # F77 structured programming
             'CHARACTER', 'THEN', 'ELSE', 'ENDIF',
             # F90 modern programming
             'MODULE', 'ALLOCATABLE', 'POINTER', 'INTERFACE',
@@ -709,7 +709,7 @@ class TestFortran2023Foundation:
             # F2008 parallel programming
             'CONCURRENT', 'CONTIGUOUS',
             # F2018 teams and events
-            'CO_SUM', 'SELECT_RANK', 'FORM_TEAM',
+            'CO_SUM', 'FORM_TEAM',  # Note: SELECT_RANK removed in #441 (dead token, parser uses SELECT + RANK_KEYWORD)
             # F2023 enhancements
             'ENUMERATOR', 'QUESTION', 'IEEE_MAX',
             # F2023 degree-based trigonometric intrinsics
