@@ -174,8 +174,16 @@ declaration_construct
 // Section 8 provides detailed execution control rules.
 
 // Execution part - ISO/IEC 1539:1991 Section 2.3.3, R208
+// Enhanced to support semicolon-separated statements per Section 3.4.2
 execution_part
-    : (NEWLINE* executable_construct)* NEWLINE*
+    : (NEWLINE* execution_item)* NEWLINE*
+    ;
+
+// Execution item: allows semicolons between action statements and constructs
+// - Action statements can be separated by semicolons on a line (ISO 3.4.2)
+// - Constructs (IF, DO, etc.) are block statements and consume lines
+execution_item
+    : executable_construct (SEMICOLON executable_construct)*
     ;
 
 // Executable construct - ISO/IEC 1539:1991 Section 2.3.3, R214
