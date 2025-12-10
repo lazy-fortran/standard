@@ -1,0 +1,12 @@
+      PROGRAM SUBSTRING_ASSIGN
+      CHARACTER*30 NAME
+      CHARACTER*20 CITY
+      NAME = 'JOHN DOE SMITH'
+      NAME(1:5) = 'JANE '
+      CITY = 'NEW YORK CITY'
+      NAME(6:10) = CITY(1:5)
+      NAME(1:5) = CITY(6:10)
+      NAME(:5) = 'HELLO'
+      NAME(10:) = 'WORLD'
+      PRINT *, NAME
+      END
