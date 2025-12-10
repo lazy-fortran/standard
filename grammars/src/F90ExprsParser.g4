@@ -63,6 +63,7 @@ intrinsic_function_f90
     | LBOUND LPAREN actual_arg_spec_list RPAREN       // LBOUND array intrinsic
     | UBOUND LPAREN actual_arg_spec_list RPAREN       // UBOUND array intrinsic
     | ALLOCATED LPAREN variable_f90 RPAREN            // ALLOCATED status
+    | ASSOCIATED LPAREN actual_arg_spec_list RPAREN   // ASSOCIATED pointer status
     | PRESENT LPAREN IDENTIFIER RPAREN                // PRESENT argument check
     | SELECTED_REAL_KIND LPAREN actual_arg_spec_list RPAREN
     | SELECTED_INT_KIND LPAREN actual_arg_spec_list RPAREN

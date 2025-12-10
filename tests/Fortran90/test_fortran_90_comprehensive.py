@@ -602,6 +602,29 @@ end program
         except Exception as e:
             pytest.fail(f"F90 IMPLICIT spec-list parsing failed: {e}")
 
+    def test_associated_intrinsic_parsing(self):
+        """Test ASSOCIATED intrinsic function parsing per ISO/IEC 1539:1991 Section 13.8.6.
+
+        ISO/IEC 1539:1991 Section 13.8.6 defines ASSOCIATED intrinsic:
+        - ASSOCIATED(POINTER) - returns .TRUE. if pointer is associated
+        - ASSOCIATED(POINTER, TARGET) - returns .TRUE. if pointer is associated with target
+
+        This tests both 1-argument and 2-argument forms of ASSOCIATED.
+        """
+        code = load_fixture(
+            "Fortran90",
+            "test_fortran_90_comprehensive",
+            "associated_intrinsic.f90",
+        )
+
+        parser = self.create_parser(code)
+
+        try:
+            tree = parser.program_unit_f90()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F90 ASSOCIATED intrinsic parsing failed: {e}")
+
 
 class TestFortran90Foundation:
     """Test F90 as foundation for modern Fortran standards chain."""
