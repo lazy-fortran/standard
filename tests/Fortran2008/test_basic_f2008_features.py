@@ -294,6 +294,19 @@ class TestBasicF2008Features:
             f"Expected 0 errors for MODULE prefix-spec test, got {errors}"
         )
 
+    def test_non_recursive_procedures(self):
+        """Test NON_RECURSIVE procedures (ISO/IEC 1539-1:2010 Section 12.6.2.2, R1226)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "non_recursive.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "NON_RECURSIVE procedures failed to produce parse tree"
+        assert errors == 0, (
+            f"Expected 0 errors for NON_RECURSIVE procedures test, got {errors}"
+        )
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
