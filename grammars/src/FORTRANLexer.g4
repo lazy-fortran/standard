@@ -178,7 +178,7 @@ COMMENT : '!' ~[\r\n]* -> skip ;
 // ============================================================================
 fragment LETTER : [A-Za-z] ;    // Alphabetic (1957: uppercase only on 704)
 fragment DIGIT  : [0-9] ;       // Numeric digits 0-9
-fragment EXPONENT : [eE] [+-]? DIGIT+ ;  // E exponent notation
+fragment EXPONENT : [eEdD] [+-]? DIGIT+ ;  // E or D exponent notation
 
 // ============================================================================
 // CASE-INSENSITIVE FRAGMENTS
