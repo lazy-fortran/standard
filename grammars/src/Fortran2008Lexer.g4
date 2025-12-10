@@ -244,6 +244,27 @@ ATOMIC_DEFINE    : A T O M I C '_' D E F I N E ;
 ATOMIC_REF       : A T O M I C '_' R E F ;
 
 // ============================================================================
+// COLLECTIVE INTRINSIC SUBROUTINES (ISO/IEC 1539-1:2010 Section 13.7.34-38)
+// ============================================================================
+// Collective intrinsics for coarray image reduction and synchronization:
+// - CO_BROADCAST(A, SOURCE_IMAGE [, STAT, ERRMSG]): Broadcast from source
+//   (Section 13.7.34)
+// - CO_MAX(A [, RESULT_IMAGE, STAT, ERRMSG]): Maximum reduction across images
+//   (Section 13.7.35)
+// - CO_MIN(A [, RESULT_IMAGE, STAT, ERRMSG]): Minimum reduction across images
+//   (Section 13.7.36)
+// - CO_SUM(A [, RESULT_IMAGE, STAT, ERRMSG]): Sum reduction across images
+//   (Section 13.7.38)
+// - CO_REDUCE(A, OPERATION [, RESULT_IMAGE, STAT, ERRMSG]): Custom reduction
+//   (Section 13.7.37)
+// These are subroutines, called via CALL statement.
+CO_BROADCAST     : C O '_' B R O A D C A S T ;
+CO_MAX           : C O '_' M A X ;
+CO_MIN           : C O '_' M I N ;
+CO_SUM           : C O '_' S U M ;
+CO_REDUCE        : C O '_' R E D U C E ;
+
+// ============================================================================
 // COMPILER INQUIRY FUNCTIONS (ISO/IEC 1539-1:2010 Section 13.7.41-42)
 // ============================================================================
 // Compiler inquiry functions return CHARACTER values describing the compilation:
