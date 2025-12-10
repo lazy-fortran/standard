@@ -69,6 +69,23 @@ intrinsic_function_f90
     | SELECTED_INT_KIND LPAREN actual_arg_spec_list RPAREN
     | KIND LPAREN expr_f90 RPAREN
     | LEN LPAREN expr_f90 RPAREN
+    | ALL_INTRINSIC LPAREN actual_arg_spec_list RPAREN           // ALL
+    | ANY_INTRINSIC LPAREN actual_arg_spec_list RPAREN           // ANY
+    | COUNT_INTRINSIC LPAREN actual_arg_spec_list RPAREN         // COUNT
+    | DOT_PRODUCT_INTRINSIC LPAREN actual_arg_spec_list RPAREN   // DOT_PRODUCT
+    | MATMUL_INTRINSIC LPAREN actual_arg_spec_list RPAREN        // MATMUL
+    | MAXVAL_INTRINSIC LPAREN actual_arg_spec_list RPAREN        // MAXVAL
+    | MINVAL_INTRINSIC LPAREN actual_arg_spec_list RPAREN        // MINVAL
+    | PRODUCT_INTRINSIC LPAREN actual_arg_spec_list RPAREN       // PRODUCT
+    | PACK_INTRINSIC LPAREN actual_arg_spec_list RPAREN          // PACK
+    | UNPACK_INTRINSIC LPAREN actual_arg_spec_list RPAREN        // UNPACK
+    | SPREAD_INTRINSIC LPAREN actual_arg_spec_list RPAREN        // SPREAD
+    | MERGE_INTRINSIC LPAREN actual_arg_spec_list RPAREN         // MERGE
+    | REPEAT_INTRINSIC LPAREN actual_arg_spec_list RPAREN        // REPEAT
+    | TRIM_INTRINSIC LPAREN actual_arg_spec_list RPAREN          // TRIM
+    | TRANSPOSE_INTRINSIC LPAREN actual_arg_spec_list RPAREN     // TRANSPOSE
+    | ADJUSTL_INTRINSIC LPAREN actual_arg_spec_list RPAREN       // ADJUSTL
+    | ADJUSTR_INTRINSIC LPAREN actual_arg_spec_list RPAREN       // ADJUSTR
     ;
 
 // ====================================================================
