@@ -1893,6 +1893,10 @@ intrinsic_function_call
     | CHARACTER LPAREN actual_arg_list RPAREN   // Type conversion
     | COMPLEX LPAREN actual_arg_list RPAREN     // Type conversion
     | SUM_INTRINSIC LPAREN actual_arg_list RPAREN
+    // F2003 OOP and memory intrinsic functions (ISO/IEC 1539-1:2004 Section 13.7)
+    | EXTENDS_TYPE_OF LPAREN actual_arg_list RPAREN  // Section 13.7.42
+    | SAME_TYPE_AS LPAREN actual_arg_list RPAREN     // Section 13.7.102
+    | NEW_LINE LPAREN actual_arg_list RPAREN         // Section 13.7.84
     | ieee_function_call
     ;
 
