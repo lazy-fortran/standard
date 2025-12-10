@@ -385,9 +385,10 @@ execution_part_f2003
     : execution_construct_f2003*
     ;
 
-// Execution construct with newline handling
+// Execution construct with newline/semicolon handling
+// ISO/IEC 1539-1:2004 Section 3.4.2 allows semicolons to separate statements on a line
 execution_construct_f2003
-    : NEWLINE* executable_construct_f2003_inner NEWLINE*
+    : (NEWLINE|SEMICOLON)* executable_construct_f2003_inner (NEWLINE|SEMICOLON)*
     ;
 
 // Executable construct (ISO/IEC 1539-1:2004 R213)

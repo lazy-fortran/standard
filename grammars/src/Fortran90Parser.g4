@@ -174,8 +174,9 @@ declaration_construct
 // Section 8 provides detailed execution control rules.
 
 // Execution part - ISO/IEC 1539:1991 Section 2.3.3, R208
+// Section 3.4.2 allows semicolons to separate statements on a line in free-form source
 execution_part
-    : (NEWLINE* executable_construct)* NEWLINE*
+    : (NEWLINE* executable_construct (SEMICOLON | NEWLINE)+)* NEWLINE* executable_construct? NEWLINE*
     ;
 
 // Executable construct - ISO/IEC 1539:1991 Section 2.3.3, R214

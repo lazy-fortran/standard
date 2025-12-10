@@ -181,8 +181,9 @@ execution_part_f2018
     ;
 
 // ISO/IEC 1539-1:2018 R510: execution-part-construct
+// Section 3.4.2 allows semicolons to separate statements on a line in free-form source
 execution_construct_f2018
-    : NEWLINE* executable_construct_f2018 NEWLINE*
+    : (NEWLINE|SEMICOLON)* executable_construct_f2018 (NEWLINE|SEMICOLON)*
     ;
 
 // ISO/IEC 1539-1:2018 R514: executable-construct

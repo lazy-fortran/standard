@@ -178,8 +178,10 @@ declaration_construct_f95
 // The execution part includes F95 executable constructs such as FORALL
 // (Section 7.5.4) and enhanced WHERE (Section 7.5.3) alongside the F90 constructs.
 
+// Execution part - ISO/IEC 1539-1:1997 Section 2.3.3, R208
+// Section 3.4.2 allows semicolons to separate statements on a line in free-form source
 execution_part_f95
-    : (NEWLINE* executable_construct_f95)* NEWLINE*
+    : (NEWLINE* executable_construct_f95 (SEMICOLON | NEWLINE)+)* NEWLINE* executable_construct_f95? NEWLINE*
     ;
 
 // ====================================================================
