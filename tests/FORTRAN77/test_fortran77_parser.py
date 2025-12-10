@@ -697,6 +697,23 @@ END IF"""
         tree = self.parse(block_if_text, 'block_if_construct')
         self.assertIsNotNone(tree)
 
+    def test_assign_in_block_if(self):
+        """Test ASSIGN statement within block IF construct
+
+        This verifies ISO 1539:1980 Section 10.4 (ASSIGN) is
+        accepted wherever executable constructs are allowed, including block
+        IF bodies that also contain assigned GO TO statements.
+        """
+        block_if_text = """IF (X .GT. 0) THEN
+    ASSIGN 100 TO ILAB
+    GO TO ILAB, (100, 200)
+ELSE
+    ASSIGN 200 TO ILAB
+    GO TO ILAB, (100, 200)
+END IF"""
+        tree = self.parse(block_if_text, 'block_if_construct')
+        self.assertIsNotNone(tree)
+
     # ====================================================================
     # FORTRAN 77 STATEMENT FUNCTION TESTS
     # ====================================================================
