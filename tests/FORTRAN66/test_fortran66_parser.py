@@ -240,14 +240,70 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
         """Test logical operators .AND., .OR., .NOT. (merged from FORTRAN IV, 1962)"""
         test_cases = [
             ".TRUE. .AND. .FALSE.",
-            ".TRUE. .OR. .FALSE.", 
+            ".TRUE. .OR. .FALSE.",
             ".NOT. .TRUE.",
             "A .EQ. B .AND. C .GT. D",
             ".NOT. (X .LT. Y)"
         ]
-        
+
         for text in test_cases:
             with self.subTest(logical_expression=text):
+                tree = self.parse(text, 'logical_expr')
+                self.assertIsNotNone(tree)
+
+    def test_logical_equivalence_operators(self):
+        """Test logical equivalence operators .EQV. and .NEQV. (X3.9-1966 Section 6.4)"""
+        test_cases = [
+            # Basic equivalence
+            ".TRUE. .EQV. .FALSE.",
+            ".TRUE. .EQV. .TRUE.",
+            ".FALSE. .EQV. .FALSE.",
+
+            # Basic non-equivalence
+            ".TRUE. .NEQV. .FALSE.",
+            ".FALSE. .NEQV. .FALSE.",
+            ".TRUE. .NEQV. .TRUE.",
+
+            # With variables
+            "A .EQV. B",
+            "FLAG1 .NEQV. FLAG2",
+
+            # With relational expressions
+            "A .EQ. B .EQV. C .GT. D",
+            "X .NE. Y .NEQV. P .LE. Q",
+        ]
+
+        for text in test_cases:
+            with self.subTest(equiv_expression=text):
+                tree = self.parse(text, 'logical_expr')
+                self.assertIsNotNone(tree)
+
+    def test_logical_operators_precedence(self):
+        """Test operator precedence: .NOT. > .AND. > .OR. > .EQV./.NEQV. (X3.9-1966 Section 6.4)"""
+        test_cases = [
+            # Equivalence has lower precedence than OR
+            ".TRUE. .OR. .FALSE. .EQV. .TRUE.",
+
+            # OR has lower precedence than AND
+            ".TRUE. .AND. .FALSE. .OR. .TRUE.",
+
+            # AND has lower precedence than NOT
+            ".NOT. .TRUE. .AND. .FALSE.",
+
+            # Complex expressions with all operators
+            "A .EQ. B .AND. C .GT. D .OR. E .LT. F .EQV. G .NEQV. H",
+
+            # Multiple equivalence operators (left-associative)
+            ".TRUE. .EQV. .FALSE. .EQV. .TRUE.",
+            ".TRUE. .NEQV. .FALSE. .NEQV. .TRUE.",
+
+            # Parentheses override precedence
+            "(.TRUE. .OR. .FALSE.) .EQV. .TRUE.",
+            ".TRUE. .AND. (.FALSE. .OR. .TRUE.)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(precedence=text):
                 tree = self.parse(text, 'logical_expr')
                 self.assertIsNotNone(tree)
     
