@@ -877,12 +877,17 @@ bit_reduction_function_call
 //   Atomically references ATOM and assigns to VALUE. ATOM must be a coarray.
 
 // ============================================================================
-// ATOMIC INTRINSIC SUBROUTINES (ISO/IEC 1539-1:2010 Section 13.7.19-20)
+// ATOMIC INTRINSIC SUBROUTINES (ISO/IEC 1539-1:2010 Section 13.7.15-21)
 // ============================================================================
 // Atomic subroutine call statement
 atomic_subroutine_call
     : CALL ATOMIC_DEFINE LPAREN actual_arg_list RPAREN NEWLINE  // 13.7.19
     | CALL ATOMIC_REF LPAREN actual_arg_list RPAREN NEWLINE     // 13.7.20
+    | CALL ATOMIC_CAS LPAREN actual_arg_list RPAREN NEWLINE     // 13.7.21
+    | CALL ATOMIC_ADD LPAREN actual_arg_list RPAREN NEWLINE     // 13.7.15
+    | CALL ATOMIC_AND LPAREN actual_arg_list RPAREN NEWLINE     // 13.7.16
+    | CALL ATOMIC_OR LPAREN actual_arg_list RPAREN NEWLINE      // 13.7.17
+    | CALL ATOMIC_XOR LPAREN actual_arg_list RPAREN NEWLINE     // 13.7.18
     ;
 
 // ============================================================================
