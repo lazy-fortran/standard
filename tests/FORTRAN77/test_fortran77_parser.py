@@ -227,6 +227,47 @@ END
         tree = self.parse(program_text, 'main_program')
         self.assertIsNotNone(tree)
 
+    def test_complex_literals_fortran77(self):
+        """Test COMPLEX constants (inherited from FORTRAN 66, ISO 1539:1980 Section 4.4.2)"""
+        test_cases = [
+            "(1.0, 2.0)",           # Real and real parts
+            "(3, -4)",              # Integer parts
+            "(-1.5, 2.5)",          # Negative parts
+            "(0.0, 1.0)",           # Zero real part
+            "(1.0, 0.0)",           # Zero imaginary part
+            "(1.0E+3, -2.5E-1)",    # Scientific notation
+            "(+1, +2)",             # Explicit plus signs
+        ]
+
+        for text in test_cases:
+            with self.subTest(complex_const=text):
+                tree = self.parse(text, 'literal')
+                self.assertIsNotNone(tree)
+
+    def test_complex_literals_in_assignment_fortran77(self):
+        """Test COMPLEX constants in assignment statements (ISO 1539:1980 Section 10)"""
+        test_program = """
+        PROGRAM COMPLEX_TEST
+        COMPLEX Z, W
+        Z = (1.0, 2.0)
+        W = (3, -4)
+        END
+        """
+        tree = self.parse(test_program, 'main_program')
+        self.assertIsNotNone(tree)
+
+    def test_complex_literals_in_data_statement_fortran77(self):
+        """Test COMPLEX constants in DATA statements (ISO 1539:1980 Section 9)"""
+        test_program = """
+        PROGRAM DATA_COMPLEX
+        COMPLEX Z1, Z2, Z3
+        DATA Z1 / (1.0, 2.0) /
+        DATA Z2, Z3 / (3.0, 4.0), (-1.0, -2.0) /
+        END
+        """
+        tree = self.parse(test_program, 'main_program')
+        self.assertIsNotNone(tree)
+
     def test_parameter_statement(self):
         """Test PARAMETER statement (NEW in FORTRAN 77)
 

@@ -89,6 +89,20 @@ Type usage:
 - `type_declaration : type_spec variable_list`
   - Used in `data_initialization_body` for BLOCK DATA and allowed as a
     statement in `statement_body`.
+
+**COMPLEX constants** (X3.9-1966 Section 4.4.2):
+
+- `complex_literal : LPAREN complex_part COMMA complex_part RPAREN`
+- `complex_part` supports signed integer and real parts.
+- Examples: `(1.0, 2.0)`, `(3, -4)`, `(-1.5E2, +2.5E-1)`.
+- Tests (`tests/FORTRAN66/test_fortran66_parser.py`):
+  - `test_complex_literals` covers all forms of complex constants as
+    literals (passing individual `(r,i)` forms to the `literal` rule).
+  - `test_complex_literals_in_assignment` exercises complex constants in
+    assignment statements.
+  - `test_complex_literals_in_data_statement` exercises complex constants
+    in DATA statements.
+
 - Tests:
   - `test_type_declarations` covers simple declarations such as:
     - `INTEGER I, J, K`
