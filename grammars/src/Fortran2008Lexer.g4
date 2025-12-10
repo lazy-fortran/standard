@@ -129,7 +129,8 @@ NON_RECURSIVE    : N O N '_' R E C U R S I V E ;
 // ============================================================================
 // DO CONCURRENT enables explicit loop parallelization:
 // - R818: loop-control -> ... | CONCURRENT concurrent-header
-// - R819: concurrent-header -> (concurrent-spec [, scalar-mask-expr] [, concurrent-locality])
+// - R819: concurrent-header -> (concurrent-spec [, scalar-mask-expr]
+//   [, concurrent-locality])
 // - R821: concurrent-locality -> LOCAL ( local-variable-list )
 // DO CONCURRENT indicates iterations may execute in any order or concurrently.
 CONCURRENT       : C O N C U R R E N T ;

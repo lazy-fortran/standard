@@ -623,7 +623,8 @@ do_concurrent_stmt
     ;
 
 // Concurrent header (ISO/IEC 1539-1:2010 R819)
-// R819: concurrent-header -> (concurrent-spec [, scalar-mask-expr] [, concurrent-locality])
+// R819: concurrent-header -> (concurrent-spec [, scalar-mask-expr]
+// [, concurrent-locality])
 // Enhanced with F2008 LOCAL specifier for iteration-private variables.
 concurrent_header
     : LPAREN forall_triplet_spec_list (COMMA scalar_mask_expr)?
@@ -1061,7 +1062,8 @@ identifier_or_keyword
     | ALL          // ALL can be used as variable name (SYNC ALL keyword)
     | MEMORY       // MEMORY can be used as variable name (SYNC MEMORY keyword)
     | CONCURRENT   // CONCURRENT can be used as variable name (DO CONCURRENT)
-    | LOCAL        // LOCAL can be used as variable name (DO CONCURRENT locality specifier)
+    | LOCAL        // LOCAL can be used as variable name
+                   // (DO CONCURRENT locality specifier)
     | CONTIGUOUS   // CONTIGUOUS can be used as variable name
     | CODIMENSION  // CODIMENSION can be used as variable name
     | SUBMODULE    // SUBMODULE can be used as a name
