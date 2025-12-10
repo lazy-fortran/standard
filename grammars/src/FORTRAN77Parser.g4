@@ -140,6 +140,45 @@ character_length
     ;
 
 // ====================================================================
+// TYPE DECLARATION WITH ENTITY DECLARATIONS
+// ISO 1539:1980 Section 8.4
+// ====================================================================
+//
+// Override FORTRAN 66 type_declaration to support per-variable
+// CHARACTER length specifications in FORTRAN 77.
+//
+// Forms supported:
+//  1. Type-level length: CHARACTER*10 A, B, C (all get length 10)
+//  2. Per-variable length: CHARACTER A*10, B*20, C (C has default length)
+//  3. Mixed: CHARACTER*5 A, B*10, C (A,C get 5, B gets 10)
+//
+// The type_spec may have an optional character_length (for type-level).
+// Each entity_decl may have an optional character_length (for per-variable).
+// Per-variable lengths override type-level lengths.
+
+// Type declaration - ISO 1539:1980 Section 8.4
+// Override from FORTRAN 66 to support entity declarations with per-variable
+// CHARACTER length specifications
+type_declaration
+    : type_spec entity_decl_list
+    ;
+
+// Entity declaration list - ISO 1539:1980 Section 8.4
+// Comma-separated list of entity declarations
+entity_decl_list
+    : entity_decl (COMMA entity_decl)*
+    ;
+
+// Entity declaration - ISO 1539:1980 Section 8.4
+// A variable or array with optional per-variable CHARACTER length
+// For CHARACTER type: variable_name or array_declarator, each optionally
+// followed by a character_length (e.g., NAME*30, CITY*20)
+entity_decl
+    : variable character_length?      // Simple variable with optional length
+    | array_declarator character_length?  // Array with optional length
+    ;
+
+// ====================================================================
 // STATEMENT CLASSIFICATION - ISO 1539:1980 Section 7
 // ====================================================================
 //
