@@ -201,8 +201,10 @@ statement_body
     | format_stmt        // Section 13
     // Executable statements - ISO 1539:1980 Section 7.1
     | assignment_stmt    // Section 10.1-10.3
-    | goto_stmt          // Section 11.1 (unconditional GO TO)
+    | assign_stmt        // Section 10.4 (inherited from F66)
+    | assigned_goto_stmt // Section 11.2 (inherited from F66) - precede goto_stmt
     | computed_goto_stmt // Section 11.3 (computed GO TO)
+    | goto_stmt          // Section 11.1 (unconditional GO TO)
     | arithmetic_if_stmt // Section 11.4
     | logical_if_stmt    // Section 11.5
     | block_if_construct // Sections 11.6-11.9 - NEW in FORTRAN 77
@@ -295,8 +297,9 @@ execution_part_construct
 // Executable statements allowed within block IF constructs
 executable_construct
     : assignment_stmt    // Section 10
-    | goto_stmt          // Section 11.1
+    | assigned_goto_stmt // Section 11.2 (inherited from F66) - precede goto_stmt
     | computed_goto_stmt // Section 11.3
+    | goto_stmt          // Section 11.1
     | arithmetic_if_stmt // Section 11.4
     | logical_if_stmt    // Section 11.5
     | call_stmt          // Section 15.8

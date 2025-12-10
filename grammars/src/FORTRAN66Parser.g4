@@ -333,9 +333,9 @@ statement_body
     | assignment_stmt          // X3.9-1966 Section 7.1.1.1 (arith), 7.1.1.2 (logical)
     | assign_stmt              // X3.9-1966 Section 7.1.1.3 (ASSIGN k TO i)
     // Control statements - Section 7.1.2
-    | goto_stmt                // X3.9-1966 Section 7.1.2.1.1 (unconditional GO TO)
-    | assigned_goto_stmt       // X3.9-1966 Section 7.1.2.1.2 (assigned GO TO)
+    | assigned_goto_stmt       // X3.9-1966 Section 7.1.2.1.2 - precede goto
     | computed_goto_stmt       // X3.9-1966 Section 7.1.2.2 (computed GO TO)
+    | goto_stmt                // X3.9-1966 Section 7.1.2.1.1 (unconditional GO TO)
     | arithmetic_if_stmt       // X3.9-1966 Section 7.1.2.3 (arithmetic IF)
     | logical_if_stmt          // X3.9-1966 Section 7.1.2.4 (logical IF)
     | do_stmt                  // X3.9-1966 Section 7.1.2.8 (DO)
