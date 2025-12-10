@@ -446,6 +446,13 @@ Gap issues (resolved):
   is modeled structurally. Tests in
   `tests/Fortran2003/test_issue185_dt_edit_descriptors.py` verify that
   FORMAT strings containing DT descriptors are accepted correctly.
+- Issue #413: **ASYNCHRONOUS attribute missing from attr_spec** (RESOLVED)
+  - The ASYNCHRONOUS attribute (ISO/IEC 1539-1:2004 Section 5.1.2.1, R503)
+    was previously documented in grammar comments but not implemented in the
+    `attr_spec` rule. Now correctly added to `Fortran2003Parser.g4` line 1554.
+  - Allows valid declarations like `integer, asynchronous :: buffer`.
+  - Tests in `tests/Fortran2003/test_issue413_asynchronous_attribute.py` verify
+    ASYNCHRONOUS can be used alone and combined with other attributes.
 
 ---
 
