@@ -201,6 +201,42 @@ END IF"""
                 tree = self.parse(text, 'call_stmt')
                 self.assertIsNotNone(tree)
 
+    def test_call_statement_with_alternate_return_specifiers(self):
+        """Ensure CALL statements handle alternate return arguments (*label)."""
+        test_cases = [
+            "CALL SOLVE(X, Y, *100, *200, Z)",
+            "CALL ROUTE(*50)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(call_stmt=text):
+                tree = self.parse(text, 'call_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_return_statement_with_alternate_return_selection(self):
+        """Verify RETURN accepts an integer expression for alternate returns."""
+        return_cases = [
+            "RETURN",
+            "RETURN 1",
+            "RETURN 2",
+        ]
+
+        for text in return_cases:
+            with self.subTest(return_stmt=text):
+                tree = self.parse(text, 'return_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_alternate_return_specifiers_fixture(self):
+        """Parse a FORTRAN 77 program that uses alternate return specifiers."""
+        fixture_text = load_fixture(
+            "FORTRAN77",
+            "test_fortran77_parser_extra",
+            "alternate_return_specifiers.f",
+        )
+
+        tree = self.parse(fixture_text, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
     def test_format_edit_descriptors(self):
         """Parse the FORMAT edit descriptors introduced in ISO 1539:1980 Section 13."""
         format_variants = [
