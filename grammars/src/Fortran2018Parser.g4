@@ -120,6 +120,7 @@ declaration_construct_f2018
     | event_declaration_stmt          // NEW in F2018 (Section 16.5.5)
     | team_declaration_stmt           // NEW in F2018 (Section 16.5.6)
     | type_declaration_stmt_f2018     // Enhanced for F2018
+    | format_stmt                     // F2018 FORMAT statements (R1301)
     | declaration_construct_f2008     // Inherit F2008 declarations
     ;
 
@@ -208,6 +209,7 @@ executable_construct_f2018
     | collective_subroutine_call      // NEW in F2018 (must be BEFORE call_stmt)
     | call_stmt                       // Inherit from F2003
     | print_stmt                      // Inherit from F2003
+    | format_stmt                     // FORMAT statements (R1301)
     | stop_stmt_f2018                 // Enhanced in F2018 (R1160)
     | error_stop_stmt_f2018           // Enhanced in F2018 (R1161)
     | select_type_construct           // Inherit from F2003
@@ -751,6 +753,136 @@ identifier_or_keyword
     | C_SIZEOF         // C_SIZEOF can be used as variable/function name
     | CFI_ESTABLISH    // CFI_ESTABLISH can be used as variable/function name
     | CFI_SETPOINTER   // CFI_SETPOINTER can be used as variable/function name
+    ;
+
+// ============================================================================ 
+// FORMAT STATEMENT SUPPORT (ISO/IEC 1539-1:2018 Section 13.2)
+// ============================================================================ 
+format_stmt
+    : FORMAT LPAREN format_specification RPAREN
+    ;
+
+format_specification
+    : format_items (COMMA unlimited_format_item)?
+    | unlimited_format_item
+    ;
+
+format_items
+    : format_item (COMMA? format_item)*
+    ;
+
+format_item
+    : repeat_count? format_element
+    ;
+
+format_element
+    : format_group
+    | data_edit_desc
+    | control_edit_desc
+    | char_string_edit_desc
+    ;
+
+format_group
+    : LPAREN format_items RPAREN
+    ;
+
+unlimited_format_item
+    : MULTIPLY LPAREN format_items RPAREN
+    ;
+
+repeat_count
+    : digit_string
+    ;
+
+digit_string
+    : INTEGER_LITERAL
+    ;
+
+signed_digit_string
+    : (PLUS | MINUS)? digit_string
+    ;
+
+data_edit_desc
+    : identifier_descriptor
+    | real_descriptor
+    | dt_descriptor
+    ;
+
+control_edit_desc
+    : position_edit_desc
+    | repeat_slash
+    | COLON
+    | sign_edit_desc
+    | scale_factor_edit_desc
+    | blank_interp_edit_desc
+    | round_edit_desc
+    | decimal_edit_desc
+    | AT_SIGN
+    | DOLLAR_SIGN
+    | BACKSLASH_SIGN
+    ;
+
+position_edit_desc
+    : digit_string IDENTIFIER
+    | IDENTIFIER
+    ;
+
+repeat_slash
+    : repeat_count? SLASH
+    ;
+
+sign_edit_desc
+    : IDENTIFIER
+    ;
+
+scale_factor_edit_desc
+    : signed_digit_string IDENTIFIER
+    ;
+
+blank_interp_edit_desc
+    : IDENTIFIER
+    ;
+
+round_edit_desc
+    : IDENTIFIER
+    ;
+
+decimal_edit_desc
+    : IDENTIFIER
+    ;
+
+identifier_descriptor
+    : IDENTIFIER format_decimal_part?
+    ;
+
+real_descriptor
+    : REAL_LITERAL format_decimal_part?
+    ;
+
+dt_descriptor
+    : IDENTIFIER char_literal_constant? (LPAREN v_list RPAREN)?
+    ;
+
+char_string_edit_desc
+    : char_literal_constant
+    ;
+
+char_literal_constant
+    : SINGLE_QUOTE_STRING
+    | DOUBLE_QUOTE_STRING
+    | HOLLERITH
+    ;
+
+v_list
+    : v_value (COMMA v_value)*
+    ;
+
+v_value
+    : signed_digit_string
+    ;
+
+format_decimal_part
+    : REAL_LITERAL
     ;
 
 // ============================================================================

@@ -167,6 +167,9 @@ DIM              : D I M ;
 MASK             : M A S K ;
 NONE             : N O N E ;
 KIND             : K I N D ;
+AT_SIGN          : '@' ;
+DOLLAR_SIGN      : '$' ;
+BACKSLASH_SIGN   : '\\\\' ;
 
 // ============================================================================
 // F2018 Fragment Helpers (inherit all from F2008)
