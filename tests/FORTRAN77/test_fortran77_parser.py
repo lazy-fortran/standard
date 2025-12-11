@@ -59,6 +59,20 @@ class TestFORTRAN77Parser(StatementFunctionTestMixin, unittest.TestCase):
             with self.subTest(character_type=text):
                 tree = self.parse(text, 'type_declaration')
                 self.assertIsNotNone(tree)
+
+    def test_complex_type_kind_spec_extension(self):
+        """Test FORTRAN 77 extension that accepts COMPLEX*8/COMPLEX*16 (issue #583)."""
+        test_cases = [
+            "COMPLEX*8 W",
+            "COMPLEX*16 Z",
+            "COMPLEX*8 W1, W2",
+            "COMPLEX*16 Z1, Z2"
+        ]
+
+        for text in test_cases:
+            with self.subTest(complex_decl=text):
+                tree = self.parse(text, 'type_declaration')
+                self.assertIsNotNone(tree)
     
     def test_if_then_else_construct(self):
         """Test IF-THEN-ELSE construct (NEW in FORTRAN 77)"""

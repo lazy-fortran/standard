@@ -83,6 +83,19 @@ Section 4.4.2):
   - `test_complex_literals_in_data_statement_fortran77` exercises complex
     constants in DATA statements.
 
+### COMPLEX kind selectors (issue #583)
+
+- Common FORTRAN 77 compilers accepted `COMPLEX*8`/`COMPLEX*16` even before
+  the kind parameter became official in ISO/IEC 1539:1991 Section 8.1.2.
+  The parser now acknowledges this extension: `non_character_type_spec`
+  accepts `COMPLEX complex_kind?`, and `complex_kind : MULTIPLY INTEGER_LITERAL`
+  allows `COMPLEX*8 W` and `COMPLEX*16 Z` to parse alongside the standard
+  `COMPLEX` declaration. Issue #583 documents this gap.
+- New tests cover the extension:
+  `test_complex_type_kind_spec_extension` parses `COMPLEX*8`/`COMPLEX*16`
+  declarations via `type_declaration`, exercising the optional kind selector
+  and ensuring the extension is not orphaned.
+
 - `character_length` supports:
   - `CHARACTER*10`
   - `CHARACTER*(* )`

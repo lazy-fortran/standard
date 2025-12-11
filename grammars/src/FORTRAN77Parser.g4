@@ -127,7 +127,14 @@ non_character_type_spec
     | REAL                       // ISO 1539:1980 Section 4.3
     | LOGICAL                    // ISO 1539:1980 Section 4.6
     | DOUBLE PRECISION           // ISO 1539:1980 Section 4.4
-    | COMPLEX                    // ISO 1539:1980 Section 4.5
+    | COMPLEX complex_kind?      // ISO 1539:1980 Section 4.5 + common extension
+    ;
+
+// Compiler-extension support for COMPLEX*8/COMPLEX*16 type statements.
+// type_spec still includes CHARACTER declarations per ISO 1539:1980 Section 8.4.
+// Extension tracked via issue #583.
+complex_kind
+    : MULTIPLY INTEGER_LITERAL
     ;
 
 // Type specification - ISO 1539:1980 Section 8.4
