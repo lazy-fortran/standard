@@ -329,6 +329,19 @@ class TestBasicF2008Features:
             f"Expected 0 errors for NON_RECURSIVE procedures test, got {errors}"
         )
 
+    def test_newunit_io_specifier(self):
+        """Test NEWUNIT I/O specifier for OPEN statements (ISO/IEC 1539-1:2010 Section 9.5.6.10)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "newunit_io.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "NEWUNIT I/O specifier failed to produce parse tree"
+        assert errors == 0, (
+            f"Expected 0 errors for NEWUNIT I/O specifier test, got {errors}"
+        )
+
     def test_execute_command_line_intrinsic(self):
         """Test EXECUTE_COMMAND_LINE intrinsic subroutine (ISO/IEC 1539-1:2010 Section 13.7.55)"""
         code = load_fixture(
