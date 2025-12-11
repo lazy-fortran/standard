@@ -140,16 +140,16 @@ STRING_LITERAL  : '\'' (~'\'' | '\'\'')* '\'' ;
 // IDENTIFIER - ISO 1539:1980 Section 2.3.3
 // ====================================================================
 // ISO 1539:1980 (FORTRAN 77) relaxed the 6-character restriction from
-// FORTRAN 66 (X3.9-1966 Section 2.3) while limiting names to a maximum
-// of 31 characters per ISO 1539:1980 Section 2.3.3: "A name has 1 to 31 characters."
+// FORTRAN 66 (X3.9-1966 Section 2.3), while limiting to 31 characters
+// per ISO 1539:1980 Section 2.3.3: "A name has 1 to 31 characters."
 //
-// NOTE: The identifier length constraint (1-31 characters) is a semantic constraint
-// that should be validated at the semantic analysis phase, not enforced by the lexer.
-// Lexer-level length enforcement breaks keyword recognition and parsing of valid code.
-// See FORTRAN66Lexer for details on why semantic validation is preferred to lexical
-// enforcement.
+// NOTE: The identifier length constraint is a semantic constraint,
+// validated at the semantic analysis phase, not enforced by the lexer.
+// Lexer-level length enforcement breaks keyword recognition.
+// See FORTRAN66Lexer for details on why semantic validation is
+// preferred to lexical enforcement.
 //
-// Compliance: STANDARD-COMPLIANT with ISO 1539:1980 Section 2.3.3 (via semantic validation)
+// Compliance: STANDARD-COMPLIANT via semantic validation
 // ====================================================================
 // (IDENTIFIER rule inherited from FORTRANLexer - no local override)
 
