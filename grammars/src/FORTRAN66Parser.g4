@@ -531,7 +531,7 @@ statement_list
 // Form: [label] statement-body
 // Labels were punched in columns 1-5, statements in columns 7-72
 statement
-    : label? statement_body NEWLINE?
+    : label? statement_body_f66 NEWLINE?
     | NEWLINE  // Blank line (blank punch card was valid)
     ;
 
@@ -549,47 +549,32 @@ label
 //   7.1 Executable Statements (control flow, I/O, assignment)
 //   7.2 Non-executable Statements (declarations, specifications)
 //
+// FORTRAN 66 extends FORTRAN II by adding a small number of new statements
+// and enhancing existing ones. To preserve historical accuracy and avoid
+// duplication, this grammar keeps the inherited FORTRAN II `statement_body`
+// and introduces a FORTRAN 66 wrapper that adds only F66-specific forms.
+//
 // NOTE: end_stmt is NOT included here - it is handled separately as a
 // program unit terminator (X3.9-1966 Section 8) to enable parsing
 // multiple program units.
 // ============================================================================
 
-statement_body
-    // Non-executable statements - X3.9-1966 Section 7.2
-    : statement_function_stmt  // X3.9-1966 Section 7.2 (statement function definition)
-    | dimension_stmt           // X3.9-1966 Section 7.2.1
-    | common_stmt              // X3.9-1966 Section 7.2.2
-    | equivalence_stmt         // X3.9-1966 Section 7.2.3
-    | external_stmt            // X3.9-1966 Section 7.2.4
-    | implicit_stmt            // X3.9-1966 Section 7.2.5
-    | type_declaration         // X3.9-1966 Section 7.2.5
-    | data_stmt                // X3.9-1966 Section 7.2.6
-    | format_stmt              // X3.9-1966 Section 7.2.7
-    | intrinsic_stmt           // X3.9-1966 Section 8.7
-    // Executable statements - X3.9-1966 Section 7.1
-    // Assignment statements - Section 7.1.1
-    | assignment_stmt          // X3.9-1966 Section 7.1.1.1 (arith), 7.1.1.2 (logical)
-    | assign_stmt              // X3.9-1966 Section 7.1.1.3 (ASSIGN k TO i)
-    // Control statements - Section 7.1.2
-    | assigned_goto_stmt       // X3.9-1966 Section 7.1.2.1.2 - precede goto
-    | computed_goto_stmt       // X3.9-1966 Section 7.1.2.2 (computed GO TO)
-    | goto_stmt                // X3.9-1966 Section 7.1.2.1.1 (unconditional GO TO)
-    | arithmetic_if_stmt       // X3.9-1966 Section 7.1.2.3 (arithmetic IF)
-    | logical_if_stmt          // X3.9-1966 Section 7.1.2.4 (logical IF)
-    | do_stmt                  // X3.9-1966 Section 7.1.2.8 (DO)
-    | continue_stmt            // X3.9-1966 Section 7.1.2.9 (CONTINUE)
-    | stop_stmt                // X3.9-1966 Section 7.1.2.5 (STOP)
-    | pause_stmt               // X3.9-1966 Section 7.1.2.6 (PAUSE)
-    | call_stmt                // X3.9-1966 Section 7.1.2.10 (CALL)
-    | return_stmt              // X3.9-1966 Section 7.1.2.7 (RETURN)
-    // I/O statements - Section 7.1.3
-    | read_stmt                // X3.9-1966 Section 7.1.3.1 (READ)
-    | write_stmt               // X3.9-1966 Section 7.1.3.1 (WRITE)
-    | print_stmt               // X3.9-1966 Section 7.1.3.2 (output)
-    | punch_stmt               // X3.9-1966 Section 7.1.3.2 (output)
-    | rewind_stmt              // X3.9-1966 Section 7.1.3.3 (auxiliary I/O)
-    | backspace_stmt           // X3.9-1966 Section 7.1.3.3 (auxiliary I/O)
-    | endfile_stmt             // X3.9-1966 Section 7.1.3.3 (auxiliary I/O)
+// Statement body wrapper for FORTRAN 66.
+// Adds only new/enhanced FORTRAN 66 statements to the inherited FORTRAN II set.
+statement_body_f66
+    // Precedence aid: statement functions (inherited) must be recognized
+    // before generic assignment to preserve FORTRAN 66 disambiguation.
+    : statement_function_stmt  // Inherited from FORTRAN I/II, ordered first
+    // NEW/ENHANCED non-executable statements - X3.9-1966 Section 7.2
+    | external_stmt            // X3.9-1966 Section 7.2.4 - NEW
+    | implicit_stmt            // X3.9-1966 Section 7.2.5 - NEW
+    | type_declaration         // X3.9-1966 Section 7.2.5 - NEW/ENHANCED types
+    | data_stmt                // X3.9-1966 Section 7.2.6 - NEW
+    | intrinsic_stmt           // X3.9-1966 Section 8.7   - NEW
+    // NEW executable statements - X3.9-1966 Section 7.1
+    | logical_if_stmt          // X3.9-1966 Section 7.1.2.4 - NEW
+    // Inherited statements from FORTRAN II (and FORTRAN I)
+    | statement_body
     ;
 
 // ============================================================================

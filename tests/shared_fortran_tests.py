@@ -158,10 +158,22 @@ class StatementFunctionTestMixin:
                 lexer = self.LexerClass(input_stream)
                 token_stream = CommonTokenStream(lexer)
                 parser = self.ParserClass(token_stream)
-                tree = parser.statement_body()
+                rule_name = getattr(self, "statement_body_rule_name", "statement_body")
+                tree = getattr(parser, rule_name)()
                 self.assertIsNotNone(tree)
                 child = tree.getChild(0)
                 child_type = type(child).__name__
+                unwrap_count = 0
+                while (
+                    expected_type not in child_type
+                    and hasattr(child, "getChildCount")
+                    and child.getChildCount() > 0
+                    and "Statement_body" in child_type
+                    and unwrap_count < 4
+                ):
+                    child = child.getChild(0)
+                    child_type = type(child).__name__
+                    unwrap_count += 1
                 self.assertIn(
                     expected_type, child_type,
                     f"'{text}' should parse as {expected_type}, got {child_type}"

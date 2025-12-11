@@ -30,6 +30,7 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
 
     LexerClass = FORTRAN66Lexer
     ParserClass = FORTRAN66Parser
+    statement_body_rule_name = "statement_body_f66"
     fixture_standard = "FORTRAN66"
 
     def setUp(self):
