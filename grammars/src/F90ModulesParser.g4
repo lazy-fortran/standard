@@ -118,6 +118,33 @@ operator_token
 // Interfaces provide explicit procedure declarations and generic overloading.
 
 // Interface block - ISO/IEC 1539:1991 Section 12.3, R1201
+// and ISO/IEC 1539-1:1997 Section 12.2 (Fortran 95: Characteristics of procedures)
+//
+// IMPORTANT SEMANTIC CONSTRAINT (ISO/IEC 1539-1:1997 Section 12.2):
+// When an explicit interface is provided, the interface must match the
+// corresponding procedure definition in characteristics:
+//
+// SECTION 12.2.1.1 - Dummy argument characteristics (REQUIRED to match):
+//   - Type and type parameters
+//   - Rank and shape
+//   - INTENT, OPTIONAL, TARGET, POINTER attributes
+//   - For array bounds: exact dependence on entities in bounds expressions
+//
+// SECTION 12.2.2 - Function result characteristics (REQUIRED to match):
+//   - Type and type parameters
+//   - Rank and shape
+//   - For nonconstant bounds: bounds expressions in interface MUST have
+//     same dependence on entities as in procedure definition
+//   - For nonconstant character length: length expressions must be equivalent
+//
+// NOTE: This grammar accepts all syntactic forms. Semantic validation
+// (bounds matching, expression equivalence checking) is deferred to
+// a semantic analysis phase and is NOT enforced by the parser.
+// See issue #415 for tracking semantic analyzer implementation.
+//
+// STANDARD-COMPLIANT: Grammar is syntactically correct per ISO/IEC 1539-1:1997
+// Section 12.3 (Interface blocks). Semantic constraints per Section 12.2 are
+// documented but not enforced by the parser.
 interface_block
     : interface_stmt interface_specification* end_interface_stmt
     ;
@@ -141,6 +168,30 @@ interface_specification
     ;
 
 // Interface body - ISO/IEC 1539:1991 Section 12.3, R1205
+// and ISO/IEC 1539-1:1997 Section 12.2 (Fortran 95: Procedure characteristics)
+//
+// SEMANTIC CONSTRAINT (ISO/IEC 1539-1:1997 Section 12.2):
+// The interface body declares procedure characteristics that MUST match
+// the actual procedure definition (Section 12.2.1.1 and 12.2.2):
+//
+// For FUNCTION interfaces (Section 12.2.2):
+//   - Result type and type parameters must match
+//   - Result rank and shape must match
+//   - For nonconstant bounds: expressions must depend on same entities
+//     Example: interface says REAL :: f(N), definition must also say f(N)
+//             NOT f(2*N) or f(N+1) - the bounds expression MUST match exactly
+//
+// For SUBROUTINE interfaces (Section 12.2.1.1):
+//   - Each dummy argument type/rank/shape must match (Section 12.2.1.1)
+//   - Array bounds dependence on entities must match between interface and definition
+//
+// NOTE: Current grammar is SYNTACTICALLY correct. This rule accepts any
+// valid function/subroutine declaration syntax. Semantic validation of
+// characteristic matching is deferred to semantic analysis phase.
+// See issue #415 for semantic analyzer implementation requirements.
+//
+// STANDARD-COMPLIANT: Grammar syntax matches ISO/IEC 1539-1:1997 Section 12.3.
+// Semantic constraints per Section 12.2 are documented here and in issue #415.
 interface_body
     : function_stmt specification_part? end_function_stmt
     | subroutine_stmt specification_part? end_subroutine_stmt
