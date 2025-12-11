@@ -1186,6 +1186,68 @@ class TestStrictCommon(unittest.TestCase):
                 self.assertIn('DIVIDE', tree.getText())
                 self.assertIn('CHECK', tree.getText())
 
+    def test_two_label_if_statements_in_fortran_ii(self):
+        """Test two-label IF statements in FORTRAN II context
+
+        Two-label IF statements from FORTRAN I (C28-6003 Appendix B rows 9-10)
+        should parse in FORTRAN II per C28-6000-2 backward compatibility guarantee.
+        Issue #603: Missing two-label IF statement forms from FORTRAN I inheritance
+        """
+        test_cases = [
+            ("IF (X) 10, 20", "two-way positive (X >= 0)"),
+            ("IF (Y) 100, 200", "two-way zero (Y = 0)"),
+            ("IF (A+B) 5, 15", "two-way with expression"),
+            ("IF (SIN(Z)) 30, 40", "two-way with function call"),
+        ]
+        for text, description in test_cases:
+            with self.subTest(two_label_if=text, desc=description):
+                tree = self.parse(text, 'statement_body')
+                self.assertIsNotNone(tree, f"Failed to parse two-label IF: {text}")
+                # Verify IF keyword
+                self.assertIn('IF', tree.getText())
+                # Verify parenthesized expression
+                self.assertIn('(', tree.getText())
+                self.assertIn(')', tree.getText())
+                # Verify labels
+                tree_text = tree.getText()
+                # Simple label extraction - check for numbers
+                self.assertGreaterEqual(tree_text.count(','), 1,
+                                      f"Two-label IF should have comma separator: {text}")
+
+    def test_two_label_if_in_fortran_ii_program(self):
+        """Test two-label IF statement in complete FORTRAN II subroutine
+
+        Demonstrates the example from issue #603:
+        A subroutine using IF (X) n1, n2 to branch on the sign of X.
+        """
+        subroutine_text = """
+      SUBROUTINE SIGN_TEST(X)
+C     Branch on sign of X
+      IF (X) 10, 20
+10    CONTINUE
+C     X is positive or zero
+      RETURN
+20    CONTINUE
+C     X is negative
+      RETURN
+      END
+        """
+        tree = self.parse(subroutine_text, 'subroutine_subprogram')
+        self.assertIsNotNone(tree)
+        text = tree.getText()
+        # Verify subroutine structure
+        self.assertIn('SUBROUTINE', text)
+        self.assertIn('SIGN_TEST', text)
+        self.assertIn('X', text)
+        # Verify two-label IF statement
+        self.assertIn('IF', text)
+        # Verify labels and CONTINUE statements
+        self.assertIn('10', text)
+        self.assertIn('20', text)
+        self.assertIn('CONTINUE', text)
+        # Verify RETURN statements
+        self.assertEqual(text.count('RETURN'), 2)
+
     def test_sense_light_statement_in_fortran_ii(self):
         """Test SENSE LIGHT statements in FORTRAN II context
 
