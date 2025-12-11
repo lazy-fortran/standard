@@ -407,8 +407,8 @@ The Fortran 90 grammar in this repository:
 
 | ISO Rule | Description | Status |
 |----------|-------------|--------|
+| R531–R534 | `data-implied-do` nested forms (DATA implied-DO lists) | Implemented (fixes #378) |
 | R620 | `section-subscript` with vector subscript | Partial |
-| R531 | `data-implied-do` nested forms | Partial |
 | R1219 | `entry-stmt` | Implemented (F90 extension via `entry_stmt_f90`) |
 
 **xfail Fixtures:** 0 (Issue #311 resolved; fixtures corrected)
@@ -417,5 +417,4 @@ Future work should:
 
 - Tighten module/program‑unit integration and internal procedures
 - Complete vector subscript support in array sections (R620)
-- Implement nested data-implied-do forms (R531)
 - Keep the grammar and tests in sync with spec‑section annotations (#173)
