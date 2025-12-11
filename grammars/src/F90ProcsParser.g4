@@ -66,8 +66,13 @@ procedure_designator
     ;
 
 // Procedure statement (in interface blocks)
+// ISO/IEC 1539:1991 Section 12.3.2.2, R1206
 procedure_stmt
-    : PROCEDURE
+    : MODULE PROCEDURE procedure_name_list NEWLINE?
+    ;
+
+procedure_name_list
+    : identifier_or_keyword (COMMA identifier_or_keyword)*
     ;
 
 // ====================================================================

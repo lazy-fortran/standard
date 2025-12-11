@@ -45,6 +45,14 @@ Grammar:
     - Optional `specification_part`, `execution_part`, and
       `internal_subprogram_part` (F90 internal procedures via
       `contains_stmt`).
+- Interfaces and procedure statements:
+  - `interface_block`, `interface_specification` and `interface_body`
+    wire together generic interface declarations, procedure definitions,
+    and the `procedure_stmt` entry point used inside interface blocks.
+  - `procedure_stmt` now implements `MODULE PROCEDURE procedure-name-list`
+    per ISO/IEC 1539:1991 Section 12.3.2.2 (R1206), driven by
+    `F90ProcsParser.g4:procedure_stmt` and `procedure_name_list` (fixes
+    #594).
 
 Notable simplifications / gaps:
 
@@ -296,6 +304,10 @@ exercised in focused unit tests. The generic fixture harness in
 
 **Current status:** All F90 fixtures pass (0 xfail).
 
+- Added `tests/fixtures/Fortran90/test_interface_module_procedure/module_procedure_interface.f90`
+  to assert that `MODULE PROCEDURE procedure-name-list` declarations (ISO/IEC
+  1539:1991 Section 12.3.2.2, R1206) parse successfully (fixes #594).
+
 Previous xfail fixtures were corrected to use valid F90 syntax:
 
 - `array_constructor_program.f90`: Updated to use F90 parenthesis array
@@ -409,6 +421,7 @@ The Fortran 90 grammar in this repository:
 |----------|-------------|--------|
 | R531–R534 | `data-implied-do` nested forms (DATA implied-DO lists) | Implemented (fixes #378) |
 | R620 | `section-subscript` with vector subscript (R620-R621) | Implemented (fixes #381) |
+| R1206 | `procedure_stmt` (`MODULE PROCEDURE` procedure-name-list) in interface blocks | Implemented (fixes #594) |
 | R1219 | `entry-stmt` | Implemented (F90 extension via `entry_stmt_f90`) |
 
 **xfail Fixtures:** 0 (Issue #311 resolved; fixtures corrected)
