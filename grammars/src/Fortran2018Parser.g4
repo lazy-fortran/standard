@@ -103,8 +103,27 @@ subroutine_stmt_f2018
 
 // ISO/IEC 1539-1:2018 R504: specification-part
 specification_part_f2018
-    : ((use_stmt | import_stmt | implicit_stmt | declaration_construct_f2018)
+    : ((use_stmt | import_stmt | implicit_stmt_f2018 | declaration_construct_f2018)
       NEWLINE*)*
+    ;
+
+// ISO/IEC 1539-1:2018 Section 8.7 (R863-R864): extended IMPLICIT NONE forms
+implicit_stmt_f2018
+    : IMPLICIT NONE implicit_none_spec_clause? NEWLINE?
+    | IMPLICIT implicit_spec_list NEWLINE?
+    ;
+
+implicit_none_spec_clause
+    : LPAREN implicit_none_spec_list RPAREN
+    ;
+
+implicit_none_spec_list
+    : implicit_none_spec (COMMA implicit_none_spec)*
+    ;
+
+implicit_none_spec
+    : TYPE
+    | EXTERNAL
     ;
 
 // ISO/IEC 1539-1:2018 R507: declaration-construct
