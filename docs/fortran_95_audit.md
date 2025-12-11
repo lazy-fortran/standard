@@ -5,9 +5,9 @@ implements and how it relates to the Fortran 95 language as defined in:
 
 - ISO/IEC 1539‑1:1997 (Fortran 95) – not stored in this repo, but used
   as the conceptual reference for the F95 feature set.
-- J3/98‑114 “Fortran 95 Request for Interpretation”
-  (`validation/pdfs/Fortran95_J3_98-114_RFI.txt`), which clarifies some
-  F95 semantics for dummy arguments and function results.
+- J3/98‑114 "Fortran 95 Request for Interpretation", which clarifies some
+  F95 semantics for dummy arguments and function results. Available from
+  the J3 Fortran committee archives (not stored in this repository).
 
 The implementation view is based on:
 
@@ -501,7 +501,7 @@ fixtures that exercise the integrated `program_unit_f95` entry point.
 
 ## 9. J3/98‑114 and semantic characteristics
 
-Reference document: `validation/pdfs/Fortran95_J3_98-114_RFI.txt`
+Reference document: J3/98-114 (available from J3 Fortran committee archives)
 
 ### Specification context (ISO/IEC 1539‑1:1997 Section 12.2)
 

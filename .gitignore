@@ -1,112 +1,157 @@
-# NEVER commit auto-generated content, PDFs, or external tools
-validation/pdfs/          # ISO specification PDFs and OCR outputs
-validation/pdfs/.ocr_tmp_*/  # Tesseract OCR intermediate directories
-validation/pdfs/*.txt        # Extracted/OCRed standard text
-validation/cache/         # Processing cache
-validation/auto-generated/ # Generated reference grammars (all files)
-validation/external/    # Downloaded external tools (kaby76/fortran - all files)  
-validation/dependencies/ # Downloaded .NET SDK and tools (all files)
+# =============================================================================
+# VALIDATION DIRECTORY - NEVER COMMIT EXTERNAL/COPYRIGHTED CONTENT
+# =============================================================================
+# All content downloaded on-demand via validation/setup_validation.sh
+validation/pdfs/                    # ISO specification PDFs
+validation/pdfs/**                  # All files under pdfs/
+validation/txt/                     # Extracted standard text files
+validation/txt/**                   # All text extractions
+validation/cache/                   # Processing cache
+validation/cache/**
+validation/auto-generated/          # Generated reference grammars
+validation/auto-generated/**
+validation/external/                # Downloaded repos (kaby76/fortran, etc.)
+validation/external/**
+validation/dependencies/            # Downloaded .NET SDK and tools
+validation/dependencies/**
+validation/*.txt                    # Any text files in validation root
+validation/**/*.pdf                 # Any PDFs anywhere in validation
+validation/**/*J3*.txt              # J3 committee documents
+validation/**/*RFI*.txt             # Request for Interpretation documents
+validation/**/*ISO*.txt             # ISO standard extractions
+validation/**/*ANSI*.txt            # ANSI standard extractions
 
-# Build directory - all generated ANTLR4 files
-build/                    # Generated parser/lexer files (all files)
+# =============================================================================
+# BUILD ARTIFACTS - GENERATED ANTLR4 FILES
+# =============================================================================
+build/                              # Main build directory
+build/**
+grammars/generated/                 # Generated output directory
+grammars/generated/**
 
-# Generated ANTLR files in grammars directory
-grammars/generated/
+# Generated ANTLR files in grammars directory (never commit these)
 grammars/*.py
 grammars/*.pyc
+grammars/*.pyo
 grammars/*.tokens
 grammars/*.interp
 grammars/*Listener.py
 grammars/*Visitor.py
-grammars/grammars/  # Prevent nested directory
+grammars/grammars/                  # Prevent nested directory accident
 
-# Generated Tree-sitter files - DO NOT COMMIT
-tree-sitter/*/src/            # Generated C parser code (entire directory)
-tree-sitter/*/node-types.json # Generated node type definitions
-tree-sitter/*/binding.gyp     # Generated build files
-tree-sitter/*/bindings/       # Generated language bindings  
-tree-sitter/*/build/          # Build artifacts
-tree-sitter/*/grammar.json    # Generated grammar files
+# =============================================================================
+# TREE-SITTER - ENTIRE DIRECTORY (PROJECT REMOVED)
+# =============================================================================
+tree-sitter/                        # Entire tree-sitter directory
+tree-sitter/**
 
-# Specific Tree-sitter generated files
-**/src/node-types.json
-**/src/parser.c
-**/src/tree_sitter/
-**/src/grammar.json
-
-# Debug and temporary files
-debug_*.py
+# =============================================================================
+# TEST AND DEBUG ARTIFACTS
+# =============================================================================
+test_output/                        # Test output directory
+test_output/**
+tools/validation_cache/             # Validation cache in tools
+tools/validation_cache/**
+debug_*.py                          # Debug scripts
 *.tmp
 *.bak
+*.log
 
-# Python cache files
+# =============================================================================
+# PYTHON
+# =============================================================================
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+eggs/
+*.egg
 
 # Virtual environments
 venv/
 env/
 ENV/
+.venv/
+.env/
 
-# IDE files
+# =============================================================================
+# IDE AND EDITOR
+# =============================================================================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
 
-# OS files
+# =============================================================================
+# OS FILES
+# =============================================================================
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
+# =============================================================================
+# COMPILED FILES AND LIBRARIES
+# =============================================================================
+# Object files
 *.o
 *.obj
+*.lo
+*.slo
 
-# Precompiled Headers
+# Precompiled headers
 *.gch
 *.pch
 
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
+# Libraries
 *.so
 *.dylib
 *.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
 *.a
 *.lib
+*.la
+*.lai
 
 # Executables
 *.exe
 *.out
 *.app
 
-# debug information files
+# Debug files
+*.d
 *.dwo
+*.ilk
+*.pdb
 
-build/
-validation/external/
-validation/auto-generated/
-validation_cache/
-test_output/
+# Fortran module files
+*.mod
+*.smod
 
-# Local ANTLR tool JARs (developer convenience only)
+# =============================================================================
+# LOCAL TOOLS (developer convenience)
+# =============================================================================
 antlr-*.jar
+*.jar
+
+# =============================================================================
+# TEMPORARY AND CACHE
+# =============================================================================
+*.cache
+.cache/
+tmp/
+temp/
