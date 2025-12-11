@@ -176,6 +176,19 @@ END IF"""
                 tree = self.parse(text, 'save_stmt')
                 self.assertIsNotNone(tree)
 
+    def test_read_positional_unit_format(self):
+        """Verify READ statements with the positional unit/format form."""
+        test_cases = [
+            "READ 5, 100",
+            "READ 5, 100, A, B",
+            "READ 7, 200, (A(I), I=1, 5)"
+        ]
+
+        for text in test_cases:
+            with self.subTest(read_stmt=text):
+                tree = self.parse(text, 'read_stmt')
+                self.assertIsNotNone(tree)
+
     def test_call_statement_with_hollerith_argument(self):
         """Verify CALL statements accept Hollerith constants as arguments."""
         test_cases = [

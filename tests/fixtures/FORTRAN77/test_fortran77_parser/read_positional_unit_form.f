@@ -1,0 +1,9 @@
+      PROGRAM READ_POSITIONAL_UNIT
+      INTEGER A(5), B, C
+      READ 5, 100, A
+      READ 6, 200, B, C
+      READ 7, 300, (A(I), I=1,5)
+  100  FORMAT(5I5)
+  200  FORMAT(2I4)
+  300  FORMAT(5I5)
+      END
