@@ -182,6 +182,7 @@ class TestUnifiedGrammarArchitecture:
             "open_close_inquire.f90",
             "file_positioning.f90",
             "advanced_io_specs.f90",
+            "inquire_iolength.f90",
         ]
 
         for filename in test_files:

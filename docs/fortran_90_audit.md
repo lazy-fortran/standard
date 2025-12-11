@@ -294,10 +294,13 @@ Grammar:
 - `namelist_stmt`:
   - Included in `declaration_construct` as an F90 declaration form.
 - File I/O statements (N692 §9):
-  - `open_stmt_f90`, `close_stmt_f90`, `backspace_stmt_f90`,
-    `endfile_stmt_f90`, `rewind_stmt_f90`, `inquire_stmt_f90` are
-    all wired into `executable_construct_f90` with proper ISO section
-    references (R904, R908, R923, R924, R925, R929).
+- `open_stmt_f90`, `close_stmt_f90`, `backspace_stmt_f90`,
+  `endfile_stmt_f90`, `rewind_stmt_f90`, `inquire_stmt_f90` are
+  all wired into `executable_construct_f90` with proper ISO section
+  references (R904, R908, R923, R924, R925, R929).
+- `inquire_stmt_f90` now also supports the `INQUIRE(IOLENGTH=...)`
+  record-length inquiry (ISO/IEC 1539:1991 Section 9.7.3 R931) paired
+  with `output_item_list_f90`, closing issue #601.
 
 ## 8. Fixtures and integration status
 
@@ -313,6 +316,9 @@ exercised in focused unit tests. The generic fixture harness in
 - Added `tests/fixtures/Fortran90/test_interface_module_procedure/module_procedure_interface.f90`
   to assert that `MODULE PROCEDURE procedure-name-list` declarations (ISO/IEC
   1539:1991 Section 12.3.2.2, R1206) parse successfully (fixes #594).
+- Added `tests/fixtures/Fortran90/test_file_io_statements/inquire_iolength.f90`
+  to exercise `INQUIRE(IOLENGTH=...)` record-length inquiries with
+  `output_item_list_f90` and closing issue #601 (ISO/IEC 1539:1991 Section 9.7.3, R931).
 
 Previous xfail fixtures were corrected to use valid F90 syntax:
 
@@ -414,7 +420,9 @@ The Fortran 90 grammar in this repository:
     intrinsics and statements (ALLOCATE/DEALLOCATE/NULLIFY).
   - Block IF, CASE, DO, DO WHILE, WHERE, named constructs, CYCLE/EXIT.
   - Enhanced expressions and literals (kinded numerics, BOZ, strings).
-  - Enhanced I/O (I/O control lists, NAMELIST, list‑directed I/O).
+  - Enhanced I/O (I/O control lists, NAMELIST, list‑directed I/O,
+    plus `INQUIRE(IOLENGTH=...)` record-length inquiries per
+    ISO/IEC 1539:1991 Section 9.7.3, R931, fixes #601).
   - Internal subprograms and unified program‑unit structure.
 - Uses a unified lexer for free‑form and fixed‑form with **lenient
   fixed‑form** handling (no card‑accurate column enforcement).

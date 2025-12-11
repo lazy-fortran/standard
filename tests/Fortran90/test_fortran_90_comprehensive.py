@@ -197,7 +197,8 @@ class TestFortran90Lexer:
             'SIZE': Fortran90Lexer.SIZE,
             'STAT': Fortran90Lexer.STAT,
             'EOR': Fortran90Lexer.EOR,
-            'IOSTAT': Fortran90Lexer.IOSTAT
+            'IOSTAT': Fortran90Lexer.IOSTAT,
+            'IOLENGTH': Fortran90Lexer.IOLENGTH
         }
         
         for keyword, expected_token in io_keywords.items():

@@ -159,9 +159,12 @@ close_stmt_f90
     : CLOSE LPAREN close_spec_list_f90 RPAREN
     ;
 
-// INQUIRE statement - ISO/IEC 1539:1991 Section 9.7.3, R929
+// INQUIRE statement - ISO/IEC 1539:1991 Section 9.7.3 (R929 file inquiry,
+// R931 IOLENGTH inquiry)
 inquire_stmt_f90
     : INQUIRE LPAREN inquire_spec_list_f90 RPAREN
+    | INQUIRE LPAREN IOLENGTH EQUALS variable_f90 RPAREN
+      output_item_list_f90
     ;
 
 // BACKSPACE statement - ISO/IEC 1539:1991 Section 9.6.1, R923
