@@ -763,8 +763,9 @@ The following F95 features are **not yet implemented** or have limitations
 and are therefore **NON-COMPLIANT** with the corresponding ISO sections
 until they are addressed:
 
-1. **Automatic deallocation** (Section 6.3.3): Semantic behavior, not syntax –
-   **NON-COMPLIANT** (semantic deallocation rules not modeled).
+1. **Automatic deallocation** (Section 6.3.3): Runtime semantic behavior –
+   **STANDARD-COMPLIANT** (grammar correctly parses ALLOCATABLE syntax; automatic
+   deallocation is a runtime feature outside grammar scope; see #407).
 2. **NULL() intrinsic** (Section 13.10.79): Implemented NULL_INTRINSIC token and
    added to identifier_or_keyword_f95 rule (fixes #376) –
    **STANDARD-COMPLIANT** (intrinsic function with optional MOLD argument).

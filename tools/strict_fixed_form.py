@@ -31,7 +31,7 @@ from enum import Enum
 from typing import List, Literal, Optional, Tuple
 
 
-FortranDialect = Literal["1957", "II"]
+FortranDialect = Literal["1957", "II", "66", "77"]
 
 
 class CardType(Enum):
@@ -54,6 +54,18 @@ DIALECT_CONFIG = {
         "label_max": 99999,
         "reference": "C28-6000-2",
         "parser": "FORTRANIIParser",
+    },
+    "66": {
+        "comment_markers": ("C", "*"),
+        "label_max": 99999,
+        "reference": "X3.9-1966",
+        "parser": "FORTRAN66Parser",
+    },
+    "77": {
+        "comment_markers": ("C", "*"),
+        "label_max": 99999,
+        "reference": "X3.9-1978",
+        "parser": "FORTRAN77Parser",
     },
 }
 
@@ -474,6 +486,106 @@ def convert_to_lenient_1957(source: str,
     """
     return convert_to_lenient(source, strict_width, allow_tabs,
                               strip_comments, dialect="1957")
+
+
+def validate_strict_fixed_form_66(source: str,
+                                  strict_width: bool = True,
+                                  allow_tabs: bool = False) -> ValidationResult:
+    """
+    Validate source code as strict fixed-form FORTRAN 66.
+
+    Convenience wrapper for validate_strict_fixed_form with dialect="66".
+
+    Per ANSI X3.9-1966 Section 3.3 (Source Program Format):
+    - Labels must be 1-99999
+    - C or * in column 1 marks a comment card
+    - Column 6 continuation mark
+    - Columns 7-72 contain statement text
+    - Columns 73-80 contain sequence field
+
+    Args:
+        source: Source code text
+        strict_width: Enforce 80-column cards
+        allow_tabs: Allow tab characters
+
+    Returns:
+        ValidationResult with validation status, errors, and parsed cards
+    """
+    return validate_strict_fixed_form(source, strict_width, allow_tabs,
+                                      dialect="66")
+
+
+def convert_to_lenient_66(source: str,
+                          strict_width: bool = True,
+                          allow_tabs: bool = False,
+                          strip_comments: bool = False
+                          ) -> Tuple[str, ValidationResult]:
+    """
+    Validate and convert FORTRAN 66 strict fixed-form to lenient form.
+
+    Convenience wrapper for convert_to_lenient with dialect="66".
+
+    Args:
+        source: Source code text
+        strict_width: Enforce 80-column cards
+        allow_tabs: Allow tab characters
+        strip_comments: If True, omit comment lines from output
+
+    Returns:
+        Tuple of (lenient_source, validation_result)
+    """
+    return convert_to_lenient(source, strict_width, allow_tabs,
+                              strip_comments, dialect="66")
+
+
+def validate_strict_fixed_form_77(source: str,
+                                  strict_width: bool = True,
+                                  allow_tabs: bool = False) -> ValidationResult:
+    """
+    Validate source code as strict fixed-form FORTRAN 77.
+
+    Convenience wrapper for validate_strict_fixed_form with dialect="77".
+
+    Per ANSI X3.9-1978 Section 3.3 (Source Program Format):
+    - Labels must be 1-99999
+    - C or * in column 1 marks a comment card
+    - Column 6 continuation mark
+    - Columns 7-72 contain statement text
+    - Columns 73-80 contain sequence field
+
+    Args:
+        source: Source code text
+        strict_width: Enforce 80-column cards
+        allow_tabs: Allow tab characters
+
+    Returns:
+        ValidationResult with validation status, errors, and parsed cards
+    """
+    return validate_strict_fixed_form(source, strict_width, allow_tabs,
+                                      dialect="77")
+
+
+def convert_to_lenient_77(source: str,
+                          strict_width: bool = True,
+                          allow_tabs: bool = False,
+                          strip_comments: bool = False
+                          ) -> Tuple[str, ValidationResult]:
+    """
+    Validate and convert FORTRAN 77 strict fixed-form to lenient form.
+
+    Convenience wrapper for convert_to_lenient with dialect="77".
+
+    Args:
+        source: Source code text
+        strict_width: Enforce 80-column cards
+        allow_tabs: Allow tab characters
+        strip_comments: If True, omit comment lines from output
+
+    Returns:
+        Tuple of (lenient_source, validation_result)
+    """
+    return convert_to_lenient(source, strict_width, allow_tabs,
+                              strip_comments, dialect="77")
 
 
 if __name__ == "__main__":

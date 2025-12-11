@@ -379,17 +379,28 @@ Mapping these families to the current grammar:
 `docs/fixed_form_support.md` describes the Fortran 66 fixed-form
 handling as:
 
-- Layout‑lenient:
+- Layout‑lenient grammar:
   - Statements are parsed according to token sequence, not strict
     column positions.
   - No enforcement of exact 80‑column semantics or sequence numbers.
+  - This makes the grammar suitable for analyzing typical FORTRAN 66 code
+    without reproducing exact card-image behavior.
+- Strict fixed-form validation (optional):
+  - The `tools/strict_fixed_form.py` preprocessor provides optional
+    strict ANSI X3.9-1966 Section 3.3 fixed-form validation and conversion
+    per issue #394.
+  - Supports card-image validation: columns 1-5 (labels), column 6
+    (continuation), columns 7-72 (statement), columns 73-80 (sequence).
+  - Dialect "66" validates labels (1-99999), comment markers (C/*),
+    and continuation rules.
+  - Provides conversion from strict to layout-lenient form for parsing.
+  - Test coverage: `tests/FORTRAN66/test_strict_fixed_form_66.py`
+    includes 22 test cases for card parsing, validation, and conversion.
 - Comments:
-  - Classic column‑1 `C`/`*` forms and sequence fields are treated as
-    historical context but are not modeled with strict semantics in
-    this grammar.
-
-This makes the grammar suitable for analyzing typical FORTRAN 66 code
-without reproducing exact card-image behavior.
+  - Classic column‑1 `C`/`*` forms are recognized as comment cards
+    (per X3.9-1966 Section 3.3).
+  - Sequence fields (columns 73-80) are recognized but not validated
+    (historical context only).
 
 ## 6. Tests and XPASS fixtures
 
