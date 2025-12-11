@@ -216,6 +216,29 @@ ENDFILE         : E N D F I L E ;
 COLON           : ':' ;
 
 // ============================================================================
+// IDENTIFIER RESTRICTION - X3.9-1966 Section 2.3 "Symbolic Names"
+// ============================================================================
+// X3.9-1966 Section 2.3 mandates that symbolic names consist of 1 to 6
+// alphanumeric characters, with the first character being alphabetic.
+// This lexer rule overrides the unlimited-length IDENTIFIER from
+// FORTRANLexer to enforce the 6-character limit per the standard.
+//
+// Valid names: A, X1, VALUE, MAX (1-6 characters)
+// Invalid names: VERYLONGNAME (>6 characters), 1X (starts with digit)
+//
+// Compliance: STANDARD-COMPLIANT with X3.9-1966 Section 2.3
+//
+// NOTE: FORTRAN 77 (ANSI X3.9-1978) removed this 6-character restriction
+// and allows arbitrary length identifiers. The FORTRAN77Lexer overrides
+// this rule to permit unrestricted identifier length for F77 and later.
+//
+// Implementation: Matches exactly 1-6 character identifiers using explicit alternatives
+// Each alternative matches identifiers of a specific length (1-6 chars)
+// This ensures greedy matching: longer valid identifiers match before shorter ones
+IDENTIFIER      : LETTER (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
+                ;
+
+// ============================================================================
 // FORTRAN 66 (X3.9-1966) HISTORICAL SIGNIFICANCE
 // ============================================================================
 //

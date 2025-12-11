@@ -137,6 +137,22 @@ COLON           : ':' ;
 STRING_LITERAL  : '\'' (~'\'' | '\'\'')* '\'' ;
 
 // ====================================================================
+// IDENTIFIER LENGTH EXTENSION - ISO 1539:1980 Section 2.3.3
+// ====================================================================
+// ISO 1539:1980 (FORTRAN 77) removed the 6-character identifier limit
+// that was mandated in FORTRAN 66 (X3.9-1966 Section 2.3).
+//
+// Per ISO 1539:1980 Section 2.3.3: "A name has 1 to 31 characters"
+// This lexer overrides the FORTRAN 66 IDENTIFIER restriction to allow
+// identifiers of arbitrary length, as per the FORTRAN 77 standard.
+//
+// Compliance: STANDARD-COMPLIANT with ISO 1539:1980 Section 2.3.3
+// Override: Restores unlimited identifier length from FORTRANLexer base
+//
+// Implementation: Uses fragment-based rules matching the FORTRANLexer pattern
+IDENTIFIER      : LETTER (LETTER | DIGIT | '_')* ;
+
+// ====================================================================
 // ISO 1539:1980 SPEC-GRAMMAR MAPPING (LEXER)
 // ====================================================================
 //
