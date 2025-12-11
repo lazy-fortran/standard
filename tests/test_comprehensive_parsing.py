@@ -15,6 +15,8 @@ sys.path.append(str(Path(__file__).parent.parent / "grammars/generated/modern"))
 from antlr4 import *
 from Fortran90Lexer import Fortran90Lexer
 from Fortran90Parser import Fortran90Parser
+from Fortran95Lexer import Fortran95Lexer
+from Fortran95Parser import Fortran95Parser
 from fixture_utils import load_fixture
 
 class TestUnifiedGrammarArchitecture:
@@ -24,22 +26,22 @@ class TestUnifiedGrammarArchitecture:
         """Helper to parse Fortran code with error checking."""
         try:
             input_stream = InputStream(code)
-            
+
             if grammar_type == "Fortran90":
                 lexer = Fortran90Lexer(input_stream)
                 parser = Fortran90Parser(CommonTokenStream(lexer))
-            else:
-                # Import F95 dynamically if needed
-                from Fortran95Lexer import Fortran95Lexer
-                from Fortran95Parser import Fortran95Parser
+                tree = parser.program_unit_f90()
+            elif grammar_type == "Fortran95":
                 lexer = Fortran95Lexer(input_stream)
                 parser = Fortran95Parser(CommonTokenStream(lexer))
-            
-            tree = parser.program_unit_f90()
+                tree = parser.program_unit_f95()
+            else:
+                return None, -1, f"Unknown grammar type: {grammar_type}"
+
             errors = parser.getNumberOfSyntaxErrors()
-            
+
             return tree, errors, None
-            
+
         except Exception as e:
             return None, -1, str(e)
     
@@ -120,7 +122,7 @@ class TestUnifiedGrammarArchitecture:
             print(f"Warning: Complex F90 test had {errors} parsing errors")
         assert tree is not None or errors > 0, "Complex F90 test should parse or fail gracefully"
     
-    @pytest.mark.skipif(not Path("grammars/Fortran95Lexer.py").exists(), 
+    @pytest.mark.skipif(not Path("grammars/generated/modern/Fortran95Lexer.py").exists(),
                        reason="Fortran95 parser not built")
     def test_fortran95_enhancements(self):
         """Test Fortran95 specific enhancements."""
