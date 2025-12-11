@@ -297,7 +297,7 @@ Mapping these families to the current grammar:
       - **SEMANTIC CONSTRAINTS (X3.9-1966 Section 5.3):**
         - `d` (single bound) must be a positive integer constant
         - `d2` (upper bound) must be positive (> 0)
-        - `d1` (lower bound) may be zero or positive
+        - `d1` (lower bound) may be any signed integer constant (negative values allowed)
         - `d2` must be >= `d1`
         - Parser accepts syntax; constraint validation requires semantic pass
       - Tests: covered by `test_dimension_statement_simple_bounds`,

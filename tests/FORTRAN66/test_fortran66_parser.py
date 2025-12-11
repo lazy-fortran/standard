@@ -1257,7 +1257,8 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
         """Test DIMENSION statement with explicit lower and upper bounds.
 
         ANSI X3.9-1966 Section 5.3 permits d1:d2 form (explicit bounds).
-        Per standard: d1 may be zero or positive, d2 must be >= d1.
+        Per standard: d1 may be a signed integer (negative values allowed)
+        and d2 must be >= d1.
         """
         # Valid explicit bound declarations
         valid_declarations = [
