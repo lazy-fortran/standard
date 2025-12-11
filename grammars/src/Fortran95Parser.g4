@@ -458,6 +458,82 @@ component_def_stmt_f95
 // - R1224 (prefix) -> prefix-spec [prefix-spec]...
 // - R1225 (prefix-spec) -> RECURSIVE | PURE | ELEMENTAL | type-spec
 
+// ====================================================================
+// FORTRAN 95 PROCEDURE PREFIXES - PURE/ELEMENTAL SEMANTICS
+// ====================================================================
+//
+// ISO/IEC 1539-1:1997 Section 12.6 defines PURE and ELEMENTAL procedures.
+// These are major F95 enhancements with extensive semantic restrictions.
+//
+// NOTE: The grammar below ONLY accepts the syntactic forms. Semantic
+// restrictions (no side effects, no I/O, no global state modification, etc.)
+// are NOT enforced by the grammar and require a semantic analyzer.
+// See issue #425 for comprehensive requirements documentation.
+//
+// PURE PROCEDURES (ISO/IEC 1539-1:1997 Section 12.6.1)
+// =====================================================
+//
+// A PURE procedure must NOT:
+//
+// 1. Modify global state (module variables, host-associated variables,
+//    common block variables)
+//
+// 2. Violate argument usage restrictions:
+//    - All dummy arguments without INTENT(IN) must have explicit INTENT(OUT/INOUT)
+//    - Cannot modify INTENT(IN) arguments
+//    - Pointer dummy arguments must have INTENT(IN)
+//
+// 3. Perform I/O or external interactions:
+//    - No I/O statements (READ, WRITE, PRINT, OPEN, CLOSE, etc.)
+//    - No STOP statement
+//    - Can only call other PURE procedures
+//
+// 4. Violate local variable restrictions:
+//    - Local variables with SAVE attribute cannot be modified
+//    - Local pointers cannot be associated with non-local targets
+//
+// ELEMENTAL PROCEDURES (ISO/IEC 1539-1:1997 Section 12.6.2)
+// ===========================================================
+//
+// An ELEMENTAL procedure must be PURE and additionally:
+//
+// 1. All dummy arguments must be SCALAR (not arrays)
+// 2. Function result must be SCALAR
+// 3. Cannot have alternate returns
+// 4. ELEMENTAL implies PURE (all PURE restrictions apply)
+//
+// USES OF PURE FUNCTIONS (ISO/IEC 1539-1:1997 Section 12.6.3)
+// ============================================================
+//
+// PURE functions can appear in:
+// - Specification expressions (array bounds, character lengths)
+// - FORALL constructs and statements
+// - WHERE constructs
+//
+// These contexts require compile-time evaluation or parallelization,
+// which pure functions enable.
+//
+// GRAMMAR STATUS
+// ===============
+//
+// This grammar accepts PURE and ELEMENTAL procedure prefixes but does
+// NOT enforce any of the above semantic constraints. Compliance with
+// Section 12.6 restrictions requires a separate semantic analysis pass.
+//
+// Non-Compliant Example (accepted by grammar but violates standard):
+//
+//   pure function bad_pure() result(y)
+//     integer, save :: counter = 0    ! VIOLATION: modifies SAVE variable
+//     print *, 'Computing'             ! VIOLATION: I/O statement
+//     counter = counter + 1             ! VIOLATION: modifies SAVE
+//     y = counter
+//   end function
+//
+// Issue Tracking
+// ===============
+// See GitHub issue #425 for comprehensive semantic requirements that
+// must be implemented in a future semantic analyzer.
+//
 // F95 procedure prefix (Section 12.5.2, R1224)
 prefix_f95
     : prefix_spec_f95+
@@ -466,18 +542,26 @@ prefix_f95
 // Prefix specification (Section 12.5.2, R1225)
 prefix_spec_f95
     : RECURSIVE                     // F90 recursive procedures (12.5.2.1)
-    | PURE                          // F95 pure procedures (12.6)
-    | ELEMENTAL                     // F95 elemental procedures (12.6)
+    | PURE                          // F95 pure (12.6) - see sec 12.6 constraints
+    | ELEMENTAL                     // F95 elemental (12.6) - see section 12.6
     | type_spec_f95                 // Function return type (5.1)
     ;
 
 // Function statement (Section 12.5.2, R1217)
+//
+// SEMANTIC CONSTRAINTS (not enforced by grammar):
+// If prefixed with PURE or ELEMENTAL, see restrictions in Section 12.6
+// and comments above.
 function_stmt_f95
     : (prefix_f95)? FUNCTION IDENTIFIER LPAREN dummy_arg_name_list? RPAREN (suffix)?
         NEWLINE?
     ;
 
 // Subroutine statement (Section 12.5.3, R1221)
+//
+// SEMANTIC CONSTRAINTS (not enforced by grammar):
+// If prefixed with PURE or ELEMENTAL, see restrictions in Section 12.6
+// and comments above.
 subroutine_stmt_f95
     : (prefix_f95)? SUBROUTINE IDENTIFIER (LPAREN dummy_arg_name_list? RPAREN)? NEWLINE?
     ;

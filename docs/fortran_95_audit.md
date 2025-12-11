@@ -230,6 +230,18 @@ Semantic constraints (not enforced by grammar):
   specification‑expression restrictions described in the standard and
   clarified in J3/98‑114. Those constraints are out of scope for this
   grammar and need to be enforced by later stages.
+- **PURE and ELEMENTAL procedure semantic restrictions** (ISO/IEC 1539-1:1997
+  Section 12.6): The grammar accepts PURE and ELEMENTAL prefixes but does NOT
+  enforce the extensive semantic constraints on:
+  - Global state modification
+  - Argument INTENT requirements
+  - I/O and external interaction restrictions
+  - ELEMENTAL scalar argument/result requirements
+  - Local variable and pointer restrictions
+
+  These requirements are documented in detail in the grammar file (`Fortran95Parser.g4`)
+  and tracked by GitHub issue #425. A future semantic analyzer must implement
+  these checks separately.
 
 ## 5. Type declarations and default initialization
 
