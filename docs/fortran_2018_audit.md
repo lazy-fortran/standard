@@ -449,7 +449,61 @@ Gaps:
   - It does not enforce that STOP/ERROR STOP codes satisfy all
     constraints; it only accepts the syntactic forms.
 
-## 9. ALLOCATE statement coverage (ISO/IEC 1539-1:2018 R927-R928)
+## 9. FORMAT statements (ISO/IEC 1539-1:2018 Section 13.2)
+
+Specification:
+
+- R1301-R1321 describe `format-stmt`, `format-specification`, `format-item`,
+  `data-edit-desc`, `control-edit-desc`, and supporting descriptors from F2003+
+  (EX/EN/ES/G, DT, etc.).
+- Nested groups `[r](format-items)` and unlimited `*(format-items)` allow
+  arbitrarily complex formatting, while control descriptors (`T/TL/TR`, `nX`,
+  `SS/SP/S`, `BN/BZ`, `RU/RD/RZ/RN/RC/RP`, `DC/DP`, `kP`, `@`, `$`, `\`, slash,
+  colon) handle output positioning and modifiers.
+
+Grammar implementation:
+
+- `Fortran2018Parser.g4` now provides an explicit FORMAT subtree:
+  - `format_stmt`, `format_specification`, `format_items`, `format_item`, and
+    `format_element` follow R1301-R1304 and route into dedicated descriptor
+    subtrees.
+  - `data_edit_desc` composes `identifier_descriptor`, `real_descriptor`, and
+    `dt_descriptor`, which keep `DT` literal text/tags plus optional `(v-list)`
+    arguments in sync with R1307-R1312.
+  - `control_edit_desc` implements R1313 with `position_edit_desc`,
+    `repeat_slash`, `sign_edit_desc`, `scale_factor_edit_desc`,
+    `blank_interp_edit_desc`, `round_edit_desc`, `decimal_edit_desc`, and the
+    `@/$/\` modifiers for the full control descriptor set.
+  - `char_string_edit_desc`, `char_literal_constant`, `format_decimal_part`,
+    `digit_string`, and `signed_digit_string` cover R1314-R1321 supporting data
+    descriptors, while `format_group`/`unlimited_format_item` model nested and
+    unlimited formatting.
+- `Fortran2018Lexer.g4` now defines `AT_SIGN`, `DOLLAR_SIGN`, and
+  `BACKSLASH_SIGN` so `@`, `$`, and `\` are accepted as control descriptors
+  instead of being rejected at the lexer.
+- Issue #571 tracked the missing support; with the parser and lexer updates the
+  grammar now covers R1301-R1321 syntactically.
+
+Tests:
+
+- `tests/Fortran2018/test_format_statement.py` exercises the new grammar:
+  - `tests/fixtures/Fortran2018/test_format_statement/format_complex.f90`
+    drives EX/EN/ES/G, `DT"mytype"(5,2)`, literal/Hollerith text, control
+    descriptors (`T/TL/TR`, `SS/SP/S`, `BN/BZ`, rounding, decimal, `kP`, `nX`,
+    `@/$/\`, scale factors, nested `2(3I5, F10.2)` groups).
+  - `tests/fixtures/Fortran2018/test_format_statement/format_unlimited.f90`
+    ensures nested repetition precedes an unlimited `*(3F6.2, /, 2X)` group in a
+    labelled FORMAT statement.
+  - Both fixtures include READ/WRITE statements so the FORMAT statements are
+    parsed within complete F2018 program units.
+
+Gaps:
+
+- No syntactic gaps remain for Format statements; future efforts will focus on
+  semantic constraints (descriptor widths, descriptor-type pairing) outside the
+  grammar.
+
+## 10. ALLOCATE statement coverage (ISO/IEC 1539-1:2018 R927-R928)
 
 Specification:
 
@@ -475,7 +529,7 @@ Gaps:
 
 ---
 
-## 10. Inheritance from F2008 and control‑flow tests
+## 11. Inheritance from F2008 and control‑flow tests
 
 Specification:
 
@@ -507,7 +561,7 @@ Gaps:
 
 ---
 
-## 11. Summary and issue mapping
+## 12. Summary and issue mapping
 
 The Fortran 2018 layer in this repository:
 
@@ -716,6 +770,10 @@ syntax rules to grammar rules in `Fortran2018Lexer.g4` and `Fortran2018Parser.g4
 | Section 16.9.161 | REDUCE | `REDUCE` |
 | Section 16.9.182 | STOPPED_IMAGES | `STOPPED_IMAGES` |
 | Section 16.9.187 | TEAM_NUMBER | `TEAM_NUMBER` |
+| Section 13.2 | @ descriptor | `AT_SIGN` |
+| Section 13.2 | $ descriptor | `DOLLAR_SIGN` |
+| Section 13.2 | \ descriptor | `BACKSLASH_SIGN` |
+
 | R1178 | NEW_INDEX | `NEW_INDEX` |
 | R1173 | UNTIL_COUNT | `UNTIL_COUNT` |
 

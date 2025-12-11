@@ -1,0 +1,3 @@
+FORMAT(I5, F10.3, EX12.4E2, EN11.3E1, G15.2E1)
+FORMAT(DT "mytype" (5,2), 'HELLO', 5HWORLD, @, $, \\, T10, TL2, TR3, -2P, 4X, SS, SP, S)
+FORMAT(BN, BZ, RU, RD, RN, RC, RP, DC, DP, 3/, :, 2(3I5, F10.2))
