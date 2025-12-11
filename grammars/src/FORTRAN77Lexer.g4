@@ -139,18 +139,31 @@ STRING_LITERAL  : '\'' (~'\'' | '\'\'')* '\'' ;
 // ====================================================================
 // IDENTIFIER LENGTH EXTENSION - ISO 1539:1980 Section 2.3.3
 // ====================================================================
-// ISO 1539:1980 (FORTRAN 77) removed the 6-character identifier limit
-// that was mandated in FORTRAN 66 (X3.9-1966 Section 2.3).
+// ISO 1539:1980 (FORTRAN 77) relaxed the 6-character restriction from
+// FORTRAN 66 (X3.9-1966 Section 2.3) while still limiting names to
+// a maximum of 31 characters. This overrides the shorter FORTRAN 66 rule
+// to permit longer symbolic names required by ISO 1539:1980 Section 2.3.3.
 //
-// Per ISO 1539:1980 Section 2.3.3: "A name has 1 to 31 characters"
-// This lexer overrides the FORTRAN 66 IDENTIFIER restriction to allow
-// identifiers of arbitrary length, as per the FORTRAN 77 standard.
-//
+// Per the standard: "A name has 1 to 31 characters."
 // Compliance: STANDARD-COMPLIANT with ISO 1539:1980 Section 2.3.3
-// Override: Restores unlimited identifier length from FORTRANLexer base
+// Override: Extends the FORTRAN 66 IDENTIFIER token to accept up to 31
+// characters (1 leading letter + 30 additional letters/digits/underscores).
 //
-// Implementation: Uses fragment-based rules matching the FORTRANLexer pattern
-IDENTIFIER      : LETTER (LETTER | DIGIT | '_')* ;
+// Implementation: Matches an alphabetic start followed by at most 30 trailing
+// characters (letters, digits, or underscores) to enforce the 31-character limit.
+IDENTIFIER
+    : LETTER
+      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
+      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
+      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
+      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
+      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
+      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
+      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
+      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
+      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
+      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
+    ;
 
 // ====================================================================
 // ISO 1539:1980 SPEC-GRAMMAR MAPPING (LEXER)
