@@ -125,3 +125,14 @@ class TestF2018TeamsAndCollectivesStatus:
         tree, errors, _ = parse_f2018(code)
         assert tree is not None
         assert errors == 0
+
+    def test_sync_team_statement_parses(self):
+        """R1169 sync team statements with optional STAT/ERRMSG parse via F2018."""
+        code = load_fixture(
+            "Fortran2018",
+            "test_issue575_sync_team",
+            "sync_team_statements.f90",
+        )
+        tree, errors, _ = parse_f2018(code)
+        assert tree is not None
+        assert errors == 0

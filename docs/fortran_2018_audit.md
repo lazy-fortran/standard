@@ -278,6 +278,8 @@ Grammar implementation:
     - `coarray_association`, where `IDENTIFIER [cosubscript_list] -> variable_f2008`.
   - `form_team_stat_list`:
     - `NEW_INDEX = expr_f90`, `STAT = variable_f90`, `ERRMSG = variable_f90`.
+  - `sync_team_stmt`:
+    - `SYNC_TEAM (team_value [, sync_stat_list])`.
   - Team declarations:
     - `team_declaration_stmt`:
       - `TYPE(TEAM_TYPE) :: entity_decl_list`.
@@ -294,6 +296,10 @@ Tests:
     - Legacy underscored variants (`form_team`, `change_team`, etc.)
       by transforming the source and picking the variant with the fewest
       syntax errors.
+- `tests/fixtures/Fortran2018/test_issue575_sync_team/sync_team_statements.f90`:
+  - Exercise the R1169 `sync team` statement with and without
+    `sync_stat_list` specifiers so SYNC_TEAM parses in both simple and
+    STAT/ERRMSG forms.
 
 Gaps:
 
