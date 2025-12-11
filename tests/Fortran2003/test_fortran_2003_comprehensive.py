@@ -142,7 +142,16 @@ class TestFortran2003Unified:
             "import_mod.f90",
         )
         self.parse_fortran_code(code)
-    
+
+    def test_iso_fortran_env(self):
+        """Test F2003 ISO_FORTRAN_ENV intrinsic module support (issue #420)."""
+        code = load_fixture(
+            "Fortran2003",
+            "test_fortran_2003_comprehensive",
+            "iso_fortran_env_mod.f90",
+        )
+        self.parse_fortran_code(code)
+
     def test_fixed_form_compatibility(self):
         """Test that F2003 features work with fixed-form format."""
         code = "\n" + load_fixture(
