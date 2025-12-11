@@ -257,19 +257,12 @@ class TestFORTRANIIParser(unittest.TestCase):
         with open(grammar_path, 'r') as f:
             content = f.read()
 
-        # Verify proper precedence hierarchy rules exist
-        self.assertIn('additive_expr', content,
-                      "Grammar missing additive_expr rule for +/- precedence")
-        self.assertIn('multiplicative_expr', content,
-                      "Grammar missing multiplicative_expr rule for */÷ precedence")
-        self.assertIn('unary_expr', content,
-                      "Grammar missing unary_expr rule for unary +/- precedence")
-        self.assertIn('power_expr', content,
-                      "Grammar missing power_expr rule for ** precedence")
-
-        # Verify expr delegates to additive_expr (not flat left-recursive)
-        self.assertIn('expr\n    : additive_expr', content,
-                      "expr should delegate to additive_expr for proper hierarchy")
+        # FORTRAN II inherits the full expression hierarchy from FORTRAN I.
+        self.assertIn('import FORTRANParser', content,
+                      "FORTRAN II must inherit expression rules from FORTRANParser")
+        # Verify FORTRAN II widens literal to accept LABEL tokens.
+        self.assertIn('literal', content,
+                      "FORTRAN II must override literal to accept LABEL tokens")
 
     def test_chained_exponentiation_parses(self):
         """Test parsing of chained exponentiation expressions"""
@@ -289,33 +282,22 @@ class TestFORTRANIIParser(unittest.TestCase):
 
     def test_power_expr_right_associativity(self):
         """Verify ** is right associative: 2**3**4 = 2**(3**4)"""
-        tree = self.parse("2**3**4", 'expr')
+        tree = self.parse("2**3**4", 'power_expr')
         self.assertIsNotNone(tree)
 
-        # The parse tree structure should show right associativity
-        # For 2**3**4, the top power_expr should have:
-        #   - primary: 2
-        #   - power_expr: 3**4 (which itself has primary: 3, power_expr: 4)
-        #
-        # Navigate down to power_expr
-        additive = tree.additive_expr()
-        mult = additive.multiplicative_expr()
-        unary = mult.unary_expr()
-        power = unary.power_expr()
-
         # Verify structure: power_expr -> primary POWER power_expr
-        self.assertIsNotNone(power.primary())
-        self.assertEqual(power.primary().getText(), '2')
+        self.assertEqual(len(tree.children), 3)
+        self.assertEqual(tree.children[0].getText(), '2')
+        self.assertEqual(tree.children[1].getText(), '**')
+        self.assertEqual(tree.children[2].getText(), '3**4')
 
-        # The nested power_expr should contain 3**4
-        nested_power = power.power_expr()
+        # The nested power_expr should contain 3**4 and be right-associative
+        nested_power = tree.power_expr()
         self.assertIsNotNone(nested_power)
-        self.assertEqual(nested_power.primary().getText(), '3')
-
-        # The innermost should be just 4
-        innermost = nested_power.power_expr()
-        self.assertIsNotNone(innermost)
-        self.assertEqual(innermost.primary().getText(), '4')
+        self.assertEqual(len(nested_power.children), 3)
+        self.assertEqual(nested_power.children[0].getText(), '3')
+        self.assertEqual(nested_power.children[1].getText(), '**')
+        self.assertEqual(nested_power.children[2].getText(), '4')
 
     def test_mixed_operator_precedence(self):
         """Test mixed operators follow correct precedence"""
@@ -352,25 +334,18 @@ class TestFORTRANIIParser(unittest.TestCase):
         """Test unary operators have correct precedence relative to **"""
         # -2**3 should parse as -(2**3), not (-2)**3
         # This is verified by the parse tree structure
-        tree = self.parse("-2**3", 'expr')
+        tree = self.parse("-2**3", 'unary_expr')
         self.assertIsNotNone(tree)
 
-        # Navigate to unary_expr
-        additive = tree.additive_expr()
-        mult = additive.multiplicative_expr()
-        unary = mult.unary_expr()
-
         # The unary_expr should have unary_op (MINUS) and another unary_expr
-        self.assertIsNotNone(unary.unary_op())
-        self.assertEqual(unary.unary_op().getText(), '-')
+        self.assertEqual(len(tree.children), 2)
+        self.assertEqual(tree.children[0].getText(), '-')
+        self.assertEqual(tree.children[1].getText(), '2**3')
 
-        # The nested unary_expr leads to power_expr with 2**3
-        nested_unary = unary.unary_expr()
+        # The nested unary_expr leads to a power expression with 2**3
+        nested_unary = tree.unary_expr()
         self.assertIsNotNone(nested_unary)
-        power = nested_unary.power_expr()
-        self.assertIsNotNone(power)
-        self.assertEqual(power.primary().getText(), '2')
-        self.assertEqual(power.power_expr().primary().getText(), '3')
+        self.assertIn('**', nested_unary.getText())
 
     def test_function_call_in_expression(self):
         """Test function calls within expressions"""
@@ -493,7 +468,7 @@ class TestFORTRANIIParser(unittest.TestCase):
 
         for stmt_text in test_cases:
             with self.subTest(stmt=stmt_text):
-                tree = self.parse(stmt_text, 'do_stmt')
+                tree = self.parse(stmt_text, 'do_stmt_basic')
                 self.assertIsNotNone(tree, f"Failed to parse: {stmt_text}")
 
     def test_leading_zero_not_lexed_as_label(self):

@@ -3,7 +3,7 @@
 This document describes what the **FORTRAN II** grammar in this
 repository currently supports, based on:
 
-- `grammars/FORTRANIILexer.g4`, `grammars/FORTRANIIParser.g4`
+- `grammars/src/FORTRANIILexer.g4`, `grammars/src/FORTRANIIParser.g4`
 - `grammars/FORTRANLexer.g4`, `grammars/FORTRANParser.g4`
 - `docs/fixed_form_support.md`
 - `tests/FORTRANII/test_fortran_ii_parser.py`
@@ -81,42 +81,17 @@ The FORTRAN II parser in this repo implements these categories
 explicitly at the syntax level, with a few notable differences from
 the strict 1958 specification (see COMMON and I/O sections below).
 
-### 2.1 FORTRAN I statement set (inherited and redefined)
+### 2.1 FORTRAN I statement set (inherited)
 
-The FORTRAN II parser redefines a full set of 1957-style statements:
+The FORTRAN II parser inherits the entire 1957 statement set from
+`grammars/src/FORTRANParser.g4` (assignment, arithmetic IF, DO, GO TO /
+computed GO TO, FORMAT and I/O, DIMENSION, EQUIVALENCE, FREQUENCY,
+PAUSE, STOP, CONTINUE, tape/drum/file control, etc.).
 
-- Assignment:
-  - `assignment_stmt : variable EQUALS expr`
-  - Implemented and widely used in fixtures (math expressions, array
-    examples, etc.).
-
-- Branching and control:
-  - `goto_stmt` – unconditional `GO TO label`.
-  - `computed_goto_stmt` – `GO TO (label-list), expr`.
-  - `arithmetic_if_stmt` – `IF (expr) l1, l2, l3`.
-  - `do_stmt` – `DO label var ASSIGN expr, expr [, expr]`.
-  - `continue_stmt`, `stop_stmt`, `pause_stmt`.
-  - These rules represent the core 1957 control constructs, with
-    `pause_stmt` and `frequency_stmt` modeling the original PAUSE and
-    FREQUENCY features.
-
-- Data layout and optimization:
-  - `dimension_stmt` – array declarations with constant bounds.
-  - `equivalence_stmt` – memory overlay sets.
-  - `frequency_stmt` – compiler optimization hints with integer
-    counts.
-
-- I/O and FORMAT:
-  - `read_stmt` – forms with unit and format label variations.
-  - `print_stmt` – `PRINT format, list`.
-  - `punch_stmt` – `PUNCH format, list`.
-  - `format_stmt` – FORMAT with a list of `format_item`s; items can
-    be numeric descriptors or Hollerith text.
-
-Compared to the FORTRAN I stub, the FORTRAN II parser is significantly
-more complete: it includes explicit rules for DIMENSION,
-EQUIVALENCE, FORMAT, PRINT and PUNCH, rather than treating them as
-tokens only.
+`grammars/src/FORTRANIIParser.g4` does not re‑define any 1957 statement
+syntax; it extends the inherited `statement_body` only by adding the
+FORTRAN II innovations. This reflects the manual’s description of
+FORTRAN II as “FORTRAN I plus six new statement forms.”
 
 ### 2.2 FORTRAN II additions
 
@@ -158,12 +133,14 @@ Data types:
 
 Expressions:
 
-- `expr` in `FORTRANIIParser.g4` defines a proper multi-level precedence
-  hierarchy aligned with both the 1957 FORTRAN spec and the FORTRAN II
-  manual (Form C28-6000-2, 1958):
+- Expression syntax is inherited from `grammars/src/FORTRANParser.g4`.
+  The FORTRAN II manual states that expression syntax is unchanged from
+  FORTRAN I, so `FORTRANIIParser.g4` relies on the inherited rules.
+
+  Inherited hierarchy:
 
   ```
-  expr -> additive_expr -> multiplicative_expr -> unary_expr -> power_expr -> primary
+  expr -> relational_expr -> additive_expr -> multiplicative_expr -> unary_expr -> power_expr -> primary
   ```
 
   Operator precedence (highest to lowest):
@@ -171,6 +148,7 @@ Expressions:
   2. unary `+`, `-`
   3. `*`, `/` (multiplication, division) - left associative
   4. binary `+`, `-` (addition, subtraction) - left associative
+  5. relational operators (`.EQ.`, `.NE.`, `.LT.`, `.LE.`, `.GT.`, `.GE.`)
 
 - The `**` operator is correctly right-associative:
   - `2**3**4` parses as `2**(3**4)`, not `(2**3)**4`.
@@ -180,12 +158,9 @@ Expressions:
   than `**`:
   - `-2**3` parses as `-(2**3)` = -8, not `(-2)**3` = -8.
 
-- `integer_expr` is a syntactic alias for `expr`; integer semantics
-  are left to a later semantic phase or consumer.
-
-- Function calls and array subscripts share the same syntax
+- Function calls and array subscripts share the same inherited syntax
   (`IDENTIFIER LPAREN expr_list RPAREN`); semantic analysis distinguishes
-  them. The `variable` rule handles both forms.
+  them. The inherited `variable` rule handles both forms.
 
 - Tests in `test_fortran_ii_parser.py` verify:
   - Chained exponentiation parses correctly (`test_chained_exponentiation_parses`)

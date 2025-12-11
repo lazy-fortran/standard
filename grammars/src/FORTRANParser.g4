@@ -53,8 +53,15 @@ statement
 
 // Statement body - all 1957 FORTRAN statement types
 // C28-6003 Appendix B enumerates 32 statement types; this parser implements
-// a subset focused on control flow, I/O, and declarations
+// a subset focused on control flow, I/O, and declarations.
+//
+// `statement_body_fi` is factored out so descendant grammars (FORTRAN II and
+// later) can extend the statement set without duplicating this list.
 statement_body
+    : statement_body_fi
+    ;
+
+statement_body_fi
     : assignment_stmt               // Appendix B: arithmetic/subscripted
     | goto_stmt                     // Appendix B row 1: GO TO n
     | computed_goto_stmt            // Appendix B row 2: GO TO (n1,...), i
@@ -73,7 +80,7 @@ statement_body
     | frequency_stmt                // Appendix B row 13: FREQUENCY n(i,j,...)
     | format_stmt                   // Appendix B row 16: FORMAT (specification)
     | statement_function_stmt       // Appendix B row 17: f(a,b,...) = expr
-    | read_tape_drum_stmt            // Appendix B rows 21-24: READ tape/drum forms
+    | read_tape_drum_stmt           // Appendix B rows 21-24: READ tape/drum forms
     | read_stmt_basic               // Appendix B row 20, 24: READ n, list / READ n
     | write_tape_drum_stmt          // Appendix B rows 25-27: WRITE tape/drum forms
     | write_stmt_basic              // Simple WRITE output_list
