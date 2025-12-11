@@ -652,11 +652,20 @@ literal
 // Complex constant - X3.9-1966 Section 4.4.2
 // Form: (real-or-int-const, real-or-int-const)
 // Examples: (1.0, 2.0), (3, -4), (-1.5E2, 2.5E-1)
+//
+// SEMANTIC CONSTRAINT (X3.9-1966 Section 4.4.2):
+// Both parts MUST be literal constants (not expressions, variables, arrays).
+// Valid:   (1.0, 2.0), (3, -4), (-1.5E2, +2.5E-1)
+// Invalid: (X, Y), (1+2, 3), (A(1), B(2))
+//
+// Grammar enforcement: complex_part restricts to signed_real_literal or
+// signed_int_literal, rejecting expressions and variables at token level.
 complex_literal
     : LPAREN complex_part COMMA complex_part RPAREN
     ;
 
-// Complex part - either signed real or signed integer
+// Complex part - either signed real or signed integer literal
+// Restricts to literal constants per X3.9-1966 Section 4.4.2
 complex_part
     : signed_real_literal
     | signed_int_literal
