@@ -370,7 +370,7 @@ data_initialization_body
 // Type statements, DIMENSION, COMMON, EQUIVALENCE, EXTERNAL declarations
 // Must appear before statement functions and executable statements
 specification_part
-    : specification_statement*
+    : (specification_statement | format_statement_line)*
     ;
 
 // Specification statements - X3.9-1966 Section 7.2
@@ -394,7 +394,7 @@ specification_body
 // Statement functions and DATA statements can appear after specification part
 // but before executable statements
 statement_function_and_data_part
-    : statement_function_or_data_statement*
+    : (statement_function_or_data_statement | format_statement_line)*
     ;
 
 // Statement function or DATA statement - X3.9-1966 Section 7.2
@@ -414,7 +414,15 @@ statement_function_or_data_body
 // All executable statements (control flow, I/O, assignments)
 // Must appear after all specification and statement function/DATA statements
 executable_part
-    : executable_statement*
+    : (executable_statement | format_statement_line)*
+    ;
+
+// Format statements may appear anywhere within program units (X3.9-1966 Section 7.2.7).
+// They are non-executable definitions that can appear before, between, or after the ordered
+// parts without affecting the ordering requirement for specification, statement function/data,
+// and executable statements.
+format_statement_line
+    : label? format_stmt NEWLINE?
     ;
 
 // Executable statement - X3.9-1966 Section 7.1
