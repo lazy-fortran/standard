@@ -1347,12 +1347,21 @@ object_name_list
 // and ISO_C_BINDING (Section 15.2).
 
 // USE statement (ISO/IEC 1539-1:2004 R1109)
+// Supports:
+// - user-defined modules: USE module_name
+// - intrinsic modules: USE, INTRINSIC :: module_name
+// - ISO_FORTRAN_ENV (Section 13.8.2): USE, INTRINSIC :: iso_fortran_env
+// - IEEE modules (Section 14): USE, INTRINSIC :: ieee_*
+// - non-intrinsic: USE, NON_INTRINSIC :: module_name
 use_stmt
     : USE IDENTIFIER NEWLINE
     | USE IDENTIFIER COMMA ONLY COLON only_list NEWLINE
     | USE COMMA INTRINSIC DOUBLE_COLON ieee_module_name NEWLINE
     | USE COMMA INTRINSIC DOUBLE_COLON ieee_module_name COMMA
       ONLY COLON ieee_only_list NEWLINE
+    | USE COMMA INTRINSIC DOUBLE_COLON IDENTIFIER NEWLINE
+    | USE COMMA INTRINSIC DOUBLE_COLON IDENTIFIER COMMA
+      ONLY COLON only_list NEWLINE
     | USE COMMA NON_INTRINSIC DOUBLE_COLON IDENTIFIER NEWLINE
     | USE COMMA NON_INTRINSIC DOUBLE_COLON IDENTIFIER COMMA
       ONLY COLON only_list NEWLINE
