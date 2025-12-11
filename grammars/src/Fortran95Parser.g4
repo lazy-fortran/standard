@@ -142,26 +142,7 @@ specification_part_f95
 declaration_construct_f95
     : type_declaration_stmt_f95
     | derived_type_def_f95
-    | interface_block
-    | parameter_stmt
-    | data_stmt
-    | namelist_stmt
-    | common_stmt
-    | equivalence_stmt
-    | dimension_stmt
-    | allocatable_stmt
-    | pointer_stmt
-    | target_stmt
-    | optional_stmt
-    | intent_stmt
-    | public_stmt
-    | private_stmt
-    | save_stmt
-    | external_stmt
-    | intrinsic_stmt
-    // F90 fallbacks for constructs without F95-specific rules
-    | type_declaration_stmt_f90
-    | derived_type_def
+    | declaration_construct
     ;
 
 // ====================================================================
@@ -179,7 +160,14 @@ declaration_construct_f95
 // (Section 7.5.4) and enhanced WHERE (Section 7.5.3) alongside the F90 constructs.
 
 execution_part_f95
-    : (NEWLINE* executable_construct_f95)* NEWLINE*
+    : (NEWLINE* execution_item_f95)* NEWLINE*
+    ;
+
+// Execution item: allows semicolons between executable constructs
+// Fortran 95 retains the F90 semicolon-separated statement feature
+// (ISO/IEC 1539:1991 3.4.2)
+execution_item_f95
+    : executable_construct_f95 (SEMICOLON executable_construct_f95)*
     ;
 
 // ====================================================================
