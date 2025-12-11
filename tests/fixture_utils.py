@@ -8,7 +8,7 @@ Fixtures live under tests/fixtures/<Standard>/[...] with file extensions:
 """
 
 from pathlib import Path
-from typing import List, Optional, Type, TypeVar, Union
+from typing import List, Type, TypeVar, Union
 
 
 _ROOT = Path(__file__).resolve().parent
@@ -41,9 +41,3 @@ def find_contexts(node, ctx_type: Type[TContext]) -> List[TContext]:
         for i in range(node.getChildCount()):
             contexts.extend(find_contexts(node.getChild(i), ctx_type))
     return contexts
-
-
-def find_first_context(node, ctx_type: Type[TContext]) -> Optional[TContext]:
-    """Return the first matching context of a given type, if any."""
-    matches = find_contexts(node, ctx_type)
-    return matches[0] if matches else None
