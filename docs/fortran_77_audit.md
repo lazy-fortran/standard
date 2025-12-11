@@ -474,6 +474,10 @@ Mapping that classification to the current grammar:
       `FORTRAN77Parser.g4`, and included in `statement_body` (twice,
       harmlessly).
     - FORMAT: via the inherited FORMAT machinery from FORTRAN 66.
+    - Format edit descriptors from ANSI X3.9-1978 / ISO 1539:1980 Section 13.2-13.3
+      (T/TL/TR tab positioning, S/SP/SS sign control, BN/BZ blank control, and
+      the L and A data edit descriptors) are now exercised by `tests/FORTRAN77/test_fortran77_parser.py::test_format_edit_descriptors`
+      (issue #580).
 
 - **Statement functions**
   - Implemented:
