@@ -1055,6 +1055,168 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
         tree = self.parse(valid_program, 'main_program')
         self.assertIsNotNone(tree)
 
+    # ====================================================================
+    # FORTRAN 66 STATEMENT LABEL RANGE VALIDATION (X3.9-1966 Section 3.4)
+    # Issue #404: Statement label range not enforced
+    # ====================================================================
+
+    def test_leading_zero_not_lexed_as_label(self):
+        """Test that leading-zero sequences are NOT lexed as LABEL tokens (issue #404).
+
+        Per X3.9-1966 Section 3.4 "Statement Labels":
+        > A statement label consists of 1 to 5 decimal digits, one of which must be nonzero.
+        > Thus, statement labels may be any integer from 1 to 99999 inclusive.
+
+        The FORTRAN 66 LABEL token is inherited from FORTRAN II and defined as:
+            [1-9] ([0-9] ([0-9] ([0-9] [0-9]?)?)?)?
+        which means:
+        - Must start with 1-9 (not 0)
+        - 1 to 5 digits total
+        - All zeros (0, 00, 000, etc.) do NOT match the LABEL token pattern
+        - 6+ digit numbers do NOT match the LABEL token pattern
+
+        This test verifies the lexer correctly enforces the label range constraint
+        by rejecting zero labels and out-of-range (>5 digit) labels.
+
+        Reference: ANSI X3.9-1966 Section 3.4 "Statement Labels"
+        """
+        # Get the LABEL token type for comparison
+        label_type = FORTRAN66Lexer.LABEL
+
+        # Leading-zero sequences that should NOT be lexed as LABEL
+        not_label_cases = [
+            "0",        # Single zero
+            "01",       # Leading zero
+            "007",      # Leading zeros
+            "00123",    # Leading zeros
+            "000",      # Multiple zeros
+        ]
+
+        for text in not_label_cases:
+            with self.subTest(text=text, constraint="leading zeros"):
+                input_stream = InputStream(text)
+                lexer = FORTRAN66Lexer(input_stream)
+                token = lexer.nextToken()
+                self.assertNotEqual(
+                    token.type, label_type,
+                    f"'{text}' was incorrectly lexed as LABEL "
+                    f"(X3.9-1966 Section 3.4 requires starting digit 1-9)"
+                )
+
+    def test_label_range_1_to_99999(self):
+        """Test that LABEL tokens accept valid range 1-99999 (issue #404).
+
+        Per X3.9-1966 Section 3.4, valid statement labels are 1-99999.
+        The LABEL token must be lexed for all valid 1-5 digit integers
+        starting with 1-9.
+
+        Reference: ANSI X3.9-1966 Section 3.4 "Statement Labels"
+        """
+        label_type = FORTRAN66Lexer.LABEL
+
+        # Valid LABEL values in range 1-99999
+        valid_label_cases = ["1", "9", "42", "100", "12345", "99999"]
+        for text in valid_label_cases:
+            with self.subTest(text=text, expected="LABEL"):
+                input_stream = InputStream(text)
+                lexer = FORTRAN66Lexer(input_stream)
+                token = lexer.nextToken()
+                self.assertEqual(
+                    token.type, label_type,
+                    f"'{text}' should be lexed as LABEL token (range 1-99999)"
+                )
+
+    def test_out_of_range_labels_rejected(self):
+        """Test that 6+ digit labels are NOT lexed as LABEL tokens (issue #404).
+
+        Per X3.9-1966 Section 3.4, labels must be 1-5 digits.
+        Numbers with 6+ digits exceed the valid range and must NOT
+        be lexed as LABEL tokens.
+
+        Reference: ANSI X3.9-1966 Section 3.4 "Statement Labels"
+        """
+        label_type = FORTRAN66Lexer.LABEL
+
+        # 6+ digit labels that should NOT be lexed as LABEL
+        out_of_range_cases = [
+            "100000",   # 6 digits
+            "1000000",  # 7 digits
+            "999999",   # 6 digits
+        ]
+
+        for text in out_of_range_cases:
+            with self.subTest(text=text, constraint="6+ digits"):
+                input_stream = InputStream(text)
+                lexer = FORTRAN66Lexer(input_stream)
+                token = lexer.nextToken()
+                self.assertNotEqual(
+                    token.type, label_type,
+                    f"'{text}' was incorrectly lexed as LABEL "
+                    f"(X3.9-1966 Section 3.4 requires max 5 digits)"
+                )
+
+    def test_label_in_statement_positions(self):
+        """Test that invalid labels are rejected in statement positions (issue #404).
+
+        When invalid labels (0, 100000) appear in statement label position,
+        the parser should reject them with a syntax error.
+
+        Valid statements with labels should parse without error:
+        - 1 CONTINUE
+        - 99999 CONTINUE
+
+        Invalid statements should produce parser errors:
+        - 0 CONTINUE (label 0 is invalid)
+        - 100000 CONTINUE (label >99999 is invalid)
+
+        Reference: ANSI X3.9-1966 Section 3.4 "Statement Labels"
+        """
+        from antlr4.error.ErrorListener import ErrorListener
+
+        class ErrorCapture(ErrorListener):
+            def __init__(self):
+                self.errors = []
+
+            def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+                self.errors.append((line, column, msg))
+
+        # Valid labels should parse without error
+        valid_programs = [
+            "1 CONTINUE\nEND",
+            "99999 CONTINUE\nEND",
+            "42 X = 1.0\nEND",
+        ]
+
+        for program in valid_programs:
+            with self.subTest(program=program, validity="valid"):
+                input_stream = InputStream(program)
+                lexer = FORTRAN66Lexer(input_stream)
+                stream = CommonTokenStream(lexer)
+                parser = FORTRAN66Parser(stream)
+                listener = ErrorCapture()
+                parser.removeErrorListeners()
+                parser.addErrorListener(listener)
+                parser.fortran66_program()
+                self.assertEqual(len(listener.errors), 0, f"Valid program had errors: {listener.errors}")
+
+        # Invalid labels should produce parser errors
+        invalid_programs = [
+            ("0 CONTINUE\nEND", "zero label"),
+            ("100000 CONTINUE\nEND", "6-digit label"),
+        ]
+
+        for program, desc in invalid_programs:
+            with self.subTest(program=program, desc=desc, validity="invalid"):
+                input_stream = InputStream(program)
+                lexer = FORTRAN66Lexer(input_stream)
+                stream = CommonTokenStream(lexer)
+                parser = FORTRAN66Parser(stream)
+                listener = ErrorCapture()
+                parser.removeErrorListeners()
+                parser.addErrorListener(listener)
+                parser.fortran66_program()
+                self.assertGreater(len(listener.errors), 0, f"Invalid label '{desc}' should have produced errors")
+
     def test_identifier_constraint_in_assignments(self):
         """Test identifier constraints in assignment statements"""
         valid_statements = [
