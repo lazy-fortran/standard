@@ -451,13 +451,20 @@ format_specification
 // - HOLLERITH (e.g., 5HHELLO) for literal text
 format_item
     : format_repeat_count? format_descriptor  // e.g., 3I5, F10.2
+    | format_repeat_count? format_group       // e.g., 2(I5, F10.2)
     | format_e_descriptor                     // e.g., 2E15.6 (lexed as REAL_LITERAL)
     | HOLLERITH                               // e.g., 5HHELLO (literal text)
+    | SLASH                                   // Record separator
     ;
 
 // Optional repeat count before format descriptor
 format_repeat_count
     : INTEGER_LITERAL
+    ;
+
+// C28-6003 Chapter III: Parenthesized format group repetition
+format_group
+    : LPAREN format_specification RPAREN
     ;
 
 // Format descriptor with optional decimal specification
