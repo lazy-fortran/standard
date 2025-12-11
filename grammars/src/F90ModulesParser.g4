@@ -98,6 +98,9 @@ operator_token
     | EQ_OP | NE_OP | LT_OP | LE_OP | GT_OP | GE_OP
     | DOT_EQ | DOT_NE | DOT_LT | DOT_LE | DOT_GT | DOT_GE
     | DOT_AND | DOT_OR | DOT_NOT | DOT_EQV | DOT_NEQV
+    // User-defined dotted operators
+    // ISO/IEC 1539:1991 Section 7.1.2 (R703-R704)
+    | DOP
     ;
 
 // ====================================================================

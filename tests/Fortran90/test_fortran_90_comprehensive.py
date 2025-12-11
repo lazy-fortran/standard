@@ -24,6 +24,7 @@ for the entire modern Fortran chain (F90 → F95 → F2003 → ... → LazyFortr
 """
 
 import sys
+import textwrap
 import pytest
 from pathlib import Path
 
@@ -245,6 +246,14 @@ class TestFortran90Lexer:
             tokens = self.get_tokens(op)
             assert len(tokens) >= 1
             assert tokens[0].type == expected_token, f"Operator '{op}' expected type {expected_token}, got {tokens[0].type}"
+
+    def test_defined_operator_token(self):
+        """Test that user-defined dotted operators lex as DOP."""
+        custom_ops = ['.MAGNITUDE.', '.CROSSPRODUCT.', '.MYOP.']
+        for op in custom_ops:
+            tokens = self.get_tokens(op)
+            assert len(tokens) >= 1
+            assert tokens[0].type == Fortran90Lexer.DOP, f"{op} token type mismatch"
 
     def test_traditional_fortran_operators(self):
         """Test traditional FORTRAN operators (F77 compatibility)."""
@@ -469,6 +478,44 @@ class TestFortran90Parser:
             assert tree is not None
         except Exception as e:
             pytest.fail(f"F90 dynamic arrays parsing failed: {e}")
+
+    def test_user_defined_operator_parsing(self):
+        """Ensure defined unary/binary operators parse inside interface blocks."""
+        code = load_fixture(
+            "Fortran90",
+            "test_fortran_90_comprehensive",
+            "user_defined_operator.f90",
+        )
+
+        parser = self.create_parser(code)
+
+        try:
+            tree = parser.program_unit_f90()
+            assert tree is not None
+            assert parser.getNumberOfSyntaxErrors() == 0
+        except Exception as e:
+            pytest.fail(f"F90 user-defined operator parsing failed: {e}")
+
+    def test_user_defined_operator_expression_parsing(self):
+        """Ensure expressions with DOP operators parse from a simple program."""
+        code = textwrap.dedent("""
+            program use_defined_operator
+              implicit none
+              real :: a(3), b(3), dot_result, mag_result
+              a = (/ 1.0, 2.0, 3.0 /)
+              b = (/ 4.0, 5.0, 6.0 /)
+              dot_result = a .DOT. b
+              mag_result = .MAGNITUDE. a
+            end program use_defined_operator
+        """)
+        parser = self.create_parser(code)
+
+        try:
+            tree = parser.program_unit_f90()
+            assert tree is not None
+            assert parser.getNumberOfSyntaxErrors() == 0
+        except Exception as e:
+            pytest.fail(f"F90 user-defined operator expression parsing failed: {e}")
 
     def test_select_case_parsing(self):
         """Test F90 SELECT CASE construct parsing."""

@@ -445,6 +445,31 @@ POINTER_ASSIGN  : '=>' ;
 PERCENT         : '%' ;
 // Slash (array constructor delimiter) - ISO/IEC 1539:1991 Section 4.5, R432
 SLASH           : '/' ;
+// Defined-operator token for user-defined operators
+// ISO/IEC 1539:1991 Section 7.1.2 (R703-R704)
+DOP
+    : '.' LETTER+ '.'
+      {
+        name = self.text[1:-1].upper()
+        builtin = {
+            "EQ": self.DOT_EQ,
+            "NE": self.DOT_NE,
+            "LT": self.DOT_LT,
+            "LE": self.DOT_LE,
+            "GT": self.DOT_GT,
+            "GE": self.DOT_GE,
+            "AND": self.DOT_AND,
+            "OR": self.DOT_OR,
+            "NOT": self.DOT_NOT,
+            "EQV": self.DOT_EQV,
+            "NEQV": self.DOT_NEQV,
+            "TRUE": self.DOT_TRUE,
+            "FALSE": self.DOT_FALSE,
+        }.get(name)
+        if builtin is not None:
+            self.type = builtin
+      }
+    ;
 // NOTE: Square brackets for array constructors [ ... ] are a Fortran 2003
 // feature (ISO/IEC 1539-1:2004), defined in Fortran2003Lexer.g4, NOT here.
 

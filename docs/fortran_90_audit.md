@@ -245,6 +245,10 @@ Grammar:
   - Includes `literal_f90`, `variable_f90`, `function_reference_f90`,
     `intrinsic_function_f90`, `array_constructor_f90`,
     `structure_constructor`, and parenthesized expressions.
+- `defined_unary_op` / `defined_binary_op`:
+  - Recognizes `.custom.` names via the `DOP` token so user-defined unary
+    and binary operators per ISO/IEC 1539:1991 Section 7.1.2 (R703-R704)
+    participate in expression parsing and interface declarations.
 - Literals:
   - `literal_f90` supports:
     - Integer and real literals with optional kind markers.
@@ -304,6 +308,8 @@ exercised in focused unit tests. The generic fixture harness in
 
 **Current status:** All F90 fixtures pass (0 xfail).
 
+- Added `tests/fixtures/Fortran90/test_fortran_90_comprehensive/user_defined_operator.f90`
+  to ensure user-defined interface/operator combinations (ISO/IEC 1539:1991 Section 7.1.2, R703-R704) parse with both unary/binary usage (fixes #590).
 - Added `tests/fixtures/Fortran90/test_interface_module_procedure/module_procedure_interface.f90`
   to assert that `MODULE PROCEDURE procedure-name-list` declarations (ISO/IEC
   1539:1991 Section 12.3.2.2, R1206) parse successfully (fixes #594).
@@ -420,6 +426,7 @@ The Fortran 90 grammar in this repository:
 | ISO Rule | Description | Status |
 |----------|-------------|--------|
 | R531–R534 | `data-implied-do` nested forms (DATA implied-DO lists) | Implemented (fixes #378) |
+| R703–R704 | `defined-unary-op` / `defined-binary-op` user-defined dotted operators | Implemented (fixes #590) |
 | R620 | `section-subscript` with vector subscript (R620-R621) | Implemented (fixes #381) |
 | R1206 | `procedure_stmt` (`MODULE PROCEDURE` procedure-name-list) in interface blocks | Implemented (fixes #594) |
 | R1219 | `entry-stmt` | Implemented (F90 extension via `entry_stmt_f90`) |
