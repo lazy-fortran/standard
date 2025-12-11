@@ -224,12 +224,18 @@ Grammar implementation:
       `RESULT_IMAGE = variable_f90`.
   - `operation_spec` and `source_image_spec`:
     - Generic identifier / expression forms.
+  - `image_selector`, `designator`, and `variable_f2008` now accept
+    optional image-selector-spec-lists so STAT=, TEAM=, and TEAM_NUMBER=
+    specifiers follow R924-R926 (issue #599).
 
 Tests:
 
 - `test_issue61_teams_and_collectives.py::test_collective_subroutines_parse_without_errors`:
   - `teams_collectives_module.f90` exercises all five collective calls
     with representative STAT/ERRMSG/RESULT_IMAGE usage.
+- `test_issue61_teams_and_collectives.py::test_image_selector_team_specs_parse_cleanly`:
+  - `image_selector_team.f90` verifies TEAM=, TEAM_NUMBER=, and STAT= specifiers inside
+    image selectors for coarrays (issue #599).
 
 Gaps:
 
@@ -789,3 +795,11 @@ The following tokens were removed as dead code:
 - `DEFAULT_ACCESS`: Not in ISO standard. F2018 uses DEFAULT with PUBLIC/PRIVATE keywords.
 
 All 5 tokens had zero references in Fortran2018Parser.g4, confirming they were unused.
+
+### A.13 Image selectors (Section 9.5.3)
+
+| ISO Rule | Description | Grammar Rule |
+|----------|-------------|--------------|
+| R924 | image-selector with optional spec list | `image_selector` with `image_selector_spec_list` and `coarray_spec` |
+| R925 | cosubscript list within the selector | `cosubscript` (inherited from Fortran 2008) |
+| R926 | image-selector-spec (STAT=, TEAM=, TEAM_NUMBER=) | `image_selector_spec` |

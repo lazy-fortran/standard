@@ -342,7 +342,45 @@ source_image_spec
     : SOURCE_IMAGE EQUALS expr_f90
     ;
 
-// ============================================================================
+// ISO/IEC 1539-1:2018 Section 9.5.3: Image selectors with team specs
+// R924: image-selector -> [ cosubscript-list [, image-selector-spec-list] ]
+// R925: cosubscript -> scalar-int-expr
+// R926: image-selector-spec -> STAT = stat-variable | TEAM = team-value
+//                                       | TEAM_NUMBER = scalar-int-expr
+image_selector
+    : LBRACKET cosubscript_list (COMMA image_selector_spec_list)? RBRACKET
+    ;
+
+image_selector_spec_list
+    : image_selector_spec (COMMA image_selector_spec)*
+    ;
+
+image_selector_spec
+    : STAT EQUALS variable_f90
+    | TEAM EQUALS team_value
+    | TEAM_NUMBER EQUALS expr_f90
+    ;
+
+// Override F2008 designators to permit the F2018 image-selector spec list.
+designator
+    : designator_core image_selector?
+    ;
+
+complex_part_designator
+    : designator_core PERCENT (RE | IM) image_selector?
+    ;
+
+lhs_expression
+    : designator
+    | complex_part_designator
+    ;
+
+// Override the F2008 variable rule so image selectors pick up the F2018 specs.
+variable_f2008
+    : IDENTIFIER image_selector? (PERCENT IDENTIFIER)*
+    | IDENTIFIER (LPAREN actual_arg_list RPAREN)? image_selector?
+    ;
+
 // TEAM SUPPORT (ISO/IEC 1539-1:2018 Section 11.6)
 // ============================================================================
 
@@ -630,7 +668,8 @@ array_expr
 // ISO/IEC 1539-1:2018 R1023: primary (override to include F2018 intrinsics)
 // Override F2008 primary to include F2018 intrinsic function calls
 primary
-    : complex_part_designator
+    : designator
+    | complex_part_designator
     | identifier_or_keyword (PERCENT identifier_or_keyword)*
     | identifier_or_keyword LPAREN actual_arg_list? RPAREN
     | identifier_or_keyword DOUBLE_QUOTE_STRING
