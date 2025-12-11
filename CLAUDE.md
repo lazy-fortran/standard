@@ -82,7 +82,6 @@ Each standard has an audit document in `docs/fortran_*_audit.md` that MUST conta
 
 | Issue | Standard | Description |
 |-------|----------|-------------|
-| #399 | FORTRAN 66 | DO loop terminal statement restrictions not enforced (X3.9-1966 Section 7.1.2.8) |
 | #415 | Fortran 95 | Interface-definition characteristics matching not enforced (ISO/IEC 1539-1:1997 Section 12.2) |
 | #427 | FORTRAN 1957 | IF statement forms from Appendix B rows 9-10 not implemented (C28-6003) |
 
