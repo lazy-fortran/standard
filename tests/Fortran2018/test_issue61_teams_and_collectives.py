@@ -82,6 +82,28 @@ class TestF2018TeamsAndCollectivesStatus:
         # Once SELECT RANK is fully wired up, this should parse with zero errors.
         assert errors == 0
 
+    def test_select_rank_with_explicit_end_select_rank(self):
+        """SELECT RANK with END SELECT RANK (modern compiler extension) parses cleanly."""
+        code = load_fixture(
+            "Fortran2018",
+            "test_issue61_teams_and_collectives",
+            "select_rank_with_end_select_rank.f90",
+        )
+        tree, errors, _ = parse_f2018(code)
+        assert tree is not None
+        assert errors == 0
+
+    def test_select_rank_named_with_explicit_end_select_rank(self):
+        """Named SELECT RANK with END SELECT RANK and construct name parses cleanly."""
+        code = load_fixture(
+            "Fortran2018",
+            "test_issue61_teams_and_collectives",
+            "select_rank_named_with_end_select_rank.f90",
+        )
+        tree, errors, _ = parse_f2018(code)
+        assert tree is not None
+        assert errors == 0
+
     def test_team_event_and_collective_semantics_program(self):
         """Teams, events and collectives program parses without syntax errors."""
         code = load_fixture(
