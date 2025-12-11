@@ -193,18 +193,23 @@ def test_fixture_parses_without_errors(standard: str, relpath: Path) -> None:
     assert tree is not None, message
 
     key = (standard, relpath)
-    if errors > 0:
-        if key in XPASS_FIXTURES:
-            reason_template = XPASS_FIXTURES[key]
-            pytest.xfail(
-                reason_template.format(
-                    standard=standard,
-                    relpath=relpath,
-                    errors=errors,
-                )
-            )
-        else:
+    xp_reason_template = XPASS_FIXTURES.get(key)
+    if xp_reason_template is not None:
+        if errors == 0:
             pytest.fail(
-                f"{standard} fixture {relpath} expected 0 syntax errors, "
-                f"got {errors}"
+                f"{standard} fixture {relpath} is marked as XPASS "
+                "but now parses cleanly; remove the stale entry "
+                "(issue #627)"
             )
+        pytest.xfail(
+            xp_reason_template.format(
+                standard=standard,
+                relpath=relpath,
+                errors=errors,
+            )
+        )
+    if errors > 0:
+        pytest.fail(
+            f"{standard} fixture {relpath} expected 0 syntax errors, "
+            f"got {errors}"
+        )
