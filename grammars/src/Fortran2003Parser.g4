@@ -1761,20 +1761,40 @@ expr_f2003
     | primary                                 // F2003 primary
     ;
 
+// Designator helpers for variables, array elements, and derived components
+// ISO/IEC 1539-1:2004 Section 6.1.2
+designator_parentheses
+    : LPAREN actual_arg_list? RPAREN
+    ;
+
+designator_component
+    : identifier_or_keyword designator_parentheses?
+    ;
+
+derived_component
+    : PERCENT identifier_or_keyword designator_parentheses?
+    ;
+
+designator_core
+    : designator_component (derived_component)*
+    ;
+
+designator
+    : designator_core
+    ;
+
+// Complex part designator (ISO/IEC 1539-1:2004 R615)
+// F2003 introduces %RE/%IM to access complex components directly
+complex_part_designator
+    : designator_core PERCENT (RE | IM)
+    ;
+
 // Left-hand side expression (variable reference)
 // ISO/IEC 1539-1:2004 R601: variable -> designator
-// F2003 adds component access for OOP (Section 6.1.2)
+// F2003 adds component access and complex part selectors (Section 6.1.2.5)
 lhs_expression
-    : identifier_or_keyword                                          // Simple variable
-    | identifier_or_keyword LPAREN actual_arg_list? RPAREN           // Array element
-    | identifier_or_keyword PERCENT identifier_or_keyword            // Component
-    | identifier_or_keyword PERCENT identifier_or_keyword
-      LPAREN actual_arg_list? RPAREN  // Component array/method
-    | identifier_or_keyword LPAREN actual_arg_list? RPAREN PERCENT
-      identifier_or_keyword  // Array element component: shapes(i)%draw
-    | identifier_or_keyword LPAREN actual_arg_list? RPAREN PERCENT
-      identifier_or_keyword LPAREN actual_arg_list? RPAREN
-        // Array element component method: shapes(i)%draw()
+    : designator
+    | complex_part_designator
     ;
 
 // CALL statement (ISO/IEC 1539-1:2004 R1218)
@@ -1871,6 +1891,7 @@ case_value_list
 // Primary (ISO/IEC 1539-1:2004 R701)
 primary
     : pdt_structure_constructor
+    | complex_part_designator
     | identifier_or_keyword (PERCENT identifier_or_keyword)*
     | identifier_or_keyword LPAREN actual_arg_list? RPAREN
     | identifier_or_keyword DOUBLE_QUOTE_STRING      // Prefixed string

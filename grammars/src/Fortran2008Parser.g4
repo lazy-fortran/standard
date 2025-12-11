@@ -519,24 +519,22 @@ entity_decl
 // R601: designator -> ... | coindexed-named-object
 // R624: image-selector -> [ cosubscript-list ]
 // Enhanced to support image selectors on various LHS forms
+designator_parentheses
+    : LPAREN (actual_arg_list | section_subscript_list)? RPAREN
+    ;
+
+designator
+    : designator_core coarray_spec?
+    ;
+
+// Complex part designator (ISO/IEC 1539-1:2004 R615) with optional coarray spec
+complex_part_designator
+    : designator_core PERCENT (RE | IM) coarray_spec?
+    ;
+
 lhs_expression
-    : identifier_or_keyword                 // Simple variable
-      coarray_spec?
-    | identifier_or_keyword LPAREN (actual_arg_list | section_subscript_list)? RPAREN
-      coarray_spec?                         // Array element or section
-    | identifier_or_keyword PERCENT identifier_or_keyword
-      coarray_spec?                         // Component
-    | identifier_or_keyword PERCENT identifier_or_keyword
-      LPAREN (actual_arg_list | section_subscript_list)? RPAREN
-      coarray_spec?                         // Component array/section/method
-    | identifier_or_keyword LPAREN (actual_arg_list | section_subscript_list)? RPAREN
-      PERCENT identifier_or_keyword
-      coarray_spec?                         // Array element or section component
-    | identifier_or_keyword LPAREN
-      (actual_arg_list | section_subscript_list)? RPAREN
-      PERCENT identifier_or_keyword LPAREN
-      (actual_arg_list | section_subscript_list)? RPAREN
-      coarray_spec?                         // Array element/section component method
+    : designator
+    | complex_part_designator
     ;
 
 // ============================================================================
@@ -997,7 +995,8 @@ system_command_call
 // Primary expression (ISO/IEC 1539-1:2010 R701)
 // Override F2003 to include F2008 intrinsic functions
 primary
-    : identifier_or_keyword (PERCENT identifier_or_keyword)*
+    : complex_part_designator
+    | identifier_or_keyword (PERCENT identifier_or_keyword)*
     | identifier_or_keyword LPAREN actual_arg_list? RPAREN
     | identifier_or_keyword DOUBLE_QUOTE_STRING
     | identifier_or_keyword SINGLE_QUOTE_STRING

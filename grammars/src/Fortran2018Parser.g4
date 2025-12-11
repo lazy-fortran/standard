@@ -630,7 +630,8 @@ array_expr
 // ISO/IEC 1539-1:2018 R1023: primary (override to include F2018 intrinsics)
 // Override F2008 primary to include F2018 intrinsic function calls
 primary
-    : identifier_or_keyword (PERCENT identifier_or_keyword)*
+    : complex_part_designator
+    | identifier_or_keyword (PERCENT identifier_or_keyword)*
     | identifier_or_keyword LPAREN actual_arg_list? RPAREN
     | identifier_or_keyword DOUBLE_QUOTE_STRING
     | identifier_or_keyword SINGLE_QUOTE_STRING
