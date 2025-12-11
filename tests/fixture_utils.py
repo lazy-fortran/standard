@@ -8,7 +8,7 @@ Fixtures live under tests/fixtures/<Standard>/[...] with file extensions:
 """
 
 from pathlib import Path
-from typing import Union
+from typing import List, Optional, Type, TypeVar, Union
 
 
 _ROOT = Path(__file__).resolve().parent
@@ -26,3 +26,24 @@ def load_fixture(*relative_parts: Union[str, Path]) -> str:
         path = path / str(part)
     return path.read_text()
 
+
+TContext = TypeVar("TContext")
+
+
+def find_contexts(node, ctx_type: Type[TContext]) -> List[TContext]:
+    """Recursively collect all ANTLR contexts of a given type under node."""
+    contexts: List[TContext] = []
+    if node is None:
+        return contexts
+    if isinstance(node, ctx_type):
+        contexts.append(node)
+    if hasattr(node, "getChildCount"):
+        for i in range(node.getChildCount()):
+            contexts.extend(find_contexts(node.getChild(i), ctx_type))
+    return contexts
+
+
+def find_first_context(node, ctx_type: Type[TContext]) -> Optional[TContext]:
+    """Return the first matching context of a given type, if any."""
+    matches = find_contexts(node, ctx_type)
+    return matches[0] if matches else None
