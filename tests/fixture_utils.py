@@ -8,11 +8,13 @@ Fixtures live under tests/fixtures/<Standard>/[...] with file extensions:
 """
 
 from pathlib import Path
-from typing import Union
+from typing import List, Optional, Type, TypeVar, Union
 
 
 _ROOT = Path(__file__).resolve().parent
 _FIXTURES_ROOT = _ROOT / "fixtures"
+
+TContext = TypeVar("TContext")
 
 
 def load_fixture(*relative_parts: Union[str, Path]) -> str:
@@ -26,3 +28,23 @@ def load_fixture(*relative_parts: Union[str, Path]) -> str:
         path = path / str(part)
     return path.read_text()
 
+
+def find_contexts(node, ctx_type: Type[TContext]) -> List[TContext]:
+    """Collect all parse-tree contexts of a given type.
+
+    This is a lightweight ANTLR4 parse-tree walk used by tests.
+    """
+    contexts: List[TContext] = []
+    if node is None:
+        return contexts
+
+    stack = [node]
+    while stack:
+        current = stack.pop()
+        if isinstance(current, ctx_type):
+            contexts.append(current)
+        if hasattr(current, "getChildCount"):
+            for i in range(current.getChildCount()):
+                stack.append(current.getChild(i))
+
+    return contexts
