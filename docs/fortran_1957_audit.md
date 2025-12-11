@@ -10,8 +10,7 @@ repository actually supports today, based only on the contents of:
 
 This is a descriptive audit of the current implementation. Full
 conformance to the original IBM 704 FORTRAN compiler requires resolving
-the gaps documented in sections 2 and 8 below (tracked by issues #141
-and #153).
+the gaps documented in sections 2 and 8 below (tracked by issue #427).
 
 ## 1. Program structure
 
@@ -339,8 +338,8 @@ each Appendix B entry to the corresponding grammar rule(s) or notes gaps.
 | 6   | IF QUOTIENT OVERFLOW n1, n2   | `if_stmt_quotient_overflow`    | Implemented     |
 | 7   | IF DIVIDE CHECK n1, n2        | `if_stmt_divide_check`         | Implemented     |
 | 8   | IF (SENSE LIGHT i) n1, n2     | `if_stmt_sense_light`          | Implemented     |
-| 9   | IF (a) n1, n2 (where a is...) | Not implemented                | Gap: see #141   |
-| 10  | IF (a) n1, n2 (another form)  | Not implemented                | Gap: see #141   |
+| 9   | IF (a) n1, n2 (where a is...) | Not implemented                | Gap: see #427   |
+| 10  | IF (a) n1, n2 (another form)  | Not implemented                | Gap: see #427   |
 | 11  | SENSE LIGHT i                 | `sense_light_stmt`             | Implemented     |
 | 12  | ASSIGN i TO n                 | `assign_stmt`                  | Implemented     |
 | 13  | FREQUENCY n (i1, i2, ...)     | `frequency_stmt`               | Implemented     |

@@ -82,11 +82,9 @@ Each standard has an audit document in `docs/fortran_*_audit.md` that MUST conta
 
 | Issue | Standard | Description |
 |-------|----------|-------------|
-| #153 | FORTRAN 1957/II | Tape/drum I/O statements |
-| #309 | Fortran 2003 | Fixed-form C comment handling |
-| #310 | Fortran 2023 | F2023 grammar features (7 xfail) |
-| #311 | Fortran 90 | Module/control flow gaps (9 xfail) |
-| #313 | Fortran 2008 | CRITICAL, LOCK/UNLOCK, bitwise intrinsics |
+| #399 | FORTRAN 66 | DO loop terminal statement restrictions not enforced (X3.9-1966 Section 7.1.2.8) |
+| #415 | Fortran 95 | Interface-definition characteristics matching not enforced (ISO/IEC 1539-1:1997 Section 12.2) |
+| #427 | FORTRAN 1957 | IF statement forms from Appendix B rows 9-10 not implemented (C28-6003) |
 
 ### Validation Workflow
 
