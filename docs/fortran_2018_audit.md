@@ -103,6 +103,12 @@ Grammar implementation:
     - Either `ieee_module_name` or a generic `IDENTIFIER`.
     - This allows ISO_FORTRAN_ENV and other intrinsic modules even
       though they are not enumerated by name.
+- Enhanced IMPORT:
+  - `import_stmt` overrides the F2003 rule so that all R867 variants are
+    available: bare `IMPORT`, `IMPORT :: import-name-list`, `IMPORT import-name-list`,
+    `IMPORT, ONLY: import-name-list`, `IMPORT, NONE`, and `IMPORT, ALL`.
+  - These forms let interface bodies and submodules explicitly control
+    which host entities are visible without relying on ad-hoc inheritances.
 - `declaration_construct_f2018`:
   - Includes:
     - F2003 types, CLASS declarations and procedure declarations.
@@ -124,9 +130,14 @@ Tests:
 - `test_issue61_teams_and_collectives.py`:
   - Team/events fixtures (e.g. `team_skeleton_module.f90`,
     `team_event_semantics.f90`) test EVENT_TYPE/TEAM_TYPE declarations
-    via the derived‑type‑style declarations:
+    via the derived-type-style declarations:
     - `TYPE(EVENT_TYPE) :: e`.
     - `TYPE(TEAM_TYPE) :: t`.
+- `tests/fixtures/Fortran2018/import_stmt_forms.f90`:
+  - Exercises each R867 IMPORT variant (`IMPORT`, `IMPORT ::`, `IMPORT, ONLY:`,
+    `IMPORT, NONE`, `IMPORT, ALL`) inside an interface block.
+  - Confirms the new parser rule added for issue #582 successfully parses
+    the forms that interface/submodule authors rely on.
 
 Gaps:
 
