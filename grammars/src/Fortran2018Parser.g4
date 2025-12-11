@@ -135,6 +135,22 @@ use_stmt
       only_list NEWLINE
     ;
 
+// ====================================================================
+// IMPORT STATEMENT (ISO/IEC 1539-1:2018 Section 8.8, R867)
+// ====================================================================
+//
+// F2018 extends IMPORT to support the ONLY/NONE/ALL variants defined by
+// R867. These forms are required by interface bodies and submodules to
+// control host association visibility explicitly.
+import_stmt
+    : IMPORT NEWLINE
+    | IMPORT DOUBLE_COLON import_name_list NEWLINE
+    | IMPORT import_name_list NEWLINE
+    | IMPORT COMMA ONLY COLON import_name_list NEWLINE
+    | IMPORT COMMA NONE NEWLINE
+    | IMPORT COMMA ALL NEWLINE
+    ;
+
 // Module name for USE statement - includes IEEE tokens which lexer matches first
 module_name_f2018
     : IDENTIFIER
