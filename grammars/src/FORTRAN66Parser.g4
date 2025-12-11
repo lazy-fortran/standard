@@ -269,7 +269,8 @@ program_unit
 // It does not have a leading SUBROUTINE, FUNCTION, or BLOCK DATA keyword.
 //
 // Statement ordering per X3.9-1966 Section 7:
-// 1. Specification statements (type declarations, DIMENSION, COMMON, EQUIVALENCE, EXTERNAL)
+// 1. Specification statements (type declarations, DIMENSION, COMMON,
+//    EQUIVALENCE, EXTERNAL)
 // 2. Statement functions (optional, after specifications)
 // 3. DATA statements (optional, can mix with statement functions)
 // 4. Executable statements (control flow, I/O, assignments)
@@ -291,7 +292,8 @@ subprogram
 // Called via CALL statement; does not return a value through its name.
 //
 // Statement ordering per X3.9-1966 Section 7:
-// 1. Specification statements (type declarations, DIMENSION, COMMON, EQUIVALENCE, EXTERNAL)
+// 1. Specification statements (type declarations, DIMENSION, COMMON,
+//    EQUIVALENCE, EXTERNAL)
 // 2. Statement functions (optional, after specifications)
 // 3. DATA statements (optional, can mix with statement functions)
 // 4. Executable statements (control flow, I/O, assignments)
@@ -308,7 +310,8 @@ subroutine_subprogram
 // Returns a value through the function name; called as part of an expression.
 //
 // Statement ordering per X3.9-1966 Section 7:
-// 1. Specification statements (type declarations, DIMENSION, COMMON, EQUIVALENCE, EXTERNAL)
+// 1. Specification statements (type declarations, DIMENSION, COMMON,
+//    EQUIVALENCE, EXTERNAL)
 // 2. Statement functions (optional, after specifications)
 // 3. DATA statements (optional, can mix with statement functions)
 // 4. Executable statements (control flow, I/O, assignments)
@@ -374,7 +377,8 @@ specification_part
     ;
 
 // Specification statements - X3.9-1966 Section 7.2
-// These statements define program structure and types; must precede all other statements
+// These statements define program structure and types; must precede
+// all other statements
 specification_statement
     : label? specification_body NEWLINE?
     | NEWLINE
@@ -417,10 +421,11 @@ executable_part
     : (executable_statement | format_statement_line)*
     ;
 
-// Format statements may appear anywhere within program units (X3.9-1966 Section 7.2.7).
-// They are non-executable definitions that can appear before, between, or after the ordered
-// parts without affecting the ordering requirement for specification, statement function/data,
-// and executable statements.
+// Format statements may appear anywhere within program units
+// (X3.9-1966 Section 7.2.7). They are non-executable definitions that can
+// appear before, between, or after the ordered parts without affecting the
+// ordering requirement for specification, statement function/data, and
+// executable statements.
 format_statement_line
     : label? format_stmt NEWLINE?
     ;
