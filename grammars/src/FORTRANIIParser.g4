@@ -223,10 +223,53 @@ end_stmt
     ;
 
 // ============================================================================
+// INHERITED FORTRAN I (1957) STATEMENTS (RE-EXPORTED)
+// ============================================================================
+// Descendant grammars (FORTRAN 66/77) reference these historical rule names.
+// FORTRANParser defines the underlying constructs under different names, so
+// FORTRAN II re-exports the 1958-era names here.
+
+// Arithmetic IF - Appendix A: IF (e) n1, n2, n3
+arithmetic_if_stmt
+    : IF LPAREN expr RPAREN label COMMA label COMMA label
+    ;
+
+// CONTINUE statement - Appendix A: CONTINUE
+continue_stmt
+    : CONTINUE
+    ;
+
+// STOP statement - Appendix A: STOP [n]
+stop_stmt
+    : STOP INTEGER_LITERAL?
+    ;
+
+// READ statement - Appendix A: READ forms
+read_stmt
+    : READ integer_expr COMMA input_list              // READ unit, list
+    | READ integer_expr COMMA label COMMA input_list  // READ unit, format, list
+    ;
+
+// ============================================================================
+// EXPRESSIONS
+// ============================================================================
+// FORTRAN II expression syntax matches 1957 arithmetic expressions.
+// Relational operators (.EQ., .NE., etc.) are not part of the top-level expr in
+// FORTRAN II; FORTRAN 66 introduces logical types and relational expressions.
+
+expr
+    : additive_expr
+    ;
+
+// ============================================================================
 // UTILITY RULES
 // ============================================================================
 
 // Variable list for COMMON statement
 variable_list
     : variable (COMMA variable)*
+    ;
+
+integer_expr
+    : expr
     ;

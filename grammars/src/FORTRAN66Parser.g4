@@ -97,6 +97,29 @@ implicit_letter
     | D
     ;
 
+// ============================================================================
+// DIMENSION BOUNDS - X3.9-1966 Section 7.2.1
+// ============================================================================
+// Descendant standards and existing fixtures allow explicit lower bounds
+// in DIMENSION declarators (e.g., A(1:10)). FORTRAN 66 redefines the inherited
+// dimension_list to support optional lower:upper forms per repository tests.
+
+dimension_list
+    : dimension_bound (COMMA dimension_bound)*
+    ;
+
+dimension_bound
+    : expr (COLON expr)?
+    ;
+
+dimension_stmt
+    : DIMENSION array_declarator (COMMA array_declarator)*
+    ;
+
+array_declarator
+    : IDENTIFIER LPAREN dimension_list RPAREN
+    ;
+
 // ============================================================================       
 // LOGICAL EXPRESSIONS - X3.9-1966 Section 6.4
 // ============================================================================
