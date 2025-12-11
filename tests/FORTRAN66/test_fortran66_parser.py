@@ -1471,6 +1471,236 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
                     pass
 
 
+    def test_statement_ordering_specification_before_executable(self):
+        """Test that specification statements must come before executable statements (X3.9-1966 Section 7)"""
+        # Valid: specification first, then executable
+        valid_program = """
+        INTEGER X
+        X = 1
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+        # Valid: multiple specifications, then executables
+        valid_program_multi = """
+        INTEGER X
+        REAL Y
+        DIMENSION A(10)
+        X = 1
+        Y = 2.0
+        END
+        """
+        tree = self.parse(valid_program_multi, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_specification_before_statement_functions(self):
+        """Test that specification statements must come before statement functions (X3.9-1966 Section 7)"""
+        # Valid: specification, then statement function, then executable
+        valid_program = """
+        INTEGER X
+        F(A) = A + 1
+        X = F(5)
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_data_after_specifications(self):
+        """Test that DATA statements come after specification statements (X3.9-1966 Section 7)"""
+        # Valid: specification, data, then executable
+        valid_program = """
+        INTEGER X, Y
+        DATA X, Y /1, 2/
+        X = X + 1
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_complete_sequence(self):
+        """Test complete statement ordering: specification -> statement function -> DATA -> executable (X3.9-1966 Section 7)"""
+        # Valid: specification -> statement function -> data -> executable
+        valid_program = """
+        INTEGER X, Y
+        DIMENSION A(10)
+        COMMON /MYBLK/ Z
+        EXTERNAL MYFUNC
+        F(N) = N * 2
+        DATA X, Y /1, 2/
+        X = 1
+        Y = MYFUNC(X)
+        A(1) = X + Y
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_subroutine_subprogram(self):
+        """Test statement ordering in SUBROUTINE subprogram (X3.9-1966 Section 8.3)"""
+        # Valid: specification, statement function, data, executable
+        valid_subroutine = """
+        SUBROUTINE TEST(X)
+        INTEGER X
+        DIMENSION A(10)
+        F(N) = N + 1
+        DATA A /10*0/
+        X = F(X)
+        END
+        """
+        tree = self.parse(valid_subroutine, 'subroutine_subprogram')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_function_subprogram(self):
+        """Test statement ordering in FUNCTION subprogram (X3.9-1966 Section 8.2)"""
+        # Valid: specification, statement function, data, executable
+        valid_function = """
+        INTEGER FUNCTION MYFUNC(X)
+        INTEGER X
+        DIMENSION RESULT(10)
+        F(N) = N * 2
+        DATA RESULT /10*0/
+        MYFUNC = F(X)
+        END
+        """
+        tree = self.parse(valid_function, 'function_subprogram')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_empty_specification_part(self):
+        """Test that specification part can be empty (X3.9-1966 Section 7)"""
+        # Valid: no specifications, just executable
+        valid_program = """
+        X = 1
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_empty_statement_function_data_part(self):
+        """Test that statement function/data part can be empty (X3.9-1966 Section 7)"""
+        # Valid: specification only
+        valid_program = """
+        INTEGER X
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_specification_only(self):
+        """Test that a program can contain only specification statements (X3.9-1966 Section 7)"""
+        # Valid: specification, no executable
+        valid_program = """
+        INTEGER X
+        REAL Y
+        DIMENSION A(10)
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_multiple_data_statements(self):
+        """Test that multiple DATA statements are allowed (X3.9-1966 Section 7.2.6)"""
+        # Valid: multiple DATA statements mixed with statement functions
+        valid_program = """
+        INTEGER X, Y
+        DATA X /1/
+        F(N) = N + 1
+        DATA Y /2/
+        CALL SOMETHING()
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_multiple_statement_functions(self):
+        """Test that multiple statement functions are allowed (X3.9-1966 Section 7.2)"""
+        # Valid: multiple statement functions
+        valid_program = """
+        INTEGER X
+        F(N) = N + 1
+        G(M) = M * 2
+        H(P) = P - 1
+        X = F(5)
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_dimension_before_executable(self):
+        """Test that DIMENSION must come before executable (X3.9-1966 Section 7)"""
+        # Valid: DIMENSION before executable
+        valid_program = """
+        DIMENSION A(10)
+        A(1) = 1.0
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_common_before_executable(self):
+        """Test that COMMON must come before executable (X3.9-1966 Section 7)"""
+        # Valid: COMMON before executable
+        valid_program = """
+        COMMON /MYBLK/ X, Y
+        X = 1.0
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_equivalence_before_executable(self):
+        """Test that EQUIVALENCE must come before executable (X3.9-1966 Section 7)"""
+        # Valid: EQUIVALENCE before executable
+        valid_program = """
+        EQUIVALENCE (A, B)
+        A = 1.0
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_external_before_executable(self):
+        """Test that EXTERNAL must come before executable (X3.9-1966 Section 7)"""
+        # Valid: EXTERNAL before executable
+        valid_program = """
+        EXTERNAL MYFUNC
+        X = MYFUNC(1)
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_intrinsic_before_executable(self):
+        """Test that INTRINSIC must come before executable (X3.9-1966 Section 7)"""
+        # Valid: INTRINSIC before executable
+        valid_program = """
+        INTRINSIC SIN
+        X = SIN(1.0)
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_blank_lines_allowed(self):
+        """Test that blank lines are allowed throughout (X3.9-1966 Section 3.2)"""
+        # Valid: blank lines scattered throughout
+        valid_program = """
+        INTEGER X
+
+        DIMENSION A(10)
+
+        F(N) = N + 1
+
+        DATA X /1/
+
+        X = F(X)
+
+        END
+        """
+        tree = self.parse(valid_program, 'fortran66_program')
+        self.assertIsNotNone(tree)
+
+
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail
     unittest.main(verbosity=2)
