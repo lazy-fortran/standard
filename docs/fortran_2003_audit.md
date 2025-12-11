@@ -684,6 +684,10 @@ Grammar implementation:
       - Array constructors `array_constructor` using square brackets.
       - IEEE constants and intrinsic function calls.
       - Prefixed character literals (e.g. `c_char_'Hello'`).
+- Complex part designator:
+  - `complex_part_designator` implements ISO/IEC 1539-1:2004 Section 6.1.2.5 (R615) so `%RE`/`%IM` access is parsed as both a primary expression and a left-hand side.
+  - New fixture `tests/fixtures/Fortran2003/test_issue584_complex_parts/complex_part_designator.f90` covers simple access, assignments, expressions, array elements, and derived-component chains that exercise the feature.
+  - Issue #584 tracks this functionality and can now be marked as resolved.
 - Array constructors:
   - `array_constructor` is defined with `LSQUARE ... RSQUARE` and
     allows:
@@ -810,6 +814,9 @@ Existing umbrella issues relevant to this audit:
   - **RESOLVED IN GRAMMAR AND TESTS**: `Fortran2003Lexer.g4` now enforces column‑1 `C`/`c` comments per ISO/IEC 1539‑1:2004 Section 3.3.2, the `fixed_form_f2003.f` fixture parses without errors, and its xfail entry has been removed.
 - #343 – **Fortran 2003 fixed-form C comments require whitespace after column-1 C**:
   - Tracks the remaining gap where column‑1 `C`/`c` comment lines without trailing whitespace (for example `C*** heading`) are rejected instead of treated as comment lines.
+- #584 – **Complex part designator %RE/%IM support (ISO/IEC 1539-1:2004 Section 6.1.2.5, R615)**:
+  - **RESOLVED**: `complex_part_designator` now participates in both `primary` and `lhs_expression`, enabling `%RE`/`%IM` access for expressions and assignments across F2003 and all inheriting grammars.
+  - Fixture `tests/fixtures/Fortran2003/test_issue584_complex_parts/complex_part_designator.f90` demonstrates assignments, expressions, array elements, and derived-component chains that cover the new behavior.
 - #175 – **Fortran 2003: annotate grammar with J3/03‑007 sections**:
   - **RESOLVED**: The grammar files `Fortran2003Parser.g4` and
     `Fortran2003Lexer.g4` have been annotated with comprehensive
