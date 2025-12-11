@@ -257,6 +257,14 @@ C_FUNPTR         : [cC] '_' F U N P T R ;
 C_NULL_PTR       : [cC] '_' N U L L '_' P T R ;
 C_NULL_FUNPTR    : [cC] '_' N U L L '_' F U N P T R ;
 
+// C interoperability intrinsic procedures (Section 15.2.5)
+// These are intrinsic functions for C interoperability
+C_LOC            : [cC] '_' L O C ;
+C_FUNLOC         : [cC] '_' F U N L O C ;
+C_ASSOCIATED     : [cC] '_' A S S O C I A T E D ;
+C_F_POINTER      : [cC] '_' F '_' P O I N T E R ;
+C_F_PROCPOINTER  : [cC] '_' F '_' P R O C P O I N T E R ;
+
 // ====================================================================
 // ADDITIONAL F2003 TOKENS
 // ====================================================================
