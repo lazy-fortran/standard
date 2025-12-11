@@ -267,8 +267,17 @@ program_unit
 // Main program - X3.9-1966 Section 8.1
 // A main program is a sequence of statements ending with END.
 // It does not have a leading SUBROUTINE, FUNCTION, or BLOCK DATA keyword.
+//
+// Statement ordering per X3.9-1966 Section 7:
+// 1. Specification statements (type declarations, DIMENSION, COMMON, EQUIVALENCE, EXTERNAL)
+// 2. Statement functions (optional, after specifications)
+// 3. DATA statements (optional, can mix with statement functions)
+// 4. Executable statements (control flow, I/O, assignments)
 main_program
-    : statement+ end_stmt NEWLINE?
+    : specification_part
+      statement_function_and_data_part?
+      executable_part?
+      end_stmt NEWLINE?
     ;
 
 // Subprograms - X3.9-1966 Sections 8.2 and 8.3
@@ -280,18 +289,34 @@ subprogram
 // SUBROUTINE subprogram - X3.9-1966 Section 8.3
 // Form: SUBROUTINE name [(dummy-arg-list)]
 // Called via CALL statement; does not return a value through its name.
+//
+// Statement ordering per X3.9-1966 Section 7:
+// 1. Specification statements (type declarations, DIMENSION, COMMON, EQUIVALENCE, EXTERNAL)
+// 2. Statement functions (optional, after specifications)
+// 3. DATA statements (optional, can mix with statement functions)
+// 4. Executable statements (control flow, I/O, assignments)
 subroutine_subprogram
     : NEWLINE* SUBROUTINE IDENTIFIER parameter_list? NEWLINE
-      statement*
+      specification_part
+      statement_function_and_data_part?
+      executable_part?
       end_stmt NEWLINE?
     ;
 
 // FUNCTION subprogram - X3.9-1966 Section 8.2
 // Form: [type] FUNCTION name (dummy-arg-list)
 // Returns a value through the function name; called as part of an expression.
+//
+// Statement ordering per X3.9-1966 Section 7:
+// 1. Specification statements (type declarations, DIMENSION, COMMON, EQUIVALENCE, EXTERNAL)
+// 2. Statement functions (optional, after specifications)
+// 3. DATA statements (optional, can mix with statement functions)
+// 4. Executable statements (control flow, I/O, assignments)
 function_subprogram
     : NEWLINE* type_spec? FUNCTION IDENTIFIER parameter_list NEWLINE
-      statement*
+      specification_part
+      statement_function_and_data_part?
+      executable_part?
       end_stmt NEWLINE?
     ;
 
@@ -331,6 +356,99 @@ data_initialization_body
     | data_stmt            // X3.9-1966 Section 7.2.6
     ;
 
+
+// ============================================================================
+// PROGRAM STRUCTURE PARTS - X3.9-1966 Section 7
+// ============================================================================
+// X3.9-1966 Section 7 requires strict ordering of statement groups:
+// 1. Specification part (type declarations, DIMENSION, COMMON, EQUIVALENCE, EXTERNAL)
+// 2. Statement function and DATA part (statement functions, DATA statements)
+// 3. Executable part (control flow, I/O, assignments, etc.)
+// ============================================================================
+
+// Specification part - X3.9-1966 Section 7.2
+// Type statements, DIMENSION, COMMON, EQUIVALENCE, EXTERNAL declarations
+// Must appear before statement functions and executable statements
+specification_part
+    : specification_statement*
+    ;
+
+// Specification statements - X3.9-1966 Section 7.2
+// These statements define program structure and types; must precede all other statements
+specification_statement
+    : label? specification_body NEWLINE?
+    | NEWLINE
+    ;
+
+// Specification statement types - X3.9-1966 Section 7.2
+specification_body
+    : type_declaration          // X3.9-1966 Section 7.2.5
+    | dimension_stmt            // X3.9-1966 Section 7.2.1
+    | common_stmt               // X3.9-1966 Section 7.2.2
+    | equivalence_stmt          // X3.9-1966 Section 7.2.3
+    | external_stmt             // X3.9-1966 Section 7.2.4
+    | intrinsic_stmt            // X3.9-1966 Section 8.7
+    ;
+
+// Statement function and DATA part - X3.9-1966 Section 7.2
+// Statement functions and DATA statements can appear after specification part
+// but before executable statements
+statement_function_and_data_part
+    : statement_function_or_data_statement*
+    ;
+
+// Statement function or DATA statement - X3.9-1966 Section 7.2
+// These statements initialize data or define statement functions
+statement_function_or_data_statement
+    : label? statement_function_or_data_body NEWLINE?
+    | NEWLINE
+    ;
+
+// Statement function or DATA statement types - X3.9-1966 Section 7.2
+statement_function_or_data_body
+    : statement_function_stmt   // X3.9-1966 Section 7.2
+    | data_stmt                 // X3.9-1966 Section 7.2.6
+    ;
+
+// Executable part - X3.9-1966 Section 7.1
+// All executable statements (control flow, I/O, assignments)
+// Must appear after all specification and statement function/DATA statements
+executable_part
+    : executable_statement*
+    ;
+
+// Executable statement - X3.9-1966 Section 7.1
+// Control flow, I/O, and assignment statements
+executable_statement
+    : label? executable_statement_body NEWLINE?
+    | NEWLINE
+    ;
+
+// Executable statement types - X3.9-1966 Section 7.1
+executable_statement_body
+    : assignment_stmt           // X3.9-1966 Section 7.1.1.1, 7.1.1.2
+    | assign_stmt               // X3.9-1966 Section 7.1.1.3
+    | assigned_goto_stmt        // X3.9-1966 Section 7.1.2.1.2
+    | computed_goto_stmt        // X3.9-1966 Section 7.1.2.2
+    | goto_stmt                 // X3.9-1966 Section 7.1.2.1.1
+    | arithmetic_if_stmt        // X3.9-1966 Section 7.1.2.3
+    | logical_if_stmt           // X3.9-1966 Section 7.1.2.4
+    | do_stmt                   // X3.9-1966 Section 7.1.2.8
+    | continue_stmt             // X3.9-1966 Section 7.1.2.9
+    | stop_stmt                 // X3.9-1966 Section 7.1.2.5
+    | pause_stmt                // X3.9-1966 Section 7.1.2.6
+    | call_stmt                 // X3.9-1966 Section 7.1.2.10
+    | return_stmt               // X3.9-1966 Section 7.1.2.7
+    | read_tape_drum_stmt       // Inherited: tape/drum I/O
+    | read_stmt                 // X3.9-1966 Section 7.1.3.1
+    | write_tape_drum_stmt      // Inherited: tape/drum I/O
+    | write_stmt                // X3.9-1966 Section 7.1.3.1
+    | print_stmt                // X3.9-1966 Section 7.1.3.2
+    | punch_stmt                // X3.9-1966 Section 7.1.3.2
+    | rewind_stmt               // X3.9-1966 Section 7.1.3.3
+    | backspace_stmt            // X3.9-1966 Section 7.1.3.3
+    | endfile_stmt              // X3.9-1966 Section 7.1.3.3
+    ;
 
 // Type declaration - X3.9-1966 Section 7.2.5
 // Form: type v1, v2, ..., vn
