@@ -343,6 +343,16 @@ REAL64           : R E A L '6' '4' ;
 REAL128          : R E A L '1' '2' '8' ;
 
 // ============================================================================
+// ENHANCED I/O SPECIFIERS (ISO/IEC 1539-1:2010 Section 9.5.6.10)
+// ============================================================================
+// Fortran 2008 adds the NEWUNIT specifier for automatic unit number allocation
+// in OPEN statements, eliminating manual unit management and avoiding conflicts.
+// - R905: connect-spec -> ... | NEWUNIT= scalar-int-variable
+// - NEWUNIT returns a unique, negative unit number for the opened file
+// - Mutually exclusive with UNIT= specifier (constraint C924)
+NEWUNIT          : N E W U N I T ;
+
+// ============================================================================
 // CASE-INSENSITIVE FRAGMENTS (inherited from F2003)
 // ============================================================================
 // All letter fragments inherited from Fortran2003Lexer for case-insensitive

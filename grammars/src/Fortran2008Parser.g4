@@ -312,6 +312,10 @@ executable_construct_f2008
     | sync_construct                  // SYNC (Section 8.5) - NEW in F2008
     | wait_stmt                       // WAIT (Section 9.7.1)
     | flush_stmt                      // FLUSH (Section 9.7.2)
+    | open_stmt                       // OPEN (Section 9.5.6) - Enhanced with NEWUNIT
+    | close_stmt                      // CLOSE (Section 9.5.7)
+    | write_stmt                      // WRITE (Section 9.4)
+    | read_stmt                       // READ (Section 9.4)
     | if_construct                    // IF (Section 8.1.7)
     | do_construct_f2008              // DO (Section 8.1.6) - Enhanced in F2008
     | select_case_construct           // SELECT CASE (Section 8.1.8)
@@ -1058,6 +1062,43 @@ elsewhere_stmt
     ;
 
 // ============================================================================
+// ENHANCED I/O SPECIFIER OVERRIDE (ISO/IEC 1539-1:2010 Section 9.5.6.10)
+// ============================================================================
+// F2008 extends the I/O specifier list with NEWUNIT for OPEN statements.
+// This rule overrides f2003_io_spec to add the NEWUNIT specifier.
+// R905: connect-spec -> ... | NEWUNIT= scalar-int-variable
+f2003_io_spec
+    : IDENTIFIER EQUALS primary
+        // Regular identifier = value (file='test.dat')
+    | UNIT EQUALS primary                        // unit=10, unit=*
+    | FILE EQUALS primary                        // file='filename'
+    | ACCESS EQUALS primary                      // access='stream' (F2003)
+    | FORM EQUALS primary                        // form='unformatted'
+    | STATUS EQUALS primary                      // status='new'
+    | BLANK EQUALS primary                       // blank='null'
+    | POSITION EQUALS primary                    // position='rewind'
+    | ACTION EQUALS primary                      // action='read'
+    | DELIM EQUALS primary                       // delim='apostrophe'
+    | PAD EQUALS primary                         // pad='yes'
+    | RECL EQUALS primary                        // recl=100
+    | IOSTAT EQUALS primary                      // iostat=ios
+    | IOMSG EQUALS primary                       // iomsg=msg (F2003)
+    | ERR EQUALS primary                         // err=100
+    | END EQUALS primary                         // end=200
+    | EOR EQUALS primary                         // eor=300
+    | ADVANCE EQUALS primary                     // advance='yes'
+    | SIZE EQUALS primary                        // size=isize
+    | REC EQUALS primary                         // rec=irec
+    | ASYNCHRONOUS EQUALS primary                // asynchronous='yes' (F2003)
+    | STREAM EQUALS primary                      // stream='yes' (F2003 R905)
+    | PENDING EQUALS primary                     // pending=var (F2003 R923)
+    | ID EQUALS primary                          // id=id_var (F2003)
+    | FMT EQUALS primary                         // fmt=*, fmt=100, fmt='(DT)'
+    | NEWUNIT EQUALS primary                     // newunit=unit_var (F2008 S9.5.6.10)
+    | primary                                    // Positional: *, 10, '(DT)', etc.
+    ;
+
+// ============================================================================
 // IDENTIFIER OR KEYWORD OVERRIDE (F2008 Extension)
 // ============================================================================
 // F2008 adds several new keywords that can also be used as identifiers.
@@ -1093,6 +1134,7 @@ identifier_or_keyword
     | RECL         // RECL can be used as variable name in I/O
     | IOMSG        // IOMSG can be used as variable name in I/O
     | ASYNCHRONOUS // ASYNCHRONOUS can be used as variable name in I/O
+    | NEWUNIT      // NEWUNIT can be used as variable name in I/O (F2008 S9.5.6.10)
     // F2008-specific tokens that can be used as identifiers
     | IMAGES       // IMAGES can be used as variable name (SYNC IMAGES keyword)
     | ALL          // ALL can be used as variable name (SYNC ALL keyword)
