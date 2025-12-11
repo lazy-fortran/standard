@@ -128,6 +128,58 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
             with self.subTest(type_decl=text):
                 tree = self.parse(text, 'type_declaration')
                 self.assertIsNotNone(tree)
+
+    def test_implicit_statements(self):
+        """Test IMPLICIT statements (X3.9-1966 Section 7.2.5)"""
+        test_cases = [
+            "IMPLICIT INTEGER (I-N)",
+            "IMPLICIT REAL (A-H, O-Z)",
+            "IMPLICIT INTEGER (A-H), REAL (I-N)",
+            "IMPLICIT DOUBLE PRECISION (D)",
+            "IMPLICIT COMPLEX (C), LOGICAL (L)",
+        ]
+
+        for text in test_cases:
+            with self.subTest(implicit_stmt=text):
+                tree = self.parse(text, 'implicit_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_implicit_statements_in_program(self):
+        """Ensure IMPLICIT statements integrate into a FORTRAN 66 program."""
+        program = load_fixture(
+            "FORTRAN66",
+            "test_fortran66_parser",
+            "implicit_statements.f",
+        )
+
+        tree = self.parse(program, 'main_program')
+        self.assertIsNotNone(tree)
+
+    def test_implicit_none_rejected(self):
+        """IMPLICIT NONE is a Fortran 90 feature; FORTRAN 66 should reject it."""
+        invalid_text = "IMPLICIT NONE"
+
+        from antlr4.error.ErrorListener import ErrorListener
+
+        class ErrorCapture(ErrorListener):
+            def __init__(self):
+                self.errors = []
+
+            def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+                self.errors.append((line, column, msg))
+
+        input_stream = InputStream(invalid_text)
+        lexer = FORTRAN66Lexer(input_stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = FORTRAN66Parser(token_stream)
+        listener = ErrorCapture()
+        parser.removeErrorListeners()
+        parser.addErrorListener(listener)
+        parser.implicit_stmt()
+        self.assertGreater(
+            len(listener.errors), 0,
+            "IMPLICIT NONE should be rejected in FORTRAN 66"
+        )
     
     def test_machine_independence(self):
         """Test machine-independent features (FORTRAN 66 goal)"""

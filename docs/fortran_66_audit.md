@@ -391,6 +391,21 @@ Mapping these families to the current grammar:
     - Type statements:
       - Via `type_declaration : type_spec variable_list` with
         `type_spec` = `INTEGER | REAL | LOGICAL | DOUBLE PRECISION | COMPLEX`.
+    - IMPLICIT statements:
+      - Implemented by `implicit_stmt` and wired into
+        `specification_body` / `statement_body` to mirror X3.9-1966 Section 7.2.5.
+      - Syntax: `IMPLICIT type (letter-range-list)` with comma-separated
+        specs and optional letter ranges such as `A-H` or `O-Z`.
+      - Tests:
+        - `test_implicit_statements` covers single and multiple specs plus
+          multi-word types.
+        - `test_implicit_statements_in_program` parses
+          `tests/fixtures/FORTRAN66/test_fortran66_parser/implicit_statements.f`.
+        - `test_implicit_none_rejected` ensures `IMPLICIT NONE` (a Fortran 90
+          feature) is rejected in this grammar.
+      - Tracked by issue #595 (FORTRAN 66 missing IMPLICIT parser); this
+        change closes the gap while preserving the historical restriction on
+        `IMPLICIT NONE`.
     - DIMENSION:
       - Implemented by the inherited `dimension_stmt` / `array_declarator`
         and `dimension_list` rules.
