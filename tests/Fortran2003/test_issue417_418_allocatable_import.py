@@ -428,6 +428,35 @@ end module test_import_implicit
         assert tree is not None, "Parse tree is None"
         assert_tree_contains_keywords(tree, "import", "sub_with_implicit", "some_param")
 
+    def test_import_without_double_colon(self):
+        """
+        Test IMPORT with name-list but WITHOUT double colon (ISO/IEC 1539-1:2004 R1209).
+
+        R1209 specifies: import-stmt is IMPORT [[::] import-name-list]
+        The double brackets mean :: is optional, so IMPORT name1, name2 is valid.
+        """
+        code = """module test_import_no_colon
+  implicit none
+
+  integer, parameter :: dp = selected_real_kind(15)
+  type :: my_type
+    integer :: value
+  end type my_type
+
+  interface
+    subroutine interface_sub(x)
+      import my_type, dp
+      type(my_type), intent(in) :: x
+    end subroutine interface_sub
+  end interface
+
+end module test_import_no_colon
+"""
+        tree, errors, exception = self.parse_fortran_code(code)
+        assert errors == 0, f"Failed to parse IMPORT without double colon: {errors} errors"
+        assert tree is not None, "Parse tree is None"
+        assert_tree_contains_keywords(tree, "import", "interface_sub", "my_type", "dp")
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

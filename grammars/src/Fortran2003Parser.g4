@@ -992,8 +992,12 @@ end_select_type_stmt
 // interface bodies.
 
 // Import statement (ISO/IEC 1539-1:2004 R1209)
+// import-stmt is IMPORT [[::] import-name-list]
+// Three forms: IMPORT, IMPORT :: names, IMPORT names
 import_stmt
-    : IMPORT (DOUBLE_COLON import_name_list)? NEWLINE
+    : IMPORT NEWLINE
+    | IMPORT DOUBLE_COLON import_name_list NEWLINE
+    | IMPORT import_name_list NEWLINE
     ;
 
 import_name_list
