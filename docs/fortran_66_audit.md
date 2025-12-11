@@ -272,6 +272,26 @@ Mapping these families to the current grammar:
         `format_item` and `format_descriptor`, plus the `HOLLERITH`
         token for Hollerith constants; the FORMAT grammar is shared
         with FORTRAN II.
+      - **HOLLERITH CONSTANTS (X3.9-1966 Section 4.7)**:
+        - Syntax: `nHxxx` where n is a positive integer and xxx are
+          exactly n characters (Hollerith format specification).
+        - Lexer: `HOLLERITH : [1-9] [0-9]* H ~[,)\r\n]*` rule in
+          `FORTRANLexer.g4` recognizes Hollerith tokens but does NOT
+          validate that declared count matches actual character count.
+        - Semantic validation: `tools/hollerith_validator.py` provides
+          `validate_hollerith()` and related functions to check count
+          compliance per X3.9-1966 Section 4.7.
+        - Known limitation: Lexer uses greedy matching and accepts
+          mismatched Hollerith (e.g., `5HHELL` with 4 chars). A semantic
+          validation pass must be applied post-parse to enforce strict
+          X3.9-1966 compliance.
+        - Tests: `tests/FORTRAN66/test_fortran66_parser.py` includes
+          `test_hollerith_constants_valid` and
+          `test_hollerith_constants_invalid_count`; detailed validator
+          unit tests in `tests/test_hollerith_validator.py`.
+        - Acceptance: All valid Hollerith per X3.9-1966 parse correctly.
+          Invalid Hollerith (count mismatches) parse but can be detected
+          via semantic validation utility.
   - Implemented:
     - REWIND, BACKSPACE, ENDFILE:
       - Per X3.9-1966 Section 7.1.3.3, these auxiliary I/O statements
