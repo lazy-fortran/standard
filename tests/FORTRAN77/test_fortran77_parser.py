@@ -187,6 +187,20 @@ END IF"""
             with self.subTest(call_stmt=text):
                 tree = self.parse(text, 'call_stmt')
                 self.assertIsNotNone(tree)
+
+    def test_format_edit_descriptors(self):
+        """Parse the FORMAT edit descriptors introduced in ISO 1539:1980 Section 13."""
+        format_variants = [
+            "FORMAT(T10, TL5, TR2)",
+            "FORMAT(S, SP, SS)",
+            "FORMAT(BN, BZ)",
+            "FORMAT(L5, A10)"
+        ]
+
+        for text in format_variants:
+            with self.subTest(format_stmt=text):
+                tree = self.parse(text, 'format_stmt')
+                self.assertIsNotNone(tree)
     
     def test_intrinsic_statement(self):
         """Test INTRINSIC statement (NEW in FORTRAN 77)"""
