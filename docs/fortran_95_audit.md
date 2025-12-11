@@ -172,10 +172,39 @@ Integration:
   -> `where_construct_f95`. Complete F95 programs containing enhanced
   WHERE can now be parsed via the dedicated entry point.
 
-Semantic limitations (not enforced by grammar):
+Semantic limitations (not enforced by grammar, documented in code):
 
-- The "logical and scalar" constraints on mask expressions are captured
-  by comments, not grammar structure.
+The WHERE construct has important semantic constraints defined in
+ISO/IEC 1539-1:1997 Section 7.5.3 that are NOT enforced by the grammar
+syntax rules. These constraints require semantic analysis (type checking
+and shape analysis) and are documented in the grammar file with examples.
+
+Constraints not enforced by grammar:
+
+1. **MASK EXPRESSION TYPE CONSTRAINT** (Section 7.5.3):
+   - mask-expr in WHERE construct-stmt (R728) must have LOGICAL type
+   - mask-expr in masked ELSEWHERE (R732) must have LOGICAL type
+   - Violations: WHERE (integer_mask > 0) or WHERE (real_expr > 0.0) are
+     incorrectly accepted by the grammar
+
+2. **MASK EXPRESSION SHAPE CONSTRAINT** (Section 7.5.3):
+   - mask-expr must be an ARRAY expression (rank > 0), not a scalar
+   - Violations: WHERE (scalar_real > 0.0) is incorrectly accepted by
+     the grammar
+
+3. **CONFORMABILITY CONSTRAINT** (Section 7.5.3):
+   - All arrays in mask-expr, WHERE-body, and ELSEWHERE-body must be
+     CONFORMABLE (same rank and shape)
+   - Violations: WHERE (a(10)) ... ELSEWHERE a(1:5)=0.0 is incorrectly
+     accepted despite shape mismatch
+
+These semantic constraints are documented in the Fortran95Parser.g4
+grammar file (lines 334-372) with detailed examples and explanations.
+
+Future work: A semantic analyzer phase must be implemented to enforce
+these type-checking, shape-checking, and conformability constraints.
+This is tracked by issue #419 (grammar documentation) and a future
+semantic analyzer implementation issue.
 
 ## 4. PURE and ELEMENTAL procedures
 
