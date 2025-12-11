@@ -93,8 +93,16 @@ Specification:
 Grammar implementation:
 
 - `specification_part_f2018`:
-  - Wraps `use_stmt`, `import_stmt`, `implicit_stmt`, and the new
+  - Wraps `use_stmt`, `import_stmt`, `implicit_stmt_f2018`, and the new
     `declaration_construct_f2018`.
+- `implicit_stmt_f2018`:
+  - Replaces the base `implicit_stmt` inside the specification part so the
+    parser accepts `IMPLICIT NONE` with the optional `(TYPE)`/`(EXTERNAL)`
+    clause defined by R863-R864 while still supporting legacy `implicit_spec`
+    lists.
+  - Supports all F2018 variants such as `IMPLICIT NONE (TYPE)`,
+    `IMPLICIT NONE (EXTERNAL)`, `IMPLICIT NONE (TYPE, EXTERNAL)`, and
+    `IMPLICIT NONE (EXTERNAL, TYPE)`, satisfying issue #568.
 - Extended USE:
   - `use_stmt` overrides the F2008 rule:
     - Supports `USE module`, `USE module, ONLY: only_list`.
@@ -138,6 +146,13 @@ Tests:
     `IMPORT, NONE`, `IMPORT, ALL`) inside an interface block.
   - Confirms the new parser rule added for issue #582 successfully parses
     the forms that interface/submodule authors rely on.
+- `tests/fixtures/Fortran2018/test_implicit_none_specifiers/implicit_none_specifiers.f90`:
+  - Contains a module plus several program units so each of the R863/R864 forms
+    (`IMPLICIT NONE (TYPE)`, `IMPLICIT NONE (EXTERNAL)`,
+    `IMPLICIT NONE (TYPE, EXTERNAL)`, `IMPLICIT NONE (EXTERNAL, TYPE)`) is
+    parsed without syntax errors.
+  - Provides direct coverage for issue #568 by exercising the new F2018
+    implicit-none clause permutations.
 
 Gaps:
 
