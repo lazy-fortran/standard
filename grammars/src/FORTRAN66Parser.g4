@@ -175,10 +175,65 @@ relational_op
 //
 // If e is .TRUE., statement s is executed; otherwise, control passes to
 // the next executable statement.
+//
+// SEMANTIC CONSTRAINT (X3.9-1966 Section 7.1.2.4):
+// The statement s must NOT be:
+// - Another logical IF statement (no nesting)
+// - A DO statement
+// - Any non-executable statement (DIMENSION, COMMON, FORMAT, etc.)
+//
+// This rule enforces the grammatical restrictions by only allowing
+// executable statements that are legal as the body of a logical IF.
 // ============================================================================
 
 logical_if_stmt
-    : IF LPAREN logical_expr RPAREN statement_body
+    : IF LPAREN logical_expr RPAREN logical_if_body
+    ;
+
+// ============================================================================
+// LOGICAL IF STATEMENT BODY - X3.9-1966 Section 7.1.2.4
+// ============================================================================
+// Restricted statement list for logical IF bodies. Excludes:
+// - logical_if_stmt (prevents nesting)
+// - do_stmt (explicitly forbidden)
+// - Non-executable statements (type declarations, DIMENSION, COMMON, FORMAT, etc.)
+// ============================================================================
+
+logical_if_body
+    : statement_function_stmt      // Assignment function definition (allowed)
+    | assignment_stmt              // v = e (allowed)
+    | goto_stmt                    // GO TO n (allowed)
+    | computed_goto_stmt           // GO TO (n1, n2, ...), i (allowed)
+    | assign_stmt                  // ASSIGN i TO n (allowed)
+    | assigned_goto_stmt           // GO TO n, (n1, ...) (allowed)
+    | arithmetic_if_stmt           // IF (e) n1, n2, n3 (allowed)
+    | if_stmt_sense_light          // IF (SENSE LIGHT i) (allowed)
+    | if_stmt_sense_switch         // IF (SENSE SWITCH i) (allowed)
+    | if_stmt_accumulator_overflow // IF ACCUMULATOR OVERFLOW (allowed)
+    | if_stmt_quotient_overflow    // IF QUOTIENT OVERFLOW (allowed)
+    | if_stmt_divide_check         // IF DIVIDE CHECK (allowed)
+    // Explicitly EXCLUDED: do_stmt (X3.9-1966 Section 7.1.2.4)
+    | continue_stmt                // CONTINUE (allowed)
+    | stop_stmt                    // STOP [n] (allowed)
+    | pause_stmt                   // PAUSE [n] (allowed)
+    | read_tape_drum_stmt          // READ tape/drum (allowed)
+    | read_stmt                    // READ forms (allowed)
+    | write_tape_drum_stmt         // WRITE tape/drum (allowed)
+    | write_stmt_basic             // WRITE output_list (allowed)
+    | print_stmt                   // PRINT n, list (allowed)
+    | punch_stmt                   // PUNCH n, list (allowed)
+    | end_file_stmt                // END FILE i (allowed)
+    | rewind_stmt                  // REWIND i (allowed)
+    | backspace_stmt               // BACKSPACE i (allowed)
+    // Explicitly EXCLUDED: logical_if_stmt (X3.9-1966 Section 7.1.2.4)
+    // Explicitly EXCLUDED: format_stmt (non-executable)
+    // Explicitly EXCLUDED: dimension_stmt (non-executable)
+    // Explicitly EXCLUDED: equivalence_stmt (non-executable)
+    // Explicitly EXCLUDED: frequency_stmt (non-executable)
+    // Explicitly EXCLUDED: sense_light_stmt (non-executable)
+    // Explicitly EXCLUDED: common_stmt (non-executable)
+    | return_stmt                  // RETURN (allowed)
+    | call_stmt                    // CALL name (args) (allowed)
     ;
 
 // ============================================================================

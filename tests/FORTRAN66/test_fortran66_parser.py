@@ -372,12 +372,75 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
             "IF (.NOT. FLAG) STOP",
             "IF (A .EQ. B .AND. C .NE. D) PRINT X"
         ]
-        
+
         for text in test_cases:
             with self.subTest(logical_if=text):
                 tree = self.parse(text, 'logical_if_stmt')
                 self.assertIsNotNone(tree)
-    
+
+    def test_logical_if_valid_statements(self):
+        """Test valid executable statements in logical IF (X3.9-1966 Section 7.1.2.4)"""
+        valid_cases = [
+            # Arithmetic IF (allowed)
+            "IF (.TRUE.) IF (X .GT. 0) Y = 1, 2, 3",
+            # Assignment (allowed)
+            "IF (FLAG) X = Y + Z",
+            # GOTO (allowed)
+            "IF (A .GT. 0) GOTO 100",
+            # Computed GOTO (allowed)
+            "IF (FLAG) GOTO (10, 20, 30), I",
+            # CALL (allowed)
+            "IF (DONE) CALL FINISH()",
+            # RETURN (allowed)
+            "IF (.TRUE.) RETURN",
+            # CONTINUE (allowed)
+            "IF (FLAG) CONTINUE",
+            # I/O statements (allowed)
+            "IF (FLAG) PRINT 100",
+            "IF (FLAG) READ 100",
+        ]
+
+        for text in valid_cases:
+            with self.subTest(valid_stmt=text):
+                tree = self.parse(text, 'logical_if_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_logical_if_invalid_nested_if(self):
+        """Test that nested logical IF is rejected (X3.9-1966 Section 7.1.2.4)"""
+        # Nested logical IF should be rejected by parser
+        invalid_cases = [
+            "IF (.TRUE.) IF (.FALSE.) X = 1",
+            "IF (A .GT. 0) IF (B .LT. 0) Y = 2",
+        ]
+
+        for text in invalid_cases:
+            with self.subTest(nested_if=text):
+                try:
+                    tree = self.parse(text, 'logical_if_stmt')
+                    # If parse succeeds when it should fail, parser is incorrect
+                    self.fail(f"Parser should reject nested logical IF: {text}")
+                except Exception:
+                    # Expected: parser should raise exception for nested IF
+                    pass
+
+    def test_logical_if_invalid_do_statement(self):
+        """Test that DO statement in logical IF is rejected (X3.9-1966 Section 7.1.2.4)"""
+        # DO statement should be rejected in logical IF
+        invalid_cases = [
+            "IF (.TRUE.) DO 10 I = 1, 10",
+            "IF (FLAG) DO 20 J = 1, 5, 2",
+        ]
+
+        for text in invalid_cases:
+            with self.subTest(do_in_if=text):
+                try:
+                    tree = self.parse(text, 'logical_if_stmt')
+                    # If parse succeeds when it should fail, parser is incorrect
+                    self.fail(f"Parser should reject DO in logical IF: {text}")
+                except Exception:
+                    # Expected: parser should raise exception for DO in IF
+                    pass
+
     def test_data_type_revolution_features(self):
         """Test the complete data type revolution merged from FORTRAN IV"""
         # Test that all new data types work in expressions and assignments
