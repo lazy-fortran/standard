@@ -297,6 +297,7 @@ executable_construct_f2008
     : assignment_stmt                 // Assignment (Section 7.2)
     | atomic_subroutine_call          // ATOMIC intrinsics (13.7.19-20) - NEW
     | collective_subroutine_call      // COLLECTIVE intrinsics (13.7.34-38)
+    | system_command_call             // EXECUTE_COMMAND_LINE (13.7.55) - NEW
     | call_stmt                       // CALL (Section 12.5.1)
     | print_stmt                      // PRINT (Section 9.6.3)
     | stop_stmt                       // STOP (Section 8.4)
@@ -959,6 +960,14 @@ co_reduce_stmt
     ;
 
 // ============================================================================
+// SYSTEM COMMAND EXECUTION (ISO/IEC 1539-1:2010 Section 13.7.55)
+// ============================================================================
+// System command execution subroutine call
+system_command_call
+    : CALL EXECUTE_COMMAND_LINE LPAREN actual_arg_list RPAREN NEWLINE  // 13.7.55
+    ;
+
+// ============================================================================
 // PRIMARY EXPRESSIONS (ISO/IEC 1539-1:2010 Section 7.1.1)
 // ============================================================================
 // Primary expressions are the basic building blocks of Fortran expressions.
@@ -1109,6 +1118,8 @@ identifier_or_keyword
     | CO_MIN         // CO_MIN can be used as variable name
     | CO_SUM         // CO_SUM can be used as variable name
     | CO_REDUCE      // CO_REDUCE can be used as variable name
+    // F2008 system command execution (Section 13.7.55)
+    | EXECUTE_COMMAND_LINE  // EXECUTE_COMMAND_LINE can be used as variable name
     // F2008 WHERE construct enhancements (Section 8.1.4.3)
     | MASKED         // MASKED can be used as variable name (MASKED ELSEWHERE keyword)
     // F2008 mathematical intrinsics (Section 13.7.77)

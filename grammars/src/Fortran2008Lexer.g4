@@ -303,6 +303,15 @@ COMPILER_VERSION : C O M P I L E R '_' V E R S I O N ;
 COMPILER_OPTIONS : C O M P I L E R '_' O P T I O N S ;
 
 // ============================================================================
+// SYSTEM COMMAND EXECUTION (ISO/IEC 1539-1:2010 Section 13.7.55)
+// ============================================================================
+// EXECUTE_COMMAND_LINE executes operating system commands portably.
+// - Section 13.7.55: EXECUTE_COMMAND_LINE(COMMAND [, WAIT, EXITSTAT, CMDSTAT, CMDMSG])
+// Replaces non-standard SYSTEM() extensions with portable standard intrinsic.
+// Called via CALL statement for subroutine execution.
+EXECUTE_COMMAND_LINE : E X E C U T E '_' C O M M A N D '_' L I N E ;
+
+// ============================================================================
 // ENHANCED INTEGER/REAL KINDS (ISO/IEC 1539-1:2010 Section 13.8.2)
 // ============================================================================
 // Named constants from ISO_FORTRAN_ENV for specific bit sizes:
