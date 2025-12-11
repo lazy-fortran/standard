@@ -1327,12 +1327,13 @@ move_alloc_args
 // VOLATILE statement (ISO/IEC 1539-1:2004 R548)
 // R548: volatile-stmt -> VOLATILE [::] object-name-list
 volatile_stmt
-    : VOLATILE DOUBLE_COLON object_name_list NEWLINE
+    : VOLATILE (DOUBLE_COLON)? object_name_list NEWLINE
     ;
 
 // PROTECTED statement (ISO/IEC 1539-1:2004 Section 5.1.2.10)
+// R540: protected-stmt -> PROTECTED [::] entity-name-list
 protected_stmt
-    : PROTECTED DOUBLE_COLON object_name_list NEWLINE
+    : PROTECTED (DOUBLE_COLON)? object_name_list NEWLINE
     ;
 
 object_name_list
