@@ -106,18 +106,29 @@ variable_f90
     ;
 
 // Array section subscripting (F90 enhancement)
+// ISO/IEC 1539:1991 Section 6.2.2.1 (R618-R621)
 section_subscript_list
     : section_subscript (COMMA section_subscript)*
     ;
 
 section_subscript
-    : expr_f90                      // Single subscript
-    | subscript_triplet             // Array section triplet
+    : subscript                     // R620: subscript (scalar integer)
+    | subscript_triplet             // R620: subscript-triplet (start:end:stride)
+    | vector_subscript              // R620: vector-subscript (rank-one int array)
+    ;
+
+subscript
+    : expr_f90                      // R611: scalar integer expression
     ;
 
 subscript_triplet
-    : expr_f90? COLON expr_f90? (COLON expr_f90)?    // start:end:stride
+    : expr_f90? COLON expr_f90? (COLON expr_f90)?    // R622: start:end:stride
     ;
+
+vector_subscript
+    : expr_f90                      // R621: rank-one integer array expression
+    ;                               // NOTE: Semantic constraint rank-one & integer type
+                                    // deferred to downstream semantic analysis
 
 // Substring range
 substring_range
