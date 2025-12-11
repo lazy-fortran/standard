@@ -125,7 +125,9 @@ array_declarator
     ;
 
 save_stmt
-    : SAVE (DOUBLE_COLON? saved_entity_list)?
+    : SAVE
+    | SAVE saved_entity_list
+    | SAVE DOUBLE_COLON saved_entity_list
     ;
 
 saved_entity_list
@@ -138,7 +140,8 @@ saved_entity
     ;
 
 external_stmt
-    : EXTERNAL (DOUBLE_COLON? external_name_list)?
+    : EXTERNAL external_name_list
+    | EXTERNAL DOUBLE_COLON external_name_list
     ;
 
 external_name_list
@@ -146,7 +149,8 @@ external_name_list
     ;
 
 intrinsic_stmt
-    : INTRINSIC (DOUBLE_COLON? intrinsic_name_list)?
+    : INTRINSIC intrinsic_name_list
+    | INTRINSIC DOUBLE_COLON intrinsic_name_list
     ;
 
 intrinsic_name_list
