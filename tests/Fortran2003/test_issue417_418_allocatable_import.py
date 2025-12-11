@@ -23,9 +23,14 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT))
 sys.path.append(str(ROOT.parent / "grammars/generated/modern"))
 
-from fixture_utils import load_fixture
-
 from antlr4 import *
+
+def assert_tree_contains_keywords(tree, *keywords):
+    """Ensure parse tree text contains all requested keywords (case-insensitive)."""
+    assert tree is not None, "Parse tree is None prior to keyword assertions"
+    tree_text = str(tree.getText()).lower()
+    missing = [kw for kw in keywords if kw.lower() not in tree_text]
+    assert not missing, f"Parse tree missing keywords {missing}: {tree_text[:200]}"
 
 
 class TestAllocatableEnhancements:
@@ -84,6 +89,7 @@ end module allocatable_components
         tree, errors, exception = self.parse_fortran_code(code)
         assert errors == 0, f"Failed to parse allocatable components: {errors} errors"
         assert tree is not None, "Parse tree is None"
+        assert_tree_contains_keywords(tree, "module", "allocatable", "container_t", "nested_t")
 
     def test_allocatable_dummy_arguments(self):
         """
@@ -122,6 +128,7 @@ end module allocatable_dummies
         tree, errors, exception = self.parse_fortran_code(code)
         assert errors == 0, f"Failed to parse allocatable dummies: {errors} errors"
         assert tree is not None, "Parse tree is None"
+        assert_tree_contains_keywords(tree, "subroutine", "allocatable", "intent")
 
     def test_allocatable_function_results(self):
         """
@@ -165,6 +172,7 @@ end module allocatable_results
         tree, errors, exception = self.parse_fortran_code(code)
         assert errors == 0, f"Failed to parse allocatable results: {errors} errors"
         assert tree is not None, "Parse tree is None"
+        assert_tree_contains_keywords(tree, "function", "allocatable", "result")
 
     def test_allocatable_combined_with_other_attributes(self):
         """
@@ -194,6 +202,7 @@ end module allocatable_combined
         tree, errors, exception = self.parse_fortran_code(code)
         assert errors == 0, f"Failed to parse allocatable with combined attributes: {errors} errors"
         assert tree is not None, "Parse tree is None"
+        assert_tree_contains_keywords(tree, "subroutine", "allocatable", "target", "intent")
 
     def test_allocatable_multidimensional(self):
         """Test ALLOCATABLE with various dimension specifications."""
@@ -222,6 +231,7 @@ end module allocatable_multidim
         tree, errors, exception = self.parse_fortran_code(code)
         assert errors == 0, f"Failed to parse multidimensional allocatable: {errors} errors"
         assert tree is not None, "Parse tree is None"
+        assert_tree_contains_keywords(tree, "process_matrix", "allocate", "allocatable", "module")
 
 
 class TestImportStatementForms:
@@ -276,6 +286,7 @@ end module test_import_all
         tree, errors, exception = self.parse_fortran_code(code)
         assert errors == 0, f"Failed to parse IMPORT all: {errors} errors"
         assert tree is not None, "Parse tree is None"
+        assert_tree_contains_keywords(tree, "module", "import", "interface", "external_sub")
 
     def test_import_with_double_colon(self):
         """
@@ -304,6 +315,7 @@ end module test_import_explicit
         tree, errors, exception = self.parse_fortran_code(code)
         assert errors == 0, f"Failed to parse IMPORT with :: and names: {errors} errors"
         assert tree is not None, "Parse tree is None"
+        assert_tree_contains_keywords(tree, "import", "process_explicit", "my_type", "interface")
 
     def test_import_multiple_names(self):
         """
@@ -330,6 +342,7 @@ end module test_import_multiple
         tree, errors, exception = self.parse_fortran_code(code)
         assert errors == 0, f"Failed to parse IMPORT with multiple names: {errors} errors"
         assert tree is not None, "Parse tree is None"
+        assert_tree_contains_keywords(tree, "import", "read_config", "config_t", "max_size")
 
 
     def test_import_in_interface_block(self):
@@ -359,6 +372,7 @@ end module test_import_interface
         tree, errors, exception = self.parse_fortran_code(code)
         assert errors == 0, f"Failed to parse IMPORT in interface: {errors} errors"
         assert tree is not None, "Parse tree is None"
+        assert_tree_contains_keywords(tree, "import", "external_func", "external_sub", "interface")
 
     def test_import_with_various_host_entities(self):
         """
@@ -392,6 +406,7 @@ end module test_import_entities
         tree, errors, exception = self.parse_fortran_code(code)
         assert errors == 0, f"Failed to parse IMPORT with various entities: {errors} errors"
         assert tree is not None, "Parse tree is None"
+        assert_tree_contains_keywords(tree, "import", "state_arg", "state_t", "buffer_size")
 
     def test_import_without_implicit_none(self):
         """Test IMPORT works with and without IMPLICIT NONE."""
@@ -411,6 +426,7 @@ end module test_import_implicit
         tree, errors, exception = self.parse_fortran_code(code)
         assert errors == 0, f"Failed to parse IMPORT without IMPLICIT NONE: {errors} errors"
         assert tree is not None, "Parse tree is None"
+        assert_tree_contains_keywords(tree, "import", "sub_with_implicit", "some_param")
 
 
 if __name__ == "__main__":
