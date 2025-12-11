@@ -239,6 +239,10 @@ Grammar implementation:
       `RESULT_IMAGE = variable_f90`.
   - `operation_spec` and `source_image_spec`:
     - Generic identifier / expression forms.
+  - `lock_stmt`, `unlock_stmt`, `lock_stat`, and `lock_variable` continue to be inherited
+    from Fortran 2008 so LOCK/UNLOCK statements accept `type(lock_type)` declarations from
+    `ISO_FORTRAN_ENV`, the `ACQUIRED_LOCK = scalar-logical-variable` status specifier,
+    and STAT/ERRMSG forms described by R1179-R1182 (issue #581).
   - `image_selector`, `designator`, and `variable_f2008` now accept
     optional image-selector-spec-lists so STAT=, TEAM=, and TEAM_NUMBER=
     specifiers follow R924-R926 (issue #599).
@@ -251,6 +255,12 @@ Tests:
 - `test_issue61_teams_and_collectives.py::test_image_selector_team_specs_parse_cleanly`:
   - `image_selector_team.f90` verifies TEAM=, TEAM_NUMBER=, and STAT= specifiers inside
     image selectors for coarrays (issue #599).
+- `tests/Fortran2018/test_basic_f2018_features.py::test_lock_unlock_statements` and its
+  fixture `tests/fixtures/Fortran2018/test_basic_f2018_features/lock_unlock.f90`:
+  - Parse LOCK/UNLOCK statements with STAT, ERRMSG, ACQUIRED_LOCK, and
+    `type(lock_type)` declarations pulled from `use iso_fortran_env` to confirm the
+    inherited syntax successfully covers ISO/IEC 1539-1:2018 Section 11.6.11-12
+    (issue #581).
 
 Gaps:
 
@@ -627,6 +637,11 @@ The Fortran 2018 layer in this repository:
   - SELECT RANK, including RANK cases and RANK DEFAULT.
   - Collective coarray subroutines (CO_SUM, CO_MIN, CO_MAX, CO_REDUCE,
     CO_BROADCAST) with STAT/ERRMSG/RESULT_IMAGE.
+  - LOCK/UNLOCK statements (ISO/IEC 1539-1:2018 Sections 11.6.11-12) with
+    STAT/ERRMSG, `ACQUIRED_LOCK`, and `LOCK_TYPE` usage are tested via
+    `tests/Fortran2018/test_basic_f2018_features.py::test_lock_unlock_statements`
+    and its fixture `tests/fixtures/Fortran2018/test_basic_f2018_features/lock_unlock.f90`,
+    closing issue #581.
   - Team constructs (FORM TEAM, CHANGE TEAM, END TEAM), TEAM_TYPE
     declarations, and coarray association syntax.
   - Event constructs (EVENT POST/WAIT/QUERY) and EVENT_TYPE
@@ -809,6 +824,9 @@ syntax rules to grammar rules in `Fortran2018Lexer.g4` and `Fortran2018Parser.g4
 | Section 11.6.8 | EVENT POST | `EVENT_POST` |
 | Section 11.6.8 | EVENT WAIT | `EVENT_WAIT` |
 | Section 11.6.9 | FORM TEAM | `FORM_TEAM` |
+| Section 11.6.11 | LOCK | `LOCK` |
+| Section 11.6.12 | UNLOCK | `UNLOCK` |
+| R861 | ACQUIRED_LOCK | `ACQUIRED_LOCK` |
 | Section 11.6.6 | FAIL IMAGE | `FAIL_IMAGE` |
 | Section 11.1.7.5 | LOCAL | `LOCAL` |
 | Section 11.1.7.5 | LOCAL_INIT | `LOCAL_INIT` |

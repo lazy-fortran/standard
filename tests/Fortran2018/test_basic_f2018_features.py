@@ -83,6 +83,19 @@ class TestBasicF2018Features:
         # (see issues #83 and #88).
         assert errors == 0, f"F2008 inheritance should parse with zero errors, got {errors}"
     
+    def test_lock_unlock_statements(self):
+        """REAL TEST: Ensure LOCK/UNLOCK (R1179-R1182) and LOCK_TYPE/ACQUIRED_LOCK specifiers parse (issue #581)."""
+        code = load_fixture(
+            "Fortran2018",
+            "test_basic_f2018_features",
+            "lock_unlock.f90",
+        )
+
+        tree, errors = self.parse_code(code)
+
+        assert tree is not None, "LOCK/UNLOCK fixture should produce a parse tree"
+        assert errors == 0, f"LOCK/UNLOCK statements should parse without errors, got {errors}"
+
     def test_f2018_parser_vs_f2008_functionality(self):
         """REAL TEST: Compare F2018 vs F2008 parsing on same code"""
         code = load_fixture(
