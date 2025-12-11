@@ -85,6 +85,7 @@ TEAM_NUMBER      : T E A M '_' N U M B E R ;
 // ----------------------------------------------------------------------------
 FORM_TEAM        : F O R M WS+ T E A M ;
 CHANGE_TEAM      : C H A N G E WS+ T E A M ;
+SYNC_TEAM        : S Y N C WS+ T E A M ;
 END_TEAM         : E N D WS+ T E A M ;
 TEAM_TYPE        : T E A M '_' T Y P E ;
 GET_TEAM         : G E T '_' T E A M ;

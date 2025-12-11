@@ -220,6 +220,7 @@ executable_construct_f2018
     | allocate_stmt_f2008             // Inherit from F2008
     | team_construct                  // NEW in F2018 (teams: R1111-R1115, R1175-R1178)
     | event_construct                 // NEW in F2018 (events: R1170-R1173)
+    | sync_team_stmt                 // NEW in F2018 (R1169)
     | sync_construct                  // Inherit from F2008
     | wait_stmt                       // Inherit from F2003
     | flush_stmt                      // Inherit from F2003
@@ -452,6 +453,11 @@ form_team_stat
     : NEW_INDEX EQUALS expr_f90
     | STAT EQUALS variable_f90
     | ERRMSG EQUALS variable_f90
+    ;
+
+// ISO/IEC 1539-1:2018 R1169: sync-team-stmt
+sync_team_stmt
+    : SYNC_TEAM LPAREN team_value (COMMA sync_stat_list)? RPAREN NEWLINE
     ;
 
 // ISO/IEC 1539-1:2018 Section 16.5.6: TEAM_TYPE declaration
