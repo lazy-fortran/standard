@@ -185,6 +185,8 @@ statement_body
     | if_stmt_accumulator_overflow // Appendix B row 5: IF ACCUMULATOR OVERFLOW
     | if_stmt_quotient_overflow    // Appendix B row 6: IF QUOTIENT OVERFLOW
     | if_stmt_divide_check         // Appendix B row 7: IF DIVIDE CHECK
+    | if_stmt_two_way_positive     // C28-6003 Appendix B row 9: IF (e) n1, n2 (>= 0)
+    | if_stmt_two_way_zero         // C28-6003 Appendix B row 10: IF (e) n1, n2 (= 0)
     | do_stmt            // Appendix A: DO n i = m1, m2 [, m3]
     | continue_stmt      // Appendix A: CONTINUE
     | stop_stmt          // Appendix A: STOP [n]
@@ -223,6 +225,8 @@ statement_body_strict
     | if_stmt_accumulator_overflow // Appendix B row 5: IF ACCUMULATOR OVERFLOW
     | if_stmt_quotient_overflow    // Appendix B row 6: IF QUOTIENT OVERFLOW
     | if_stmt_divide_check         // Appendix B row 7: IF DIVIDE CHECK
+    | if_stmt_two_way_positive     // C28-6003 Appendix B row 9: IF (e) n1, n2 (>= 0)
+    | if_stmt_two_way_zero         // C28-6003 Appendix B row 10: IF (e) n1, n2 (= 0)
     | do_stmt            // Appendix A: DO n i = m1, m2 [, m3]
     | continue_stmt      // Appendix A: CONTINUE
     | stop_stmt          // Appendix A: STOP [n]

@@ -367,6 +367,8 @@ These are either inherited from `FORTRANParser.g4` or redefined in
 | GO TO n                              | `goto_stmt`                    | Implemented     |
 | GO TO (n1, n2, ..., nm), i           | `computed_goto_stmt`           | Implemented     |
 | IF (e) n1, n2, n3                    | `arithmetic_if_stmt`           | Implemented     |
+| IF (e) n1, n2 (>= 0 branch)          | `if_stmt_two_way_positive`     | Implemented     |
+| IF (e) n1, n2 (= 0 branch)           | `if_stmt_two_way_zero`         | Implemented     |
 | DO n i = m1, m2 [, m3]               | `do_stmt`                      | Implemented     |
 | CONTINUE                             | `continue_stmt`                | Implemented     |
 | STOP [n]                             | `stop_stmt`                    | Implemented     |
