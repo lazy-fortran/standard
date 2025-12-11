@@ -189,7 +189,9 @@ statement_body
     | continue_stmt      // Appendix A: CONTINUE
     | stop_stmt          // Appendix A: STOP [n]
     | pause_stmt         // Appendix A: PAUSE [n]
+    | read_tape_drum_stmt // C28-6003 rows 21-24: READ tape/drum (from F77)
     | read_stmt          // Appendix A: READ forms
+    | write_tape_drum_stmt // C28-6003 rows 25-27: WRITE tape/drum (F77)
     | write_stmt_basic   // C28-6003 Chap III: WRITE output_list (from FORTRAN I)
     | print_stmt         // Appendix A: PRINT n, list
     | punch_stmt         // Appendix A: PUNCH n, list
@@ -225,7 +227,9 @@ statement_body_strict
     | continue_stmt      // Appendix A: CONTINUE
     | stop_stmt          // Appendix A: STOP [n]
     | pause_stmt         // Appendix A: PAUSE [n]
+    | read_tape_drum_stmt // C28-6003 rows 21-24: READ tape/drum (from F77)
     | read_stmt          // Appendix A: READ forms
+    | write_tape_drum_stmt // C28-6003 rows 25-27: WRITE tape/drum (F77)
     | write_stmt_basic   // C28-6003 Chap III: WRITE output_list (from FORTRAN I)
     | print_stmt         // Appendix A: PRINT n, list
     | punch_stmt         // Appendix A: PUNCH n, list

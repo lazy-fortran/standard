@@ -1308,6 +1308,7 @@ class TestStrictCommon(unittest.TestCase):
                         f"FORMAT statements should parse without errors, got {errors}")
 
 
+
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail
     unittest.main(verbosity=2)
