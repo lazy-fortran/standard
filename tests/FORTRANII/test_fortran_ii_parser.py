@@ -959,6 +959,57 @@ class TestFORTRANIIParser(unittest.TestCase):
         self.assertIn('END', text)
         self.assertIn('FILE', text)
 
+    def test_read_tape_drum_statements(self):
+        """Verify READ tape/drum forms inherited from FORTRAN I.
+
+        Issue #153 documents that these tape/drum I/O statements must appear
+        in the FORTRAN II statement_body set but were previously missing.
+        """
+        test_cases = [
+            ("READ INPUT TAPE 1, 100, A, B", ["INPUT", "TAPE"]),
+            ("READ TAPE 2, C, D, E", ["TAPE"]),
+            ("READ DRUM 3, 10, F, G", ["DRUM"]),
+        ]
+        for text, keywords in test_cases:
+            with self.subTest(read_stmt=text):
+                tree = self.parse(text, 'read_tape_drum_stmt')
+                self.assertIsNotNone(tree)
+                tree_text = tree.getText()
+                self.assertIn('READ', tree_text)
+                for keyword in keywords:
+                    self.assertIn(keyword, tree_text)
+                errors = tree.parser.getNumberOfSyntaxErrors()
+                self.assertEqual(
+                    errors, 0,
+                    f"READ tape/drum statement '{text}' should parse without "
+                    f"errors, got {errors}"
+                )
+
+    def test_write_tape_drum_statements(self):
+        """Verify WRITE tape/drum forms inherited from FORTRAN I.
+
+        References C28-6003 rows 25-27.
+        """
+        test_cases = [
+            ("WRITE OUTPUT TAPE 5, 300, RESULT", ["OUTPUT", "TAPE"]),
+            ("WRITE TAPE 6, TOTAL", ["TAPE"]),
+            ("WRITE DRUM 7, 40, DATA", ["DRUM"]),
+        ]
+        for text, keywords in test_cases:
+            with self.subTest(write_stmt=text):
+                tree = self.parse(text, 'write_tape_drum_stmt')
+                self.assertIsNotNone(tree)
+                tree_text = tree.getText()
+                self.assertIn('WRITE', tree_text)
+                for keyword in keywords:
+                    self.assertIn(keyword, tree_text)
+                errors = tree.parser.getNumberOfSyntaxErrors()
+                self.assertEqual(
+                    errors, 0,
+                    f"WRITE tape/drum statement '{text}' should parse without "
+                    f"errors, got {errors}"
+                )
+
 
 class TestStrictCommon(unittest.TestCase):
     """Test strict 1958 COMMON mode (blank COMMON only, per issue #156)"""
@@ -1306,6 +1357,7 @@ class TestStrictCommon(unittest.TestCase):
         errors = tree.parser.getNumberOfSyntaxErrors()
         self.assertEqual(errors, 0,
                         f"FORMAT statements should parse without errors, got {errors}")
+
 
 
 if __name__ == "__main__":
