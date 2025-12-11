@@ -1232,6 +1232,140 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
                 tree = self.parse(stmt, 'assignment_stmt')
                 self.assertIsNotNone(tree)
 
+    def test_dimension_statement_simple_bounds(self):
+        """Test DIMENSION statement with simple positive bounds.
+
+        ANSI X3.9-1966 Section 5.3 specifies dimension bounds as
+        d (dimension 1 to d) or d1, d2 (dimension d1 to d2).
+        """
+        # Valid dimension declarations per X3.9-1966 Section 5.3
+        valid_declarations = [
+            "DIMENSION A(10)",           # Single dimension: 1 to 10
+            "DIMENSION B(5)",            # Single dimension: 1 to 5
+            "DIMENSION C(100)",          # Single dimension: 1 to 100
+            "DIMENSION X(10, 20)",       # Two dimensions: 1-10, 1-20
+            "DIMENSION Y(3, 4, 5)",      # Three dimensions
+            "DIMENSION P(1)",            # Minimum positive bound
+        ]
+
+        for decl in valid_declarations:
+            with self.subTest(declaration=decl):
+                tree = self.parse(decl, 'dimension_stmt')
+                self.assertIsNotNone(tree, f"Failed to parse: {decl}")
+
+    def test_dimension_statement_explicit_bounds(self):
+        """Test DIMENSION statement with explicit lower and upper bounds.
+
+        ANSI X3.9-1966 Section 5.3 permits d1:d2 form (explicit bounds).
+        Per standard: d1 may be a signed integer (negative values allowed)
+        and d2 must be >= d1.
+        """
+        # Valid explicit bound declarations
+        valid_declarations = [
+            "DIMENSION A(1:10)",         # Explicit 1 to 10
+            "DIMENSION B(0:10)",         # Zero lower bound (allowed)
+            "DIMENSION C(-5:10)",        # Negative lower bound (allowed)
+            "DIMENSION D(1:1)",          # Single element (1 to 1)
+            "DIMENSION E(10:20)",        # Explicit 10 to 20
+        ]
+
+        for decl in valid_declarations:
+            with self.subTest(declaration=decl):
+                tree = self.parse(decl, 'dimension_stmt')
+                self.assertIsNotNone(tree, f"Failed to parse: {decl}")
+
+    def test_dimension_statement_multiple_declarators(self):
+        """Test DIMENSION statement with multiple array declarators."""
+        declarations = [
+            "DIMENSION A(10), B(20)",
+            "DIMENSION X(5, 10), Y(3, 4, 5)",
+            "DIMENSION P(1:10), Q(0:20), R(100)",
+        ]
+
+        for decl in declarations:
+            with self.subTest(declaration=decl):
+                tree = self.parse(decl, 'dimension_stmt')
+                self.assertIsNotNone(tree, f"Failed to parse: {decl}")
+
+    def test_dimension_bounds_semantic_constraint_zero_upper(self):
+        """Test semantic constraint: upper bound must be positive.
+
+        ANSI X3.9-1966 Section 5.3 specifies that d and d2 must be positive.
+        Constraint: d > 0 (when single bound), d2 > 0 (when explicit)
+
+        Note: Parser accepts these syntactically; semantic validation would
+        require a separate pass. This test documents the constraint.
+        """
+        # These parse syntactically but violate ANSI X3.9-1966 Section 5.3
+        # They would require semantic validation to reject
+        invalid_semantically = [
+            "DIMENSION A(0)",            # Zero upper bound - NON-COMPLIANT
+            "DIMENSION B(-5)",           # Negative single bound - NON-COMPLIANT
+            "DIMENSION C(10, 5)",        # Inverted bounds (d2 < d1) - NON-COMPLIANT
+            "DIMENSION D(0:0)",          # Zero to zero (ambiguous) - NON-COMPLIANT
+        ]
+
+        for decl in invalid_semantically:
+            with self.subTest(declaration=decl):
+                # These currently parse without error - documenting constraint
+                tree = self.parse(decl, 'dimension_stmt')
+                self.assertIsNotNone(tree)
+                # TODO: Add semantic validation pass to reject these per X3.9-1966
+
+    def test_dimension_bounds_in_typed_declaration(self):
+        """Test dimension bounds in type declaration (e.g., INTEGER A(10))."""
+        # Type declarations with embedded dimension syntax
+        declarations = [
+            "INTEGER A(10)",
+            "REAL B(5, 20)",
+            "LOGICAL FLAG(100)",
+            "DOUBLE PRECISION X(10, 10, 10)",
+            "COMPLEX Z(5)",
+        ]
+
+        for decl in declarations:
+            with self.subTest(declaration=decl):
+                tree = self.parse(decl, 'type_declaration')
+                self.assertIsNotNone(tree, f"Failed to parse: {decl}")
+
+    def test_dimension_bounds_variable_list_subscripting(self):
+        """Test that dimension bounds appear in variable lists.
+
+        ANSI X3.9-1966 Section 5 specifies array declarators in
+        DIMENSION, type declarations, and COMMON statements.
+        """
+        # Array variables can appear in:
+        # - DIMENSION statements (tested above)
+        # - Type declarations (tested above)
+        # - Variable lists in assignments/I/O
+
+        # Assignment with array element
+        assignment = "A(5) = 10"
+        tree = self.parse(assignment, 'assignment_stmt')
+        self.assertIsNotNone(tree)
+
+        # Subscript expression can be more complex
+        assignment2 = "X(I, J+1) = Y(2*K, 3)"
+        tree = self.parse(assignment2, 'assignment_stmt')
+        self.assertIsNotNone(tree)
+
+    def test_dimension_statement_with_negative_bounds(self):
+        """Test DIMENSION with negative lower bounds (explicit form).
+
+        ANSI X3.9-1966 Section 5.3: d1 may be negative.
+        Valid forms: d1:d2 where d1 < d2, both signed integers.
+        """
+        declarations = [
+            "DIMENSION A(-10:10)",       # Symmetric negative to positive
+            "DIMENSION B(-5:-1)",        # Negative to negative (d2 >= d1)
+            "DIMENSION C(-100:0)",       # Negative to zero
+        ]
+
+        for decl in declarations:
+            with self.subTest(declaration=decl):
+                tree = self.parse(decl, 'dimension_stmt')
+                self.assertIsNotNone(tree, f"Failed to parse: {decl}")
+
 
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail
