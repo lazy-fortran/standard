@@ -19,7 +19,8 @@ parser grammar F90ExprsParser;
 
 // F90 expressions (enhanced with new operators and array operations)
 expr_f90
-    : expr_f90 DOT_EQV expr_f90                          # EquivalenceExprF90
+    : expr_f90 defined_binary_op expr_f90                # DefinedBinaryExprF90
+    | expr_f90 DOT_EQV expr_f90                          # EquivalenceExprF90
     | expr_f90 DOT_NEQV expr_f90                         # NotEquivalenceExprF90
     | expr_f90 DOT_OR expr_f90                           # LogicalOrExprF90
     | expr_f90 DOT_AND expr_f90                          # LogicalAndExprF90
@@ -35,6 +36,7 @@ expr_f90
     | expr_f90 (MULTIPLY | SLASH) expr_f90              # MultDivExprF90
     | expr_f90 (PLUS | MINUS) expr_f90                   # AddSubExprF90
     | (PLUS | MINUS) expr_f90                            # UnaryExprF90
+    | defined_unary_op primary_f90                       # DefinedUnaryExprF90
     | primary_f90                                        # PrimaryExprF90
     ;
 
@@ -47,6 +49,15 @@ primary_f90
     | array_constructor_f90         // F90 innovation
     | structure_constructor         // F90 innovation
     | LPAREN expr_f90 RPAREN
+    ;
+
+// Defined operators (user-defined) – ISO/IEC 1539:1991 Section 7.1.2 (R703-R704)
+defined_unary_op
+    : DOP
+    ;
+
+defined_binary_op
+    : DOP
     ;
 
 // ====================================================================
