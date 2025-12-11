@@ -170,19 +170,6 @@ IOMSG            : I O M S G ;   // F2003 (Section 9.10)
 ASSOCIATE        : A S S O C I A T E ;
 
 // ====================================================================
-// BLOCK CONSTRUCT (ISO/IEC 1539-1:2010 Section 8.1.4)
-// ====================================================================
-//
-// NOTE: The standalone BLOCK construct was introduced in Fortran 2008
-// (ISO/IEC 1539-1:2010), NOT Fortran 2003. The BLOCK token is inherited
-// for compatibility, but the ENDBLOCK token (which was previously here)
-// has been removed as it is not used (parsers use "END BLOCK" instead).
-// See issue #469 for details.
-
-BLOCK            : B L O C K ;
-
-
-// ====================================================================
 // IMPORT STATEMENT (ISO/IEC 1539-1:2004 Section 12.3.2.1)
 // ====================================================================
 //

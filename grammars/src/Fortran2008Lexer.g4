@@ -63,6 +63,16 @@ CRITICAL         : C R I T I C A L ;
 END_CRITICAL     : E N D WS+ C R I T I C A L ;
 
 // ============================================================================
+// BLOCK CONSTRUCT (ISO/IEC 1539-1:2010 Section 8.1.4)
+// ============================================================================
+// Fortran 2008 introduces the standalone BLOCK construct for local scoping.
+// - R807: block-construct -> block-stmt [specification-part]
+//         [execution-part] end-block-stmt
+// - R808: block-stmt -> [block-construct-name :] BLOCK
+// - R809: end-block-stmt -> END BLOCK [block-construct-name]
+BLOCK            : B L O C K ;
+
+// ============================================================================
 // LOCK/UNLOCK STATEMENTS (ISO/IEC 1539-1:2010 Section 8.5.6)
 // ============================================================================
 // LOCK and UNLOCK statements provide mutex-style synchronization for coarrays:

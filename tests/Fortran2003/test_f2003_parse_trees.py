@@ -139,28 +139,6 @@ class TestFortran2003ParseTrees:
         except Exception as e:
             pytest.skip(f"ASSOCIATE construct rule not available: {e}")
     
-    def test_block_construct_validation(self):
-        """NON-SHALLOW: Validate BLOCK construct creates proper scoped parse tree.""" 
-        code = "block\ninteger :: local_var\nend block\n"
-        
-        try:
-            tree, errors, parser = self.parse_and_validate(code, 'block_construct')
-            
-            assert errors == 0, f"Expected no parse errors, got {errors}"
-            
-            # Validate block scoping semantics
-            tree_text = str(tree.getText()) if tree else ""
-            assert 'block' in tree_text.lower(), "Missing BLOCK keyword"
-            assert 'end' in tree_text.lower(), "Missing END BLOCK"
-            
-            # Verify internal structure can contain declarations
-            contains_declarations = 'integer' in tree_text.lower() or 'local_var' in tree_text.lower()
-            
-            print(f"✓ BLOCK construct validated, contains declarations: {contains_declarations}")
-            
-        except Exception as e:
-            pytest.skip(f"BLOCK construct rule not available: {e}")
-    
     def test_enhanced_allocate_semantics(self):
         """NON-SHALLOW: Validate enhanced ALLOCATE with SOURCE/MOLD semantics."""
         code = "allocate(array, source=source_array)\n"
