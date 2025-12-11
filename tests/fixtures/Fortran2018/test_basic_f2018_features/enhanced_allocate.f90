@@ -5,8 +5,8 @@ contains
 
   subroutine demonstrate_allocate_specifiers()
     integer, allocatable :: arr_stat(:)
-    integer, allocatable :: arr_source(:)
-    integer, allocatable :: arr_mold(:)
+    real, allocatable :: arr_source(:)
+    real, allocatable :: arr_mold(:)
     integer, allocatable :: arr_errmsg(:)
     integer :: stat_code
     character(len=32) :: errmsg
