@@ -808,6 +808,7 @@ intrinsic_function_call_f2008
     | bit_mask_function_call          // Bit mask intrinsics (Section 13.7.110-111)
     | bit_reduction_function_call     // Bit reduction (Section 13.7.79-80, 94)
     | bitwise_comparison_function_call // Bitwise comparison (Section 13.7.28-31)
+    | advanced_bit_function_call      // Advanced bit manipulation (Section 13.7)
     ;
 
 // Bessel function calls (ISO/IEC 1539-1:2010 Section 13.7.22-27)
@@ -893,6 +894,18 @@ bitwise_comparison_function_call
     | BGT LPAREN actual_arg_list RPAREN         // Section 13.7.29
     | BLE LPAREN actual_arg_list RPAREN         // Section 13.7.30
     | BLT LPAREN actual_arg_list RPAREN         // Section 13.7.31
+    ;
+
+// Advanced bit manipulation function calls (ISO/IEC 1539-1:2010 Section 13.7)
+// Double shifts, bit counting, and merge operations
+advanced_bit_function_call
+    : DSHIFTL LPAREN actual_arg_list RPAREN     // Section 13.7.50
+    | DSHIFTR LPAREN actual_arg_list RPAREN     // Section 13.7.51
+    | LEADZ LPAREN actual_arg_list RPAREN       // Section 13.7.103
+    | MERGE_BITS LPAREN actual_arg_list RPAREN  // Section 13.7.112
+    | POPCNT LPAREN actual_arg_list RPAREN      // Section 13.7.133
+    | POPPAR LPAREN actual_arg_list RPAREN      // Section 13.7.134
+    | TRAILZ LPAREN actual_arg_list RPAREN      // Section 13.7.168
     ;
 
 // ============================================================================
@@ -1109,6 +1122,14 @@ identifier_or_keyword
     | BGT          // BGT can be used as variable name
     | BLE          // BLE can be used as variable name
     | BLT          // BLT can be used as variable name
+    // F2008 advanced bit manipulation intrinsics (Section 13.7)
+    | DSHIFTL      // DSHIFTL can be used as variable name
+    | DSHIFTR      // DSHIFTR can be used as variable name
+    | LEADZ        // LEADZ can be used as variable name
+    | MERGE_BITS   // MERGE_BITS can be used as variable name
+    | POPCNT       // POPCNT can be used as variable name
+    | POPPAR       // POPPAR can be used as variable name
+    | TRAILZ       // TRAILZ can be used as variable name
     // F2008 atomic intrinsics (Section 13.7.19-20)
     | ATOMIC_DEFINE  // ATOMIC_DEFINE can be used as variable name
     | ATOMIC_REF     // ATOMIC_REF can be used as variable name
