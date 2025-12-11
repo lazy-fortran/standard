@@ -212,6 +212,7 @@ executable_construct_f2018
     | format_stmt                     // FORMAT statements (R1301)
     | stop_stmt_f2018                 // Enhanced in F2018 (R1160)
     | error_stop_stmt_f2018           // Enhanced in F2018 (R1161)
+    | fail_image_stmt                 // NEW in F2018 (R1163)
     | select_type_construct           // Inherit from F2003
     | select_rank_construct           // NEW in F2018 (R1148-R1151)
     | associate_construct             // Inherit from F2003
@@ -588,6 +589,11 @@ stop_stmt_f2018
 // ISO/IEC 1539-1:2018 R1161: error-stop-stmt with optional QUIET= specifier
 error_stop_stmt_f2018
     : ERROR_STOP (stop_code)? (COMMA QUIET EQUALS logical_expr)? NEWLINE
+    ;
+
+// ISO/IEC 1539-1:2018 R1163: fail-image-stmt
+fail_image_stmt
+    : FAIL_IMAGE NEWLINE
     ;
 
 // ISO/IEC 1539-1:2018 R1162: stop-code

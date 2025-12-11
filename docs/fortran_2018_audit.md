@@ -455,7 +455,36 @@ Gaps:
   - It does not enforce that STOP/ERROR STOP codes satisfy all
     constraints; it only accepts the syntactic forms.
 
-## 9. FORMAT statements (ISO/IEC 1539-1:2018 Section 13.2)
+---
+
+## 9. FAIL IMAGE statement (ISO/IEC 1539-1:2018 Section 11.6.6)
+
+Specification:
+
+- R1163: `fail-image-stmt` is simply `FAIL IMAGE`, which terminates the
+  invoking image when executed within a coarray control path.
+
+Grammar implementation:
+
+- `fail_image_stmt` is a dedicated rule (`FAIL_IMAGE NEWLINE`) that
+  participates in `executable_construct_f2018`.
+- The `FAIL_IMAGE` lexer token captures the two-word keyword pair so that
+  the parser treats `FAIL IMAGE` as a single statement terminator.
+
+Tests:
+
+- `tests/fixtures/Fortran2018/test_issue574_fail_image/fail_image_stmt.f90`
+  exercises the statement within an `IF` block so the surrounding control
+  structure retains its validity while the statement executes.
+
+Gaps:
+
+- None; issue #574 tracked the missing syntax and is resolved by this
+  implementation.
+
+---
+
+## 10. FORMAT statements (ISO/IEC 1539-1:2018 Section 13.2)
 
 Specification:
 
@@ -509,7 +538,7 @@ Gaps:
   semantic constraints (descriptor widths, descriptor-type pairing) outside the
   grammar.
 
-## 10. ALLOCATE statement coverage (ISO/IEC 1539-1:2018 R927-R928)
+## 11. ALLOCATE statement coverage (ISO/IEC 1539-1:2018 R927-R928)
 
 Specification:
 
@@ -535,7 +564,7 @@ Gaps:
 
 ---
 
-## 11. Inheritance from F2008 and control‑flow tests
+## 12. Inheritance from F2008 and control‑flow tests
 
 Specification:
 
@@ -567,7 +596,7 @@ Gaps:
 
 ---
 
-## 12. Summary and issue mapping
+## 13. Summary and issue mapping
 
 The Fortran 2018 layer in this repository:
 
@@ -583,6 +612,7 @@ The Fortran 2018 layer in this repository:
     declarations.
   - DO CONCURRENT with locality specifiers and mask.
   - Enhanced STOP and ERROR STOP with QUIET.
+  - FAIL IMAGE statements for coarray image termination (R1163).
   - Assumed‑rank dummy arguments via DIMENSION(..).
   - Additional intrinsic procedures from F2018 (image status, teams,
     collectives, RANDOM_INIT, OUT_OF_RANGE, REDUCE extensions).
@@ -703,6 +733,7 @@ syntax rules to grammar rules in `Fortran2018Lexer.g4` and `Fortran2018Parser.g4
 | R1160 | stop-stmt | `stop_stmt_f2018` |
 | R1161 | error-stop-stmt | `error_stop_stmt_f2018` |
 | R1162 | stop-code | `stop_code` |
+| R1163 | fail-image-stmt | `fail_image_stmt` |
 
 ### A.8 Type Declarations (Section 8)
 
@@ -750,6 +781,7 @@ syntax rules to grammar rules in `Fortran2018Lexer.g4` and `Fortran2018Parser.g4
 | Section 11.6.8 | EVENT POST | `EVENT_POST` |
 | Section 11.6.8 | EVENT WAIT | `EVENT_WAIT` |
 | Section 11.6.9 | FORM TEAM | `FORM_TEAM` |
+| Section 11.6.6 | FAIL IMAGE | `FAIL_IMAGE` |
 | Section 11.1.7.5 | LOCAL | `LOCAL` |
 | Section 11.1.7.5 | LOCAL_INIT | `LOCAL_INIT` |
 | Section 11.1.7.5 | SHARED | `SHARED` |

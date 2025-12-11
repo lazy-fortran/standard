@@ -103,6 +103,11 @@ EVENT_WAIT       : E V E N T WS+ W A I T ;
 EVENT_QUERY      : E V E N T WS+ Q U E R Y ;
 
 // ----------------------------------------------------------------------------
+// FAIL IMAGE statement (ISO/IEC 1539-1:2018 Section 11.6.6)
+// ----------------------------------------------------------------------------
+FAIL_IMAGE       : F A I L WS+ I M A G E ;
+
+// ----------------------------------------------------------------------------
 // Assumed Rank Support (NEW in F2018)
 // ISO/IEC 1539-1:2018 Section 8.5.8.7: Assumed-rank entity
 // ISO/IEC 1539-1:2018 R825: assumed-rank-spec is ..
