@@ -253,13 +253,10 @@ read_stmt
 // ============================================================================
 // EXPRESSIONS
 // ============================================================================
-// FORTRAN II expression syntax matches 1957 arithmetic expressions.
-// Relational operators (.EQ., .NE., etc.) are not part of the top-level expr in
-// FORTRAN II; FORTRAN 66 introduces logical types and relational expressions.
-
-expr
-    : additive_expr
-    ;
+// FORTRAN II expression syntax is unchanged from FORTRAN I (1957).
+// All expression rules, including relational operators, are inherited from
+// FORTRANParser. This grammar only widens numeric handling via `literal` and
+// `label` to accept LABEL tokens from FORTRANIILexer.
 
 // ============================================================================
 // UTILITY RULES

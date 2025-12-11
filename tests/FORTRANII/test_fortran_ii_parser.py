@@ -316,6 +316,22 @@ class TestFORTRANIIParser(unittest.TestCase):
                 self.assertIsNotNone(tree, f"Failed to parse: {expr_text}")
                 self.assertEqual(tree.getText(), expected)
 
+    def test_relational_expressions_parse(self):
+        """Test relational operators in FORTRAN II expressions (inherited from 1957)."""
+        test_cases = [
+            "A .EQ. B",
+            "X+1 .GT. Y",
+            "I .LE. 10",
+            "J .NE. K",
+        ]
+
+        for expr_text in test_cases:
+            with self.subTest(expr=expr_text):
+                tree = self.parse(expr_text, 'expr')
+                self.assertIsNotNone(tree, f"Failed to parse: {expr_text}")
+                expected = expr_text.replace(' ', '')
+                self.assertEqual(tree.getText(), expected)
+
     def test_parenthesized_expressions(self):
         """Test parentheses override default precedence"""
         test_cases = [
