@@ -611,6 +611,21 @@ class TestFortran2023Parser:
         except Exception as e:
             pytest.fail(f"F2023 AT edit descriptor parsing failed: {e}")
 
+    def test_simple_procedures_parsing(self):
+        """Test F2023 SIMPLE prefix-spec parsing for procedures (Section 15.8)."""
+        simple_input = load_fixture(
+            "Fortran2023",
+            "test_fortran_2023_comprehensive",
+            "simple_procedures.f90",
+        )
+        parser = self.create_parser(simple_input)
+
+        try:
+            tree = parser.program_unit_f2023()
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"F2023 SIMPLE procedure parsing failed: {e}")
+
     def test_do_concurrent_reduce_parsing(self):
         """Test F2023 DO CONCURRENT REDUCE locality specifier parsing.
 
