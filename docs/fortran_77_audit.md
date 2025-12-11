@@ -243,6 +243,17 @@ Tests:
 - `test_enhanced_do_loops` parses examples such as:
   - `DO 100 X = 1.0, 10.0, 0.5`.
   - `DO 200 I = 1, N`.
+  - `test_do_loop_terminal_statement_forms` parses a complete main program
+    with assignment, `CALL`, `READ`, `WRITE`, and arithmetic `IF` terminal
+    statements per ANSI X3.9-1978 Section 11.10.4, proving the parser accepts
+    any labeled executable statement while leaving restricted forms to later
+    analysis (issue #586).
+
+Interpretation:
+
+- `do_stmt` only ensures the terminal label exists; blockage of GO TO, RETURN,
+  STOP, PAUSE, DO, block IF, ELSE IF, ELSE, or END IF terminals remains a
+  semantic restriction that is intentionally deferred per issue #586.
 
 ## 5. Declarations: SAVE, INTRINSIC, EXTERNAL, DATA
 
