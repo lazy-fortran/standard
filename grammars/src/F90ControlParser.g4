@@ -239,7 +239,13 @@ continue_stmt
 
 // GOTO statement - ISO/IEC 1539:1991 Section 8.2
 goto_stmt
-    : GOTO label
+    : go_to_keyword label
+    ;
+
+// GO TO keyword accepts both the historic two-word form and the modern alias
+go_to_keyword
+    : GOTO
+    | GO TO
     ;
 
 // STOP statement - ISO/IEC 1539:1991 Section 8.3, R841

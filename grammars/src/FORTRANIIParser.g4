@@ -305,13 +305,13 @@ assignment_stmt
 // Unconditional GO TO - Appendix A: GO TO n
 // Transfers control to the statement with label n
 goto_stmt
-    : GOTO label
+    : go_to_keyword label
     ;
 
 // Computed GO TO - Appendix A: GO TO (n1, n2, ..., nm), i
 // Transfers to n1 if i=1, n2 if i=2, etc.
 computed_goto_stmt
-    : GOTO LPAREN label_list RPAREN COMMA expr
+    : go_to_keyword LPAREN label_list RPAREN COMMA expr
     ;
 
 // Arithmetic IF - Appendix A: IF (e) n1, n2, n3

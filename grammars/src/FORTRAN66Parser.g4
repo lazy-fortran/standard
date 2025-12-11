@@ -766,7 +766,7 @@ assign_stmt
 // ============================================================================
 
 assigned_goto_stmt
-    : GOTO variable COMMA LPAREN label_list RPAREN
+    : go_to_keyword variable COMMA LPAREN label_list RPAREN
     ;
 
 // ============================================================================

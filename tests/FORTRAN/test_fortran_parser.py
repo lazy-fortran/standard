@@ -162,6 +162,42 @@ class TestFORTRANParser(unittest.TestCase):
             with self.subTest(goto=text):
                 tree = self.parse(text, 'goto_stmt')
                 self.assertIsNotNone(tree)
+
+    def test_goto_statement_two_word_form(self):
+        """Test the historic two-word GO TO form"""
+        test_cases = [
+            "GO TO 100",
+            "GO TO 555"
+        ]
+
+        for text in test_cases:
+            with self.subTest(go_statement=text):
+                tree = self.parse(text, 'goto_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_computed_goto_two_word_form(self):
+        """Ensure computed GO TO accepts both single and two-word prefixes"""
+        test_cases = [
+            "GOTO (10, 20, 30), I",
+            "GO TO (100, 200, 300), J"
+        ]
+
+        for text in test_cases:
+            with self.subTest(computed_goto=text):
+                tree = self.parse(text, 'computed_goto_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_assigned_goto_two_word_form(self):
+        """Ensure assigned GO TO accepts both single and two-word prefixes"""
+        test_cases = [
+            "GOTO K, (10, 20)",
+            "GO TO TARGET, (1, 2, 3)"
+        ]
+
+        for text in test_cases:
+            with self.subTest(assigned_goto=text):
+                tree = self.parse(text, 'assigned_goto_stmt')
+                self.assertIsNotNone(tree)
     
     def test_arithmetic_if_statement(self):
         """Test arithmetic IF statements (1957 style)"""
