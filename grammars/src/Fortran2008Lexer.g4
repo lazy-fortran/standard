@@ -241,6 +241,16 @@ IALL             : I A L L ;
 IANY             : I A N Y ;
 IPARITY          : I P A R I T Y ;
 
+// Bitwise comparison intrinsics (Section 13.7.28-31)
+// - BGE(I,J): Bitwise greater-or-equal (Section 13.7.28)
+// - BGT(I,J): Bitwise greater-than (Section 13.7.29)
+// - BLE(I,J): Bitwise less-or-equal (Section 13.7.30)
+// - BLT(I,J): Bitwise less-than (Section 13.7.31)
+BGE              : B G E ;
+BGT              : B G T ;
+BLE              : B L E ;
+BLT              : B L T ;
+
 // ============================================================================
 // ATOMIC INTRINSICS (ISO/IEC 1539-1:2010 Section 13.7.19-13.7.21)
 // ============================================================================

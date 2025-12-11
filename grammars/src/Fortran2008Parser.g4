@@ -806,6 +806,7 @@ intrinsic_function_call_f2008
     | bit_shift_function_call         // Bit shift intrinsics (Section 13.7.158-160)
     | bit_mask_function_call          // Bit mask intrinsics (Section 13.7.110-111)
     | bit_reduction_function_call     // Bit reduction (Section 13.7.79-80, 94)
+    | bitwise_comparison_function_call // Bitwise comparison (Section 13.7.28-31)
     ;
 
 // Bessel function calls (ISO/IEC 1539-1:2010 Section 13.7.22-27)
@@ -878,6 +879,19 @@ bit_reduction_function_call
     : IALL LPAREN actual_arg_list RPAREN         // Section 13.7.79
     | IANY LPAREN actual_arg_list RPAREN         // Section 13.7.80
     | IPARITY LPAREN actual_arg_list RPAREN      // Section 13.7.94
+    ;
+
+// Bitwise comparison function calls (ISO/IEC 1539-1:2010 Section 13.7.28-31)
+// Bitwise comparison operations returning logical results
+// - BGE(I,J): Bitwise greater-or-equal (Section 13.7.28)
+// - BGT(I,J): Bitwise greater-than (Section 13.7.29)
+// - BLE(I,J): Bitwise less-or-equal (Section 13.7.30)
+// - BLT(I,J): Bitwise less-than (Section 13.7.31)
+bitwise_comparison_function_call
+    : BGE LPAREN actual_arg_list RPAREN         // Section 13.7.28
+    | BGT LPAREN actual_arg_list RPAREN         // Section 13.7.29
+    | BLE LPAREN actual_arg_list RPAREN         // Section 13.7.30
+    | BLT LPAREN actual_arg_list RPAREN         // Section 13.7.31
     ;
 
 // ============================================================================
@@ -1081,6 +1095,11 @@ identifier_or_keyword
     | IALL         // IALL can be used as variable name
     | IANY         // IANY can be used as variable name
     | IPARITY      // IPARITY can be used as variable name
+    // F2008 bitwise comparison intrinsics (Section 13.7.28-31)
+    | BGE          // BGE can be used as variable name
+    | BGT          // BGT can be used as variable name
+    | BLE          // BLE can be used as variable name
+    | BLT          // BLT can be used as variable name
     // F2008 atomic intrinsics (Section 13.7.19-20)
     | ATOMIC_DEFINE  // ATOMIC_DEFINE can be used as variable name
     | ATOMIC_REF     // ATOMIC_REF can be used as variable name

@@ -246,6 +246,17 @@ class TestBasicF2008Features:
         assert tree is not None, "Bit reduction intrinsics failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for bit reduction intrinsics, got {errors}"
 
+    def test_bitwise_comparison_intrinsics(self):
+        """Test bitwise comparison intrinsics BGE, BGT, BLE, BLT (ISO 13.7.28-31)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "bitwise_comparison_intrinsics.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "Bitwise comparison intrinsics failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for bitwise comparison intrinsics, got {errors}"
+
     def test_atomic_intrinsics(self):
         """Test ATOMIC_DEFINE and ATOMIC_REF intrinsics (ISO 13.7.19-20)"""
         code = load_fixture(
