@@ -230,8 +230,10 @@ end_stmt
 // FORTRAN II re-exports the 1958-era names here.
 
 // Arithmetic IF - Appendix A: IF (e) n1, n2, n3
+// Inherited from FORTRAN I as `if_stmt_arithmetic`; re-exported here under the
+// FORTRAN II name to preserve downstream rule references.
 arithmetic_if_stmt
-    : IF LPAREN expr RPAREN label COMMA label COMMA label
+    : if_stmt_arithmetic
     ;
 
 // CONTINUE statement - Appendix A: CONTINUE
@@ -245,8 +247,12 @@ stop_stmt
     ;
 
 // READ statement - Appendix A: READ forms
+// Re-export inherited FORTRAN I basic READ forms and add FORTRAN II positional
+// unit/format variants. This avoids duplicating the FORTRAN I alternatives while
+// retaining FORTRAN II enhancements.
 read_stmt
-    : READ integer_expr COMMA input_list              // READ unit, list
+    : read_stmt_basic                                 // Inherited basic READ forms
+    | READ integer_expr COMMA input_list              // READ unit, list
     | READ integer_expr COMMA label COMMA input_list  // READ unit, format, list
     ;
 
