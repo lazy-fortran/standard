@@ -995,7 +995,8 @@ system_command_call
 // Primary expression (ISO/IEC 1539-1:2010 R701)
 // Override F2003 to include F2008 intrinsic functions
 primary
-    : complex_part_designator
+    : type_param_inquiry
+    | complex_part_designator
     | identifier_or_keyword (PERCENT identifier_or_keyword)*
     | identifier_or_keyword LPAREN actual_arg_list? RPAREN
     | identifier_or_keyword DOUBLE_QUOTE_STRING

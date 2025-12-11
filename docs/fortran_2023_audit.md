@@ -389,7 +389,7 @@ Current status:
 The Fortran 2023 layer in this repository:
 
 - **Currently implements (partially):**
-  - A F2023‑specific program entry (`program_unit_f2023`) that re‑uses
+  - A F2023-specific program entry (`program_unit_f2023`) that re-uses
     F2018 program units.
   - A specification part overlay (`specification_part_f2023`) that
     supports ENUM/ENUMERATOR definitions and F2023 type declarations.
@@ -402,7 +402,8 @@ The Fortran 2023 layer in this repository:
     - Conditional expressions using `? :` (limited).
     - IEEE_MAX/MIN/MAX_MAG/MIN_MAG.
     - BOZ literals and basic NAMELIST/SYSTEM_CLOCK refinements.
-  - Token‑level compatibility with F2018 and earlier standards.
+  - Token-level compatibility with F2018 and earlier standards.
+  - Type parameter inquiries (`type_param_inquiry`, R916) parse `designator % type-param-name` expressions; the fixture `tests/fixtures/Fortran2023/test_issue572_type_param_inquiry/type_param_inquiry.f90` exercises the derived-type lookup patterns and closes Issue #572 for the F2023 layer.
 
 **CRITICAL Gaps (Issues #328–#335, #345–#348):**
 

@@ -688,6 +688,10 @@ Grammar implementation:
   - `complex_part_designator` implements ISO/IEC 1539-1:2004 Section 6.1.2.5 (R615) so `%RE`/`%IM` access is parsed as both a primary expression and a left-hand side.
   - New fixture `tests/fixtures/Fortran2003/test_issue584_complex_parts/complex_part_designator.f90` covers simple access, assignments, expressions, array elements, and derived-component chains that exercise the feature.
   - Issue #584 tracks this functionality and can now be marked as resolved.
+- Type parameter inquiry:
+  - `type_param_inquiry` implements ISO/IEC 1539-1:2004 R916 so `designator % type-param-name` lookups on parameterized derived types parse as primary expressions.
+  - New fixture `tests/fixtures/Fortran2003/test_issue572_type_param_inquiry/type_param_inquiry.f90` exercises `%len_param` and `%kind_param` accesses on array elements created from a parameterized derived type.
+  - Issue #572 (Fortran 2018 type parameter inquiries) can now be considered resolved for F2003 and all inheriting grammars that reuse this rule.
 - Array constructors:
   - `array_constructor` is defined with `LSQUARE ... RSQUARE` and
     allows:
