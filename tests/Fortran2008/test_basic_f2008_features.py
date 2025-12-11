@@ -257,6 +257,17 @@ class TestBasicF2008Features:
         assert tree is not None, "Bitwise comparison intrinsics failed to produce parse tree"
         assert errors == 0, f"Expected 0 errors for bitwise comparison intrinsics, got {errors}"
 
+    def test_advanced_bit_intrinsics(self):
+        """Test advanced bit manipulation intrinsics DSHIFTL, DSHIFTR, LEADZ, MERGE_BITS, POPCNT, POPPAR, TRAILZ (ISO 13.7.50-51, 103, 112, 133-134, 168)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "advanced_bit_intrinsics.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "Advanced bit intrinsics failed to produce parse tree"
+        assert errors == 0, f"Expected 0 errors for advanced bit intrinsics, got {errors}"
+
     def test_atomic_intrinsics(self):
         """Test ATOMIC_DEFINE and ATOMIC_REF intrinsics (ISO 13.7.19-20)"""
         code = load_fixture(
