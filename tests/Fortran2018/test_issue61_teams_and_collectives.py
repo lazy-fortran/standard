@@ -114,3 +114,14 @@ class TestF2018TeamsAndCollectivesStatus:
         tree, errors, _ = parse_f2018(code)
         assert tree is not None
         assert errors == 0
+
+    def test_image_selector_team_specs_parse_cleanly(self):
+        """TEAM/TEAM_NUMBER image selectors with STAT= parse without errors."""
+        code = load_fixture(
+            "Fortran2018",
+            "test_issue61_teams_and_collectives",
+            "image_selector_team.f90",
+        )
+        tree, errors, _ = parse_f2018(code)
+        assert tree is not None
+        assert errors == 0
