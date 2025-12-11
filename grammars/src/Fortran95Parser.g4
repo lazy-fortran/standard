@@ -331,9 +331,45 @@ end_forall_stmt
 // - R734 (end-where-stmt) -> END WHERE [where-construct-name]
 // - R735 (where-stmt) -> WHERE (mask-expr) where-assignment-stmt
 //
-// Semantic constraints (Section 7.5.3, not enforced by grammar):
-// - mask-expr must be a logical array expression
-// - All arrays in mask and body must be conformable
+// SEMANTIC CONSTRAINTS (Section 7.5.3, NOT enforced by grammar):
+// ================================================================
+// These constraints require semantic analysis (type checking, shape analysis)
+// and are NOT enforced by the grammar syntax rules.
+//
+// MASK EXPRESSION TYPE CONSTRAINT (Section 7.5.3):
+// - mask-expr in WHERE construct-stmt must have LOGICAL type (not INTEGER, REAL, etc.)
+// - mask-expr in masked ELSEWHERE must have LOGICAL type
+// Violation example (incorrectly accepted by grammar):
+//   integer :: mask(10)
+//   real :: a(10), b(10)
+//   where (mask > 0)        ! INVALID - mask is INTEGER, not LOGICAL
+//     a = b
+//   end where
+//
+// MASK EXPRESSION SHAPE CONSTRAINT (Section 7.5.3):
+// - mask-expr must be an ARRAY expression (rank > 0), not a scalar
+// Violation example (incorrectly accepted by grammar):
+//   real :: a(10), b(10)
+//   real :: scalar_mask
+//   where (scalar_mask > 0.0)  ! INVALID - scalar_mask is scalar, not array
+//     a = b
+//   end where
+//
+// CONFORMABILITY CONSTRAINT (Section 7.5.3):
+// - All arrays in mask-expr, where-body, and elsewhere-body must be CONFORMABLE
+//   with each other (same rank and shape)
+// - Arrays with different shapes or ranks are INVALID
+// Violation example (incorrectly accepted by grammar):
+//   real :: a(10), b(10)
+//   where (a > 0.0)
+//     a = b
+//   elsewhere
+//     a(1:5) = 0.0             ! INVALID - different shape than WHERE mask
+//   end where
+//
+// FUTURE WORK:
+// A semantic analyzer phase must be implemented to enforce these constraints.
+// Related issue tracking: #419 (document), future issue for semantic implementation
 
 // WHERE construct (ISO/IEC 1539-1:1997 Section 7.5.3, R727)
 where_construct_f95
@@ -342,6 +378,9 @@ where_construct_f95
     ;
 
 // WHERE construct statement (Section 7.5.3, R728)
+// NOTE: Grammar accepts any expression, but semantic constraint requires
+// logical_expr_f95 to be a LOGICAL ARRAY expression (not scalar, not non-logical).
+// See constraints documented above - enforced by semantic analyzer, not grammar.
 where_construct_stmt_f95
     : (IDENTIFIER COLON)? WHERE LPAREN logical_expr_f95 RPAREN
     ;
@@ -360,6 +399,9 @@ elsewhere_part_f95
     ;
 
 // ELSEWHERE statement - with optional mask (Section 7.5.3, R732/R733)
+// NOTE: When mask is present (masked ELSEWHERE, R732), semantic constraint requires
+// logical_expr_f95 to be a LOGICAL ARRAY expression.
+// See constraints documented above - enforced by semantic analyzer, not grammar.
 elsewhere_stmt_f95
     : ELSEWHERE (LPAREN logical_expr_f95 RPAREN)? (IDENTIFIER)?
     ;
@@ -380,6 +422,9 @@ elsewhere_assignment_stmt_f95
     ;
 
 // WHERE statement - single statement form (Section 7.5.3.2, R735)
+// NOTE: Grammar accepts any expression, but semantic constraint requires
+// logical_expr_f95 to be a LOGICAL ARRAY expression.
+// See constraints documented above - enforced by semantic analyzer, not grammar.
 where_stmt_f95
     : WHERE LPAREN logical_expr_f95 RPAREN assignment_stmt_f95
     ;
