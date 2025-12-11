@@ -629,6 +629,115 @@ primary
     ;
 
 // ============================================================================
+// IDENTIFIER OR KEYWORD OVERRIDE (F2018 Extension)
+// ============================================================================
+// F2018 adds C interoperability intrinsics that can also be used as identifiers.
+// Override F2008 identifier_or_keyword to include F2018 C interop tokens.
+// ISO/IEC 1539-1:2018 Section 18.2: Interoperability with C
+identifier_or_keyword
+    : IDENTIFIER
+    // Inherit all F2008 and earlier keywords
+    | VALUE        // VALUE can be used as an identifier when not in C-binding context
+    | NAME         // NAME can be used as an identifier
+    | RESULT       // RESULT can be used as a variable name
+    | SUM_INTRINSIC  // SUM can be used as a variable/result name
+    | ID           // ID can be used as a variable name (common identifier)
+    | DATA         // DATA can be used as a variable name (legacy keyword)
+    | KIND         // KIND can be used as parameter name in type instantiation
+    | LEN          // LEN can be used as parameter name in character declarations
+    | TRIM_INTRINSIC  // TRIM can be used as function name
+    | SIZE         // SIZE can be used as function name (F90 token)
+    | SHAPE_INTRINSIC  // SHAPE can be used as a type name
+    | STAT         // STAT can be used as variable name in ALLOCATE
+    | ERRMSG       // ERRMSG can be used as variable name in ALLOCATE
+    | SOURCE       // SOURCE can be used as variable name
+    | MOLD         // MOLD can be used as variable name
+    | UNIT         // UNIT can be used as variable name in I/O
+    | IOSTAT       // IOSTAT can be used as variable name
+    | FILE         // FILE can be used as variable name in I/O
+    | ACCESS       // ACCESS can be used as variable name in I/O
+    | FORM         // FORM can be used as variable name in I/O
+    | STATUS       // STATUS can be used as variable name in I/O
+    | BLANK        // BLANK can be used as variable name in I/O
+    | POSITION     // POSITION can be used as variable name in I/O
+    | ACTION       // ACTION can be used as variable name in I/O
+    | DELIM        // DELIM can be used as variable name in I/O
+    | PAD          // PAD can be used as variable name in I/O
+    | RECL         // RECL can be used as variable name in I/O
+    | IOMSG        // IOMSG can be used as variable name in I/O
+    | ASYNCHRONOUS // ASYNCHRONOUS can be used as variable name in I/O
+    | NEWUNIT      // NEWUNIT can be used as variable name in I/O (F2008 S9.5.6.10)
+    // F2003 C interoperability intrinsics (inherited from F2003, Section 15.2.5)
+    | C_LOC        // C_LOC intrinsic (Section 15.2.5)
+    | C_FUNLOC     // C_FUNLOC intrinsic (Section 15.2.5)
+    | C_ASSOCIATED // C_ASSOCIATED intrinsic (Section 15.2.5)
+    | C_F_POINTER  // C_F_POINTER intrinsic (Section 15.2.5)
+    | C_F_PROCPOINTER // C_F_PROCPOINTER intrinsic (Section 15.2.5)
+    // F2008-specific tokens that can be used as identifiers
+    | IMAGES       // IMAGES can be used as variable name (SYNC IMAGES keyword)
+    | ALL          // ALL can be used as variable name (SYNC ALL keyword)
+    | MEMORY       // MEMORY can be used as variable name (SYNC MEMORY keyword)
+    | CONCURRENT   // CONCURRENT can be used as variable name (DO CONCURRENT)
+    | LOCAL        // LOCAL can be used as variable name
+                   // (DO CONCURRENT locality specifier)
+    | CONTIGUOUS   // CONTIGUOUS can be used as variable name
+    | CODIMENSION  // CODIMENSION can be used as variable name
+    | SUBMODULE    // SUBMODULE can be used as a name
+    | BLOCK        // BLOCK can be used as variable name
+    | ERROR_STOP   // ERROR_STOP is compound keyword, not typically used as name
+    | LOCK         // LOCK can be used as variable name
+    | UNLOCK       // UNLOCK can be used as variable name
+    // F2008 bit manipulation intrinsics (Section 13.7.110-111, 13.7.158-160)
+    | SHIFTA       // SHIFTA can be used as variable name
+    | SHIFTL       // SHIFTL can be used as variable name
+    | SHIFTR       // SHIFTR can be used as variable name
+    | MASKL        // MASKL can be used as variable name
+    | MASKR        // MASKR can be used as variable name
+    // F2008 bitwise reduction intrinsics (Section 13.7.79-80, 13.7.94)
+    | IALL         // IALL can be used as variable name
+    | IANY         // IANY can be used as variable name
+    | IPARITY      // IPARITY can be used as variable name
+    // F2008 bitwise comparison intrinsics (Section 13.7.28-31)
+    | BGE          // BGE can be used as variable name
+    | BGT          // BGT can be used as variable name
+    | BLE          // BLE can be used as variable name
+    | BLT          // BLT can be used as variable name
+    // F2008 advanced bit manipulation intrinsics (Section 13.7)
+    | DSHIFTL      // DSHIFTL can be used as variable name
+    | DSHIFTR      // DSHIFTR can be used as variable name
+    | LEADZ        // LEADZ can be used as variable name
+    | MERGE_BITS   // MERGE_BITS can be used as variable name
+    | POPCNT       // POPCNT can be used as variable name
+    | POPPAR       // POPPAR can be used as variable name
+    | TRAILZ       // TRAILZ can be used as variable name
+    // F2008 atomic intrinsics (Section 13.7.19-20)
+    | ATOMIC_DEFINE  // ATOMIC_DEFINE can be used as variable name
+    | ATOMIC_REF     // ATOMIC_REF can be used as variable name
+    // F2008 collective intrinsic subroutines (Section 13.7.34-38)
+    | CO_BROADCAST   // CO_BROADCAST can be used as variable name
+    | CO_MAX         // CO_MAX can be used as variable name
+    | CO_MIN         // CO_MIN can be used as variable name
+    | CO_SUM         // CO_SUM can be used as variable name
+    | CO_REDUCE      // CO_REDUCE can be used as variable name
+    // F2008 system command execution (Section 13.7.55)
+    | EXECUTE_COMMAND_LINE  // EXECUTE_COMMAND_LINE can be used as variable name
+    // F2008 WHERE construct enhancements (Section 8.1.4.3)
+    | MASKED         // MASKED can be used as variable name (MASKED ELSEWHERE keyword)
+    // F2008 mathematical intrinsics (Section 13.7.77)
+    | HYPOT          // HYPOT can be used as variable name
+    // F2008 procedure prefix keywords (Section 12.6.2.2, Section 12.7)
+    | NON_RECURSIVE  // NON_RECURSIVE can be used as variable name when
+                     // not in prefix context
+    | IMPURE         // IMPURE can be used as variable name when
+                     // not in prefix context (F2008 Section 12.7)
+    // F2018 C interoperability intrinsics (Section 18.2.5, 16.9.55)
+    | C_F_POINTER_RANK // C_F_POINTER_RANK can be used as variable/function name
+    | C_SIZEOF         // C_SIZEOF can be used as variable/function name
+    | CFI_ESTABLISH    // CFI_ESTABLISH can be used as variable/function name
+    | CFI_SETPOINTER   // CFI_SETPOINTER can be used as variable/function name
+    ;
+
+// ============================================================================
 // UTILITY RULES - Override F2008 rules for F2018 entry points
 // ============================================================================
 

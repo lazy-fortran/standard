@@ -1135,6 +1135,12 @@ identifier_or_keyword
     | IOMSG        // IOMSG can be used as variable name in I/O
     | ASYNCHRONOUS // ASYNCHRONOUS can be used as variable name in I/O
     | NEWUNIT      // NEWUNIT can be used as variable name in I/O (F2008 S9.5.6.10)
+    // F2003 C interoperability intrinsics (inherited from F2003, Section 15.2.5)
+    | C_LOC        // C_LOC intrinsic (Section 15.2.5)
+    | C_FUNLOC     // C_FUNLOC intrinsic (Section 15.2.5)
+    | C_ASSOCIATED // C_ASSOCIATED intrinsic (Section 15.2.5)
+    | C_F_POINTER  // C_F_POINTER intrinsic (Section 15.2.5)
+    | C_F_PROCPOINTER // C_F_PROCPOINTER intrinsic (Section 15.2.5)
     // F2008-specific tokens that can be used as identifiers
     | IMAGES       // IMAGES can be used as variable name (SYNC IMAGES keyword)
     | ALL          // ALL can be used as variable name (SYNC ALL keyword)
