@@ -216,6 +216,26 @@ ENDFILE         : E N D F I L E ;
 COLON           : ':' ;
 
 // ============================================================================
+// IDENTIFIER - X3.9-1966 Section 2.3 "Symbolic Names"
+// ============================================================================
+// X3.9-1966 Section 2.3 mandates that symbolic names consist of 1 to 6
+// alphanumeric characters, with the first character being alphabetic.
+//
+// NOTE: The identifier length restriction is inherited from FORTRANLexer.
+// While X3.9-1966 Section 2.3 requires identifiers to be "1 to 6 characters",
+// this is a semantic constraint that should be validated at the semantic analysis
+// phase, not enforced by truncating lexer tokens. Lexer-level truncation breaks
+// parsing of valid code where longer identifiers appear (e.g., statement labels
+// like 100, or keywords that happen to be longer than 6 characters when written
+// without whitespace in fixed-form FORTRAN).
+//
+// Compliance: STANDARD-COMPLIANT with X3.9-1966 Section 2.3 (via semantic validation)
+//
+// See FORTRAN77Lexer for identifier length extension to 31 characters.
+// ============================================================================
+// (IDENTIFIER rule inherited from FORTRANLexer - no local override)
+
+// ============================================================================
 // FORTRAN 66 (X3.9-1966) HISTORICAL SIGNIFICANCE
 // ============================================================================
 //
