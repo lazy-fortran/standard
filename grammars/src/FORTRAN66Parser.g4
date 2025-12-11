@@ -190,6 +190,17 @@ logical_variable
     ;
 
 // ============================================================================
+// ARITHMETIC EXPRESSIONS - X3.9-1966 Section 6.2
+// ============================================================================
+// FORTRAN 66 retains the FORTRAN I/II arithmetic expression syntax. The
+// top-level `expr` is defined here as an arithmetic expression so that
+// relational and logical expressions introduced in FORTRAN 66 remain separate.
+
+expr
+    : additive_expr
+    ;
+
+// ============================================================================
 // RELATIONAL EXPRESSIONS - X3.9-1966 Section 6.3
 // ============================================================================
 // X3.9-1966 Section 6.3 defines relational expressions that compare two
