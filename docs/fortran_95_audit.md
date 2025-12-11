@@ -537,10 +537,15 @@ These constraints are inherently semantic and would require a separate
 analysis phase operating on symbol tables and expression trees, not on
 raw parse rules.
 
-### Semantic checks required for future tooling (Issue #183)
+### Semantic checks required for future tooling (Issue #415)
 
 A semantic analyzer built on top of this grammar must implement the
 following checks to comply with ISO/IEC 1539‑1:1997 Section 12.2:
+
+NOTE: Issue #415 documents this semantic gap and tracks requirements for
+a future semantic analyzer implementation. Grammar comments documenting
+Section 12.2 constraints have been added to interface-related rules in
+F90ModulesParser.g4 (interface_block, interface_body rules).
 
 1. **Interface-definition bounds matching** (Section 12.2.2):
    - For function results with nonconstant array bounds, verify that
@@ -573,6 +578,12 @@ The grammar correctly parses all syntactic forms but leaves
 characteristic-matching validation to a later analysis phase. This is
 acceptable for a syntactic grammar but must be explicitly documented.
 
+This gap is formally tracked by issue #415: "Fortran 95: J3/98-114
+interface-definition characteristics matching not enforced
+(ISO/IEC 1539-1:1997 Section 12.2)". Grammar comments documenting
+the semantic constraints have been added to clarify what semantic
+analysis must enforce.
+
 ### Audit stance
 
 - The ANTLR grammar alone cannot guarantee compliance with the
@@ -580,7 +591,9 @@ acceptable for a syntactic grammar but must be explicitly documented.
   Section 12.2.
 - Any future semantic analyzer or linter built on top of this grammar
   must incorporate those rules separately using the checks enumerated
-  above.
+  above (tracked by issue #415).
+- See issue #415 for detailed requirements specification and semantic
+  analyzer implementation guidance.
 
 ## 10. Tests and coverage model
 
