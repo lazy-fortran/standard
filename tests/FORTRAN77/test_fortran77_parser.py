@@ -714,6 +714,72 @@ END IF"""
         tree = self.parse(block_if_text, 'block_if_construct')
         self.assertIsNotNone(tree)
 
+    def test_program_statement_accepts_max_identifier_length(self):
+        """ISO 1539:1980 Section 2.3.3 - identifiers can be up to 31 characters"""
+        max_length_name = 'A' + 'B' * 30  # 31 characters total
+        program_stmt = f"PROGRAM {max_length_name}\n"
+        tree = self.parse(program_stmt, 'program_stmt')
+        self.assertIsNotNone(tree)
+
+    def test_identifier_tokens_within_length_limit(self):
+        """Verify lexical recognition of identifiers up to 31 characters"""
+        valid_identifiers = [
+            "I",                          # 1 char
+            "VAR01",                      # 5 chars
+            "LONGNAME",                   # 8 chars
+            'A' + 'B' * 30,               # 31 chars (maximum)
+        ]
+
+        for identifier in valid_identifiers:
+            with self.subTest(identifier=identifier):
+                tokens = self._collect_tokens(identifier)
+                identifier_tokens = [
+                    token for token in tokens if token.type == FORTRAN77Lexer.IDENTIFIER
+                ]
+                self.assertEqual(
+                    1,
+                    len(identifier_tokens),
+                    f"Expected one IDENTIFIER token for {identifier}",
+                )
+                self.assertEqual(identifier, identifier_tokens[0].text)
+
+    def test_identifier_tokens_exceed_length_limit(self):
+        """Verify identifiers longer than 31 characters are not accepted as single tokens"""
+        long_identifiers = [
+            'A' * 32,
+            'LONG' + 'NAME' * 7,  # 32+ characters
+        ]
+
+        for identifier in long_identifiers:
+            with self.subTest(identifier=identifier):
+                tokens = self._collect_tokens(identifier)
+                identifier_tokens = [
+                    token for token in tokens if token.type == FORTRAN77Lexer.IDENTIFIER
+                ]
+                self.assertTrue(identifier_tokens, "Expected at least one IDENTIFIER fragment")
+                self.assertFalse(
+                    any(token.text == identifier for token in identifier_tokens),
+                    "Lexer should not emit a single IDENTIFIER token matching the long name",
+                )
+                for token in identifier_tokens:
+                    self.assertLessEqual(
+                        len(token.text),
+                        31,
+                        "Identifier fragments must remain within the 31-character limit",
+                    )
+
+    def _collect_tokens(self, text: str):
+        """Collect tokens from the FORTRAN 77 lexer for the given text"""
+        input_stream = InputStream(text)
+        lexer = FORTRAN77Lexer(input_stream)
+        tokens = []
+        while True:
+            token = lexer.nextToken()
+            if token.type == -1:
+                break
+            tokens.append(token)
+        return tokens
+
     # ====================================================================
     # FORTRAN 77 STATEMENT FUNCTION TESTS
     # ====================================================================
