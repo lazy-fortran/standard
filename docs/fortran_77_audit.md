@@ -404,9 +404,11 @@ Mapping that classification to the current grammar:
   - Implemented:
     - READ and PRINT are inherited from FORTRAN 66 (`read_stmt`,
       `print_stmt`).
+    - READ now supports the positional `unit, fmt [, iolist]` form per
+      ANSI X3.9-1978 Section 12.6; issue #578 tracked this gap.
     - Enhanced WRITE is implemented as `write_stmt` with:
       - A `control_info_list` including unit, format identifier, and
-        list‑directed `*`.
+        list-directed `*`.
       - `output_item_list` supporting implied DO constructs.
 
 - **REWIND, BACKSPACE, ENDFILE, OPEN, CLOSE, INQUIRE**
@@ -526,6 +528,9 @@ cover:
   `test_data_type_revolution_features` and others).
 - A structured program example fixture:
   - `FORTRAN77/test_fortran77_parser/structured_program_example.f`.
+- READ positional unit form coverage:
+  - `FORTRAN77/test_fortran77_parser/read_positional_unit_form.f` ensures the
+    positional `READ unit, fmt [, iolist]` form parses (tracked as issue #578).
 
 In the generic fixture harness (`tests/test_fixture_parsing.py`):
 

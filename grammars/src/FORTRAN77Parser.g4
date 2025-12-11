@@ -340,10 +340,11 @@ executable_construct
 // - Section 12.10: File connection statements (OPEN, CLOSE, INQUIRE)
 
 // READ statement - ISO 1539:1980 Sections 12.4 and 12.6
-// Forms: READ fmt, iolist  OR  READ (cilist) iolist
+// Forms: READ fmt, iolist  OR  READ (cilist) iolist  OR  READ unit, fmt [, iolist]
 read_stmt
-    : READ format_identifier (COMMA input_item_list_f77)?
-    | READ LPAREN read_control_info_list RPAREN input_item_list_f77?
+    : READ LPAREN read_control_info_list RPAREN input_item_list_f77?
+    | READ integer_expr COMMA format_identifier (COMMA input_item_list_f77)?
+    | READ format_identifier (COMMA input_item_list_f77)?
     ;
 
 // Input item list - ISO 1539:1980 Section 12.6.1
