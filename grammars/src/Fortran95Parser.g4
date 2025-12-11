@@ -543,8 +543,134 @@ entity_decl_list_f95
     : entity_decl_f95 (COMMA entity_decl_f95)*
     ;
 
+// ====================================================================
+// INITIALIZATION EXPRESSIONS (ISO/IEC 1539-1:1997 Section 7.1.6)
+// ====================================================================
+//
+// Initialization expressions are a restricted subset of expressions used
+// in type declarations and data initialization contexts. Unlike general
+// expressions, they must be evaluable at compile-time or with compile-time
+// known values.
+//
+// SEMANTIC CONSTRAINTS (NOT enforced by grammar):
+// =================================================
+// Per ISO/IEC 1539-1:1997 Section 7.1.6, an initialization expression must be:
+//
+// 1. A **constant expression** (Section 7.1.6.1), which is an expression
+//    containing only:
+//    - Literal constants (integer, real, complex, logical, character)
+//    - Named constants (parameters)
+//    - Intrinsic operators applied to constant expressions
+//    - Certain intrinsic functions with constant arguments:
+//      * BIT_SIZE, KIND, LEN, SELECTED_INT_KIND, SELECTED_REAL_KIND
+//      * TRIM, REPEAT, RESHAPE, TRANSFER (with constant arguments)
+//
+// 2. A **structure constructor** where each component is an initialization
+//    expression (recursively)
+//
+// 3. An **array constructor** where each ac-value is an initialization
+//    expression
+//
+// RESTRICTIONS on initialization expressions (Section 7.1.6):
+// ============================================================
+// An initialization expression CANNOT contain:
+// - References to variables (local or host-associated)
+// - References to non-constant functions
+// - References to array elements with non-constant subscripts
+// - References to character substrings with non-constant bounds
+// - Implicit type conversions via function references
+// - DO loop variables or implied-DO index variables with non-constant bounds
+//
+// SCOPE OF APPLICATION:
+// =======================
+// Initialization expressions appear in these contexts:
+//
+// 1. **Entity declarations with initialization** (Section 5.1, R504):
+//    - `INTEGER :: x = 42`           (constant - VALID)
+//    - `INTEGER :: y = x + 1`        (references variable x - INVALID)
+//    - `REAL :: r = compute()`       (non-constant function - INVALID)
+//
+// 2. **Derived type component initialization** (Section 4.4.1, R429):
+//    - `TYPE :: point_t`
+//    -   `REAL :: x = 0.0`           (constant - VALID)
+//    -   `REAL :: y = get_y()`       (function call - INVALID)
+//    - `END TYPE`
+//
+// 3. **Array constructor with initialization** (Section 4.5, R464):
+//    - `REAL :: arr(:) = [1.0, 2.0, 3.0]`  (constants - VALID)
+//    - `REAL :: arr(:) = [1.0, x, 3.0]`    (variable x - INVALID)
+//
+// STANDARD COMPLIANCE STATUS:
+// =============================
+// **NON-COMPLIANT** with ISO/IEC 1539-1:1997 Section 7.1.6
+//
+// The grammar rule below accepts ANY expr_f95, which violates the standard's
+// requirement that only constant expressions and structure constructors with
+// constant components are allowed. This is a **semantic gap** that cannot be
+// fully enforced by ANTLR grammar alone, as it requires:
+//
+// - Constant expression evaluation
+// - Symbol table analysis to detect variable references
+// - Type and rank analysis for structure constructors
+// - Intrinsic function classification
+//
+// FUTURE WORK:
+// =============
+// A future semantic analyzer must implement:
+//
+// 1. **Constant expression validator** (Section 7.1.6.1):
+//    - Detect and reject variable references in initialization context
+//    - Detect and reject non-constant function calls
+//    - Evaluate constant expressions where possible
+//
+// 2. **Initialization expression classifier**:
+//    - Distinguish between constant expressions, structure constructors,
+//      and array constructors
+//    - Validate that nested components are also initialization expressions
+//
+// 3. **Compile-time diagnostics**:
+//    - Clear error messages for invalid initializers
+//    - Suggest valid alternatives (e.g., "use parameter instead")
+//    - Track initialization context for better error reporting
+//
+// VIOLATION EXAMPLE (accepted by grammar, violates standard):
+// =============================================================
+// This code is syntactically valid but semantically non-compliant:
+//
+//   program bad_initializers
+//     implicit none
+//     integer :: n = 10
+//     integer :: arr(10)
+//     integer, parameter :: const = 5
+//
+//     ! VALID - constant expression
+//     integer :: x = const + 2
+//
+//     ! INVALID - references variable n
+//     integer :: y = n + 1
+//
+//     ! INVALID - function call
+//     integer :: z = compute()
+//
+//     ! INVALID - runtime variable in structure
+//     type :: point_t
+//       real :: x = n * 2.0   ! References variable n!
+//     end type
+//
+//   contains
+//     integer function compute()
+//       compute = 42
+//     end function
+//   end program bad_initializers
+//
+// All of the above are parsed successfully by the grammar but violate
+// Section 7.1.6 and would be rejected by a standards-conforming compiler.
+
 // Initialization expression (Section 7.1.6)
-// Must be a constant expression or structure constructor with constant components
+// NOTE: Grammar accepts any expr_f95, but semantic constraint requires
+// initialization expressions to be constant (Section 7.1.6.1).
+// A semantic analyzer must validate this constraint.
+// See comprehensive documentation above for details.
 initialization_expr
     : expr_f95
     ;

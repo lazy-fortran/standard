@@ -355,10 +355,18 @@ Gaps and limitations:
   - Default initialization of derived‑type components is therefore
     modeled only indirectly via the F90 `entity_decl_f90 ASSIGN expr_f90`
     pattern, not via the dedicated F95 constructs.
-- **No syntactic enforcement of initialization‑expression restrictions**:
-  - The standard’s distinction between general expressions and
+- **No syntactic enforcement of initialization‑expression restrictions**
+  (Issue #390):
+  - The standard's distinction between general expressions and
     initialization expressions (constant, specification‑expression, etc.)
     is not represented; `initialization_expr` accepts any `expr_f95`.
+  - ISO/IEC 1539-1:1997 Section 7.1.6 requires initialization expressions
+    to be **constant expressions** or **structure constructors with constant
+    components** (Section 7.1.6.1).
+  - The grammar permits arbitrary expressions, which is a **semantic gap**
+    requiring a future semantic analyzer to enforce constant expression
+    validation (see grammar documentation in `Fortran95Parser.g4` for
+    comprehensive constraint specification).
 - **Pointer and ALLOCATABLE rules**:
   - F90’s pointer/ALLOCATABLE declarations and ALLOCATE/DEALLOCATE/NULLIFY
     statements are reused; F95’s refinements (e.g. automatic
@@ -771,10 +779,13 @@ until they are addressed:
    **STANDARD-COMPLIANT** (intrinsic function with optional MOLD argument).
 3. **FORALL index variable restrictions**: Semantic, not syntactic –
    **NON-COMPLIANT** (index restrictions not enforced).
-4. **Initialization expression restrictions** (Section 7.1.6): Grammar accepts
-   any expression; the constraint that initialization expressions must be
-   constant is semantic – **NON-COMPLIANT** (initialization expression
-   constraints not modeled).
+4. **Initialization expression restrictions** (Section 7.1.6, Issue #390):
+   Grammar accepts any expression; the constraint that initialization
+   expressions must be constant (Section 7.1.6.1) is semantic –
+   **NON-COMPLIANT** (initialization expression constraints not enforced
+   by grammar, require semantic analyzer). Comprehensive documentation of
+   constraints added to `Fortran95Parser.g4` initialization_expr rule
+   and referenced from this audit.
 
 ## 12. Summary and issue mapping
 
