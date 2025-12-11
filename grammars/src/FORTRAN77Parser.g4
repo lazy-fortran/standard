@@ -105,6 +105,18 @@ entry_dummy_arg
     | MULTIPLY                // Alternate return specifier (*)
     ;
 
+// CALL and RETURN statements - ISO 1539:1980 Section 15.8
+// CALL includes alternate return specifiers via actual_arg_spec_list (Section 15.8.1)
+call_stmt
+    : CALL IDENTIFIER (LPAREN actual_arg_spec_list? RPAREN)?
+    ;
+
+// RETURN optionally selects an alternate return via an integer expression
+// (Section 15.8.2)
+return_stmt
+    : RETURN integer_expr?
+    ;
+
 // ====================================================================
 // TYPE SYSTEM - ISO 1539:1980 Section 4 and Section 8.4
 // ====================================================================
@@ -843,6 +855,7 @@ actual_arg_spec_list
 // Actual argument specification - ISO 1539:1980 Section 15.8.1
 actual_arg_spec
     : expr
+    | MULTIPLY label           // Alternate return specifier (*label) per Section 15.8.3
     ;
 
 // Integer variable - ISO 1539:1980 Section 4.2

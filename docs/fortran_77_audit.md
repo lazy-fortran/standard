@@ -426,8 +426,17 @@ Mapping that classification to the current grammar:
 
 - **CALL, RETURN, END**
   - Implemented:
-    - `call_stmt`, `return_stmt`, and `end_stmt` are inherited and
-      wired into `statement_body`.
+    - `call_stmt` is overridden to consume `actual_arg_spec_list`, which now
+      accepts `expr` or `*label` alternate return specifiers per ISO 1539:1980
+      Sections 15.8.1 and 15.8.3. Issue #576 tracked the previous gap where
+      `*s` forms were rejected.
+    - `return_stmt` now accepts an optional `integer_expr` (Section 15.8.2) so a
+      subroutine can `RETURN 1`/`RETURN 2` to select among the alternate
+      return specifiers supplied by the caller.
+    - Tests: `test_call_statement_with_alternate_return_specifiers`,
+      `test_return_statement_with_alternate_return_selection`, and the new
+      fixture `tests/fixtures/FORTRAN77/test_fortran77_parser_extra/alternate_return_specifiers.f`
+      exercise the complete alternate-return cycle.
 
 - **PROGRAM, FUNCTION, SUBROUTINE, ENTRY, BLOCK DATA**
   - Implemented:
