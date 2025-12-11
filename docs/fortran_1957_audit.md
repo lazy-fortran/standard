@@ -346,7 +346,7 @@ each Appendix B entry to the corresponding grammar rule(s) or notes gaps.
 | 14  | DIMENSION v, v, ...           | `dimension_stmt`               | Implemented     |
 | 15  | EQUIVALENCE (a,b,...), ...    | `equivalence_stmt`             | Implemented     |
 | 16  | FORMAT (specification)        | `format_stmt`                  | Implemented     |
-| 17  | f(a, b, ...) = e              | Not implemented                | Gap: stmt func  |
+| 17  | f(a, b, ...) = e              | `statement_function_stmt`      | Implemented     |
 | 18  | DO n i = m1, m2, m3           | `do_stmt_basic`                | Implemented     |
 | 19  | CONTINUE                      | `CONTINUE` token in body       | Implemented     |
 | 20  | READ n, list                  | `read_stmt_basic`              | Implemented     |
