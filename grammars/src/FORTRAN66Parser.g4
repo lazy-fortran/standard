@@ -71,6 +71,33 @@ type_spec
     ;
 
 // ============================================================================
+// IMPLICIT STATEMENTS - X3.9-1966 Section 7.2.5
+// ============================================================================
+// IMPLICIT statements override default implicit typing rules by mapping
+// letter ranges to specific types. Each statement declares one or more
+// type ranges via parenthesized letter lists separated by commas.
+implicit_stmt
+    : IMPLICIT implicit_spec (COMMA implicit_spec)*
+    ;
+
+implicit_spec
+    : type_spec LPAREN implicit_range_list RPAREN
+    ;
+
+implicit_range_list
+    : implicit_range (COMMA implicit_range)*
+    ;
+
+implicit_range
+    : implicit_letter (MINUS implicit_letter)?
+    ;
+
+implicit_letter
+    : IDENTIFIER
+    | D
+    ;
+
+// ============================================================================       
 // LOGICAL EXPRESSIONS - X3.9-1966 Section 6.4
 // ============================================================================
 // X3.9-1966 Section 6.4 defines logical expressions with five operators
@@ -386,7 +413,8 @@ specification_statement
 
 // Specification statement types - X3.9-1966 Section 7.2
 specification_body
-    : type_declaration          // X3.9-1966 Section 7.2.5
+    : implicit_stmt             // X3.9-1966 Section 7.2.5
+    | type_declaration          // X3.9-1966 Section 7.2.5
     | dimension_stmt            // X3.9-1966 Section 7.2.1
     | common_stmt               // X3.9-1966 Section 7.2.2
     | equivalence_stmt          // X3.9-1966 Section 7.2.3
@@ -510,6 +538,7 @@ statement_body
     | common_stmt              // X3.9-1966 Section 7.2.2
     | equivalence_stmt         // X3.9-1966 Section 7.2.3
     | external_stmt            // X3.9-1966 Section 7.2.4
+    | implicit_stmt            // X3.9-1966 Section 7.2.5
     | type_declaration         // X3.9-1966 Section 7.2.5
     | data_stmt                // X3.9-1966 Section 7.2.6
     | format_stmt              // X3.9-1966 Section 7.2.7
