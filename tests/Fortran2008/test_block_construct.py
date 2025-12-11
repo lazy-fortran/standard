@@ -29,6 +29,18 @@ class TestBlockConstructF2008:
         errors = parser.getNumberOfSyntaxErrors()
         return tree, errors
 
+    def find_contexts(self, node, ctx_type):
+        """Recursively collect contexts of a given type."""
+        contexts = []
+        if node is None:
+            return contexts
+        if isinstance(node, ctx_type):
+            contexts.append(node)
+        if hasattr(node, "getChildCount"):
+            for i in range(node.getChildCount()):
+                contexts.extend(self.find_contexts(node.getChild(i), ctx_type))
+        return contexts
+
     def test_block_fixtures_parse(self):
         fixtures = [
             "block_construct.f90",
@@ -56,9 +68,62 @@ class TestBlockConstructF2008:
         )
         tree, errors = self.parse_code(code)
         assert errors == 0, f"Expected no parse errors, got {errors}"
-        tree_text = str(tree.getText()) if tree else ""
-        assert "block" in tree_text.lower()
-        assert "end" in tree_text.lower()
+        assert tree is not None, "Expected parse tree"
+
+        blocks = self.find_contexts(
+            tree, Fortran2008Parser.Block_construct_f2008Context
+        )
+        assert len(blocks) == 1, f"Expected 1 BLOCK construct, got {len(blocks)}"
+
+        block_ctx = blocks[0]
+        assert block_ctx.BLOCK(), "BLOCK token missing in construct"
+        assert block_ctx.END() is not None, "END token missing in construct"
+        assert block_ctx.NEWLINE(), "Expected NEWLINEs in BLOCK construct"
+        spec_part = block_ctx.specification_part_f2008()
+        assert spec_part is not None, "Expected local specification part inside BLOCK"
+        decls = self.find_contexts(
+            spec_part, Fortran2008Parser.Declaration_construct_f2008Context
+        )
+        assert decls, "Expected at least one declaration in BLOCK specification part"
+
+        exec_part = block_ctx.execution_part_f2008()
+        if exec_part is not None:
+            executable_constructs = self.find_contexts(
+                exec_part, Fortran2008Parser.Executable_construct_f2008Context
+            )
+            assert not executable_constructs, (
+                "Did not expect executable statements in this snippet"
+            )
+
+    def test_minimal_block_construct_has_no_parts(self):
+        code = (
+            "program minimal_block\n"
+            "block\n"
+            "end block\n"
+            "end program minimal_block\n"
+        )
+        tree, errors = self.parse_code(code)
+        assert errors == 0, f"Expected no parse errors, got {errors}"
+        blocks = self.find_contexts(
+            tree, Fortran2008Parser.Block_construct_f2008Context
+        )
+        assert len(blocks) == 1
+        block_ctx = blocks[0]
+        spec_part = block_ctx.specification_part_f2008()
+        if spec_part is not None:
+            decls = self.find_contexts(
+                spec_part, Fortran2008Parser.Declaration_construct_f2008Context
+            )
+            assert not decls, "Did not expect declarations in minimal BLOCK"
+
+        exec_part = block_ctx.execution_part_f2008()
+        if exec_part is not None:
+            executable_constructs = self.find_contexts(
+                exec_part, Fortran2008Parser.Executable_construct_f2008Context
+            )
+            assert not executable_constructs, (
+                "Did not expect executable statements in minimal BLOCK"
+            )
 
 
 if __name__ == "__main__":
