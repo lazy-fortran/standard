@@ -397,8 +397,16 @@ array_declarator
     ;
 
 // Dimension list (compile-time constants in original FORTRAN)
+// Supports both single bounds (d) and explicit bounds (d1:d2)
 dimension_list
-    : integer_expr (COMMA integer_expr)*
+    : dimension_bound (COMMA dimension_bound)*
+    ;
+
+// Dimension bound - single or explicit
+// Form: d (implicit 1:d) or d1:d2 (explicit lower:upper)
+// ANSI X3.9-1966 Section 5.3: Array declarator forms
+dimension_bound
+    : integer_expr (COLON integer_expr)?
     ;
 
 // EQUIVALENCE statement - Appendix A: EQUIVALENCE (a,b,...), ...
