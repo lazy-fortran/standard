@@ -86,7 +86,7 @@ identifier_or_keyword
     | SHAPE_INTRINSIC  // SHAPE can be used as a type name
     | STAT         // STAT can be used as variable name in ALLOCATE
     | ERRMSG       // ERRMSG can be used as variable name in ALLOCATE
-    | SOURCE       // SOURCE can be used as variable name 
+    | SOURCE       // SOURCE can be used as variable name
     | MOLD         // MOLD can be used as variable name
     | UNIT         // UNIT can be used as variable name in I/O
     | IOSTAT       // IOSTAT can be used as variable name
@@ -102,6 +102,11 @@ identifier_or_keyword
     | RECL         // RECL can be used as variable name in I/O
     | IOMSG        // IOMSG can be used as variable name in I/O
     | ASYNCHRONOUS // ASYNCHRONOUS can be used as variable name in I/O
+    | C_LOC        // C_LOC intrinsic (Section 15.2.5)
+    | C_FUNLOC     // C_FUNLOC intrinsic (Section 15.2.5)
+    | C_ASSOCIATED // C_ASSOCIATED intrinsic (Section 15.2.5)
+    | C_F_POINTER  // C_F_POINTER intrinsic (Section 15.2.5)
+    | C_F_PROCPOINTER // C_F_PROCPOINTER intrinsic (Section 15.2.5)
     ;
 
 // ====================================================================
