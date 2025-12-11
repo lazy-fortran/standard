@@ -109,10 +109,23 @@ class TestBasicF2018Features:
             assert f2018_tree is not None, "F2018 should parse F2008 code"
             assert f2018_errors == f2008_errors, \
                 f"F2018 errors ({f2018_errors}) should match F2008 ({f2008_errors}) once coarray support is aligned"
-                
+
         except ImportError:
             pytest.skip("F2008 parser not available for comparison")
-    
+
+    def test_allocate_statement_enhanced_specifiers(self):
+        """REAL TEST: Verify F2018 ALLOCATE R927/R928 specifiers parse (issue #585)"""
+        code = load_fixture(
+            "Fortran2018",
+            "test_basic_f2018_features",
+            "enhanced_allocate.f90",
+        )
+
+        tree, errors = self.parse_code(code)
+
+        assert tree is not None, "ALLOCATE specifiers fixture should produce a parse tree"
+        assert errors == 0, f"Enhanced ALLOCATE specifiers should parse without errors, got {errors}"
+
     def test_complex_program_structure_limitations(self):
         """REAL TEST: Document known program structure parsing limitations"""
         code = load_fixture(

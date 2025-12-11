@@ -438,9 +438,33 @@ Gaps:
   - It does not enforce that STOP/ERROR STOP codes satisfy all
     constraints; it only accepts the syntactic forms.
 
+## 9. ALLOCATE statement coverage (ISO/IEC 1539-1:2018 R927-R928)
+
+Specification:
+
+- R927: `allocate-stmt` allows `ALLOCATE ([type-spec ::] allocation-list [, alloc-opt-list])`.
+- R928: `alloc-opt` consists of exactly `STAT=stat-variable`, `ERRMSG=errmsg-variable`,
+  `SOURCE=source-expr`, or `MOLD=source-expr`, mirroring the F2018 clause.
+
+Grammar implementation:
+
+- F2018 routes ALLOCATE statements to `allocate_stmt_f2008`, which already implements R927.
+- `alloc_opt_list` and `alloc_opt` are inherited from `Fortran2003Parser.g4`, so the four R928 specifiers are present.
+- `identifier_or_keyword` recognizes `STAT`, `ERRMSG`, `SOURCE`, and `MOLD` so they can appear as either alloc-opt keywords or variable names.
+
+Tests:
+
+- `tests/Fortran2018/test_basic_f2018_features.py::test_allocate_statement_enhanced_specifiers`
+  parses `tests/fixtures/Fortran2018/test_basic_f2018_features/enhanced_allocate.f90`
+  and exercises `STAT=`, `ERRMSG=`, `SOURCE=`, and `MOLD=` forms. That fixture documents the current syntax coverage and confirms issue #585.
+
+Gaps:
+
+- None at the syntactic level for R927/R928 now that this verification exists; remaining ALLOCATE work is in semantic validation (e.g., forbidding conflicting SOURCE/MOLD pairs or checking STAT/ERRMSG usage).
+
 ---
 
-## 9. Inheritance from F2008 and control‑flow tests
+## 10. Inheritance from F2008 and control‑flow tests
 
 Specification:
 
@@ -472,7 +496,7 @@ Gaps:
 
 ---
 
-## 10. Summary and issue mapping
+## 11. Summary and issue mapping
 
 The Fortran 2018 layer in this repository:
 
