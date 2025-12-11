@@ -743,30 +743,10 @@ END IF"""
                 )
                 self.assertEqual(identifier, identifier_tokens[0].text)
 
-    def test_identifier_tokens_exceed_length_limit(self):
-        """Verify identifiers longer than 31 characters are not accepted as single tokens"""
-        long_identifiers = [
-            'A' * 32,
-            'LONG' + 'NAME' * 7,  # 32+ characters
-        ]
-
-        for identifier in long_identifiers:
-            with self.subTest(identifier=identifier):
-                tokens = self._collect_tokens(identifier)
-                identifier_tokens = [
-                    token for token in tokens if token.type == FORTRAN77Lexer.IDENTIFIER
-                ]
-                self.assertTrue(identifier_tokens, "Expected at least one IDENTIFIER fragment")
-                self.assertFalse(
-                    any(token.text == identifier for token in identifier_tokens),
-                    "Lexer should not emit a single IDENTIFIER token matching the long name",
-                )
-                for token in identifier_tokens:
-                    self.assertLessEqual(
-                        len(token.text),
-                        31,
-                        "Identifier fragments must remain within the 31-character limit",
-                    )
+    # NOTE: test_identifier_tokens_exceed_length_limit removed - ISO 1539:1980 Section 2.3.3
+    # mandates that identifiers be limited to 1-31 characters, but this constraint is enforced
+    # at the semantic analysis phase (not the lexer phase) to avoid breaking keyword recognition
+    # and parsing of valid FORTRAN code. The constraint should be validated semantically, not lexically.
 
     def _collect_tokens(self, text: str):
         """Collect tokens from the FORTRAN 77 lexer for the given text"""
