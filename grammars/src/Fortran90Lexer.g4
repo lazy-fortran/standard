@@ -402,6 +402,9 @@ ACTION          : A C T I O N ;
 DELIM           : D E L I M ;
 // PAD= specifier - ISO/IEC 1539:1991 Section 9.7.1.15 (F90)
 PAD             : P A D ;
+// IOLENGTH= specifier - ISO/IEC 1539:1991 Section 9.7.3, R931
+IOLENGTH        : ('i'|'I') ('o'|'O') ('l'|'L') ('e'|'E') ('n'|'N')
+                  ('g'|'G') ('t'|'T') ('h'|'H') ;
 // EXIST= specifier (INQUIRE) - ISO/IEC 1539:1991 Section 9.7.3.4
 EXIST           : E X I S T ;
 // OPENED= specifier (INQUIRE) - ISO/IEC 1539:1991 Section 9.7.3.5
