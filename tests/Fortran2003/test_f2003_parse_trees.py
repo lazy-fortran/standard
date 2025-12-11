@@ -60,12 +60,7 @@ class TestFortran2003ParseTrees:
     def test_class_declaration_parse_tree(self):
         """NON-SHALLOW: Validate CLASS declaration creates correct parse tree structure."""
         code = "class(integer), pointer :: obj"
-
-        try:
-            tree, errors, parser = self.parse_and_validate(code, 'class_declaration_stmt')
-        except AttributeError as e:
-            pytest.skip(f"CLASS declaration rule not available: {e}")
-            return
+        tree, errors, parser = self.parse_and_validate(code, 'class_declaration_stmt')
 
         assert errors == 0, f"Expected no parse errors, got {errors}"
         assert tree is not None, "Parse tree should not be None"
@@ -79,12 +74,7 @@ class TestFortran2003ParseTrees:
     def test_procedure_pointer_semantics(self):
         """NON-SHALLOW: Validate procedure pointer creates semantically correct parse tree."""
         code = "procedure(interface), pointer :: proc_ptr\n"
-
-        try:
-            tree, errors, parser = self.parse_and_validate(code, 'procedure_declaration_stmt')
-        except AttributeError as e:
-            pytest.skip(f"Procedure pointer rule not available: {e}")
-            return
+        tree, errors, parser = self.parse_and_validate(code, 'procedure_declaration_stmt')
 
         assert errors == 0, f"Expected no parse errors, got {errors}"
 
@@ -97,12 +87,7 @@ class TestFortran2003ParseTrees:
     def test_associate_construct_structure(self):
         """NON-SHALLOW: Validate ASSOCIATE construct parse tree semantics."""
         code = "associate (x => y)\nend associate\n"
-
-        try:
-            tree, errors, parser = self.parse_and_validate(code, 'associate_construct')
-        except AttributeError as e:
-            pytest.skip(f"ASSOCIATE construct rule not available: {e}")
-            return
+        tree, errors, parser = self.parse_and_validate(code, 'associate_construct')
 
         assert errors == 0, f"Expected no parse errors, got {errors}"
 
@@ -125,12 +110,7 @@ class TestFortran2003ParseTrees:
     def test_enhanced_allocate_semantics(self):
         """NON-SHALLOW: Validate enhanced ALLOCATE with SOURCE/MOLD semantics."""
         code = "allocate(array, source=source_array)\n"
-
-        try:
-            tree, errors, parser = self.parse_and_validate(code, 'allocate_stmt_f2003')
-        except AttributeError as e:
-            pytest.skip(f"Enhanced ALLOCATE rule not available: {e}")
-            return
+        tree, errors, parser = self.parse_and_validate(code, 'allocate_stmt_f2003')
 
         assert errors == 0, f"Expected no parse errors, got {errors}"
 
@@ -143,12 +123,7 @@ class TestFortran2003ParseTrees:
     def test_oop_type_definition_structure(self):
         """NON-SHALLOW: Validate object-oriented TYPE definition parse tree."""
         code = "type, extends(parent_type) :: child_type\nend type\n"
-
-        try:
-            tree, errors, parser = self.parse_and_validate(code, 'derived_type_def_f2003')
-        except AttributeError as e:
-            pytest.skip(f"OOP type definition rule not available: {e}")
-            return
+        tree, errors, parser = self.parse_and_validate(code, 'derived_type_def_f2003')
 
         assert errors == 0, f"Expected no parse errors, got {errors}"
 
@@ -164,12 +139,7 @@ class TestFortran2003ParseTrees:
     def test_abstract_interface_semantics(self):
         """NON-SHALLOW: Validate ABSTRACT INTERFACE creates correct parse tree."""
         code = "abstract interface\nsubroutine abstract_sub()\nend subroutine\nend interface\n"
-
-        try:
-            tree, errors, parser = self.parse_and_validate(code, 'interface_block')
-        except AttributeError as e:
-            pytest.skip(f"Abstract interface rule not available: {e}")
-            return
+        tree, errors, parser = self.parse_and_validate(code, 'interface_block')
 
         assert errors == 0, f"Expected no parse errors, got {errors}"
 
@@ -185,6 +155,9 @@ class TestFortran2003ParseTrees:
         """NON-SHALLOW: Test multiple F2003 features in combination."""
         # This tests the integration of multiple F2003 features
         features_found = []
+        rules = ['class_declaration_stmt', 'procedure_declaration_stmt', 'volatile_stmt', 'protected_stmt']
+        missing_rules = [rule for rule in rules if not hasattr(self.parser_class, rule)]
+        assert not missing_rules, f"Missing expected F2003 parser rules: {missing_rules}"
         
         test_cases = [
             ("class(integer), pointer :: obj", "CLASS declaration"),
@@ -194,12 +167,8 @@ class TestFortran2003ParseTrees:
         ]
         
         for code, feature_name in test_cases:
-            for rule in ['class_declaration_stmt', 'procedure_declaration_stmt', 'volatile_stmt', 'protected_stmt']:
-                try:
-                    tree, errors, parser = self.parse_and_validate(code, rule)
-                except AttributeError:
-                    continue
-
+            for rule in rules:
+                tree, errors, parser = self.parse_and_validate(code, rule)
                 if errors == 0 and tree is not None:
                     tree_text = str(tree.getText()) if tree else ""
                     if tree_text.strip():
