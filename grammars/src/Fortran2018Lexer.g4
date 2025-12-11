@@ -37,12 +37,12 @@ CO_BROADCAST     : C O '_' B R O A D C A S T ;
 // ISO/IEC 1539-1:2018 Section 16.9.73: FAILED_IMAGES
 // ISO/IEC 1539-1:2018 Section 16.9.81: IMAGE_STATUS
 // ISO/IEC 1539-1:2018 Section 16.9.182: STOPPED_IMAGES
+// Note: IMAGE_STATUS_FAILED and IMAGE_STATUS_STOPPED are NOT in the standard
+// and have been removed (see issue #386).
 // ----------------------------------------------------------------------------
 IMAGE_STATUS     : I M A G E '_' S T A T U S ;
 FAILED_IMAGES    : F A I L E D '_' I M A G E S ;
 STOPPED_IMAGES   : S T O P P E D '_' I M A G E S ;
-IMAGE_STATUS_FAILED    : I M A G E '_' S T A T U S '_' F A I L E D ;
-IMAGE_STATUS_STOPPED   : I M A G E '_' S T A T U S '_' S T O P P E D ;
 
 // ----------------------------------------------------------------------------
 // SELECT RANK Construct (NEW in F2018)
