@@ -1407,6 +1407,70 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
                 self.assertIsNotNone(tree, f"Failed to parse: {decl}")
 
 
+    def test_hollerith_constants_valid(self):
+        """Test valid Hollerith constants in FORMAT statements.
+
+        Per ANSI X3.9-1966 Section 4.7, Hollerith format is nHxxx where:
+        - n is an unsigned integer constant
+        - xxx are exactly n characters
+        """
+        test_cases = [
+            # Basic Hollerith constants
+            ("10 FORMAT(5HHELLO)", "5HHELLO"),
+            ("10 FORMAT(1H*)", "1H*"),
+            ("10 FORMAT(10HFORTRAN 66)", "10HFORTRAN 66"),
+            ("10 FORMAT(3H***)", "3H***"),
+            # Hollerith with spaces
+            ("10 FORMAT(11HHELLO WORLD)", "11HHELLO WORLD"),
+            # Multiple Hollerith constants
+            ("10 FORMAT(5HHELLO, 6HWORLD!)", "5HHELLO"),
+            # Hollerith with mixed content
+            ("10 FORMAT(7HX = 1.5)", "7HX = 1.5"),
+        ]
+
+        for text, expected_hollerith in test_cases:
+            with self.subTest(format_text=text):
+                tree = self.parse(text, 'fortran66_program')
+                self.assertIsNotNone(tree)
+                tree_text = str(tree.toStringTree(
+                    recog=FORTRAN66Parser
+                ))
+                self.assertIn(expected_hollerith, tree_text)
+
+    def test_hollerith_constants_invalid_count(self):
+        """Test that Hollerith with mismatched count are recognized.
+
+        These should either be rejected at lexer level or flagged
+        as non-compliant with ANSI X3.9-1966 Section 4.7.
+
+        KNOWN LIMITATION: Lexer accepts these due to greedy matching.
+        A semantic pass is needed to properly validate count.
+        """
+        # These are currently accepted by the lexer but are
+        # not X3.9-1966 compliant
+        invalid_cases = [
+            # Count too high (n=5 but only 4 chars)
+            "10 FORMAT(5HHELL)",
+            # Count too low (n=3 but 5 chars)
+            "10 FORMAT(3HHELLO)",
+            # Zero count (should be at least 1)
+            "10 FORMAT(0H)",
+        ]
+
+        for text in invalid_cases:
+            with self.subTest(invalid_format=text):
+                # For now, just verify these parse (lexer accepts them)
+                # A semantic validation pass should reject them
+                try:
+                    tree = self.parse(text, 'fortran66_program')
+                    # Document that these parse despite being invalid
+                    # per ISO standard
+                except Exception:
+                    # If parser rejects, that's also acceptable
+                    # and indicates semantic validation is working
+                    pass
+
+
 if __name__ == "__main__":
     # Run with verbose output to see which tests fail
     unittest.main(verbosity=2)
