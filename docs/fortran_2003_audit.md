@@ -359,33 +359,31 @@ Gaps that warrant explicit issues:
 
 ---
 
-## 6. ASSOCIATE, BLOCK, and control constructs
+## 6. ASSOCIATE, SELECT TYPE, and control constructs
 
 Specification:
 
 - F2003 adds:
   - `ASSOCIATE` constructs:
     - `ASSOCIATE (name => expr, ...)` and a corresponding `END ASSOCIATE`.
-  - `BLOCK` constructs:
-    - `BLOCK`/`END BLOCK` with local declarations and execution blocks.
+  - `SELECT TYPE` constructs:
+    - `SELECT TYPE (name => selector)` dispatch with `TYPE IS`/`CLASS IS` guards.
 - Traditional control constructs (IF, DO, SELECT CASE) remain from
   F90/F95 and are augmented by the new constructs.
 
 Grammar implementation:
 
-- `associate_construct` and `block_construct` appear in
-  `executable_construct_f2003_inner` alongside inherited IF/DO/SELECT
-  CASE constructs.
+- `associate_construct` and `select_type_construct` appear in
+  `executable_construct_f2003_inner` alongside inherited IF/DO/SELECT CASE constructs.
 - Rules include binding lists, inner specification parts, and nested
   executable constructs.
 
 Tests:
 
 - `test_fortran_2003_comprehensive.py`:
-  - `associate_construct.f90` and `block_construct.f90` fixtures are
-    parsed via `program_unit_f2003`.
-- Additional tests combine ASSOCIATE/BLOCK with polymorphism and
-  SELECT TYPE (e.g. in `advanced_f2003.f90`).
+  - `associate_construct.f90` fixture is parsed via `program_unit_f2003`.
+- Additional tests combine ASSOCIATE and SELECT TYPE with polymorphism
+  (e.g. in `advanced_f2003.f90`).
 
 Gaps:
 
@@ -784,7 +782,7 @@ The Fortran 2003 layer in this repository:
   - Polymorphism via CLASS, CLASS(*), and SELECT TYPE.
   - Parameterized derived types and PDT structure constructors.
   - Procedure pointers and abstract interfaces.
-  - ASSOCIATE and BLOCK constructs.
+  - ASSOCIATE constructs.
   - Enhanced ALLOCATE/DEALLOCATE with SOURCE, MOLD, STAT, ERRMSG.
   - F2003 I/O (WAIT, FLUSH, extended OPEN/READ/WRITE/CLOSE) and
     generic defined derived‑type I/O at the READ/WRITE level.
@@ -831,7 +829,7 @@ Existing umbrella issues relevant to this audit:
     - Parameterized derived types (Section 4.5.3)
     - Type-bound procedures (Section 4.5.4)
     - Type extension and polymorphism (Section 4.5.6)
-    - ASSOCIATE and BLOCK constructs (Section 8.1.3, 8.1.4)
+    - ASSOCIATE constructs (Section 8.1.3)
     - SELECT TYPE (Section 8.1.5)
     - Procedure pointers and interfaces (Section 12.3.2)
     - Enhanced I/O (Section 9)

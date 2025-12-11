@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TDD tests for Issue #25 - PROGRAM, ASSOCIATE, BLOCK constructs"""
+"""TDD tests for Issue #25 - PROGRAM and ASSOCIATE constructs"""
 
 import sys
 import pytest
@@ -59,17 +59,6 @@ class TestIssue25TDD:
         tree, errors = self.parse_code(code)
         assert errors == 0, f"Minimal ASSOCIATE should parse, got {errors}"
     
-    def test_minimal_block_construct(self):
-        """RED: Minimal BLOCK should parse"""
-        code = load_fixture(
-            "Fortran2003",
-            "test_issue25_tdd",
-            "minimal_block_construct.f90",
-        )
-        
-        tree, errors = self.parse_code(code)
-        assert errors == 0, f"Minimal BLOCK should parse, got {errors}"
-    
     def test_associate_with_identifier_alias(self):
         """RED: ASSOCIATE with simple identifier"""
         code = load_fixture(
@@ -81,19 +70,8 @@ class TestIssue25TDD:
         tree, errors = self.parse_code(code)
         assert errors == 0, f"ASSOCIATE with identifier should parse, got {errors}"
     
-    def test_block_with_local_declaration(self):
-        """RED: BLOCK with local variable"""
-        code = load_fixture(
-            "Fortran2003",
-            "test_issue25_tdd",
-            "block_with_local_var.f90",
-        )
-        
-        tree, errors = self.parse_code(code)
-        assert errors == 0, f"BLOCK with local declaration should parse, got {errors}"
-    
     def test_named_constructs(self):
-        """RED: Named ASSOCIATE and BLOCK"""
+        """RED: Named ASSOCIATE"""
         code = load_fixture(
             "Fortran2003",
             "test_issue25_tdd",

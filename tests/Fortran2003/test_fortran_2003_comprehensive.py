@@ -80,15 +80,6 @@ class TestFortran2003Unified:
         )
         self.parse_fortran_code(code)
     
-    def test_block_construct(self):
-        """Test F2003 BLOCK construct."""
-        code = load_fixture(
-            "Fortran2003",
-            "test_fortran_2003_comprehensive",
-            "block_construct.f90",
-        )
-        self.parse_fortran_code(code)
-    
     def test_procedure_pointers(self):
         """Test F2003 procedure pointers."""
         code = load_fixture(

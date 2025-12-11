@@ -33,7 +33,7 @@ options {
 // - C interoperability: BIND(C), ISO_C_BINDING (Section 15)
 // - IEEE arithmetic modules (Section 14)
 // - Enhanced ALLOCATE with SOURCE/MOLD (Section 6.3.1)
-// - ASSOCIATE and BLOCK constructs (Section 8.1.3, 8.1.4)
+// - ASSOCIATE constructs (Section 8.1.3)
 // - Enhanced I/O: WAIT, FLUSH, stream I/O (Section 9)
 // - IMPORT statement (Section 12.3.2.1)
 // - VOLATILE and PROTECTED attributes (Section 5.1.2)
@@ -379,12 +379,11 @@ declaration_construct_f2003
 // ISO/IEC 1539-1:2004 Section 2.1 defines execution part.
 // - R208 (execution-part) -> executable-construct [execution-part-construct]...
 // - R213 (executable-construct) -> action-stmt | associate-construct
-//                                | block-construct | case-construct
+//                                | case-construct
 //                                | critical-construct | do-construct
 //                                | forall-construct | if-construct
 //                                | select-type-construct | where-construct
-// F2003 adds ASSOCIATE (Section 8.1.3), BLOCK (Section 8.1.4),
-// SELECT TYPE (Section 8.1.5)
+// F2003 adds ASSOCIATE (Section 8.1.3) and SELECT TYPE (Section 8.1.5)
 
 // Execution part (ISO/IEC 1539-1:2004 R208)
 execution_part_f2003
@@ -404,7 +403,6 @@ executable_construct_f2003_inner
     | stop_stmt
     | select_type_construct         // SELECT TYPE (Section 8.1.5)
     | associate_construct           // ASSOCIATE (Section 8.1.3)
-    | block_construct               // BLOCK (Section 8.1.4)
     | allocate_stmt_f2003           // Enhanced ALLOCATE (Section 6.3.1)
     | wait_stmt                     // WAIT (Section 9.6)
     | flush_stmt                    // FLUSH (Section 9.7)
@@ -796,24 +794,6 @@ association
 // R819: selector -> expr | variable
 selector
     : expr_f2003
-    ;
-
-// ====================================================================
-// BLOCK CONSTRUCT (ISO/IEC 1539-1:2004 Section 8.1.4)
-// ====================================================================
-//
-// F2003 introduces the BLOCK construct for local scoping.
-// - R807 (block-construct) -> block-stmt [specification-part]
-//                             [execution-part] end-block-stmt
-// - R808 (block-stmt) -> [block-construct-name :] BLOCK
-// - R809 (end-block-stmt) -> END BLOCK [block-construct-name]
-
-// Block construct (ISO/IEC 1539-1:2004 R807)
-block_construct
-    : (IDENTIFIER COLON)? BLOCK NEWLINE
-      specification_part_f2003?
-      execution_part_f2003?
-      END BLOCK (IDENTIFIER)? NEWLINE?
     ;
 
 // ====================================================================
@@ -1690,7 +1670,6 @@ executable_construct
     | print_stmt
     | stop_stmt
     | associate_construct
-    | block_construct
     | allocate_stmt_f2003
     | deallocate_stmt
     | move_alloc_stmt
@@ -1867,7 +1846,7 @@ do_body_f2003
     | move_alloc_stmt
     | if_construct
     | do_construct
-    | block_construct)*
+    )*
     ;
 
 // CASE construct (ISO/IEC 1539-1:2004 R808)

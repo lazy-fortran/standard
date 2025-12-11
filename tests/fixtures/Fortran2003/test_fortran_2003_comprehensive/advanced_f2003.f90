@@ -54,6 +54,7 @@ contains
     subroutine demonstrate_features()
         type(circle_t), allocatable :: shapes(:)
         integer :: i
+        real :: total_area
 
         ! Enhanced allocate with source
         allocate(shapes, source=[circle_t(1, 5.0, [0.0, 0.0]), &
@@ -64,20 +65,15 @@ contains
             call shapes(i)%draw()
         end do
 
-        ! Block construct with local variables
-        block
-            real :: total_area
-            total_area = 0.0
+        total_area = 0.0
 
-            do i = 1, size(shapes)
-                total_area = total_area + 3.14159 * shapes(i)%radius**2
-            end do
+        do i = 1, size(shapes)
+            total_area = total_area + 3.14159 * shapes(i)%radius**2
+        end do
 
-            print *, 'Total area:', total_area
-        end block
+        print *, 'Total area:', total_area
 
         deallocate(shapes)
     end subroutine demonstrate_features
 
 end module advanced_f2003
-
