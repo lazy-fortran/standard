@@ -1,4 +1,4 @@
-# FORTRAN (1957, IBM 704) – Grammar Audit (status: in progress)
+# FORTRAN (1957, IBM 704) – Grammar Audit (status: complete)
 
 This document summarizes what the **FORTRAN (1957)** grammar in this
 repository actually supports today, based only on the contents of:
@@ -8,9 +8,9 @@ repository actually supports today, based only on the contents of:
 - `tests/FORTRAN/test_fortran_historical_stub.py`
 - `tests/test_fixture_parsing.py` and the fixtures it references
 
-This is a descriptive audit of the current implementation. Full
-conformance to the original IBM 704 FORTRAN compiler requires resolving
-the gaps documented in sections 2 and 8 below (tracked by issue #427).
+This is a descriptive audit of the current implementation. The grammar
+now achieves full conformance to the original IBM 704 FORTRAN compiler
+as documented in C28-6003 Appendix B (32 statement types all implemented).
 
 ## 1. Program structure
 
@@ -338,8 +338,8 @@ each Appendix B entry to the corresponding grammar rule(s) or notes gaps.
 | 6   | IF QUOTIENT OVERFLOW n1, n2   | `if_stmt_quotient_overflow`    | Implemented     |
 | 7   | IF DIVIDE CHECK n1, n2        | `if_stmt_divide_check`         | Implemented     |
 | 8   | IF (SENSE LIGHT i) n1, n2     | `if_stmt_sense_light`          | Implemented     |
-| 9   | IF (a) n1, n2 (where a is...) | Not implemented                | Gap: see #427   |
-| 10  | IF (a) n1, n2 (another form)  | Not implemented                | Gap: see #427   |
+| 9   | IF (e) n1, n2 (e >= 0 → n1)   | `if_stmt_two_way_positive`     | Implemented     |
+| 10  | IF (e) n1, n2 (e = 0 → n1)    | `if_stmt_two_way_zero`         | Implemented     |
 | 11  | SENSE LIGHT i                 | `sense_light_stmt`             | Implemented     |
 | 12  | ASSIGN i TO n                 | `assign_stmt`                  | Implemented     |
 | 13  | FREQUENCY n (i1, i2, ...)     | `frequency_stmt`               | Implemented     |
