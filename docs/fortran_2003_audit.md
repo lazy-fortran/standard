@@ -12,9 +12,9 @@ Because the OCR’d text file is currently empty
 itself and the standard’s well‑known feature set as the primary reference
 and cross‑checks against:
 
-- `grammars/Fortran2003Lexer.g4`, `grammars/Fortran2003Parser.g4`
+- `grammars/src/Fortran2003Lexer.g4`, `grammars/src/Fortran2003Parser.g4`
 - Inherited grammars:
-  - `grammars/Fortran95Lexer.g4`, `grammars/Fortran95Parser.g4`
+  - `grammars/src/Fortran95Lexer.g4`, `grammars/src/Fortran95Parser.g4`
 - Tests under `tests/Fortran2003/`
   - `test_fortran_2003_comprehensive.py`
   - `test_simple_f2003.py`, `test_working_f2003.py`

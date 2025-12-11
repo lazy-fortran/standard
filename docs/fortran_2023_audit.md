@@ -10,9 +10,9 @@ implements and how it relates to the Fortran 2023 language as defined in:
 The OCR'd `.txt` file is currently empty, so this audit uses the known
 F2023 feature set plus the local PDF and compares that to:
 
-- `grammars/Fortran2023Lexer.g4`, `grammars/Fortran2023Parser.g4`
+- `grammars/src/Fortran2023Lexer.g4`, `grammars/src/Fortran2023Parser.g4`
 - Inherited grammars:
-  - `grammars/Fortran2018Lexer.g4`, `grammars/Fortran2018Parser.g4`
+  - `grammars/src/Fortran2018Lexer.g4`, `grammars/src/Fortran2018Parser.g4`
 - Tests under:
   - `tests/Fortran2023/test_fortran_2023_comprehensive.py`
   - Generic fixture harness: `tests/test_fixture_parsing.py` and
