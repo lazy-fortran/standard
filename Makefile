@@ -9,7 +9,7 @@ GRAMMAR_SRC = $(GRAMMAR_DIR)/src
 GRAMMAR_GEN_EARLY = $(GRAMMAR_DIR)/generated/early
 GRAMMAR_GEN_MODERN = $(GRAMMAR_DIR)/generated/modern
 TEST_DIR = tests
-PYTEST = python -m pytest -n auto
+	PYTEST = python -m pytest
 
 # Detect whether a Java runtime is available for ANTLR regeneration.
 # If Java is not available, existing generated lexer/parser sources are used.
