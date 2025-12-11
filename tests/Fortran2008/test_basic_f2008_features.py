@@ -355,6 +355,19 @@ class TestBasicF2008Features:
             f"Expected 0 errors for EXECUTE_COMMAND_LINE test, got {errors}"
         )
 
+    def test_impure_elemental_procedures(self):
+        """Test IMPURE ELEMENTAL procedures (ISO/IEC 1539-1:2010 Section 12.7)"""
+        code = load_fixture(
+            "Fortran2008",
+            "test_basic_f2008_features",
+            "impure_elemental.f90",
+        )
+        tree, errors = self.parse_code(code)
+        assert tree is not None, "IMPURE ELEMENTAL procedures failed to produce parse tree"
+        assert errors == 0, (
+            f"Expected 0 errors for IMPURE ELEMENTAL procedures test, got {errors}"
+        )
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
