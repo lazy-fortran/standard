@@ -251,6 +251,22 @@ BGT              : B G T ;
 BLE              : B L E ;
 BLT              : B L T ;
 
+// Advanced bit manipulation intrinsics (Section 13.7.50-51, 103, 112, 133-134, 168)
+// - DSHIFTL(I,J,SHIFT): Combined left shift (Section 13.7.50)
+// - DSHIFTR(I,J,SHIFT): Combined right shift (Section 13.7.51)
+// - LEADZ(I): Number of leading zero bits (Section 13.7.103)
+// - MERGE_BITS(I,J,MASK): Merge bits under mask (Section 13.7.112)
+// - POPCNT(I): Population count (Section 13.7.133)
+// - POPPAR(I): Population parity (Section 13.7.134)
+// - TRAILZ(I): Number of trailing zero bits (Section 13.7.168)
+DSHIFTL          : D S H I F T L ;
+DSHIFTR          : D S H I F T R ;
+LEADZ            : L E A D Z ;
+MERGE_BITS       : M E R G E '_' B I T S ;
+POPCNT           : P O P C N T ;
+POPPAR           : P O P P A R ;
+TRAILZ           : T R A I L Z ;
+
 // ============================================================================
 // ATOMIC INTRINSICS (ISO/IEC 1539-1:2010 Section 13.7.19-13.7.21)
 // ============================================================================
