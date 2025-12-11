@@ -10,8 +10,8 @@ in the local copy of the standard:
 
 The implementation view is based on:
 
-- `grammars/FORTRAN77Lexer.g4`, `grammars/FORTRAN77Parser.g4`
-- Inherited grammars (`FORTRAN66Lexer.g4`, `FORTRAN66Parser.g4`)
+- `grammars/src/FORTRAN77Lexer.g4`, `grammars/src/FORTRAN77Parser.g4`
+- Inherited grammars (`grammars/src/FORTRAN66Lexer.g4`, `grammars/src/FORTRAN66Parser.g4`)
 - `docs/fixed_form_support.md`
 - Tests under `tests/FORTRAN77/`
 - XPASS fixtures in `tests/test_fixture_parsing.py`

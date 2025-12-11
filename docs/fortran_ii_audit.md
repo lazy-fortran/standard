@@ -4,7 +4,7 @@ This document describes what the **FORTRAN II** grammar in this
 repository currently supports, based on:
 
 - `grammars/src/FORTRANIILexer.g4`, `grammars/src/FORTRANIIParser.g4`
-- `grammars/FORTRANLexer.g4`, `grammars/FORTRANParser.g4`
+- `grammars/src/FORTRANLexer.g4`, `grammars/src/FORTRANParser.g4`
 - `docs/fixed_form_support.md`
 - `tests/FORTRANII/test_fortran_ii_parser.py`
 - `tests/test_fixture_parsing.py` (XPASS fixtures)

@@ -3,7 +3,7 @@
 This document summarizes what the **FORTRAN (1957)** grammar in this
 repository actually supports today, based only on the contents of:
 
-- `grammars/FORTRANLexer.g4`, `grammars/FORTRANParser.g4`
+- `grammars/src/FORTRANLexer.g4`, `grammars/src/FORTRANParser.g4`
 - `docs/fixed_form_support.md`
 - `tests/FORTRAN/test_fortran_historical_stub.py`
 - `tests/test_fixture_parsing.py` and the fixtures it references

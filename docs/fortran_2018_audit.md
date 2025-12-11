@@ -10,9 +10,9 @@ implements and how it relates to the Fortran 2018 language as defined in:
 The OCR’d `.txt` file is currently empty, so this audit uses the known
 F2018 feature set plus the local PDF and compares that to:
 
-- `grammars/Fortran2018Lexer.g4`, `grammars/Fortran2018Parser.g4`
+- `grammars/src/Fortran2018Lexer.g4`, `grammars/src/Fortran2018Parser.g4`
 - Inherited grammars:
-  - `grammars/Fortran2008Lexer.g4`, `grammars/Fortran2008Parser.g4`
+  - `grammars/src/Fortran2008Lexer.g4`, `grammars/src/Fortran2008Parser.g4`
 - Tests under `tests/Fortran2018/`:
   - `test_basic_f2018_features.py`
   - `test_issue61_teams_and_collectives.py`

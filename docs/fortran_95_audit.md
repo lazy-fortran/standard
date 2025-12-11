@@ -11,9 +11,9 @@ implements and how it relates to the Fortran 95 language as defined in:
 
 The implementation view is based on:
 
-- `grammars/Fortran95Lexer.g4`, `grammars/Fortran95Parser.g4`
+- `grammars/src/Fortran95Lexer.g4`, `grammars/src/Fortran95Parser.g4`
 - Inherited F90 grammar:
-  - `grammars/Fortran90Lexer.g4`, `grammars/Fortran90Parser.g4`
+  - `grammars/src/Fortran90Lexer.g4`, `grammars/src/Fortran90Parser.g4`
 - Tests in `tests/Fortran95/test_fortran_95_features.py` and fixtures
   under `tests/fixtures/Fortran95/test_fortran_95_features/`
 

@@ -3,8 +3,8 @@
 This document summarizes the **FORTRAN 66** grammar implemented in this
 repository, based on:
 
-- `grammars/FORTRAN66Lexer.g4`, `grammars/FORTRAN66Parser.g4`
-- Inherited grammars (`FORTRANIILexer.g4`, `FORTRANIIParser.g4`)
+- `grammars/src/FORTRAN66Lexer.g4`, `grammars/src/FORTRAN66Parser.g4`
+- Inherited grammars (`grammars/src/FORTRANIILexer.g4`, `grammars/src/FORTRANIIParser.g4`)
 - `docs/fixed_form_support.md`
 - Tests in `tests/FORTRAN66/test_fortran66_parser.py`
 - XPASS fixtures listed in `tests/test_fixture_parsing.py`

@@ -9,7 +9,7 @@ locally:
 
 The implementation view is based on:
 
-- `grammars/Fortran90Lexer.g4`, `grammars/Fortran90Parser.g4`
+- `grammars/src/Fortran90Lexer.g4`, `grammars/src/Fortran90Parser.g4`
 - `docs/fixed_form_support.md`
 - `tests/Fortran90/test_fortran_90_comprehensive.py`
 - XPASS fixtures recorded in `tests/test_fixture_parsing.py`

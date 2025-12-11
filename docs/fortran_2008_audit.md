@@ -10,9 +10,9 @@ implements and how it relates to the Fortran 2008 language as defined in:
 The OCR’d `.txt` file is currently empty, so this audit uses the known
 F2008 feature set plus the local PDF and compares that to:
 
-- `grammars/Fortran2008Lexer.g4`, `grammars/Fortran2008Parser.g4`
+- `grammars/src/Fortran2008Lexer.g4`, `grammars/src/Fortran2008Parser.g4`
 - Inherited grammars:
-  - `grammars/Fortran2003Lexer.g4`, `grammars/Fortran2003Parser.g4`
+  - `grammars/src/Fortran2003Lexer.g4`, `grammars/src/Fortran2003Parser.g4`
 - Tests under `tests/Fortran2008/`:
   - `test_basic_f2008_features.py`
   - `test_f2008_coarrays.py`
