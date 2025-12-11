@@ -93,15 +93,21 @@ Type usage:
 **COMPLEX constants** (X3.9-1966 Section 4.4.2):
 
 - `complex_literal : LPAREN complex_part COMMA complex_part RPAREN`
-- `complex_part` supports signed integer and real parts.
+- `complex_part` restricts to signed integer and real literal parts.
 - Examples: `(1.0, 2.0)`, `(3, -4)`, `(-1.5E2, +2.5E-1)`.
-- Tests (`tests/FORTRAN66/test_fortran66_parser.py`):
-  - `test_complex_literals` covers all forms of complex constants as
-    literals (passing individual `(r,i)` forms to the `literal` rule).
-  - `test_complex_literals_in_assignment` exercises complex constants in
-    assignment statements.
-  - `test_complex_literals_in_data_statement` exercises complex constants
-    in DATA statements.
+
+**Semantic Constraint Enforcement (X3.9-1966 Section 4.4.2)**:
+- **Valid**: Both parts must be literal constants (e.g., `(1.0, 2.0)`, `(3, -4)`)
+- **Invalid (rejected by grammar)**: Expressions, variables, or array references
+  - Invalid examples: `(X, Y)` (variables), `(1+2, 3)` (expression), `(A(1), B(2))` (array)
+- **Grammar enforcement**: `complex_part` restricts to `signed_real_literal` or `signed_int_literal`,
+  rejecting non-literal tokens at the parse level.
+
+**Tests** (`tests/FORTRAN66/test_fortran66_parser.py`):
+- `test_complex_literals`: Valid complex constant forms as literals
+- `test_complex_literals_in_assignment`: Complex constants in assignment statements
+- `test_complex_literals_in_data_statement`: Complex constants in DATA statements
+- `test_complex_literals_invalid_forms`: Documents rejection of invalid forms (variables, expressions, array refs)
 
 - Tests:
   - `test_type_declarations` covers simple declarations such as:
