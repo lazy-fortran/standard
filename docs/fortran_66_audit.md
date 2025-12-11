@@ -289,6 +289,32 @@ Mapping these families to the current grammar:
     - DIMENSION:
       - Implemented by the inherited `dimension_stmt` / `array_declarator`
         and `dimension_list` rules.
+      - Syntax: `DIMENSION array-declarator, array-declarator, ...` where
+        `array-declarator` = `IDENTIFIER (dimension-list)`.
+      - Dimensions may be:
+        - Single bound: `d` (implicit 1 to d)
+        - Explicit bounds: `d1:d2` (lower bound d1 to upper bound d2)
+      - **SEMANTIC CONSTRAINTS (X3.9-1966 Section 5.3):**
+        - `d` (single bound) must be a positive integer constant
+        - `d2` (upper bound) must be positive (> 0)
+        - `d1` (lower bound) may be zero or positive
+        - `d2` must be >= `d1`
+        - Parser accepts syntax; constraint validation requires semantic pass
+      - Tests: covered by `test_dimension_statement_simple_bounds`,
+        `test_dimension_statement_explicit_bounds`,
+        `test_dimension_statement_multiple_declarators`,
+        `test_dimension_bounds_semantic_constraint_zero_upper`,
+        `test_dimension_bounds_in_typed_declaration`,
+        `test_dimension_bounds_variable_list_subscripting`, and
+        `test_dimension_statement_with_negative_bounds` in
+        `tests/FORTRAN66/test_fortran66_parser.py`.
+      - **NON-COMPLIANT with X3.9-1966 Section 5.3:**
+        - Parser currently accepts violations like:
+          - `DIMENSION A(0)` (zero upper bound)
+          - `DIMENSION B(-5)` (negative single bound)
+          - `DIMENSION C(10, 5)` (d2 < d1)
+        - These would require semantic validation to reject properly
+        - See issue #403 for tracking semantic validation work
     - EQUIVALENCE:
       - Implemented by `equivalence_stmt` / `equivalence_set`.
     - COMMON:
