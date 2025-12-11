@@ -2,24 +2,37 @@
 # VALIDATION DIRECTORY - NEVER COMMIT EXTERNAL/COPYRIGHTED CONTENT
 # =============================================================================
 # All content downloaded on-demand via validation/setup_validation.sh
-validation/pdfs/                    # ISO specification PDFs
-validation/pdfs/**                  # All files under pdfs/
-validation/txt/                     # Extracted standard text files
-validation/txt/**                   # All text extractions
-validation/cache/                   # Processing cache
-validation/cache/**
-validation/auto-generated/          # Generated reference grammars
-validation/auto-generated/**
-validation/external/                # Downloaded repos (kaby76/fortran, etc.)
-validation/external/**
-validation/dependencies/            # Downloaded .NET SDK and tools
-validation/dependencies/**
-validation/*.txt                    # Any text files in validation root
-validation/**/*.pdf                 # Any PDFs anywhere in validation
-validation/**/*J3*.txt              # J3 committee documents
-validation/**/*RFI*.txt             # Request for Interpretation documents
-validation/**/*ISO*.txt             # ISO standard extractions
-validation/**/*ANSI*.txt            # ANSI standard extractions
+
+# ISO specification PDFs
+validation/pdfs
+
+# Extracted standard text files
+validation/txt
+
+# Processing cache
+validation/cache
+
+# Generated reference grammars
+validation/auto-generated
+
+# Downloaded repos (kaby76/fortran, etc.)
+validation/external
+
+# Downloaded .NET SDK and tools
+validation/dependencies
+
+# Catch-all patterns for validation content
+# Any PDFs (standards are not stored in this repo)
+*.pdf
+
+# J3 committee documents anywhere
+**/J3*.txt
+
+# Request for Interpretation documents
+**/RFI*.txt
+
+# Standard extractions
+**/*_standard*.txt
 
 # =============================================================================
 # BUILD ARTIFACTS - GENERATED ANTLR4 FILES
