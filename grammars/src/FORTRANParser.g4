@@ -61,6 +61,8 @@ statement_body
     | assign_stmt                   // Appendix B row 12: ASSIGN i TO n
     | assigned_goto_stmt            // Appendix B row 2: GO TO n, (n1,...)
     | if_stmt_arithmetic            // Appendix B row 3: IF (e) n1,n2,n3
+    | if_stmt_two_way_positive      // Appendix B row 9: IF (e) n1, n2 (>= 0 branch n1)
+    | if_stmt_two_way_zero          // Appendix B row 10: IF (e) n1, n2 (= 0 branch n1)
     | if_stmt_sense_light           // Appendix B row 8: IF (SENSE LIGHT i)
     | if_stmt_sense_switch          // Appendix B row 4: IF (SENSE SWITCH i)
     | if_stmt_accumulator_overflow  // Appendix B row 5: IF ACCUMULATOR OVERFLOW
@@ -215,6 +217,25 @@ label_list
 // Branches to n1 if e<0, n2 if e=0, n3 if e>0
 if_stmt_arithmetic
     : IF LPAREN expr RPAREN label COMMA label COMMA label
+    ;
+
+// ============================================================================
+// TWO-LABEL IF STATEMENTS
+// C28-6003 Appendix B rows 9-10: Two-branch IF statements
+// ============================================================================
+
+// IF (e) n1, n2 - Appendix B row 9
+// C28-6003: Two-label arithmetic IF
+// If e >= 0, branch to n1; if e < 0, branch to n2
+if_stmt_two_way_positive
+    : IF LPAREN expr RPAREN label COMMA label
+    ;
+
+// IF (e) n1, n2 - Appendix B row 10
+// C28-6003: Two-label arithmetic IF (alternative form)
+// If e = 0, branch to n1; if e != 0, branch to n2
+if_stmt_two_way_zero
+    : IF LPAREN expr RPAREN label COMMA label
     ;
 
 // ============================================================================
