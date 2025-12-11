@@ -241,11 +241,14 @@ Mapping these families to the current grammar:
       variable and label.
     - STOP / PAUSE:
       - Implemented as `stop_stmt` and `pause_stmt` rules inherited
-        from FORTRAN II, with `integer_expr?` argument.
-  - Not fully aligned with X3.9‑1966:
-    - STOP/PAUSE octal restrictions and "only octal digits 0–7" rule
-      are not enforced; the grammar treats their arguments as generic
-      integer expressions.
+        from FORTRAN II, with `INTEGER_LITERAL?` argument (fixes #400).
+      - X3.9-1966 Section 7.1.2.5 specifies that codes must be 1-5 octal
+        digits (0-7 only).
+      - **Known limitation**: Parser accepts any INTEGER_LITERAL for
+        simplicity. Full octal validation (rejecting codes with digits 8-9
+        or >5 digits) would require semantic validation beyond ANTLR
+        parser capabilities. A semantic checker could enforce this
+        constraint if needed.
 
 - **Input/output statements**
   - Implemented:

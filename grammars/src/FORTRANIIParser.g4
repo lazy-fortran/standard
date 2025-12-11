@@ -327,12 +327,18 @@ do_stmt
 continue_stmt : CONTINUE ;
 
 // STOP statement - Appendix A: STOP [n]
-// Program termination with optional numeric code
-stop_stmt : STOP integer_expr? ;
+// Program termination with optional octal code
+// X3.9-1966 Section 7.1.2.5: n is 1-5 octal digits (0-7 only)
+// NOTE: Parser accepts any INTEGER_LITERAL; semantic validation required to
+// enforce octal range restriction (digits must be 0-7, max 5 digits)
+stop_stmt : STOP INTEGER_LITERAL? ;
 
 // PAUSE statement - Appendix A: PAUSE [n]
 // Operator intervention: halts and displays message to operator
-pause_stmt : PAUSE integer_expr? ;
+// X3.9-1966 Section 7.1.2.5: n is 1-5 octal digits (0-7 only)
+// NOTE: Parser accepts any INTEGER_LITERAL; semantic validation required to
+// enforce octal range restriction (digits must be 0-7, max 5 digits)
+pause_stmt : PAUSE INTEGER_LITERAL? ;
 
 // RETURN statement - C28-6000-2 Part I, Chapter 3, Section 3.4
 // Returns control from subroutine or function to caller (NEW in FORTRAN II)
