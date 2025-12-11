@@ -1608,12 +1608,13 @@ attr_spec_list
 // Attribute specification (ISO/IEC 1539-1:2004 R503)
 // R503: attr-spec -> ALLOCATABLE | ASYNCHRONOUS | BIND(C) | ...
 // F2003 adds VALUE (Section 15.3.5), VOLATILE (Section 5.1.2.16),
-// PROTECTED (Section 5.1.2.10)
+// PROTECTED (Section 5.1.2.10), and BIND(C) for variables (Section 15.3.4)
 attr_spec
     : PUBLIC
     | PRIVATE
     | ALLOCATABLE
     | ASYNCHRONOUS      // F2003 (Section 5.1.2.1)
+    | binding_spec      // F2003 BIND(C) for variables (Section 15.3.4)
     | POINTER
     | INTENT LPAREN intent_spec RPAREN
     | OPTIONAL
