@@ -773,6 +773,30 @@ END
                 tree = self.parse(text, 'assign_stmt')
                 self.assertIsNotNone(tree)
 
+    def test_unconditional_goto_variants(self):
+        """Verify both GOTO and GO TO unconditional statements parse"""
+        test_cases = [
+            "GOTO 100",
+            "GO TO 200"
+        ]
+
+        for text in test_cases:
+            with self.subTest(goto=text):
+                tree = self.parse(text, 'goto_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_computed_goto_variants(self):
+        """Verify both GOTO and GO TO computed branches parse"""
+        test_cases = [
+            "GOTO (100, 200), I",
+            "GO TO (300, 400), K"
+        ]
+
+        for text in test_cases:
+            with self.subTest(computed_goto=text):
+                tree = self.parse(text, 'computed_goto_stmt')
+                self.assertIsNotNone(tree)
+
     def test_assigned_goto_statement(self):
         """Test Assigned GO TO statement (ISO 1539:1980 Section 11.2)
 
@@ -783,9 +807,9 @@ END
         """
         test_cases = [
             "GO TO ILAB, (100, 200, 300)",
-            "GO TO TARGET, (10, 20)",
+            "GOTO TARGET, (10, 20)",
             "GO TO LABEL_VAR, (1, 2, 3, 4, 5)",
-            "GO TO X, (50)",
+            "GOTO X, (50)",
         ]
 
         for text in test_cases:

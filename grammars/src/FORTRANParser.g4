@@ -175,14 +175,14 @@ assignment_stmt
 // Unconditional GO TO - Appendix B row 1
 // C28-6003 Chapter II.G: GO TO n transfers to statement n
 goto_stmt
-    : GOTO label
+    : go_to_keyword label
     ;
 
 // Computed GO TO - Appendix B row 2
 // C28-6003 Chapter II.G: GO TO (n1, n2, ..., nm), i
 // Transfers to n1 if i=1, n2 if i=2, etc.
 computed_goto_stmt
-    : GOTO LPAREN label_list RPAREN COMMA expr
+    : go_to_keyword LPAREN label_list RPAREN COMMA expr
     ;
 
 // ASSIGN statement - Appendix B row 12
@@ -204,7 +204,13 @@ assign_stmt
 // 1539-1:2018 Annex B.2. Retained for historical accuracy only.
 // See docs/fortran_1957_audit.md for compliance details.
 assigned_goto_stmt
-    : GOTO variable COMMA LPAREN label_list RPAREN
+    : go_to_keyword variable COMMA LPAREN label_list RPAREN
+    ;
+
+// GO TO keyword - allows both the single-token GOTO and historic GO TO form
+go_to_keyword
+    : GOTO
+    | GO TO
     ;
 
 // Label list for computed/assigned GO TO

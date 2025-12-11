@@ -36,6 +36,7 @@ lexer grammar FORTRANLexer;
 // C28-6003 Appendix B: GO TO, IF, DO, CONTINUE, STOP, END statements
 IF           : I F ;        // Arithmetic IF (three-way branch) - Appendix B row 3
 GOTO         : G O T O ;    // Unconditional/computed GO TO - Appendix B rows 1-2
+GO           : G O ;        // GO keyword used in the historic "GO TO" statement form
 DO           : D O ;        // DO loops with statement labels - Appendix B row 18
 END          : E N D ;      // End of program - Appendix B row 32
 CONTINUE     : C O N T I N U E ; // DO loop continuation - Appendix B row 19
