@@ -701,6 +701,7 @@ array_expr
 primary
     : designator
     | complex_part_designator
+    | type_param_inquiry
     | identifier_or_keyword (PERCENT identifier_or_keyword)*
     | identifier_or_keyword LPAREN actual_arg_list? RPAREN
     | identifier_or_keyword DOUBLE_QUOTE_STRING

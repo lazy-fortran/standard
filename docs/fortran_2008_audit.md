@@ -511,6 +511,7 @@ The Fortran 2008 layer in this repository:
     (Section 13.7.41-42) with grammar coverage, fixture
     `compiler_inquiry_intrinsics.f90`, and issue #454.
   - Atomic subroutine intrinsics (`ATOMIC_DEFINE`/`ATOMIC_REF`, ISO/IEC 1539-1:2010 Sections 13.7.19-13.7.20) with lexer/parser coverage and fixture `atomic_intrinsics.f90` (#327).
+  - Type parameter inquiries (`type_param_inquiry`, R916) now parse `designator % type-param-name` expressions, and the new fixture `tests/fixtures/Fortran2008/test_issue572_type_param_inquiry/type_param_inquiry.f90` covers `%len_param` and `%kind_param` lookups; resolves Issue #572 for F2008.
   - Integration of all of the above into F2008 specification and
     execution parts and program units.
 

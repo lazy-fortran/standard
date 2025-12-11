@@ -1789,6 +1789,17 @@ complex_part_designator
     : designator_core PERCENT (RE | IM)
     ;
 
+// Type parameter inquiry (ISO/IEC 1539-1:2004 R916)
+// F2003 derives type parameters for parameterized derived types and
+// supports designator % type-param-name lookups.
+type_param_inquiry
+    : designator PERCENT type_param_name
+    ;
+
+type_param_name
+    : IDENTIFIER
+    ;
+
 // Left-hand side expression (variable reference)
 // ISO/IEC 1539-1:2004 R601: variable -> designator
 // F2003 adds component access and complex part selectors (Section 6.1.2.5)
@@ -1892,6 +1903,7 @@ case_value_list
 primary
     : pdt_structure_constructor
     | complex_part_designator
+    | type_param_inquiry
     | identifier_or_keyword (PERCENT identifier_or_keyword)*
     | identifier_or_keyword LPAREN actual_arg_list? RPAREN
     | identifier_or_keyword DOUBLE_QUOTE_STRING      // Prefixed string

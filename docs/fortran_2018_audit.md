@@ -637,6 +637,13 @@ The Fortran 2018 layer in this repository:
   - Assumed‑rank dummy arguments via DIMENSION(..).
   - Additional intrinsic procedures from F2018 (image status, teams,
     collectives, RANDOM_INIT, OUT_OF_RANGE, REDUCE extensions).
+  - Type parameter inquiries (`type_param_inquiry`, R916) ensure `designator % type-param-name`
+    syntax parses across the modern grammars; new fixtures under
+    `tests/fixtures/Fortran2003/...`, `tests/fixtures/Fortran2008/...`, and
+    `tests/fixtures/Fortran2023/test_issue572_type_param_inquiry/type_param_inquiry.f90`
+    exercise `%len_param`/`%kind_param` lookups and close Issue #572 for the inherited F2018 layer,
+    while `tests/Fortran2018/test_issue572_type_param_inquiry.py` covers the same syntax via the
+    `program_unit_f2018` entry rule.
   - Inheritance of all F2008 syntax (submodules, coarrays, CONTIGUOUS,
     etc.) with F2018 entry points.
 - **Intentionally leaves to semantic tooling:**
