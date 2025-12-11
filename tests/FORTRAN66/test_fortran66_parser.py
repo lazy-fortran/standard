@@ -1302,24 +1302,34 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
         """
         # Valid explicit bound declarations
         valid_declarations = [
-            "DIMENSION A(1:10)",         # Explicit 1 to 10
-            "DIMENSION B(0:10)",         # Zero lower bound (allowed)
-            "DIMENSION C(-5:10)",        # Negative lower bound (allowed)
-            "DIMENSION D(1:1)",          # Single element (1 to 1)
-            "DIMENSION E(10:20)",        # Explicit 10 to 20
+            "DIMENSION ARRX(1:10)",      # Explicit 1 to 10
+            "DIMENSION ARRY(0:10)",      # Zero lower bound (allowed)
+            "DIMENSION ARRZ(-5:10)",     # Negative lower bound (allowed)
+            "DIMENSION ARRU(1:1)",       # Single element (1 to 1)
+            "DIMENSION ARRV(10:20)",     # Explicit 10 to 20
         ]
 
         for decl in valid_declarations:
             with self.subTest(declaration=decl):
-                tree = self.parse(decl, 'dimension_stmt')
+                input_stream = InputStream(decl)
+                lexer = FORTRAN66Lexer(input_stream)
+                token_stream = CommonTokenStream(lexer)
+                parser = FORTRAN66Parser(token_stream)
+
+                tree = parser.dimension_stmt()
+
+                # Verify parse completed WITHOUT syntax errors
+                error_count = parser.getNumberOfSyntaxErrors()
+                self.assertEqual(0, error_count,
+                    f"Parse errors in: {decl}")
                 self.assertIsNotNone(tree, f"Failed to parse: {decl}")
 
     def test_dimension_statement_multiple_declarators(self):
         """Test DIMENSION statement with multiple array declarators."""
         declarations = [
-            "DIMENSION A(10), B(20)",
-            "DIMENSION X(5, 10), Y(3, 4, 5)",
-            "DIMENSION P(1:10), Q(0:20), R(100)",
+            "DIMENSION ARR1(10), ARR2(20)",
+            "DIMENSION VAR1(5, 10), VAR2(3, 4, 5)",
+            "DIMENSION MAT1(1:10), MAT2(0:20), MAT3(100)",
         ]
 
         for decl in declarations:
