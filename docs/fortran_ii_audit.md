@@ -336,6 +336,9 @@ Most core FORTRAN (1957) statements remain available in FORTRAN II.
 These are either inherited from `FORTRANParser.g4` or redefined in
 `FORTRANIIParser.g4`:
 
+Statement functions are explicitly inherited unchanged from FORTRAN I
+and are not redefined in the FORTRAN II grammar (issue #639).
+
 | Statement Form                       | Grammar Rule(s)                | Status          |
 |--------------------------------------|--------------------------------|-----------------|
 | v = e (assignment)                   | `assignment_stmt`              | Implemented     |
