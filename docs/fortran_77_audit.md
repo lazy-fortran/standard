@@ -117,6 +117,9 @@ Grammar coverage:
   - Character function references.
   - Parenthesized character expressions.
 
+- `literal`:
+  - Accepts `HOLLERITH` constants per ISO 1539:1980 Section 4.8.1, which lets these legacy text constants appear inside expressions, assignment RHSs, and actual arguments (issue #589).
+
 - `substring_range`:
   - `IDENTIFIER(L:U)` with integer expressions for start/end.
   - ISO 1539:1980 Section 5.7 allows either bound to be omitted, enabling
@@ -138,6 +141,11 @@ Tests:
   expressions including `'HELLO'`, `'HELLO' // ' WORLD'`,
   `'IT''S A TEST'` (doubled apostrophes), and multi-operand
   concatenations.
+- `test_hollerith_literal` and `test_call_statement_with_hollerith_argument`
+  verify that the `literal` rule accepts `HOLLERITH` tokens and that
+  `call_stmt` can receive them as actual arguments. These tests rely on
+  the `tests/fixtures/FORTRAN77/test_fortran77_parser/hollerith_call_argument.f`
+  fixture to cover a realistic subroutine call scenario (issue #589).
 - `test_character_substring_operations` exercises substring syntax
   `NAME(1:5)`, `STR(I:J)`, and open-ended forms like `LINE(1:)`.
 - `test_character_concatenation_combinations` tests mixed-operand

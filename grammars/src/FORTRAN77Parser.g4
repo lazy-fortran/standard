@@ -715,6 +715,7 @@ literal
     | REAL_LITERAL              // Section 4.3.2
     | STRING_LITERAL            // Section 4.8.2 - NEW in FORTRAN 77
     | logical_literal           // Section 4.6.2
+    | HOLLERITH                 // Section 4.8.1 (legacy Hollerith constants)
     ;
 
 // Logical literal - ISO 1539:1980 Section 4.6.2

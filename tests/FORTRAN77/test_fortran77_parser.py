@@ -96,6 +96,18 @@ END IF"""
             with self.subTest(char_expr=text):
                 tree = self.parse(text, 'character_expr')
                 self.assertIsNotNone(tree)
+
+    def test_hollerith_literal(self):
+        """Ensure Hollerith literals are accepted by the literal rule."""
+        test_cases = [
+            "5HHELLO",
+            "3H***"
+        ]
+
+        for text in test_cases:
+            with self.subTest(hollerith=text):
+                tree = self.parse(text, 'literal')
+                self.assertIsNotNone(tree)
     
     def test_enhanced_do_loops(self):
         """Test enhanced DO loops with floating point (FORTRAN 77)"""
@@ -120,6 +132,18 @@ END IF"""
         for text in test_cases:
             with self.subTest(save_stmt=text):
                 tree = self.parse(text, 'save_stmt')
+                self.assertIsNotNone(tree)
+
+    def test_call_statement_with_hollerith_argument(self):
+        """Verify CALL statements accept Hollerith constants as arguments."""
+        test_cases = [
+            "CALL PRINT(5HHELLO)",
+            "CALL REPORT(4HDATA, RESULT)"
+        ]
+
+        for text in test_cases:
+            with self.subTest(call_stmt=text):
+                tree = self.parse(text, 'call_stmt')
                 self.assertIsNotNone(tree)
     
     def test_intrinsic_statement(self):
