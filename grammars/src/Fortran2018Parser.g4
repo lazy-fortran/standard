@@ -582,9 +582,11 @@ image_status_function_call
     ;
 
 // ISO/IEC 1539-1:2018 Section 16.9.52: COSHAPE
+// ISO/IEC 1539-1:2018 Section 16.9.78: GET_TEAM
 // ISO/IEC 1539-1:2018 Section 16.9.187: TEAM_NUMBER
 collective_function_call
     : COSHAPE LPAREN expr_f90 (COMMA KIND EQUALS expr_f90)? RPAREN
+    | GET_TEAM LPAREN expr_f90 (COMMA TEAM EQUALS team_value)? RPAREN
     | TEAM_NUMBER LPAREN (TEAM EQUALS team_value)? RPAREN
     ;
 
