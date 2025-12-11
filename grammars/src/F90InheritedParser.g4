@@ -6,10 +6,152 @@ parser grammar F90InheritedParser;
 // ====================================================================
 // INHERITED CONSTRUCTS (from FORTRAN 77 Parser)
 // ====================================================================
-// FORTRAN 77 specification statements (PARAMETER, DATA, COMMON, EQUIVALENCE,
-// DIMENSION, SAVE, EXTERNAL, INTRINSIC) are imported by Fortran90Parser.g4
-// via FORTRAN77Parser and should not be redefined here. This delegate file
-// only defines constructs that are NEW or extended in Fortran 90.
+// These constructs are inherited from FORTRAN 77 and earlier standards, but
+// Fortran 90 widens several specification statements (notably by permitting
+// full F90 expressions/array specs and optional `::` in free form). Because
+// descendant grammars do not override `expr`, `variable`, or `dimension_stmt`,
+// we must re-export Fortran 90–correct forms here to maintain feature
+// completeness and historical accuracy.
+
+// ====================================================================
+// PARAMETER AND DATA STATEMENTS (F90-widened)
+// ====================================================================
+
+parameter_stmt
+    : PARAMETER LPAREN parameter_list RPAREN
+    ;
+
+parameter_list
+    : parameter_assignment (COMMA parameter_assignment)*
+    ;
+
+parameter_assignment
+    : IDENTIFIER EQUALS expr_f90
+    ;
+
+data_stmt
+    : DATA data_stmt_set (COMMA data_stmt_set)*
+    ;
+
+data_stmt_set
+    : data_stmt_object_list SLASH data_stmt_value_list SLASH
+    ;
+
+data_stmt_object_list
+    : data_stmt_object (COMMA data_stmt_object)*
+    ;
+
+data_stmt_object
+    : variable_f90          // Simple variable or array element
+    | data_implied_do_f90   // Implied-DO list for DATA
+    ;
+
+data_stmt_value_list
+    : data_stmt_value (COMMA data_stmt_value)*
+    ;
+
+data_stmt_value
+    : expr_f90
+    ;
+
+// Data implied-DO list for DATA statements - ISO/IEC 1539:1991 R534
+// Syntax: (data_stmt_object_list, integer_var = expr, expr [, expr])
+// Used to initialize ranges of array elements, supports nested implied-DO
+data_implied_do_f90
+    : LPAREN data_stmt_object_list COMMA IDENTIFIER EQUALS expr_f90 COMMA
+      expr_f90 (COMMA expr_f90)? RPAREN
+    ;
+
+// ====================================================================
+// COMMON AND EQUIVALENCE STATEMENTS (F90-compatible forms)
+// ====================================================================
+
+common_stmt
+    : COMMON (common_block_name)? common_block_object_list
+      (COMMA common_block_name common_block_object_list)*
+    ;
+
+common_block_name
+    : SLASH IDENTIFIER SLASH
+    | SLASH SLASH
+    ;
+
+common_block_object_list
+    : common_block_object (COMMA common_block_object)*
+    ;
+
+common_block_object
+    : variable_name (LPAREN array_spec_f90 RPAREN)?
+    ;
+
+variable_name
+    : IDENTIFIER
+    ;
+
+equivalence_stmt
+    : EQUIVALENCE equivalence_set_list
+    ;
+
+equivalence_set_list
+    : equivalence_set (COMMA equivalence_set)*
+    ;
+
+equivalence_set
+    : LPAREN equivalence_object_list RPAREN
+    ;
+
+equivalence_object_list
+    : equivalence_object (COMMA equivalence_object)*
+    ;
+
+equivalence_object
+    : variable_f90
+    ;
+
+// ====================================================================
+// DIMENSION AND ATTRIBUTE STATEMENTS (F90-widened)
+// ====================================================================
+
+dimension_stmt
+    : DIMENSION (DOUBLE_COLON)? array_declarator_list
+    ;
+
+array_declarator_list
+    : array_declarator (COMMA array_declarator)*
+    ;
+
+array_declarator
+    : IDENTIFIER LPAREN array_spec_f90 RPAREN
+    ;
+
+save_stmt
+    : SAVE (DOUBLE_COLON? saved_entity_list)?
+    ;
+
+saved_entity_list
+    : saved_entity (COMMA saved_entity)*
+    ;
+
+saved_entity
+    : IDENTIFIER
+    | SLASH IDENTIFIER SLASH
+    ;
+
+external_stmt
+    : EXTERNAL (DOUBLE_COLON? external_name_list)?
+    ;
+
+external_name_list
+    : IDENTIFIER (COMMA IDENTIFIER)*
+    ;
+
+intrinsic_stmt
+    : INTRINSIC (DOUBLE_COLON? intrinsic_name_list)?
+    ;
+
+intrinsic_name_list
+    : IDENTIFIER (COMMA IDENTIFIER)*
+    ;
 
 // ====================================================================
 // F90 ATTRIBUTE STATEMENTS
