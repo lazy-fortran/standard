@@ -15,6 +15,7 @@
 
 lexer grammar Fortran2023Lexer;
 
+
 import Fortran2018Lexer;
 
 // ============================================================================
@@ -205,7 +206,6 @@ C_F_STRPOINTER   : C '_' F '_' S T R P O I N T E R ;
 // STRING: character scalar of kind C_CHAR
 // ASIS: optional logical, if true, preserves embedded nulls
 F_C_STRING       : F '_' C '_' S T R I N G ;
-
 // ============================================================================
 // FORTRAN 2023 STANDARD OVERVIEW (ISO/IEC 1539-1:2023)
 // ============================================================================
@@ -243,3 +243,11 @@ F_C_STRING       : F '_' C '_' S T R I N G ;
 // with F2018. Foundation for LazyFortran2025 type inference extensions.
 //
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// SIMPLE prefix-spec keyword (NEW in F2023)
+// ISO/IEC 1539-1:2023 Section 15.8: A SIMPLE procedure only references
+// non-local variables through its dummy arguments.
+// ----------------------------------------------------------------------------
+
+SIMPLE           : S I M P L E ;

@@ -438,6 +438,7 @@ Other Missing Features:
 | -- | NOTIFY_TYPE derived type | NOT IMPLEMENTED |
 | -- | C_F_STRPOINTER procedure | IMPLEMENTED (Issue #346) |
 | -- | AT edit descriptor | IMPLEMENTED (Issue #347) |
+| -- | SIMPLE prefix-spec for procedures (Section 15.8) | IMPLEMENTED (Issue #588) |
 | -- | LEADING_ZERO I/O specifier | NOT IMPLEMENTED |
 
 - R1130 REDUCE locality-spec: Implemented via Issue #345. The REDUCE locality
@@ -466,6 +467,13 @@ Other Missing Features:
   strings are treated as opaque character literals, and for legacy FORMAT
   statements the `AT` is recognized as an IDENTIFIER by the existing
   format_item rules.
+- SIMPLE prefix-spec for procedures: Implemented via Issue #588. The new
+  `SIMPLE` keyword (ISO/IEC 1539-1:2023 Section 15.8) is recognized by
+  `Fortran2023Lexer.g4` and the F2023 parser overrides `prefix_spec_f2008`
+  to accept `SIMPLE`. The new fixture
+  `tests/fixtures/Fortran2023/test_fortran_2023_comprehensive/simple_procedures.f90`
+  and `TestFortran2023Parser::test_simple_procedures_parsing` prove that
+  simple functions/subroutines are parsed as part of `program_unit_f2023`.
 - LEADING_ZERO I/O specifier tracked by Issue #348.
 
 **Missing Intrinsic Functions (remaining gaps):**

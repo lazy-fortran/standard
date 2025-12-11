@@ -596,6 +596,34 @@ only_item_f2018
     ;
 
 // ============================================================================
+// PROCEDURE PREFIX OVERRIDE (ISO/IEC 1539-1:2023 Section 15.8)
+// ============================================================================
+// F2023 introduces the SIMPLE prefix-spec for procedures. Override the
+// inherited F2008 `prefix_spec_f2008` rule to consume SIMPLE without affecting
+// earlier standards.
+prefix_spec_f2008
+    : RECURSIVE                     // F90 recursive procedures
+    | PURE                          // F95 pure procedures
+    | ELEMENTAL                     // F95 elemental procedures
+    | IMPURE                        // F2008 IMPURE procedures
+    | MODULE                        // F2008 MODULE procedures
+    | SIMPLE                        // F2023 SIMPLE procedures (Section 15.8)
+    | NON_RECURSIVE                 // F2008 NON_RECURSIVE procedures
+    | type_spec                     // Function return type
+    ;
+
+// ============================================================================ 
+// F90 Prefix Specification Extension (Section 12.5.2 + F2023 Section 15.8)
+// ============================================================================
+// Override the inherited F90 prefix_spec rule to allow the SIMPLE keyword
+// in addition to the original RECURSIVE and type-spec options.
+prefix_spec
+    : RECURSIVE
+    | type_spec_f90
+    | SIMPLE                        // F2023 SIMPLE procedures (Section 15.8)
+    ;
+
+// ============================================================================ 
 // DERIVED TYPE SPEC OVERRIDE (F2023 Extension)
 // ============================================================================
 // Override F2003 derived_type_spec to include NOTIFY_TYPE for use in
