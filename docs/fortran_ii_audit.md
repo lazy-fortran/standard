@@ -10,10 +10,10 @@ repository currently supports, based on:
 - `tests/test_fixture_parsing.py` (XPASS fixtures)
 
 This is a descriptive audit of the current implementation. Full
-conformance to the IBM 704 FORTRAN II manual (C28-6000-2, 1958) requires
-resolving the gaps documented in section 8 below. Tape/drum I/O
-statements are tracked by issue #153 (reopened). File-control statements
-(END FILE, REWIND, BACKSPACE) are implemented per issue #384.
+conformance to the IBM 704 FORTRAN II manual (C28-6000-2, 1958) is
+substantially complete. Tape/drum I/O statements are implemented per
+issue #153 (closed). File-control statements (END FILE, REWIND, BACKSPACE)
+are implemented per issue #384.
 
 ## 1. Program structure and subprograms
 
@@ -396,12 +396,12 @@ or are out of scope for the current grammar:
 | IF QUOTIENT OVERFLOW n1, n2          | `if_stmt_quotient_overflow`    | Implemented     |
 | IF DIVIDE CHECK n1, n2               | `if_stmt_divide_check`         | Implemented     |
 | SENSE LIGHT i                        | `sense_light_stmt`             | Implemented     |
-| READ INPUT TAPE i, n, list           | Not implemented                | Gap: see #153   |
-| READ TAPE i, list                    | Not implemented                | Gap: see #153   |
-| READ DRUM i, j, list                 | Not implemented                | Gap: see #153   |
-| WRITE OUTPUT TAPE i, n, list         | Not implemented                | Gap: see #153   |
-| WRITE TAPE i, list                   | Not implemented                | Gap: see #153   |
-| WRITE DRUM i, j, list                | Not implemented                | Gap: see #153   |
+| READ INPUT TAPE i, n, list           | `read_tape_drum_stmt`          | Implemented     |
+| READ TAPE i, list                    | `read_tape_drum_stmt`          | Implemented     |
+| READ DRUM i, j, list                 | `read_tape_drum_stmt`          | Implemented     |
+| WRITE OUTPUT TAPE i, n, list         | `write_tape_drum_stmt`         | Implemented     |
+| WRITE TAPE i, list                   | `write_tape_drum_stmt`         | Implemented     |
+| WRITE DRUM i, j, list                | `write_tape_drum_stmt`         | Implemented     |
 | END FILE i                           | `end_file_stmt`                | Implemented     |
 | REWIND i                             | `rewind_stmt`                  | Implemented     |
 | BACKSPACE i                          | `backspace_stmt`               | Implemented     |
@@ -429,10 +429,9 @@ been addressed:
   preprocessor (issue #143, closed). Validates IBM 704 card layout per
   C28-6000-2 and converts to lenient form for parsing.
 
-The following features remain as gaps to be resolved:
-
-- Tape/drum I/O forms (READ INPUT TAPE, WRITE OUTPUT TAPE, READ/WRITE
-  TAPE/DRUM) are not implemented. These are tracked by issue #153 (reopened).
+Tape/drum I/O forms (READ INPUT TAPE, WRITE OUTPUT TAPE, READ/WRITE
+TAPE/DRUM) are now implemented (issue #153 closed). There are no
+remaining significant gaps for FORTRAN II coverage.
 
 ## 9. Summary
 
