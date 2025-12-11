@@ -408,13 +408,29 @@ The Fortran 90 grammar in this repository:
 | ISO Rule | Description | Status |
 |----------|-------------|--------|
 | R531–R534 | `data-implied-do` nested forms (DATA implied-DO lists) | Implemented (fixes #378) |
-| R620 | `section-subscript` with vector subscript | Partial |
+| R620 | `section-subscript` with vector subscript (R620-R621) | Implemented (fixes #381) |
 | R1219 | `entry-stmt` | Implemented (F90 extension via `entry_stmt_f90`) |
 
 **xfail Fixtures:** 0 (Issue #311 resolved; fixtures corrected)
 
+**Vector Subscript Implementation (Issue #381):**
+
+Added explicit grammar rules per ISO/IEC 1539:1991 Section 6.2.2.1:
+- R611 `subscript` → scalar integer expression
+- R620 `section-subscript` → subscript | subscript-triplet | vector-subscript
+- R621 `vector-subscript` → rank-one integer array expression
+- R622 `subscript-triplet` → start:end:stride
+
+Test fixtures in `tests/fixtures/Fortran90/test_vector_subscripts/`:
+- `vector_subscript_basic.f90`: Basic usage with simple array variable
+- `vector_subscript_multidim.f90`: Multidimensional array with vector subscripts
+- `vector_subscript_expression.f90`: Vector subscript using array constructor
+- `vector_subscript_mixed.f90`: Mixed subscript types (scalar, triplet, vector)
+
+Test suite: `tests/Fortran90/test_vector_subscripts.py`
+
 Future work should:
 
 - Tighten module/program‑unit integration and internal procedures
-- Complete vector subscript support in array sections (R620)
+- Enforce semantic constraints on vector subscripts (rank-one, integer type, non-definable arrays)
 - Keep the grammar and tests in sync with spec‑section annotations (#173)
