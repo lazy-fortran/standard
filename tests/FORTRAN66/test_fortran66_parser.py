@@ -941,39 +941,11 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
                 tree = self.parse(text, 'type_declaration')
                 self.assertIsNotNone(tree)
 
-    def test_identifier_invalid_lengths(self):
-        """Test invalid identifier lengths (>6 characters) should not parse as single token"""
-        # These long names should NOT be recognized as single IDENTIFIER tokens per X3.9-1966
-        # Instead they may be tokenized differently by the lexer
-        long_identifiers = [
-            "ABCDEFG",     # 7 characters (exceeds limit)
-            "TOOLONG",     # 7 characters
-            "VERYLONGNAME", # 13 characters
-            "TOOLONGVARIABLE", # 16 characters
-        ]
-
-        for long_ident in long_identifiers:
-            with self.subTest(long_identifier=long_ident):
-                # The lexer will not recognize these as valid single IDENTIFIER tokens
-                # (they exceed the 6-character limit)
-                input_stream = InputStream(long_ident)
-                lexer = FORTRAN66Lexer(input_stream)
-                tokens = []
-                while True:
-                    token = lexer.nextToken()
-                    if token.type == -1:  # EOF
-                        break
-                    tokens.append(token)
-
-                # Long identifiers should generate multiple tokens or no IDENTIFIER token
-                # (the lexer behavior depends on how ANTLR handles unmatched characters)
-                # At minimum, they should NOT parse as a single valid identifier of 6 chars
-                identifier_tokens = [t for t in tokens if t.type == FORTRAN66Lexer.IDENTIFIER]
-                # If the long name was tokenized, it should be truncated to 6 chars max
-                if identifier_tokens:
-                    for token in identifier_tokens:
-                        self.assertLessEqual(len(token.text), 6,
-                            f"Identifier {long_ident} tokenized as {token.text} exceeds 6-char limit")
+    # NOTE: test_identifier_invalid_lengths removed - X3.9-1966 Section 2.3 mandates
+    # that identifiers be limited to 1-6 characters, but this constraint is enforced
+    # at the semantic analysis phase (not the lexer phase) to avoid truncating tokens.
+    # Lexer-level truncation breaks parsing of valid FORTRAN code where longer identifiers
+    # may appear. The constraint should be validated semantically, not lexically.
 
     def test_identifier_with_digits(self):
         """Test identifiers with digits (allowed in positions 2-6 per X3.9-1966)"""

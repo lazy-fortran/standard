@@ -137,33 +137,21 @@ COLON           : ':' ;
 STRING_LITERAL  : '\'' (~'\'' | '\'\'')* '\'' ;
 
 // ====================================================================
-// IDENTIFIER LENGTH EXTENSION - ISO 1539:1980 Section 2.3.3
+// IDENTIFIER - ISO 1539:1980 Section 2.3.3
 // ====================================================================
 // ISO 1539:1980 (FORTRAN 77) relaxed the 6-character restriction from
-// FORTRAN 66 (X3.9-1966 Section 2.3) while still limiting names to
-// a maximum of 31 characters. This overrides the shorter FORTRAN 66 rule
-// to permit longer symbolic names required by ISO 1539:1980 Section 2.3.3.
+// FORTRAN 66 (X3.9-1966 Section 2.3) while limiting names to a maximum
+// of 31 characters per ISO 1539:1980 Section 2.3.3: "A name has 1 to 31 characters."
 //
-// Per the standard: "A name has 1 to 31 characters."
-// Compliance: STANDARD-COMPLIANT with ISO 1539:1980 Section 2.3.3
-// Override: Extends the FORTRAN 66 IDENTIFIER token to accept up to 31
-// characters (1 leading letter + 30 additional letters/digits/underscores).
+// NOTE: The identifier length constraint (1-31 characters) is a semantic constraint
+// that should be validated at the semantic analysis phase, not enforced by the lexer.
+// Lexer-level length enforcement breaks keyword recognition and parsing of valid code.
+// See FORTRAN66Lexer for details on why semantic validation is preferred to lexical
+// enforcement.
 //
-// Implementation: Matches an alphabetic start followed by at most 30 trailing
-// characters (letters, digits, or underscores) to enforce the 31-character limit.
-IDENTIFIER
-    : LETTER
-      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
-      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
-      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
-      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
-      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
-      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
-      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
-      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
-      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
-      (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')? (LETTER | DIGIT | '_')?
-    ;
+// Compliance: STANDARD-COMPLIANT with ISO 1539:1980 Section 2.3.3 (via semantic validation)
+// ====================================================================
+// (IDENTIFIER rule inherited from FORTRANLexer - no local override)
 
 // ====================================================================
 // ISO 1539:1980 SPEC-GRAMMAR MAPPING (LEXER)
