@@ -281,17 +281,29 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
             "(A(1), B(2))",     # Array references, not constants
         ]
 
+        from antlr4.error.ErrorListener import ErrorListener
+
+        class ErrorCapture(ErrorListener):
+            def __init__(self):
+                self.errors = []
+
+            def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+                self.errors.append((line, column, msg))
+
         for text in invalid_cases:
             with self.subTest(invalid_complex=text):
-                try:
-                    tree = self.parse(text, 'literal')
-                    # Parser error recovery may create a tree, but it should have errors
-                    # We verify the parser rejected the input by checking for None
-                    # or by relying on the fact that invalid input doesn't match
-                    # the complex_literal rule and falls through to expression parsing
-                except Exception:
-                    # Expected - parser should reject invalid forms
-                    pass
+                input_stream = InputStream(text)
+                lexer = FORTRAN66Lexer(input_stream)
+                token_stream = CommonTokenStream(lexer)
+                parser = FORTRAN66Parser(token_stream)
+                listener = ErrorCapture()
+                parser.removeErrorListeners()
+                parser.addErrorListener(listener)
+                parser.complex_literal()
+                self.assertGreater(
+                    len(listener.errors), 0,
+                    f"Invalid complex literal '{text}' should raise a parser error"
+                )
 
     def test_logical_literals(self):
         """Test logical literals .TRUE. and .FALSE. (merged from FORTRAN IV, 1962)"""
