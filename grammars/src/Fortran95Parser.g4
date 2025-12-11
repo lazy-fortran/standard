@@ -247,10 +247,63 @@ identifier_or_keyword_f95
 // - R741 (forall-header) -> (forall-triplet-spec-list [, scalar-mask-expr])
 // - R742 (forall-triplet-spec) -> index-name = subscript : subscript [: stride]
 //
-// Semantic constraints (Section 7.5.4, not enforced by grammar):
-// - scalar-mask-expr must be scalar logical
-// - Index variables have no storage association
-// - All operations must be assignment-like (no side effects)
+// SEMANTIC CONSTRAINTS (Section 7.5.4, NOT enforced by grammar):
+// ==============================================================
+// These constraints require semantic analysis (type checking, scope analysis)
+// and are NOT enforced by the grammar syntax rules.
+//
+// SCALAR MASK EXPRESSION TYPE CONSTRAINT (Section 7.5.4, R741):
+// - scalar-mask-expr (if present) must have LOGICAL type (not INTEGER, REAL, etc.)
+// - scalar-mask-expr must be SCALAR (rank 0), not an array
+// Violation example (incorrectly accepted by grammar):
+//   integer :: i, j, m(10,10)
+//   real :: a(10,10), b(10,10)
+//   integer :: mask(10,10)     ! Integer, not logical!
+//   real :: scalar_mask         ! Scalar mask (correct for scalar requirement)
+//
+//   FORALL (i=1:10, j=1:10, mask(i,j))  ! INVALID - mask is INTEGER, not LOGICAL
+//     a(i,j) = b(i,j)
+//   END FORALL
+//
+//   FORALL (i=1:10, scalar_mask)  ! Valid syntax but mask type not enforced
+//     a(i,i) = b(i,i)
+//   END FORALL
+//
+// INDEX VARIABLE RESTRICTIONS (Section 7.5.4):
+// - Index variables (from forall-triplet-spec) have NO storage association
+// - Index variables are LOCAL to the FORALL construct
+// - Index variables CANNOT be modified within the FORALL body
+// - Index variables CANNOT be passed as ACTUAL ARGUMENTS to procedures
+// Violation example (incorrectly accepted by grammar):
+//   FORALL (i=1:10)
+//     i = i + 1              ! INVALID - modifying index variable
+//     CALL foo(i)            ! INVALID - index variable as argument
+//   END FORALL
+//
+// FORALL BODY RESTRICTIONS (Section 7.5.4, R737):
+// - FORALL body constructs: assignment-stmt | pointer-assignment-stmt |
+//                           WHERE construct | nested FORALL
+// - NO I/O statements (READ, WRITE, PRINT, OPEN, CLOSE, etc.)
+// - NO STOP, RETURN, EXIT, CYCLE statements
+// - NO procedure calls with side effects
+// Violation example (incorrectly accepted by grammar):
+//   FORALL (i=1:10)
+//     PRINT *, i             ! INVALID - I/O statement in FORALL body
+//     a(i) = b(i)
+//   END FORALL
+//
+// DEPENDENCY CONSTRAINTS (Section 7.5.4):
+// - All RHS evaluations occur before any assignments (array semantics)
+// - LHS and RHS of assignments must not interfere
+// - Index variables on LHS and RHS determine evaluation order
+// Violation example (undefined order):
+//   FORALL (i=1:n)
+//     a(i) = a(i+1)  ! Order dependency - different element accessed
+//   END FORALL
+//
+// FUTURE WORK:
+// A semantic analyzer phase must be implemented to enforce these constraints.
+// Related issue tracking: #402 (comprehensive documentation)
 
 // FORALL construct (ISO/IEC 1539-1:1997 Section 7.5.4.1, R736)
 forall_construct
@@ -269,6 +322,9 @@ forall_stmt
     ;
 
 // FORALL header with triplet specifications (Section 7.5.4, R741)
+// NOTE: scalar_mask_expr is accepted as any expr_f95, but semantic constraint
+// requires it to be a LOGICAL SCALAR expression. Grammar does not enforce this.
+// See constraint documentation above.
 forall_header
     : LPAREN forall_triplet_spec_list (COMMA scalar_mask_expr)? RPAREN
     ;
@@ -285,13 +341,35 @@ forall_triplet_spec
     ;
 
 // Scalar mask expression (Section 7.5.4, part of R741)
-// Must be a scalar logical expression (semantic constraint, not syntax)
+// SEMANTIC CONSTRAINTS (not enforced by grammar):
+// - Must be a SCALAR logical expression (not an array, not non-logical)
+// - Grammar accepts any expr_f95 without type or shape checking
+// - A semantic analyzer must validate:
+//   1. Type: mask expression has LOGICAL type
+//   2. Shape: mask expression is scalar (rank 0)
+// Invalid examples (incorrectly accepted by grammar):
+//   FORALL (i=1:10, integer_array(i,j))  ! Type error - INTEGER not LOGICAL
+//   FORALL (i=1:10, logical_array > 0.0)  ! Shape error - LOGICAL array not scalar
+// See FORALL semantic constraints section above for comprehensive documentation.
 scalar_mask_expr
     : expr_f95
     ;
 
 // FORALL body construct (Section 7.5.4.1, R737)
 // forall-body-construct -> forall-assignment-stmt | where-construct | forall-construct
+// SEMANTIC CONSTRAINTS (not enforced by grammar):
+// - forall-assignment-stmt: assignment-stmt | pointer-assignment-stmt
+// - Nested WHERE constructs allowed (Section 7.5.3)
+// - Nested FORALL constructs allowed (Section 7.5.4)
+// RESTRICTIONS (not enforced by grammar):
+// - NO I/O statements (READ, WRITE, PRINT, OPEN, CLOSE, INQUIRE, BACKSPACE,
+//   REWIND, ENDFILE)
+// - NO control flow statements (STOP, RETURN, EXIT, CYCLE, GO TO)
+// - NO procedure calls with side effects
+// - All operations must be pure (no global state modification)
+// Grammar currently allows I/O and control flow via executable_stmt_f95 in
+// forall_assignment_stmt. A semantic analyzer must restrict this.
+// See FORALL semantic constraints section above for comprehensive documentation.
 forall_body_construct
     : forall_assignment_stmt NEWLINE?
     | where_construct_f95

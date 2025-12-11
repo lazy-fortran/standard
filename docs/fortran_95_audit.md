@@ -122,13 +122,56 @@ Integration:
   -> `forall_construct`. Complete F95 programs containing FORALL can
   now be parsed via the dedicated entry point.
 
-Semantic limitations (not enforced by grammar):
+Semantic limitations (not enforced by grammar, documented in code):
 
-- The requirement that `scalar_mask_expr` be scalar LOGICAL is
-  documented but not enforced syntactically (any `expr_f95` is
-  accepted).
-- Side‑effect and ordering constraints on the FORALL body are not
-  modeled; they belong to semantic analysis.
+The FORALL construct has important semantic constraints defined in
+ISO/IEC 1539-1:1997 Section 7.5.4 that are NOT enforced by the grammar
+syntax rules. These constraints require semantic analysis (type checking,
+shape analysis, and scope tracking) and are documented in the grammar file
+with detailed examples.
+
+Constraints not enforced by grammar:
+
+1. **SCALAR MASK EXPRESSION TYPE CONSTRAINT** (Section 7.5.4, R741):
+   - scalar-mask-expr (if present) must have LOGICAL type
+   - Violations: FORALL (i=1:10, integer_array(i,j)) or
+     FORALL (i=1:10, real_expr) are incorrectly accepted by the grammar
+
+2. **SCALAR MASK EXPRESSION SHAPE CONSTRAINT** (Section 7.5.4, R741):
+   - scalar-mask-expr must be SCALAR (rank 0), not an array
+   - Violations: FORALL (i=1:10, logical_array(i,j)) is incorrectly accepted
+     despite being an array, not scalar
+
+3. **INDEX VARIABLE RESTRICTIONS** (Section 7.5.4):
+   - Index variables (from forall-triplet-spec) have NO storage association
+   - Index variables are LOCAL to the FORALL construct
+   - Index variables CANNOT be modified within the FORALL body
+   - Index variables CANNOT be passed as actual arguments to procedures
+   - Violations: FORALL (i=1:10) i = i + 1 or CALL foo(i) are incorrectly
+     accepted by the grammar
+
+4. **FORALL BODY RESTRICTIONS** (Section 7.5.4, R737):
+   - FORALL body must contain: assignment-stmt | pointer-assignment-stmt |
+     WHERE construct | nested FORALL (NO side effects allowed)
+   - NO I/O statements (READ, WRITE, PRINT, OPEN, CLOSE, etc.)
+   - NO control flow statements (STOP, RETURN, EXIT, CYCLE, GO TO)
+   - NO procedure calls with side effects
+   - Violations: FORALL (i=1:10) PRINT *, i or FORALL (i=1:10) STOP are
+     incorrectly accepted by the grammar
+
+5. **DEPENDENCY CONSTRAINTS** (Section 7.5.4):
+   - All RHS evaluations occur before any assignments (array semantics)
+   - LHS and RHS of assignments must not interfere
+   - Violations: FORALL (i=1:n) a(i) = a(i+1) has undefined order semantics
+     and is incorrectly accepted with no warning
+
+These semantic constraints are documented in detail in the Fortran95Parser.g4
+grammar file (lines 236-306) with comprehensive examples and explanations.
+
+Future work: A semantic analyzer phase must be implemented to enforce
+these type-checking, shape-checking, scope analysis, and dependency
+analysis constraints. This is tracked by issue #402 (comprehensive
+documentation) and future semantic analyzer implementation issues.
 
 ## 3. Enhanced WHERE and ELSEWHERE
 
