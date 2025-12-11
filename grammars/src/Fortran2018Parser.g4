@@ -250,8 +250,9 @@ rank_value
     ;
 
 // ISO/IEC 1539-1:2018 R1151: end-select-rank-stmt
+// Extended to support optional RANK keyword for modern compiler extensions
 end_select_rank_stmt
-    : END_SELECT (IDENTIFIER)? NEWLINE
+    : END_SELECT (RANK_KEYWORD)? (IDENTIFIER)? NEWLINE
     ;
 
 // ============================================================================
