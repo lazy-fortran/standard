@@ -437,9 +437,11 @@ format_stmt
     : FORMAT LPAREN format_specification RPAREN
     ;
 
-// Format specification items - C28-6003 Chapter III
+// Format specification items - C28-6003 Chapter III.
+// Commas are optional so slash descriptors can appear without
+// intervening delimiters (record separators per Appendix B row 16).
 format_specification
-    : format_item (COMMA format_item)*
+    : format_item (COMMA? format_item)*
     ;
 
 // Individual format items - C28-6003 Chapter III

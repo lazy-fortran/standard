@@ -223,6 +223,10 @@ Implemented (full IBM 704 I/O statement family):
   - Hollerith constants: nHtext (the only string literals in 1957 FORTRAN)
   - Group repetition `n(...)` (including nested parenthesized lists) per
     C28-6003 Chapter III is now modeled via `format_group` (issue #597).
+- Slash (`/` or `//`) record separators per C28-6003 Chapter III and
+  Appendix B row 16 now parse without commas between descriptors. Fixture
+  `tests/fixtures/FORTRAN/test_fortran_parser/format_slash_record_separators.f`
+  validates single/double slash usage (issue #596).
 - `END FILE i` (write end-of-file mark) via `end_file_stmt`.
 - `REWIND i` (rewind tape to beginning) via `rewind_stmt`.
 - `BACKSPACE i` (backspace one record) via `backspace_stmt`.
