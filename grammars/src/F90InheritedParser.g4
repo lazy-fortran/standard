@@ -39,7 +39,8 @@ data_stmt_object_list
     ;
 
 data_stmt_object
-    : variable_f90
+    : variable_f90          // Simple variable or array element
+    | data_implied_do_f90   // Implied-DO list for DATA
     ;
 
 data_stmt_value_list
@@ -48,6 +49,14 @@ data_stmt_value_list
 
 data_stmt_value
     : expr_f90
+    ;
+
+// Data implied-DO list for DATA statements - ISO/IEC 1539:1991 R534
+// Syntax: (data_stmt_object_list, integer_var = expr, expr [, expr])
+// Used to initialize ranges of array elements, supports nested implied-DO
+data_implied_do_f90
+    : LPAREN data_stmt_object_list COMMA IDENTIFIER EQUALS expr_f90 COMMA
+      expr_f90 (COMMA expr_f90)? RPAREN
     ;
 
 // ====================================================================
