@@ -6,12 +6,15 @@ parser grammar F90InheritedParser;
 // ====================================================================
 // INHERITED CONSTRUCTS (from FORTRAN 77 Parser)
 // ====================================================================
-// These constructs are inherited from FORTRAN 77 and earlier standards.
-// Temporary definitions ensure grammar completeness for F90 innovations.
-// ISO/IEC 1539:1991 maintains backward compatibility with FORTRAN 77.
+// These constructs are inherited from FORTRAN 77 and earlier standards, but
+// Fortran 90 widens several specification statements (notably by permitting
+// full F90 expressions/array specs and optional `::` in free form). Because
+// descendant grammars do not override `expr`, `variable`, or `dimension_stmt`,
+// we must re-export Fortran 90–correct forms here to maintain feature
+// completeness and historical accuracy.
 
 // ====================================================================
-// PARAMETER AND DATA STATEMENTS
+// PARAMETER AND DATA STATEMENTS (F90-widened)
 // ====================================================================
 
 parameter_stmt
@@ -60,7 +63,7 @@ data_implied_do_f90
     ;
 
 // ====================================================================
-// COMMON AND EQUIVALENCE STATEMENTS
+// COMMON AND EQUIVALENCE STATEMENTS (F90-compatible forms)
 // ====================================================================
 
 common_stmt
@@ -106,11 +109,11 @@ equivalence_object
     ;
 
 // ====================================================================
-// DIMENSION AND ATTRIBUTE STATEMENTS
+// DIMENSION AND ATTRIBUTE STATEMENTS (F90-widened)
 // ====================================================================
 
 dimension_stmt
-    : DIMENSION COLON? array_declarator_list
+    : DIMENSION (DOUBLE_COLON)? array_declarator_list
     ;
 
 array_declarator_list
@@ -122,7 +125,9 @@ array_declarator
     ;
 
 save_stmt
-    : SAVE (COLON? saved_entity_list)?
+    : SAVE
+    | SAVE saved_entity_list
+    | SAVE DOUBLE_COLON saved_entity_list
     ;
 
 saved_entity_list
@@ -135,7 +140,8 @@ saved_entity
     ;
 
 external_stmt
-    : EXTERNAL (COLON? external_name_list)?
+    : EXTERNAL external_name_list
+    | EXTERNAL DOUBLE_COLON external_name_list
     ;
 
 external_name_list
@@ -143,7 +149,8 @@ external_name_list
     ;
 
 intrinsic_stmt
-    : INTRINSIC (COLON? intrinsic_name_list)?
+    : INTRINSIC intrinsic_name_list
+    | INTRINSIC DOUBLE_COLON intrinsic_name_list
     ;
 
 intrinsic_name_list
