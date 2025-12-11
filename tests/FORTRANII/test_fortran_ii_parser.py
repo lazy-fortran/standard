@@ -102,6 +102,24 @@ class TestFORTRANIIParser(unittest.TestCase):
         self.assertIn('X', text)
         self.assertIn('Y', text)
 
+    def test_statement_function_in_main_program(self):
+        """Test statement functions parse in FORTRAN II main programs.
+
+        Statement functions were introduced in FORTRAN I (1957) and are
+        inherited unchanged in FORTRAN II (1958). This verifies the FORTRAN II
+        parser continues to accept the inherited rule without redefinition.
+        """
+        program_text = """
+        F(X,Y) = X + Y
+        A = F(1,2)
+        END
+        """
+        tree = self.parse(program_text, 'main_program')
+        self.assertIsNotNone(tree)
+        text = tree.getText().replace(' ', '')
+        self.assertIn('F(X,Y)=X+Y', text)
+        self.assertIn('A=F(1,2)', text)
+
     def test_function_definition(self):
         """Test FUNCTION definitions (introduced in FORTRAN II)"""
         function_text = load_fixture(
