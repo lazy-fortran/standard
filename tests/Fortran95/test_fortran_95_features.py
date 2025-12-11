@@ -294,3 +294,93 @@ class TestFortran95Parser:
                 f"{parser.getNumberOfSyntaxErrors()}"
             )
 
+    def test_valid_constant_initializers(self):
+        """Valid constant initialization expressions parse correctly.
+
+        ISO/IEC 1539-1:1997 Section 7.1.6 requires initialization expressions
+        to be constant expressions. The grammar accepts any expression (semantic
+        gap), but valid constant initializers should parse without errors.
+
+        Test coverage: Section 7.1.6, Section 5.1 (type declarations with
+        initialization), Section 4.4.1 (derived type component initialization).
+        Issue #390: initialization expression constraints not enforced.
+        """
+        code = load_fixture(
+            "Fortran95",
+            "test_fortran_95_features",
+            "valid_constant_initializers.f90",
+        )
+        parser = self.create_parser_for_rule(code)
+        tree = parser.program_unit_f95()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_valid_derived_type_initializers(self):
+        """Valid derived type component initialization expressions parse.
+
+        ISO/IEC 1539-1:1997 Section 4.4.1 allows derived type components
+        to have default initialization with constant expressions. Tests that
+        both component defaults and structure constructors parse correctly.
+
+        Test coverage: Section 4.4.1, Section 7.1.6 (constant expressions).
+        Issue #390: initialization expression constraints not enforced.
+        """
+        code = load_fixture(
+            "Fortran95",
+            "test_fortran_95_features",
+            "valid_derived_type_initializers.f90",
+        )
+        parser = self.create_parser_for_rule(code)
+        tree = parser.program_unit_f95()
+        assert tree is not None
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_invalid_variable_ref_in_initializers(self):
+        """Variable references in initializers require semantic analysis.
+
+        ISO/IEC 1539-1:1997 Section 7.1.6 requires initialization expressions
+        to be constant expressions. Variable references are NOT allowed per the
+        standard, but detecting them requires semantic analysis.
+
+        This test documents the fixture for future semantic analyzer work
+        (issue #335). The grammar accepts all expressions syntactically.
+
+        Test coverage: Section 7.1.6 constraint documentation.
+        Issue #390: initialization expression constraints not enforced.
+        """
+        code = load_fixture(
+            "Fortran95",
+            "test_fortran_95_features",
+            "invalid_variable_ref_initializers.f90",
+        )
+        parser = self.create_parser_for_rule(code)
+        tree = parser.program_unit_f95()
+        assert tree is not None
+        # Grammar accepts syntactically valid code
+        assert parser.getNumberOfSyntaxErrors() == 0
+
+    def test_invalid_function_call_in_initializers(self):
+        """Function calls in initializers require semantic analysis.
+
+        ISO/IEC 1539-1:1997 Section 7.1.6.1 restricts which functions can
+        appear in constant expressions. User-defined functions and most
+        intrinsic functions are NOT allowed, but detecting these violations
+        requires semantic analysis of function properties.
+
+        This test documents the fixture for future semantic analyzer work
+        (issue #335). The grammar accepts all expressions syntactically.
+
+        Test coverage: Section 7.1.6, Section 7.1.6.1 constraint documentation.
+        Issue #390: initialization expression constraints not enforced.
+        """
+        code = load_fixture(
+            "Fortran95",
+            "test_fortran_95_features",
+            "invalid_function_call_initializers.f90",
+        )
+        parser = self.create_parser_for_rule(code)
+        tree = parser.program_unit_f95()
+        assert tree is not None
+        # Grammar accepts syntactically valid code
+        assert parser.getNumberOfSyntaxErrors() == 0
+
