@@ -66,11 +66,11 @@ def _parse_decimal(token_text: str) -> Decimal:
         return Decimal(normalized)
 
 
-def validate_fortran1957_numeric_constants(
+def _validate_real_constants(
     statement_text: str,
     line_number: int,
     column_offset: int,
-) -> List[NumericConstantViolation]:
+) -> tuple[List[NumericConstantViolation], List[tuple[int, int]]]:
     violations: List[NumericConstantViolation] = []
     consumed: List[tuple[int, int]] = []
 
@@ -87,10 +87,7 @@ def validate_fortran1957_numeric_constants(
                 NumericConstantViolation(
                     line_number=line_number,
                     column=column_offset + start,
-                    message=(
-                        "Invalid floating point constant syntax in "
-                        f"{token}"
-                    ),
+                    message=f"Invalid floating point constant syntax in {token}",
                 )
             )
             continue
@@ -112,15 +109,25 @@ def validate_fortran1957_numeric_constants(
                 )
             )
 
+    return violations, consumed
+
+
+def _validate_fixed_point_constants(
+    statement_text: str,
+    line_number: int,
+    column_offset: int,
+    consumed: List[tuple[int, int]],
+) -> List[NumericConstantViolation]:
+    violations: List[NumericConstantViolation] = []
+
     for match in _INT_PATTERN.finditer(statement_text):
         start, end = match.span()
-        if any(start >= s and end <= e for (s, e) in consumed):
+        if any(start >= span_start and end <= span_end for (span_start, span_end) in consumed):
             continue
         token = match.group(0)
 
         sign = _leading_unary_sign(statement_text, start)
-        digits = token
-        if len(digits) > 5:
+        if len(token) > 5:
             violations.append(
                 NumericConstantViolation(
                     line_number=line_number,
@@ -134,7 +141,7 @@ def validate_fortran1957_numeric_constants(
             )
             continue
 
-        value = int(digits) * sign
+        value = int(token) * sign
         if abs(value) >= 32768:
             violations.append(
                 NumericConstantViolation(
@@ -148,4 +155,25 @@ def validate_fortran1957_numeric_constants(
                 )
             )
 
+    return violations
+
+
+def validate_fortran1957_numeric_constants(
+    statement_text: str,
+    line_number: int,
+    column_offset: int,
+) -> List[NumericConstantViolation]:
+    violations, consumed = _validate_real_constants(
+        statement_text=statement_text,
+        line_number=line_number,
+        column_offset=column_offset,
+    )
+    violations.extend(
+        _validate_fixed_point_constants(
+            statement_text=statement_text,
+            line_number=line_number,
+            column_offset=column_offset,
+            consumed=consumed,
+        )
+    )
     return violations
