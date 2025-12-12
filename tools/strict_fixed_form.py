@@ -285,6 +285,44 @@ class StrictFixedFormProcessor:
 
         return errors
 
+    def _validate_ii_hollerith_length_counts_in_format(
+        self, card: Card
+    ) -> List[ValidationError]:
+        """
+        Validate Hollerith constants in FORTRAN II FORMAT statements.
+
+        Per C28-6000-2 (FORTRAN II manual), Hollerith constants are written
+        nH x1 x2 … xn, where the digit count n must match the number of
+        characters that follow the H.
+
+        Args:
+            card: The card being validated
+
+        Returns:
+            List of validation errors for mismatched Hollerith counts
+        """
+        errors: List[ValidationError] = []
+
+        for match in self._HOLLERITH_TOKEN_RE.finditer(card.statement_text):
+            declared = int(match.group(1))
+            actual = len(match.group(2))
+            if declared == actual:
+                continue
+
+            errors.append(
+                ValidationError(
+                    line_number=card.line_number,
+                    column=7 + match.start(1),
+                    message=(
+                        "Hollerith length-count mismatch in FORMAT per "
+                        "C28-6000-2 Part I Chapter 2: "
+                        f"declared {declared}, got {actual} in {match.group(0)}"
+                    ),
+                )
+            )
+
+        return errors
+
     @staticmethod
     def _validate_comment_marker(card: Card,
                                  comment_markers: Tuple[str, ...],
@@ -413,6 +451,17 @@ class StrictFixedFormProcessor:
                         self._validate_1957_hollerith_length_counts_in_format(card)
                     )
                 errors.extend(self._validate_1957_numeric_constants(card))
+
+            elif self.dialect == "II":
+                if card.card_type == CardType.STATEMENT:
+                    format_continuation = (
+                        card.statement_text.lstrip().upper().startswith("FORMAT")
+                    )
+
+                if format_continuation:
+                    errors.extend(
+                        self._validate_ii_hollerith_length_counts_in_format(card)
+                    )
 
         self._validate_continuation_sequence(cards, errors)
 
@@ -549,6 +598,31 @@ def validate_strict_fixed_form_1957(source: str,
     """
     return validate_strict_fixed_form(source, strict_width, allow_tabs,
                                       dialect="1957")
+
+
+def validate_strict_fixed_form_ii(source: str,
+                                  strict_width: bool = True,
+                                  allow_tabs: bool = False) -> ValidationResult:
+    """
+    Validate source code as strict fixed-form FORTRAN II.
+
+    Convenience wrapper for validate_strict_fixed_form with dialect="II".
+
+    Per C28-6000-2 (FORTRAN II for the IBM 704):
+    - Labels must be 1-99999
+    - C or * in column 1 marks a comment card
+    - Hollerith constants in FORMAT must have matching counts
+
+    Args:
+        source: Source code text
+        strict_width: Enforce 80-column cards
+        allow_tabs: Allow tab characters
+
+    Returns:
+        ValidationResult with validation status, errors, and parsed cards
+    """
+    return validate_strict_fixed_form(source, strict_width, allow_tabs,
+                                      dialect="II")
 
 
 def convert_to_lenient(source: str,
