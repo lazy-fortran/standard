@@ -64,7 +64,12 @@ options {
 // Main program - ISO 1539:1980 Section 14.1
 // Override from FORTRAN 66 to add optional PROGRAM statement
 main_program
-    : program_stmt? statement* end_stmt NEWLINE?
+    : program_stmt?
+      specification_part
+      data_part?
+      statement_function_part?
+      executable_part?
+      end_stmt NEWLINE?
     ;
 
 // PROGRAM statement - ISO 1539:1980 Section 14.1
@@ -72,6 +77,112 @@ main_program
 // The program-name is optional in FORTRAN 77 (this grammar requires it)
 program_stmt
     : PROGRAM IDENTIFIER NEWLINE
+    ;
+
+// ====================================================================
+// SUBPROGRAM STRUCTURE AND STATEMENT ORDERING
+// ISO 1539:1980 Sections 3.5, 15.1-15.3
+// ====================================================================
+//
+// ISO 1539:1980 Section 3.5 requires ordering of statement groups in
+// program units:
+//  1. Specification statements
+//  2. DATA statements
+//  3. Statement function definitions
+//  4. Executable statements
+//  5. END statement
+//
+// FORMAT statements may appear anywhere within the ordered parts
+// (Section 13), and blank lines are permitted.
+
+// SUBROUTINE subprogram - ISO 1539:1980 Section 15.2
+// Form: SUBROUTINE name [(dummy-arg-list)]
+subroutine_subprogram
+    : NEWLINE* SUBROUTINE IDENTIFIER parameter_list? NEWLINE
+      specification_part
+      data_part?
+      statement_function_part?
+      executable_part?
+      end_stmt NEWLINE?
+    ;
+
+// FUNCTION subprogram - ISO 1539:1980 Section 15.1
+// Form: [type] FUNCTION name (dummy-arg-list)
+function_subprogram
+    : NEWLINE* type_spec? FUNCTION IDENTIFIER parameter_list NEWLINE
+      specification_part
+      data_part?
+      statement_function_part?
+      executable_part?
+      end_stmt NEWLINE?
+    ;
+
+// DATA part - ISO 1539:1980 Section 9
+// DATA statements must follow all specification statements (Section 3.5).
+data_part
+    : (data_statement | format_statement_line)*
+    ;
+
+data_statement
+    : label? data_stmt NEWLINE?
+    | NEWLINE
+    ;
+
+// Statement function part - ISO 1539:1980 Section 15.6
+// Statement functions must follow any DATA statements (Section 3.5).
+statement_function_part
+    : (statement_function_statement | format_statement_line)*
+    ;
+
+statement_function_statement
+    : label? statement_function_stmt NEWLINE?
+    | NEWLINE
+    ;
+
+// Specification statement types - ISO 1539:1980 Section 8
+// Extends FORTRAN 66 specification bodies with PARAMETER and SAVE.
+specification_body
+    : implicit_stmt      // Section 8.5
+    | type_declaration   // Section 8.4
+    | parameter_stmt     // Section 8.6 - NEW in FORTRAN 77
+    | dimension_stmt     // Section 8.1
+    | common_stmt        // Section 8.3
+    | equivalence_stmt   // Section 8.2
+    | external_stmt      // Section 8.8
+    | intrinsic_stmt     // Section 8.9
+    | save_stmt          // Section 8.7 - NEW in FORTRAN 77
+    ;
+
+// Executable statement types - ISO 1539:1980 Section 7.1
+// Extends FORTRAN 66 executable bodies with structured IF and file I/O.
+executable_statement_body
+    : assignment_stmt    // Section 10.1-10.3
+    | assign_stmt        // Section 10.4 (inherited)
+    | assigned_goto_stmt // Section 11.2 (inherited)
+    | computed_goto_stmt // Section 11.3 (computed GO TO)
+    | goto_stmt          // Section 11.1 (unconditional GO TO)
+    | arithmetic_if_stmt // Section 11.4
+    | logical_if_stmt    // Section 11.5
+    | block_if_construct // Sections 11.6-11.9 - NEW in FORTRAN 77
+    | do_stmt            // Section 11.10
+    | continue_stmt      // Section 11.11
+    | stop_stmt          // Section 11.12
+    | pause_stmt         // Section 11.12
+    | call_stmt          // Section 15.8
+    | return_stmt        // Section 15.8
+    | entry_stmt         // Section 15.7 - NEW in FORTRAN 77
+    | read_tape_drum_stmt    // Legacy I/O, inherited from FORTRAN 66
+    | read_stmt              // Section 12.6 / 12.4
+    | write_tape_drum_stmt   // Legacy I/O, inherited from FORTRAN 66
+    | write_stmt             // Section 12.6
+    | print_stmt             // Section 12.6
+    | punch_stmt             // Legacy I/O, inherited from FORTRAN 66
+    | open_stmt              // Section 12.10.1 - NEW in FORTRAN 77
+    | close_stmt             // Section 12.10.2 - NEW in FORTRAN 77
+    | inquire_stmt           // Section 12.10.3 - NEW in FORTRAN 77
+    | rewind_stmt            // Section 12.9
+    | backspace_stmt         // Section 12.9
+    | endfile_stmt           // Section 12.9
     ;
 
 // ====================================================================
