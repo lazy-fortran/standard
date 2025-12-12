@@ -12,6 +12,6 @@ program vector_subscript_non_integer_type
   real_indices = (/ 2.5, 5.7, 8.1 /)
 
   ! SEMANTIC VIOLATION: real_indices is REAL type, not INTEGER
-  ! arr(real_indices) = 99  ! Invalid: non-integer subscript
+  arr(real_indices) = 99
 
 end program vector_subscript_non_integer_type

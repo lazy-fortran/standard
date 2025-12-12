@@ -12,6 +12,6 @@ program vector_subscript_rank_violation
   indices_2d = 1
 
   ! SEMANTIC VIOLATION: indices_2d is rank-two, not rank-one
-  ! arr(indices_2d) = 99  ! Invalid: rank-two subscript
+  arr(indices_2d) = 99
 
 end program vector_subscript_rank_violation
