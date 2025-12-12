@@ -461,8 +461,19 @@ Test fixtures in `tests/fixtures/Fortran90/test_vector_subscripts/`:
 
 Test suite: `tests/Fortran90/test_vector_subscripts.py`
 
+**Semantic Validator Implementation (Issue #675):**
+
+Implements semantic validation for vector subscripts per ISO/IEC 1539:1991 Section 6.2.2.1:
+- **tools/f90_vector_subscript_validator.py** (220 lines): ANTLR listener-based semantic analyzer
+- Enforces rank-one array expression constraint (R621)
+- Enforces integer element type constraint
+- Validates array bounds and indices
+- Test suite: `tests/Fortran90/test_issue675_vector_subscript_semantics.py` (10 test cases)
+- Semantic fixtures: `tests/fixtures/Fortran90/test_vector_subscripts_semantic/` (3 positive/negative cases)
+
+Error codes E675-001 through E675-003 with ISO section references (6.2.2.1).
+
 Future work should:
 
 - Tighten module/program‑unit integration and internal procedures
-- Enforce semantic constraints on vector subscripts (rank-one, integer type, non-definable arrays)
 - Keep the grammar and tests in sync with spec‑section annotations (#173)
