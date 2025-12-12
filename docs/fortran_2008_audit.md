@@ -320,6 +320,9 @@ Grammar implementation:
   - `allocation_f2008`:
     - `IDENTIFIER coarray_spec? (shape)?` or
       `derived_type_spec :: IDENTIFIER coarray_spec? (shape)?`.
+  - `alloc_opt`:
+    - Supports `STAT=`, `ERRMSG=`, `SOURCE=`, and `MOLD=` specifiers
+      (MOLD first appears in F2008; issue #679).
   - This extends F2003’s allocation with explicit coarray codimensions.
 
 Tests:
@@ -653,8 +656,9 @@ rules to grammar rules in `Fortran2008Lexer.g4` and `Fortran2008Parser.g4`.
 | ISO Rule | ISO Description | Grammar Rule |
 |----------|-----------------|--------------|
 | R626 | allocate-stmt | `allocate_stmt_f2008` |
-| R627 | allocation-list | `allocation_list_f2008` |
-| R628 | allocation | `allocation_f2008` |
+| -- | allocation-list | `allocation_list_f2008` |
+| R627 | alloc-opt | `alloc_opt` |
+| R631 | allocation | `allocation_f2008` |
 
 ### A.9 ERROR STOP (Section 8.4)
 
