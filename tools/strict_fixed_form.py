@@ -30,6 +30,9 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Literal, Optional, Tuple
 
+from f57_numeric_constant_validator import (
+    validate_fortran1957_numeric_constants,
+)
 
 FortranDialect = Literal["1957", "II", "66", "77"]
 
@@ -215,6 +218,22 @@ class StrictFixedFormProcessor:
             sequence_field=seq_field
         )
 
+    def _validate_1957_numeric_constants(self, card: Card) -> List[ValidationError]:
+        """Validate numeric constants for FORTRAN 1957 dialect."""
+        violations = validate_fortran1957_numeric_constants(
+            card.statement_text,
+            line_number=card.line_number,
+            column_offset=7,
+        )
+        return [
+            ValidationError(
+                line_number=v.line_number,
+                column=v.column,
+                message=v.message,
+            )
+            for v in violations
+        ]
+
     def validate_cards(self, cards: List[Card]) -> Tuple[List[ValidationError],
                                                          List[ValidationError]]:
         """
@@ -282,6 +301,9 @@ class StrictFixedFormProcessor:
                             "use spaces for strict conformance",
                     severity="warning"
                 ))
+
+            if self.dialect == "1957":
+                errors.extend(self._validate_1957_numeric_constants(card))
 
         for i, card in enumerate(cards):
             if card.card_type == CardType.CONTINUATION and i == 0:

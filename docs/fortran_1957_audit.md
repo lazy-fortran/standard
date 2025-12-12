@@ -198,7 +198,12 @@ Implemented:
 
 Out-of-scope / not explicitly audited:
 
-- Exact numeric range and kind semantics (pure syntax only).
+- Numeric constant range semantics are enforced in strict fixed-form mode:
+  - `tools/f57_numeric_constant_validator.py` validates fixed point and
+    floating point constants per C28-6003 Chapter II (Constants), using the
+    local OCR text `validation/pdfs/FORTRAN_1957_IBM704_C28-6003_Oct58.txt`
+    lines 316–324 (fixed point), 338–340 (floating point), and 1846–1850
+    (modulo 2^15 model). This closes issue #667.
 - Any later-era types (LOGICAL, COMPLEX, CHARACTER, etc.).
 
 ## 4. I/O and FORMAT
@@ -286,6 +291,8 @@ authentic IBM 704 card-image source files according to C28-6003:
   - Columns 7–72: Statement text
   - Columns 73–80: Sequence/identification field (stripped)
   - Column 1: `C` marks a comment card (historical; `*` generates warning)
+  - Numeric constant range validation per C28-6003 Chapter II (Constants)
+    via `tools/f57_numeric_constant_validator.py` (issue #667)
 
 - **Usage**:
   ```python
