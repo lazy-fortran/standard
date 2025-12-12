@@ -187,9 +187,18 @@ Grammar:
       ADJUSTL, ADJUSTR) matching ISO/IEC 1539:1991 coverage for
       intrinsic procedures.
 
-Gaps:
+Gaps (spec vs grammar):
 
-- The grammar does not enforce all context restrictions on assumed‑shape/deferred‑shape arrays or POINTER/TARGET combinations; semantic validation is required (issue #676).
+- The grammar does not enforce all context restrictions on assumed‑shape/deferred‑shape arrays or POINTER/TARGET combinations.
+  **ADDRESSED**: Semantic validator `tools/f90_array_spec_pointer_target_validator.py` now enforces:
+  - Assumed-shape arrays restricted to dummy arguments (ISO/IEC 1539:1991 Section 5.1.2.4)
+  - POINTER arrays must have deferred-shape specs (Section 5.2.7)
+  - ALLOCATABLE arrays must have deferred-shape specs (Section 5.1.2.4)
+  - POINTER and TARGET are mutually exclusive (Section 5.2.7-5.2.8)
+  - POINTER excludes INTENT attribute (Section 5.2.7)
+  - ALLOCATABLE and POINTER are mutually exclusive (Section 5.2.7)
+  Test suite validates all constraints with comprehensive test cases covering valid and invalid scenarios.
+  Implementation status: Complete (issue #676).
 
 ## 5. Control constructs (IF, CASE, DO, WHERE)
 
