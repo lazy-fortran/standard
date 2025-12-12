@@ -107,7 +107,17 @@ $(GRAMMAR_GEN_EARLY)/FORTRAN77Lexer.py: $(GRAMMAR_SRC)/FORTRAN77Lexer.g4 $(GRAMM
 	fi
 
 # Fortran 90 (1990) - Modern Foundation
-$(GRAMMAR_GEN_MODERN)/Fortran90Lexer.py: $(GRAMMAR_SRC)/Fortran90Lexer.g4 $(GRAMMAR_SRC)/Fortran90Parser.g4 FORTRAN77
+F90_PARSER_DEPS = \
+	$(GRAMMAR_SRC)/F90ModulesParser.g4 \
+	$(GRAMMAR_SRC)/F90TypesParser.g4 \
+	$(GRAMMAR_SRC)/F90ControlParser.g4 \
+	$(GRAMMAR_SRC)/F90IOParser.g4 \
+	$(GRAMMAR_SRC)/F90ExprsParser.g4 \
+	$(GRAMMAR_SRC)/F90MemoryParser.g4 \
+	$(GRAMMAR_SRC)/F90ProcsParser.g4 \
+	$(GRAMMAR_SRC)/F90InheritedParser.g4
+
+$(GRAMMAR_GEN_MODERN)/Fortran90Lexer.py: $(GRAMMAR_SRC)/Fortran90Lexer.g4 $(GRAMMAR_SRC)/Fortran90Parser.g4 $(F90_PARSER_DEPS) FORTRAN77
 	@echo "Building Fortran 90 (1990)..."
 	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
