@@ -85,9 +85,9 @@ PRECISION       : P R E C I S I O N ;
 // Ordered pair of REAL values (real part, imaginary part)
 COMPLEX         : C O M P L E X ;
 
-// Double precision exponent marker - X3.9-1966 Section 4.3.2
-// Used in DOUBLE PRECISION constants: 1.0D0, 3.14159D0
-D               : [Dd] ;
+// Double precision exponent notation uses the D exponent marker (Section 4.3.2).
+// This is enabled by the EXPONENT fragment override below without reserving D
+// as a standalone token, preserving its availability as an identifier.
 
 // Exponent fragment override - X3.9-1966 Section 4.3.2
 // Ensures D exponent notation is available starting with FORTRAN 66

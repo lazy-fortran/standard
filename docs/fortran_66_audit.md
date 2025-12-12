@@ -420,22 +420,21 @@ Mapping these families to the current grammar:
         - `d2` (upper bound) must be positive (> 0)
         - `d1` (lower bound) may be any signed integer constant (negative values allowed)
         - `d2` must be >= `d1`
-        - Parser accepts syntax; constraint validation requires semantic pass
+        - Constraint validation enforced by `tools/f66_dimension_bounds_validator.py`
       - Tests: covered by `test_dimension_statement_simple_bounds`,
         `test_dimension_statement_explicit_bounds`,
         `test_dimension_statement_multiple_declarators`,
         `test_dimension_bounds_semantic_constraint_zero_upper`,
+        `test_dimension_bounds_semantic_valid_cases`,
         `test_dimension_bounds_in_typed_declaration`,
         `test_dimension_bounds_variable_list_subscripting`, and
         `test_dimension_statement_with_negative_bounds` in
         `tests/FORTRAN66/test_fortran66_parser.py`.
-      - **NON-COMPLIANT with X3.9-1966 Section 5.3:**
-        - Parser currently accepts violations like:
+      - **Compliance Status: STANDARD-COMPLIANT with X3.9-1966 Section 5.3**
+        - Semantic validator rejects violations such as:
           - `DIMENSION A(0)` (zero upper bound)
-          - `DIMENSION B(-5)` (negative single bound)
-          - `DIMENSION C(10, 5)` (d2 < d1)
-        - These would require semantic validation to reject properly
-        - See issue #403 for tracking semantic validation work
+          - `DIMENSION B(-5)` (negative upper bound)
+          - `DIMENSION C(10:5)` (d2 < d1)
     - EQUIVALENCE:
       - Implemented by `equivalence_stmt` / `equivalence_set`.
     - COMMON:

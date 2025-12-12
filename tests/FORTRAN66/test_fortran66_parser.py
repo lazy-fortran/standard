@@ -13,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT))
 sys.path.append(str(ROOT.parent / "grammars/generated/early"))
+sys.path.append(str(ROOT.parent / "tools"))
 
 try:
     from antlr4 import InputStream, CommonTokenStream  # type: ignore
@@ -20,9 +21,13 @@ try:
     from FORTRAN66Parser import FORTRAN66Parser  # type: ignore
     from fixture_utils import load_fixture
     from shared_fortran_tests import StatementFunctionTestMixin
+    from f66_dimension_bounds_validator import (
+        F66DimensionBoundsValidator,
+    )
 except ImportError as e:
     print(f"Import error: {e}")
     FORTRAN66Parser = None
+    F66DimensionBoundsValidator = None
 
 
 class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
@@ -1327,6 +1332,7 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
             "A = 1",
             "VAR = 2.0",
             "ABCDEF = 3",  # Exactly 6 characters
+            "D = 4",  # Single-letter identifier D is valid in FORTRAN 66
             "X1 = Y2",
             "FLAG = .TRUE.",
         ]
@@ -1361,8 +1367,8 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
         """Test DIMENSION statement with explicit lower and upper bounds.
 
         ANSI X3.9-1966 Section 5.3 permits d1:d2 form (explicit bounds).
-        Per standard: d1 may be a signed integer (negative values allowed)
-        and d2 must be >= d1.
+        Per standard: d1 may be a signed integer (negative values allowed),
+        d2 must be positive, and d2 must be >= d1.
         """
         # Valid explicit bound declarations
         valid_declarations = [
@@ -1402,29 +1408,66 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
                 self.assertIsNotNone(tree, f"Failed to parse: {decl}")
 
     def test_dimension_bounds_semantic_constraint_zero_upper(self):
-        """Test semantic constraint: upper bound must be positive.
+        """Test semantic constraint: bounds must be integer constants and upper positive.
 
-        ANSI X3.9-1966 Section 5.3 specifies that d and d2 must be positive.
-        Constraint: d > 0 (when single bound), d2 > 0 (when explicit)
-
-        Note: Parser accepts these syntactically; semantic validation would
-        require a separate pass. This test documents the constraint.
+        ANSI X3.9-1966 Section 5.3 constraints:
+        - Single bound d must be a positive integer constant.
+        - Explicit bound d1:d2 requires integer constants, d2 > 0, and d2 >= d1.
         """
-        # These parse syntactically but violate ANSI X3.9-1966 Section 5.3
-        # They would require semantic validation to reject
+        if F66DimensionBoundsValidator is None:
+            self.skipTest("F66DimensionBoundsValidator not available")
+        validator = F66DimensionBoundsValidator()
+
+        # These are syntactically valid but semantically NON-COMPLIANT
         invalid_semantically = [
             "DIMENSION A(0)",            # Zero upper bound - NON-COMPLIANT
             "DIMENSION B(-5)",           # Negative single bound - NON-COMPLIANT
-            "DIMENSION C(10, 5)",        # Inverted bounds (d2 < d1) - NON-COMPLIANT
+            "DIMENSION C(10:5)",         # Inverted bounds (d2 < d1) - NON-COMPLIANT
             "DIMENSION D(0:0)",          # Zero to zero (ambiguous) - NON-COMPLIANT
+            "DIMENSION E(-5:-1)",        # Negative upper bound - NON-COMPLIANT
+            "DIMENSION F(-100:0)",       # Zero upper bound - NON-COMPLIANT
+            "DIMENSION G(N)",            # Non-constant bound - NON-COMPLIANT
+            "DIMENSION H(1.5)",          # Non-integer bound - NON-COMPLIANT
+            "DIMENSION I(-N:10)",        # Non-constant lower bound - NON-COMPLIANT
         ]
 
         for decl in invalid_semantically:
             with self.subTest(declaration=decl):
-                # These currently parse without error - documenting constraint
-                tree = self.parse(decl, 'dimension_stmt')
-                self.assertIsNotNone(tree)
-                # TODO: Add semantic validation pass to reject these per X3.9-1966
+                wrapped = f"{decl}\nEND\n"
+                result = validator.validate_code(wrapped)
+                self.assertTrue(
+                    result.has_errors,
+                    f"Expected semantic errors for: {decl}",
+                )
+                codes = {d.code for d in result.diagnostics}
+                self.assertTrue(
+                    any(code.startswith("DIM66_") for code in codes),
+                    f"Expected DIM66_* diagnostics for: {decl}, got {codes}",
+                )
+
+    def test_dimension_bounds_semantic_valid_cases(self):
+        """Valid DIMENSION and type-declaration bounds should pass semantic validation."""
+        if F66DimensionBoundsValidator is None:
+            self.skipTest("F66DimensionBoundsValidator not available")
+        validator = F66DimensionBoundsValidator()
+
+        valid_semantically = [
+            "DIMENSION A(10)",
+            "DIMENSION B(1)",
+            "DIMENSION C(-5:10)",
+            "DIMENSION D(0:10)",
+            "INTEGER X(5, 10)",
+            "REAL Y(3)",
+        ]
+
+        for decl in valid_semantically:
+            with self.subTest(declaration=decl):
+                wrapped = f"{decl}\nEND\n"
+                result = validator.validate_code(wrapped)
+                self.assertFalse(
+                    result.has_errors,
+                    f"Unexpected semantic errors for: {decl}: {result.diagnostics}",
+                )
 
     def test_dimension_bounds_in_typed_declaration(self):
         """Test dimension bounds in type declaration (e.g., INTEGER A(10))."""
@@ -1464,15 +1507,14 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
         self.assertIsNotNone(tree)
 
     def test_dimension_statement_with_negative_bounds(self):
-        """Test DIMENSION with negative lower bounds (explicit form).
+        """Test DIMENSION parsing with negative bounds (explicit form).
 
-        ANSI X3.9-1966 Section 5.3: d1 may be negative.
-        Valid forms: d1:d2 where d1 < d2, both signed integers.
+        Syntax permits signed bounds in d1:d2. Semantic validator enforces d2 > 0.
         """
         declarations = [
-            "DIMENSION A(-10:10)",       # Symmetric negative to positive
-            "DIMENSION B(-5:-1)",        # Negative to negative (d2 >= d1)
-            "DIMENSION C(-100:0)",       # Negative to zero
+            "DIMENSION A(-10:10)",       # Semantic compliant
+            "DIMENSION B(-5:-1)",        # Semantic NON-COMPLIANT: upper not positive
+            "DIMENSION C(-100:0)",       # Semantic NON-COMPLIANT: upper not positive
         ]
 
         for decl in declarations:
