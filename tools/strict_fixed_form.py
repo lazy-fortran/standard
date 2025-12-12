@@ -142,6 +142,8 @@ class StrictFixedFormProcessor:
       (1957: C only, II: C or *)
     """
 
+    _ALL_COMMENT_MARKERS = ("C", "*")
+
     def __init__(self, strict_width: bool = True, allow_tabs: bool = False,
                  dialect: FortranDialect = "II"):
         """
@@ -157,6 +159,54 @@ class StrictFixedFormProcessor:
         self.dialect = dialect
         self.config = DIALECT_CONFIG[dialect]
 
+    def _normalize_raw_card_text(self, line: str) -> Tuple[str, bool]:
+        raw = line.rstrip("\r\n")
+        original_empty = len(raw) == 0
+        if self.strict_width:
+            raw = raw.ljust(80)[:80]
+        return raw, original_empty
+
+    @staticmethod
+    def _blank_card(line_number: int, raw_text: str) -> Card:
+        return Card(
+            line_number=line_number,
+            raw_text=raw_text,
+            card_type=CardType.BLANK,
+            label=None,
+            continuation=False,
+            statement_text="",
+            sequence_field="",
+        )
+
+    @staticmethod
+    def _comment_card(line_number: int, raw_text: str) -> Card:
+        return Card(
+            line_number=line_number,
+            raw_text=raw_text,
+            card_type=CardType.COMMENT,
+            label=None,
+            continuation=False,
+            statement_text=raw_text,
+            sequence_field="",
+        )
+
+    @staticmethod
+    def _label_from_raw(raw_text: str) -> Optional[str]:
+        label_field = raw_text[:5] if len(raw_text) >= 5 else raw_text.ljust(5)
+        label_text = label_field.strip()
+        return label_text if label_text else None
+
+    @staticmethod
+    def _is_continuation(raw_text: str) -> bool:
+        cont_char = raw_text[5] if len(raw_text) > 5 else " "
+        return cont_char not in (" ", "0")
+
+    @staticmethod
+    def _statement_and_sequence_from_raw(raw_text: str) -> Tuple[str, str]:
+        stmt_text = raw_text[6:72] if len(raw_text) > 6 else ""
+        seq_field = raw_text[72:80] if len(raw_text) > 72 else ""
+        return stmt_text.rstrip(), seq_field
+
     def parse_card(self, line: str, line_number: int) -> Card:
         """
         Parse a single line as an 80-column card image.
@@ -168,44 +218,17 @@ class StrictFixedFormProcessor:
         Returns:
             Card object with parsed fields
         """
-        raw = line.rstrip("\r\n")
-        original_empty = len(raw) == 0
-        if self.strict_width:
-            raw = raw.ljust(80)[:80]
-
+        raw, original_empty = self._normalize_raw_card_text(line)
         if original_empty or raw.strip() == "":
-            return Card(
-                line_number=line_number,
-                raw_text=raw,
-                card_type=CardType.BLANK,
-                label=None,
-                continuation=False,
-                statement_text="",
-                sequence_field=""
-            )
+            return self._blank_card(line_number, raw)
 
         col1 = raw[0] if raw else " "
-        all_comment_markers = ("C", "*")
-        if col1.upper() in all_comment_markers:
-            return Card(
-                line_number=line_number,
-                raw_text=raw,
-                card_type=CardType.COMMENT,
-                label=None,
-                continuation=False,
-                statement_text=raw,
-                sequence_field=""
-            )
+        if col1.upper() in self._ALL_COMMENT_MARKERS:
+            return self._comment_card(line_number, raw)
 
-        label_field = raw[:5] if len(raw) >= 5 else raw.ljust(5)
-        label = label_field.strip() if label_field.strip() else None
-
-        cont_char = raw[5] if len(raw) > 5 else " "
-        is_continuation = cont_char not in (" ", "0")
-
-        stmt_text = raw[6:72] if len(raw) > 6 else ""
-        seq_field = raw[72:80] if len(raw) > 72 else ""
-
+        label = self._label_from_raw(raw)
+        is_continuation = self._is_continuation(raw)
+        stmt_text, seq_field = self._statement_and_sequence_from_raw(raw)
         card_type = CardType.CONTINUATION if is_continuation else CardType.STATEMENT
 
         return Card(
@@ -214,8 +237,8 @@ class StrictFixedFormProcessor:
             card_type=card_type,
             label=label,
             continuation=is_continuation,
-            statement_text=stmt_text.rstrip(),
-            sequence_field=seq_field
+            statement_text=stmt_text,
+            sequence_field=seq_field,
         )
 
     def _validate_1957_numeric_constants(self, card: Card) -> List[ValidationError]:
@@ -233,6 +256,93 @@ class StrictFixedFormProcessor:
             )
             for v in violations
         ]
+
+    @staticmethod
+    def _validate_comment_marker(card: Card,
+                                 comment_markers: Tuple[str, ...],
+                                 warnings: List[ValidationError]) -> None:
+        col1 = card.raw_text[0].upper() if card.raw_text else ""
+        if col1 == "*" and "*" not in comment_markers:
+            warnings.append(ValidationError(
+                line_number=card.line_number,
+                column=1,
+                message="Star (*) comment not historical for "
+                        "FORTRAN 1957; use C in column 1",
+                severity="warning",
+            ))
+
+    @staticmethod
+    def _validate_label(card: Card, label_max: int,
+                        errors: List[ValidationError]) -> None:
+        if card.label is None:
+            return
+
+        if not card.label.isdigit():
+            errors.append(ValidationError(
+                line_number=card.line_number,
+                column=1,
+                message=f"Invalid label in columns 1-5: "
+                        f"expected numeric (1-{label_max}), "
+                        f"got '{card.label}'",
+            ))
+            return
+
+        label_val = int(card.label)
+        if label_val < 1 or label_val > label_max:
+            errors.append(ValidationError(
+                line_number=card.line_number,
+                column=1,
+                message=f"Label {label_val} out of range (1-{label_max})",
+            ))
+        if card.continuation:
+            errors.append(ValidationError(
+                line_number=card.line_number,
+                column=1,
+                message="Continuation card (col 6 non-blank) "
+                        "must not have a label",
+            ))
+
+    def _validate_tabs(self, card: Card,
+                       warnings: List[ValidationError]) -> None:
+        if self.allow_tabs:
+            return
+        if "\t" not in card.raw_text:
+            return
+
+        warnings.append(ValidationError(
+            line_number=card.line_number,
+            column=card.raw_text.index("\t") + 1,
+            message="Tab character found (not historical); "
+                    "use spaces for strict conformance",
+            severity="warning",
+        ))
+
+    @staticmethod
+    def _validate_continuation_sequence(cards: List[Card],
+                                        errors: List[ValidationError]) -> None:
+        has_preceding_statement = False
+        for i, card in enumerate(cards):
+            if card.card_type == CardType.STATEMENT:
+                has_preceding_statement = True
+                continue
+            if card.card_type != CardType.CONTINUATION:
+                continue
+
+            if i == 0:
+                errors.append(ValidationError(
+                    line_number=card.line_number,
+                    column=6,
+                    message="First card cannot be a continuation",
+                ))
+                continue
+
+            if not has_preceding_statement:
+                errors.append(ValidationError(
+                    line_number=card.line_number,
+                    column=6,
+                    message="Continuation card has no preceding statement",
+                ))
+            has_preceding_statement = True
 
     def validate_cards(self, cards: List[Card]) -> Tuple[List[ValidationError],
                                                          List[ValidationError]]:
@@ -256,72 +366,16 @@ class StrictFixedFormProcessor:
         for card in cards:
             if card.card_type in (CardType.BLANK, CardType.COMMENT):
                 if card.card_type == CardType.COMMENT:
-                    col1 = card.raw_text[0].upper() if card.raw_text else ""
-                    if col1 == "*" and "*" not in comment_markers:
-                        warnings.append(ValidationError(
-                            line_number=card.line_number,
-                            column=1,
-                            message="Star (*) comment not historical for "
-                                    "FORTRAN 1957; use C in column 1",
-                            severity="warning"
-                        ))
+                    self._validate_comment_marker(card, comment_markers, warnings)
                 continue
 
-            if card.label is not None:
-                if not card.label.isdigit():
-                    errors.append(ValidationError(
-                        line_number=card.line_number,
-                        column=1,
-                        message=f"Invalid label in columns 1-5: "
-                                f"expected numeric (1-{label_max}), "
-                                f"got '{card.label}'"
-                    ))
-                elif card.label:
-                    label_val = int(card.label)
-                    if label_val < 1 or label_val > label_max:
-                        errors.append(ValidationError(
-                            line_number=card.line_number,
-                            column=1,
-                            message=f"Label {label_val} out of range "
-                                    f"(1-{label_max})"
-                        ))
-                if card.continuation:
-                    errors.append(ValidationError(
-                        line_number=card.line_number,
-                        column=1,
-                        message="Continuation card (col 6 non-blank) "
-                                "must not have a label"
-                    ))
-
-            if not self.allow_tabs and "\t" in card.raw_text:
-                warnings.append(ValidationError(
-                    line_number=card.line_number,
-                    column=card.raw_text.index("\t") + 1,
-                    message="Tab character found (not historical); "
-                            "use spaces for strict conformance",
-                    severity="warning"
-                ))
+            self._validate_label(card, label_max, errors)
+            self._validate_tabs(card, warnings)
 
             if self.dialect == "1957":
                 errors.extend(self._validate_1957_numeric_constants(card))
 
-        for i, card in enumerate(cards):
-            if card.card_type == CardType.CONTINUATION and i == 0:
-                errors.append(ValidationError(
-                    line_number=card.line_number,
-                    column=6,
-                    message="First card cannot be a continuation"
-                ))
-            elif card.card_type == CardType.CONTINUATION:
-                prev_stmt_cards = [c for c in cards[:i]
-                                   if c.card_type in (CardType.STATEMENT,
-                                                      CardType.CONTINUATION)]
-                if not prev_stmt_cards:
-                    errors.append(ValidationError(
-                        line_number=card.line_number,
-                        column=6,
-                        message="Continuation card has no preceding statement"
-                    ))
+        self._validate_continuation_sequence(cards, errors)
 
         return errors, warnings
 
@@ -351,6 +405,21 @@ class StrictFixedFormProcessor:
             cards=cards
         )
 
+    @staticmethod
+    def _append_statement(output_lines: List[str], label: Optional[str],
+                          statement_text: Optional[str]) -> None:
+        if statement_text is None:
+            return
+        if label:
+            output_lines.append(f"{label} {statement_text}")
+        else:
+            output_lines.append(statement_text)
+
+    @staticmethod
+    def _comment_to_free_form(card: Card) -> str:
+        comment_text = card.raw_text[1:].strip() if len(card.raw_text) > 1 else ""
+        return f"! {comment_text}"
+
     def to_lenient_form(self, result: ValidationResult,
                         strip_comments: bool = False) -> str:
         """
@@ -372,44 +441,26 @@ class StrictFixedFormProcessor:
 
         for card in result.cards:
             if card.card_type == CardType.BLANK:
-                if current_stmt is not None:
-                    if current_label:
-                        output_lines.append(f"{current_label} {current_stmt}")
-                    else:
-                        output_lines.append(current_stmt)
-                    current_stmt = None
-                    current_label = None
+                self._append_statement(output_lines, current_label, current_stmt)
+                current_stmt = None
+                current_label = None
                 if not strip_comments:
                     output_lines.append("")
             elif card.card_type == CardType.COMMENT:
-                if current_stmt is not None:
-                    if current_label:
-                        output_lines.append(f"{current_label} {current_stmt}")
-                    else:
-                        output_lines.append(current_stmt)
-                    current_stmt = None
-                    current_label = None
+                self._append_statement(output_lines, current_label, current_stmt)
+                current_stmt = None
+                current_label = None
                 if not strip_comments:
-                    comment_text = card.raw_text[1:].strip() \
-                                   if len(card.raw_text) > 1 else ""
-                    output_lines.append(f"! {comment_text}")
+                    output_lines.append(self._comment_to_free_form(card))
             elif card.card_type == CardType.STATEMENT:
-                if current_stmt is not None:
-                    if current_label:
-                        output_lines.append(f"{current_label} {current_stmt}")
-                    else:
-                        output_lines.append(current_stmt)
+                self._append_statement(output_lines, current_label, current_stmt)
                 current_stmt = card.statement_text.rstrip()
                 current_label = card.label
             elif card.card_type == CardType.CONTINUATION:
                 if current_stmt is not None:
                     current_stmt += " " + card.statement_text.strip()
 
-        if current_stmt is not None:
-            if current_label:
-                output_lines.append(f"{current_label} {current_stmt}")
-            else:
-                output_lines.append(current_stmt)
+        self._append_statement(output_lines, current_label, current_stmt)
 
         return "\n".join(output_lines)
 
