@@ -211,9 +211,16 @@ Grammar:
     `end_where_stmt`, `where_stmt`, `logical_expr_f90` implement the
     WHERE construct and single WHERE statement.
 
-Gaps:
+Semantic validation (issue #677):
 
-- Semantic constraints on named constructs and CYCLE/EXIT binding are not enforced (issue #677).
+- Semantic validator `tools/f90_cycle_exit_validator.py` implements CYCLE/EXIT
+  construct-name validation per §8.1.4.4, enforcing:
+  - CYCLE and EXIT must appear within DO construct range (§8.1.4.4.3–4.4)
+  - Named CYCLE/EXIT must reference active DO construct by name (§8.1.4.4.3–4.4)
+  - No stray construct references allowed (§8.1.4.4.3–4.4)
+- Test suite: `tests/Fortran90/test_issue677_cycle_exit_semantics.py` (30+ test cases)
+- Fixtures: `tests/fixtures/Fortran90/test_cycle_exit/` with positive and negative cases
+- Closes issue #677
 
 ## 6. Expressions and literals
 
