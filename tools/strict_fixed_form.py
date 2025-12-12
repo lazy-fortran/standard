@@ -26,6 +26,7 @@ References:
 - IBM FORTRAN II for the IBM 704 Data Processing System (Form C28-6000-2, 1958)
 """
 
+import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Literal, Optional, Tuple
@@ -143,6 +144,7 @@ class StrictFixedFormProcessor:
     """
 
     _ALL_COMMENT_MARKERS = ("C", "*")
+    _HOLLERITH_TOKEN_RE = re.compile(r"([1-9][0-9]*)[Hh]([^,)\r\n]*)")
 
     def __init__(self, strict_width: bool = True, allow_tabs: bool = False,
                  dialect: FortranDialect = "II"):
@@ -257,6 +259,32 @@ class StrictFixedFormProcessor:
             for v in violations
         ]
 
+    @classmethod
+    def _validate_1957_hollerith_length_counts_in_format(
+        cls, card: Card
+    ) -> List[ValidationError]:
+        errors: List[ValidationError] = []
+
+        for match in cls._HOLLERITH_TOKEN_RE.finditer(card.statement_text):
+            declared = int(match.group(1))
+            actual = len(match.group(2))
+            if declared == actual:
+                continue
+
+            errors.append(
+                ValidationError(
+                    line_number=card.line_number,
+                    column=7 + match.start(1),
+                    message=(
+                        "Hollerith length-count mismatch in FORMAT per "
+                        "C28-6003 Chapter III: "
+                        f"declared {declared}, got {actual} in {match.group(0)}"
+                    ),
+                )
+            )
+
+        return errors
+
     @staticmethod
     def _validate_comment_marker(card: Card,
                                  comment_markers: Tuple[str, ...],
@@ -362,9 +390,11 @@ class StrictFixedFormProcessor:
         warnings = []
         label_max = self.config["label_max"]
         comment_markers = self.config["comment_markers"]
+        format_continuation = False
 
         for card in cards:
             if card.card_type in (CardType.BLANK, CardType.COMMENT):
+                format_continuation = False
                 if card.card_type == CardType.COMMENT:
                     self._validate_comment_marker(card, comment_markers, warnings)
                 continue
@@ -373,6 +403,15 @@ class StrictFixedFormProcessor:
             self._validate_tabs(card, warnings)
 
             if self.dialect == "1957":
+                if card.card_type == CardType.STATEMENT:
+                    format_continuation = (
+                        card.statement_text.lstrip().upper().startswith("FORMAT")
+                    )
+
+                if format_continuation:
+                    errors.extend(
+                        self._validate_1957_hollerith_length_counts_in_format(card)
+                    )
                 errors.extend(self._validate_1957_numeric_constants(card))
 
         self._validate_continuation_sequence(cards, errors)

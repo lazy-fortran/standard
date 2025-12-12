@@ -441,6 +441,30 @@ class TestFixtures1957(unittest.TestCase):
                 for e in result.errors)
         )
 
+    def test_invalid_hollerith_count_too_long_fixture(self):
+        """Test invalid_hollerith_count_too_long.f fails validation."""
+        source = load_fixture(
+            "FORTRAN", "test_strict_fixed_form", "invalid_hollerith_count_too_long.f"
+        )
+        result = validate_strict_fixed_form_1957(source)
+        self.assertFalse(result.valid)
+        self.assertTrue(
+            any("hollerith" in e.message.lower() and "mismatch" in e.message.lower()
+                for e in result.errors)
+        )
+
+    def test_invalid_hollerith_count_too_short_fixture(self):
+        """Test invalid_hollerith_count_too_short.f fails validation."""
+        source = load_fixture(
+            "FORTRAN", "test_strict_fixed_form", "invalid_hollerith_count_too_short.f"
+        )
+        result = validate_strict_fixed_form_1957(source)
+        self.assertFalse(result.valid)
+        self.assertTrue(
+            any("hollerith" in e.message.lower() and "mismatch" in e.message.lower()
+                for e in result.errors)
+        )
+
     def test_star_comment_warning_fixture(self):
         """Test star_comment_warning.f generates warning."""
         source = load_fixture(
