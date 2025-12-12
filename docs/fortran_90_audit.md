@@ -226,14 +226,17 @@ Specification (N692 §7, §4.3, §4.5, §13.7–13.8):
 Grammar:
 
 - `expr_f90`:
-  - A single recursive rule representing:
-    - Logical operators (`.EQV.`, `.NEQV.`, `.OR.`, `.AND.`, `.NOT.`).
-    - Relational operators (both dotted and symbolic: `.EQ.`, `==`,
-      `.NE.`, `/=`, `.LT.`, `<`, etc.).
-    - Character concatenation (`//`).
-    - Arithmetic (`**`, `*`, `/`, `+`, `-`) including unary prefix
-      `+`/`-`.
-    - `primary_f90`.
+  - A precedence-aware rule tower that implements N692 §7.1.1 and §7.4
+    (Table 7.7), including associativity:
+    - Defined unary operators bind tightest (`level_1_expr_f90`).
+    - Exponentiation `**` associates right to left (`mult_operand_f90`).
+    - `*`/`/`, `+`/`-`, and `//` associate left to right.
+    - Relational operators are non-associative and appear at most once
+      (`level_4_expr_f90`).
+    - Logical precedence `.NOT.` > `.AND.` > `.OR.` > `.EQV.`/`.NEQV.`
+      (`level_5_expr_f90`).
+    - Defined binary operators have lowest precedence (Table 7.7) and
+      are parsed at `expr_f90` (fixes #678).
 - `primary_f90`:
   - Includes `literal_f90`, `variable_f90`, `function_reference_f90`,
     `intrinsic_function_f90`, `array_constructor_f90`,
@@ -251,7 +254,8 @@ Grammar:
 
 Gaps:
 
-- Expression precedence and associativity are not encoded in a standard‑accurate way; downstream tooling cannot rely on parse‑tree structure (issue #678).
+- Expression parsing is syntactic only; type, rank and definability
+  constraints are deferred to downstream semantic tooling.
 
 ## 7. I/O: READ, WRITE, NAMELIST, control lists
 

@@ -26,6 +26,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent / "grammars/generated/mo
 
 try:
     from antlr4 import InputStream, CommonTokenStream
+    from antlr4.error.ErrorListener import ErrorListener
     from Fortran90Lexer import Fortran90Lexer
     from Fortran90Parser import Fortran90Parser
 except ImportError as e:
@@ -107,32 +108,51 @@ end program test
 class TestFortran90VectorSubscriptRules:
     """Test F90 grammar rule structure for vector subscripts."""
 
-    def test_section_subscript_rule_exists(self):
-        """Verify section_subscript rule exists in grammar."""
-        # This is implicitly tested by successful parsing in other tests
-        # Grammar must have section_subscript rule
-        pass
+    class ParseErrorListener(ErrorListener):
+        def __init__(self):
+            super().__init__()
+            self.errors = []
 
-    def test_vector_subscript_rule_exists(self):
-        """Verify explicit vector_subscript rule exists in grammar.
+        def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+            self.errors.append(f"{line}:{column}: {msg}")
+
+    def parse_rule(self, source_text, rule_name):
+        input_stream = InputStream(source_text)
+        lexer = Fortran90Lexer(input_stream)
+        stream = CommonTokenStream(lexer)
+        parser = Fortran90Parser(stream)
+        error_listener = self.ParseErrorListener()
+        parser.removeErrorListeners()
+        parser.addErrorListener(error_listener)
+        ctx = getattr(parser, rule_name)()
+        assert parser._input.LA(1) == -1
+        assert error_listener.errors == []
+        return ctx
+
+    def test_section_subscript_rule_parses(self):
+        """Verify section_subscript rule parses section syntax."""
+        tree = self.parse_rule("1:10", "section_subscript")
+        assert tree is not None
+
+    def test_vector_subscript_rule_parses(self):
+        """Verify explicit vector_subscript rule parses expressions.
 
         Per issue #381, the grammar should have explicit vector_subscript
         rule per R621, not just implicit through expr_f90.
         """
-        # This test verifies the grammar change - if parsing works above,
-        # the rule exists.
-        pass
+        tree = self.parse_rule("(/ 1, 2, 3 /)", "vector_subscript")
+        assert tree is not None
 
-    def test_subscript_rule_exists(self):
-        """Verify subscript rule distinguishes scalar from vector.
+    def test_subscript_rule_parses(self):
+        """Verify subscript rule parses scalar expressions.
 
         Per R620, section-subscript includes:
         - subscript (scalar integer expression) - R611
         - subscript-triplet - R622
         - vector-subscript - R621
         """
-        # Verified by successful parsing of various subscript types above
-        pass
+        tree = self.parse_rule("1", "subscript")
+        assert tree is not None
 
 
 if __name__ == '__main__':

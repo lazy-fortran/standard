@@ -17,27 +17,95 @@ parser grammar F90ExprsParser;
 //
 // Expressions with new operators and array operations.
 
-// F90 expressions (enhanced with new operators and array operations)
+// F90 expressions (precedence and associativity)
+//
+// ISO/IEC 1539:1991 (WG5 N692) Section 7.1.1 and 7.4 define both the
+// syntactic form and precedence of expressions:
+// - R703-R704: level-1-expr and defined-unary-op
+// - R705-R710: level-2-expr numeric precedence and associativity
+// - R711-R712: level-3-expr concatenation
+// - R713-R714: level-4-expr relational (at most one rel-op)
+// - R715-R722: level-5-expr logical precedence
+// - R723-R724: expr and defined-binary-op (lowest precedence)
+//
+// This rule tower encodes Table 7.7 precedence and associativity per issue #678.
+
+// R723-R724: expr (defined-binary-op is lowest precedence)
 expr_f90
-    : expr_f90 defined_binary_op expr_f90                # DefinedBinaryExprF90
-    | expr_f90 DOT_EQV expr_f90                          # EquivalenceExprF90
-    | expr_f90 DOT_NEQV expr_f90                         # NotEquivalenceExprF90
-    | expr_f90 DOT_OR expr_f90                           # LogicalOrExprF90
-    | expr_f90 DOT_AND expr_f90                          # LogicalAndExprF90
-    | DOT_NOT expr_f90                                   # LogicalNotExprF90
-    | expr_f90 (DOT_EQ | EQ_OP) expr_f90                 # EqualExprF90
-    | expr_f90 (DOT_NE | NE_OP) expr_f90                 # NotEqualExprF90
-    | expr_f90 (DOT_LT | LT_OP) expr_f90                 # LessExprF90
-    | expr_f90 (DOT_LE | LE_OP) expr_f90                 # LessEqualExprF90
-    | expr_f90 (DOT_GT | GT_OP) expr_f90                 # GreaterExprF90
-    | expr_f90 (DOT_GE | GE_OP) expr_f90                 # GreaterEqualExprF90
-    | expr_f90 CONCAT expr_f90                           # ConcatExprF90
-    | expr_f90 POWER expr_f90                            # PowerExprF90
-    | expr_f90 (MULTIPLY | SLASH) expr_f90              # MultDivExprF90
-    | expr_f90 (PLUS | MINUS) expr_f90                   # AddSubExprF90
-    | (PLUS | MINUS) expr_f90                            # UnaryExprF90
-    | defined_unary_op primary_f90                       # DefinedUnaryExprF90
-    | primary_f90                                        # PrimaryExprF90
+    : expr_f90 defined_binary_op level_5_expr_f90         # DefinedBinaryExprF90
+    | level_5_expr_f90                                    # Level5ExprF90
+    ;
+
+// R718-R722: level-5-expr (equivalence operators)
+level_5_expr_f90
+    : level_5_expr_f90 DOT_EQV equiv_operand_f90          # EquivalenceExprF90
+    | level_5_expr_f90 DOT_NEQV equiv_operand_f90         # NotEquivalenceExprF90
+    | equiv_operand_f90                                   # EquivOperandExprF90
+    ;
+
+// R717-R721: equiv-operand (logical or)
+equiv_operand_f90
+    : equiv_operand_f90 DOT_OR or_operand_f90             # LogicalOrExprF90
+    | or_operand_f90                                      # OrOperandExprF90
+    ;
+
+// R716-R720: or-operand (logical and)
+or_operand_f90
+    : or_operand_f90 DOT_AND and_operand_f90              # LogicalAndExprF90
+    | and_operand_f90                                     # AndOperandExprF90
+    ;
+
+// R715-R719: and-operand (logical not; at most one)
+and_operand_f90
+    : DOT_NOT level_4_expr_f90                            # LogicalNotExprF90
+    | level_4_expr_f90                                    # Level4ExprF90
+    ;
+
+// R713-R714: level-4-expr (relational; at most one rel-op)
+level_4_expr_f90
+    : level_3_expr_f90 (DOT_EQ | EQ_OP) level_3_expr_f90  # EqualExprF90
+    | level_3_expr_f90 (DOT_NE | NE_OP) level_3_expr_f90  # NotEqualExprF90
+    | level_3_expr_f90 (DOT_LT | LT_OP) level_3_expr_f90  # LessExprF90
+    | level_3_expr_f90 (DOT_LE | LE_OP) level_3_expr_f90  # LessEqualExprF90
+    | level_3_expr_f90 (DOT_GT | GT_OP) level_3_expr_f90  # GreaterExprF90
+    | level_3_expr_f90 (DOT_GE | GE_OP) level_3_expr_f90  # GreaterEqualExprF90
+    | level_3_expr_f90                                    # Level3ExprF90
+    ;
+
+// R711-R712: level-3-expr (concatenation, left-to-right)
+level_3_expr_f90
+    : level_3_expr_f90 CONCAT level_2_expr_f90            # ConcatExprF90
+    | level_2_expr_f90                                    # Level2ExprF90
+    ;
+
+// R707-R710: level-2-expr (numeric binary +/-, left-to-right)
+level_2_expr_f90
+    : level_2_expr_f90 (PLUS | MINUS) add_operand_f90     # AddSubExprF90
+    | signed_add_operand_f90                              # SignedAddOperandExprF90
+    ;
+
+// R707: only the first add-operand may be preceded by an intrinsic unary + or -
+signed_add_operand_f90
+    : (PLUS | MINUS) add_operand_f90                      # UnaryExprF90
+    | add_operand_f90                                     # AddOperandExprF90
+    ;
+
+// R706-R709: add-operand (mult-op, left-to-right)
+add_operand_f90
+    : add_operand_f90 (MULTIPLY | SLASH) mult_operand_f90 # MultDivExprF90
+    | mult_operand_f90                                    # MultOperandExprF90
+    ;
+
+// R705-R708: mult-operand (power-op, right-to-left)
+mult_operand_f90
+    : level_1_expr_f90 POWER mult_operand_f90             # PowerExprF90
+    | level_1_expr_f90                                    # Level1ExprF90
+    ;
+
+// R703-R704: level-1-expr (defined unary, highest precedence)
+level_1_expr_f90
+    : defined_unary_op primary_f90                        # DefinedUnaryExprF90
+    | primary_f90                                         # PrimaryExprF90
     ;
 
 // F90 primary expressions (enhanced with new constructs)
