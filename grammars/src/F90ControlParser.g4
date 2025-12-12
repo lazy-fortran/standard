@@ -198,30 +198,30 @@ if_stmt_f90
 // ISO/IEC 1539:1991 Section 2.3.3, R215 (restricted form)
 // Excludes if_stmt_f90, constructs, and do-terminal-stmt to prevent left-recursion
 action_stmt_f90_non_control
-    : call_stmt_f90                  // Section 12.4 - Enhanced procedure calls
+    : cycle_stmt                     // Section 8.1.4.4.1 - F90 loop control (common)
+    | exit_stmt                      // Section 8.1.4.4.2 - F90 loop control (common)
+    | assignment_stmt_f90            // Section 7.5.1 - Variable assignments (common)
+    | call_stmt_f90                  // Section 12.4 - Enhanced procedure calls
     | return_stmt                    // Section 12.4.3
     | stop_stmt                      // Section 8.3
-    | cycle_stmt                     // Section 8.1.4.4.1 - F90 loop control
-    | exit_stmt                      // Section 8.1.4.4.2 - F90 loop control
+    | continue_stmt                  // Section 8.2
     | goto_stmt                      // Section 8.2
     | arithmetic_if_stmt             // Section 8.1.1.2 (obsolescent)
-    | continue_stmt                  // Section 8.2
     | read_stmt_f90                  // Section 9.4 - Enhanced I/O
     | write_stmt_f90                 // Section 9.4 - Enhanced I/O
     | print_stmt_f90                 // Section 9.4 - F77-inherited print
+    | allocate_stmt                  // Section 6.3.1 - F90 memory management
+    | deallocate_stmt                // Section 6.3.3 - F90 memory management
+    | nullify_stmt                   // Section 6.3.2 - F90 pointer nullification
+    | where_stmt                     // Section 7.5.3 - F90 array conditional
+    | pointer_assignment_stmt        // Section 7.5.2 - F90 pointer assignment
     | open_stmt_f90                  // Section 9.7.1 - File connection (R904)
     | close_stmt_f90                 // Section 9.7.2 - File disconnection (R908)
     | inquire_stmt_f90               // Section 9.7.3 - File inquiry (R929)
     | backspace_stmt_f90             // Section 9.6.1 - File positioning (R923)
     | endfile_stmt_f90               // Section 9.6.2 - File positioning (R924)
     | rewind_stmt_f90                // Section 9.6.3 - File positioning (R925)
-    | allocate_stmt                  // Section 6.3.1 - F90 memory management
-    | deallocate_stmt                // Section 6.3.3 - F90 memory management
-    | nullify_stmt                   // Section 6.3.2 - F90 pointer nullification
-    | where_stmt                     // Section 7.5.3 - F90 array conditional
-    | pointer_assignment_stmt        // Section 7.5.2 - F90 pointer assignment
     | entry_stmt_f90                 // Section 12.5.2.4 - F90 ENTRY statement
-    | assignment_stmt_f90            // Section 7.5.1 - Last resort for ENDIF
     ;
 
 // IF construct - ISO/IEC 1539:1991 Section 8.1.1, R802
