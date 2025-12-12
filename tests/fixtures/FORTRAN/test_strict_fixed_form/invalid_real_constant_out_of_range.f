@@ -1,0 +1,4 @@
+C     INVALID - REAL CONSTANT OUT OF RANGE (ISSUE #667)
+      X = 1.0E500
+      END
+

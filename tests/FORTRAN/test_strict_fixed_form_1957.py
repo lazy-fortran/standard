@@ -155,6 +155,75 @@ ABCDE X = 1.0
         self.assertFalse(result.valid)
         self.assertTrue(any("label" in e.message.lower() for e in result.errors))
 
+    def test_invalid_integer_constant_out_of_range(self):
+        """Test detection of out-of-range fixed point constants."""
+        source = """\
+C     OUT OF RANGE INTEGER CONSTANT
+      I = 999999
+      END
+"""
+        result = validate_strict_fixed_form_1957(source)
+        self.assertFalse(result.valid)
+        self.assertTrue(
+            any("fixed point constant" in e.message.lower()
+                and "out of range" in e.message.lower()
+                for e in result.errors)
+        )
+
+    def test_invalid_integer_constant_boundary(self):
+        """Test detection of integer magnitude >= 32768."""
+        source = """\
+      I = 32768
+      END
+"""
+        result = validate_strict_fixed_form_1957(source)
+        self.assertFalse(result.valid)
+        self.assertTrue(
+            any("magnitude < 32768" in e.message.lower()
+                for e in result.errors)
+        )
+
+    def test_invalid_real_constant_out_of_range(self):
+        """Test detection of out-of-range floating point constants."""
+        source = """\
+      X = 1.0E500
+      END
+"""
+        result = validate_strict_fixed_form_1957(source)
+        self.assertFalse(result.valid)
+        self.assertTrue(
+            any("floating point constant" in e.message.lower()
+                and "out of range" in e.message.lower()
+                for e in result.errors)
+        )
+
+    def test_invalid_real_constant_underflow(self):
+        """Test detection of nonzero floating point underflow."""
+        source = """\
+      X = 1.0E-50
+      END
+"""
+        result = validate_strict_fixed_form_1957(source)
+        self.assertFalse(result.valid)
+        self.assertTrue(
+            any("floating point constant" in e.message.lower()
+                and "out of range" in e.message.lower()
+                for e in result.errors)
+        )
+
+    def test_valid_numeric_constant_boundaries(self):
+        """Test acceptance of in-range integer and floating point constants."""
+        source = """\
+      I = 32767
+      J = -32767
+      X = 0.0E500
+      Y = 1.0E38
+      Z = 1.0E-38
+      END
+"""
+        result = validate_strict_fixed_form_1957(source)
+        self.assertTrue(result.valid, f"Errors: {result.errors}")
+
     def test_invalid_continuation_with_label(self):
         """Test detection of label on continuation card."""
         source = """\
@@ -334,6 +403,42 @@ class TestFixtures1957(unittest.TestCase):
         self.assertFalse(result.valid)
         self.assertTrue(
             any("out of range" in e.message.lower() for e in result.errors)
+        )
+
+    def test_invalid_integer_constant_out_of_range_fixture(self):
+        """Test invalid_integer_constant_out_of_range.f fails validation."""
+        source = load_fixture(
+            "FORTRAN", "test_strict_fixed_form", "invalid_integer_constant_out_of_range.f"
+        )
+        result = validate_strict_fixed_form_1957(source)
+        self.assertFalse(result.valid)
+        self.assertTrue(
+            any("fixed point constant" in e.message.lower()
+                for e in result.errors)
+        )
+
+    def test_invalid_real_constant_out_of_range_fixture(self):
+        """Test invalid_real_constant_out_of_range.f fails validation."""
+        source = load_fixture(
+            "FORTRAN", "test_strict_fixed_form", "invalid_real_constant_out_of_range.f"
+        )
+        result = validate_strict_fixed_form_1957(source)
+        self.assertFalse(result.valid)
+        self.assertTrue(
+            any("floating point constant" in e.message.lower()
+                for e in result.errors)
+        )
+
+    def test_invalid_real_constant_underflow_fixture(self):
+        """Test invalid_real_constant_underflow.f fails validation."""
+        source = load_fixture(
+            "FORTRAN", "test_strict_fixed_form", "invalid_real_constant_underflow.f"
+        )
+        result = validate_strict_fixed_form_1957(source)
+        self.assertFalse(result.valid)
+        self.assertTrue(
+            any("floating point constant" in e.message.lower()
+                for e in result.errors)
         )
 
     def test_star_comment_warning_fixture(self):

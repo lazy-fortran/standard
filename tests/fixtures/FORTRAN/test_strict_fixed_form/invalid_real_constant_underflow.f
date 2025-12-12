@@ -1,0 +1,4 @@
+C     INVALID - REAL CONSTANT UNDERFLOW (ISSUE #667)
+      X = 1.0E-50
+      END
+
