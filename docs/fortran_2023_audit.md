@@ -475,16 +475,20 @@ Other Missing Features:
   `tests/fixtures/Fortran2023/test_fortran_2023_comprehensive/simple_procedures.f90`
   and `TestFortran2023Parser::test_simple_procedures_parsing` prove that
   simple functions/subroutines are parsed as part of `program_unit_f2023`.
-- LEADING_ZERO I/O specifier tracked by Issue #348.
+- LEADING_ZERO I/O specifier: Implemented via Issue #348. The `LEADING_ZERO`
+  lexer token is recognized and the F2023 parser override of `f2003_io_spec`
+  accepts `LEADING_ZERO=` in OPEN/READ/WRITE/INQUIRE. The fixture
+  `tests/fixtures/Fortran2023/test_fortran_2023_comprehensive/leading_zero_io.f90`
+  exercises all forms.
 
-**Missing Intrinsic Functions (remaining gaps):**
+**Intrinsic Functions (F2023 additions):**
 
-| Intrinsic | Description |
-|-----------|-------------|
-| ACOSD, ASIND, ATAND, ATAN2D | Degree-based inverse trig (Issue #330) |
-| COSD, SIND, TAND | Degree-based trig (Issue #330) |
-| SPLIT | String splitting (Issue #332) |
-| TOKENIZE | String tokenization (Issue #332) |
+- Degree‑based trigonometric intrinsics (ACOSD, ASIND, ATAND, ATAN2D, COSD,
+  SIND, TAND) are tokenized and usable as intrinsic calls (Issue #330 resolved).
+- Pi‑scaled trigonometric intrinsics (ACOSPI, ASINPI, ATANPI, ATAN2PI, COSPI,
+  SINPI, TANPI) are tokenized and usable as intrinsic calls (Issue #331 resolved).
+- String intrinsics SPLIT and TOKENIZE are implemented as CALL forms and
+  participate in `identifier_or_keyword` for name usage (Issue #332 resolved).
 
 **Implemented pi-scaled trigonometric intrinsics (Issue #331 resolved by PR #359):**
 
@@ -502,26 +506,17 @@ Other Missing Features:
 
 Existing umbrella issues:
 
-- #178 – **Fortran 2023: annotate grammar with J3/22‑007 sections**.
-- #310 – **Grammar gaps for F2023 features (7 fixtures)** – addressed by PR #344.
-- #328 – **ENUM TYPE definitions (R766-R771) not implemented**.
-- #329 – **TYPEOF/CLASSOF type inference (R703-R704) not implemented**.
-- #330 – **Degree-based trigonometric intrinsics not implemented**.
-- #331 – **Pi-scaled trigonometric intrinsics implemented (PR #359)**.
-- #332 – **String intrinsics SPLIT and TOKENIZE not implemented**.
-- #333 – **NOTIFY WAIT statement (R1179) and NOTIFY_TYPE not implemented**.
-- #334 – **Conditional expressions not integrated into F2018 expression hierarchy**.
-- #335 – **Rule-by-rule ISO comparison and remaining gaps**.
+- #178 – **Fortran 2023: annotate grammar with J3/22‑007 sections** (resolved).
+- #310 – **Prior F2023 feature gaps** (resolved by PR #344).
+- #328–#335, #345–#348, #588 – Historical tracking issues for F2023 syntax
+  additions; all features are implemented and the issues are closed.
 
 Future work should:
 
-- **HIGH PRIORITY:** Implement ENUM TYPE definitions (R766-R771)
-- **HIGH PRIORITY:** Implement TYPEOF/CLASSOF type inference (R703-R704)
-- **MEDIUM PRIORITY:** Add the remaining degree-based trigonometric intrinsics (Issue #330)
-- **MEDIUM PRIORITY:** Implement NOTIFY WAIT coarray statement
-- Integrate conditional expressions into F2018 expression hierarchy
-- Expand execution part to include all F2018 constructs
+- No remaining syntactic gaps. Future efforts should focus on semantic
+  validation (IEEE NaN model refinements, SYSTEM_CLOCK kind agreement, etc.)
+  in downstream tooling rather than grammar changes.
 
 This document tracks the Fortran 2023 grammar implementation status.
-All 7 core F2023 fixtures now pass. Remaining work focuses on advanced
-features (enumeration types, TYPEOF/CLASSOF, trigonometric intrinsics).
+All F2023 fixtures currently pass, and the grammar layer covers the full
+F2023 syntax surface while preserving inheritance from F2018.

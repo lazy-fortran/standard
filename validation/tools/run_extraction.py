@@ -18,15 +18,15 @@ class ExtractionRunner:
     
     def __init__(self, target_dir):
         """Initialize extraction runner with target directory."""
-        self.target_dir = target_dir
-        self.external_dir = os.path.join(target_dir, 'validation', 'external')
+        self.target_dir = os.path.abspath(target_dir)
+        self.external_dir = os.path.join(self.target_dir, 'validation', 'external')
         self.kaby76_dir = os.path.join(self.external_dir, 'kaby76-fortran')
         self.auto_generated_dir = os.path.join(
-            target_dir, 'validation', 'auto-generated'
+            self.target_dir, 'validation', 'auto-generated'
         )
         
         # Initialize dependency manager
-        self.deps_manager = DependencyManager(target_dir)
+        self.deps_manager = DependencyManager(self.target_dir)
         
         # Ensure auto-generated directory exists
         os.makedirs(self.auto_generated_dir, exist_ok=True)
@@ -171,9 +171,14 @@ class ExtractionRunner:
             log.append(f"Running extraction on {pdf_file}")
             
             # Run the extraction script in the kaby76 directory
-            result = subprocess.run([
-                './extract.sh', pdf_file
-            ], cwd=self.kaby76_dir, env=env, capture_output=True, text=True, timeout=300)
+            result = subprocess.run(
+                ['bash', './extract.sh', pdf_file],
+                cwd=self.kaby76_dir,
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=300
+            )
             
             log.append(f"Extract script exit code: {result.returncode}")
             if result.stdout:

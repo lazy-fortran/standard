@@ -345,16 +345,11 @@ Grammar implementation:
 
 Gaps and limitations:
 
-- **Unreachable F95‑type rules in full programs**:
-  - F90’s `declaration_construct` (which is what `specification_part`
-    uses) still refers to `type_declaration_stmt_f90` and
-    `derived_type_def`, not to the F95 variants.
-  - None of the F95 `*_f95` type rules are referenced from
-    `declaration_construct` or `derived_type_def`, so they are not used
-    when parsing real modules or program units.
-  - Default initialization of derived‑type components is therefore
-    modeled only indirectly via the F90 `entity_decl_f90 ASSIGN expr_f90`
-    pattern, not via the dedicated F95 constructs.
+- **F95 type‑declaration integration**:
+  - `specification_part_f95` routes through `declaration_construct_f95`,
+    which references both `type_declaration_stmt_f95` and
+    `derived_type_def_f95`. Full F95 program units therefore exercise the
+    F95‑specific declaration rules (issues #385 and #646 resolved).
 - **No syntactic enforcement of initialization‑expression restrictions**
   (Issue #390):
   - The standard's distinction between general expressions and
@@ -396,10 +391,9 @@ Grammar implementation:
 
 Remaining gaps:
 
-- **Entry‑point integration**:
-  - As with other F95 rules, `array_constructor_f95` is not referenced
-    from F90's `primary_f90` / `array_constructor_f90`, so full F95
-    programs continue to use the F90 constructor rule.
+- None at the syntactic level. `primary_f95` includes
+  `array_constructor_f95`, so full F95 programs parse standard
+  `(/ ... /)` array constructors through the F95 layer.
 
 ## 7. Intrinsic procedures and F95 additions
 
@@ -433,23 +427,11 @@ Lexer and parser implementation:
 
 Gaps:
 
-- **Intrinsic calls are not parsed in F95**:
-  - Calls such as `CALL CPU_TIME(t)` or `x = CEILING(y)` cannot
-    currently be parsed by the F95 grammar, even though the lexer
-    recognizes the tokens.
-- **No F95‑specific intrinsic argument rules**:
-  - The extra `KIND=` or DIM/MASK arguments introduced or clarified in
-    F95 are not modeled at the grammar level.
-- **Interaction with later standards**:
-  - Fortran 2003 introduces `identifier_or_keyword` and additional
-    handling that treats some keywords as identifiers. That mechanism
-    is not present at the F95 level.
-
-These limitations should be covered by Fortran 95 issues dedicated to:
-
-- Making F95 intrinsics usable in expressions and calls.
-- Documenting that argument‑level semantics are left to later
-  validation.
+- None at the purely syntactic level. `identifier_or_keyword_f95` allows
+  F95 intrinsic tokens (CPU_TIME, CEILING, FLOOR, bit intrinsics, etc.) to
+  participate in calls and expressions (issues #379 and #180 resolved).
+- F95‑specific intrinsic argument restrictions (KIND=, DIM/MASK, etc.) are
+  semantic and remain outside the grammar (documented in issues #402/#419).
 
 ## 8. Program units and integration of F95 constructs
 
@@ -816,8 +798,9 @@ The Fortran 95 layer in this repository:
     the program structure via `execution_part_f95`, `specification_part_f95`,
     `function_subprogram_f95` and `subroutine_subprogram_f95`.
 - **Remaining gaps**:
-  - F95 intrinsic tokens are recognized by the lexer but not yet fully
-    usable as intrinsic calls in all contexts.
+  - None at the syntactic level. Remaining divergences are semantic
+    constraints (FORALL/WHERE masks, initialization expressions, PURE/
+    ELEMENTAL restrictions) documented in issues #390/#402/#419/#425.
 - **Historical notes** (all resolved):
   - (Resolved in #182: PURE/ELEMENTAL in F90 grammar is now documented as a
     deliberate forward extension, with clear comments in the grammar files
@@ -844,9 +827,9 @@ Existing issues:
 
 Outstanding work tracked by issues:
 
-- Making F95 intrinsic tokens usable as function and subroutine calls.
-- Implementing semantic checks for J3/98‑114 characteristics rules
-  (see Section 9 for enumerated requirements).
+- No remaining grammar gaps. Semantic validation requirements for J3/98‑114
+  characteristics and other F95 constraints are documented in the closed
+  issue set for historical record and tooling guidance.
 
 Together with the Fortran 90 audit, this document completes the
 spec-aware audit chain up through Fortran 95 for issue #140, while

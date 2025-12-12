@@ -19,13 +19,43 @@ class DependencyManager:
     
     def __init__(self, target_dir):
         """Initialize dependency manager with target directory."""
-        self.target_dir = target_dir
-        self.deps_dir = os.path.join(target_dir, 'validation', 'dependencies')
+        self.target_dir = os.path.abspath(target_dir)
+        self.deps_dir = os.path.join(self.target_dir, 'validation', 'dependencies')
         self.bin_dir = os.path.join(self.deps_dir, 'bin')
         
         # Ensure directories exist
         os.makedirs(self.deps_dir, exist_ok=True)
         os.makedirs(self.bin_dir, exist_ok=True)
+
+    def _install_dotnet_app(self, built_exe_path, tool_name):
+        """Install a dotnet apphost binary and its sidecar files into bin_dir."""
+        built_dir = os.path.dirname(built_exe_path)
+        publish_dir = os.path.join(built_dir, 'publish')
+
+        source_dir = built_dir
+        source_exe = built_exe_path
+        publish_exe = os.path.join(publish_dir, tool_name)
+        publish_exe_alt = os.path.join(publish_dir, f'{tool_name}.exe')
+        if os.path.isdir(publish_dir) and (os.path.exists(publish_exe) or os.path.exists(publish_exe_alt)):
+            source_dir = publish_dir
+            source_exe = publish_exe if os.path.exists(publish_exe) else publish_exe_alt
+
+        dest_exe = os.path.join(self.bin_dir, tool_name)
+        shutil.copy2(source_exe, dest_exe)
+        os.chmod(dest_exe, 0o755)
+
+        # Copy the tool's own metadata files from source_dir.
+        for ext in ('.deps.json', '.runtimeconfig.json'):
+            sidecar_src = os.path.join(source_dir, f'{tool_name}{ext}')
+            if os.path.exists(sidecar_src):
+                shutil.copy2(sidecar_src, os.path.join(self.bin_dir, f'{tool_name}{ext}'))
+
+        # Copy all dependency assemblies from source_dir.
+        for entry in os.listdir(source_dir):
+            if entry.endswith('.dll'):
+                shutil.copy2(os.path.join(source_dir, entry), os.path.join(self.bin_dir, entry))
+
+        return dest_exe
     
     def setup_all_dependencies(self):
         """Set up all required dependencies for extraction."""
@@ -54,32 +84,57 @@ class DependencyManager:
             return {'success': True, 'path': dotnet_exe}
         
         try:
-            # Download .NET SDK for Linux x64
-            dotnet_url = "https://download.visualstudio.microsoft.com/download/pr/cd0d0a4d-2a6a-4d0d-b42e-dfd3b880e222/008a93f83aba6d1acf75ded3d2cfba24/dotnet-sdk-8.0.403-linux-x64.tar.gz"
-            
-            print(f"Downloading .NET SDK from {dotnet_url}")
-            with tempfile.NamedTemporaryFile(suffix='.tar.gz', delete=False) as tmp:
-                urllib.request.urlretrieve(dotnet_url, tmp.name)
-                
-                # Extract to deps directory
-                os.makedirs(dotnet_dir, exist_ok=True)
-                with tarfile.open(tmp.name, 'r:gz') as tar:
-                    tar.extractall(dotnet_dir)
-                
-                os.unlink(tmp.name)
-            
-            # Make executable
+            os.makedirs(dotnet_dir, exist_ok=True)
+
+            # Prefer the official dotnet-install script over hard-coded tarball URLs.
+            channel = os.environ.get('DOTNET_CHANNEL', '8.0')
+            install_url = "https://dot.net/v1/dotnet-install.sh"
+            print(f"Downloading dotnet-install script from {install_url}")
+
+            install_script = None
+            try:
+                with tempfile.NamedTemporaryFile(suffix='.sh', delete=False) as tmp:
+                    install_script = tmp.name
+                urllib.request.urlretrieve(install_url, install_script)
+                os.chmod(install_script, 0o755)
+
+                print(f"Installing .NET SDK channel {channel} into {dotnet_dir}")
+                result = subprocess.run(
+                    ['bash', install_script, '--channel', channel, '--install-dir', dotnet_dir, '--no-path'],
+                    capture_output=True, text=True
+                )
+            finally:
+                if install_script and os.path.exists(install_script):
+                    os.unlink(install_script)
+
+            if result.returncode != 0:
+                # Fall back to a system-provided dotnet if available.
+                system_dotnet = shutil.which('dotnet')
+                if system_dotnet:
+                    try:
+                        os.symlink(system_dotnet, dotnet_exe)
+                    except FileExistsError:
+                        pass
+                    verify = subprocess.run([dotnet_exe, '--version'], capture_output=True, text=True)
+                    if verify.returncode == 0:
+                        print(f"✓ Using system .NET SDK: {verify.stdout.strip()}")
+                        return {'success': True, 'path': dotnet_exe, 'version': verify.stdout.strip(), 'source': 'system'}
+
+                err = (result.stderr or result.stdout or '').strip()
+                return {'success': False, 'error': f'dotnet-install failed: {err}'}
+
+            if not os.path.exists(dotnet_exe):
+                return {'success': False, 'error': 'dotnet executable not found after installation'}
+
             os.chmod(dotnet_exe, 0o755)
-            
-            # Test installation
-            result = subprocess.run([dotnet_exe, '--version'], 
-                                  capture_output=True, text=True)
-            if result.returncode == 0:
-                print(f"✓ .NET SDK installed successfully: {result.stdout.strip()}")
-                return {'success': True, 'path': dotnet_exe, 'version': result.stdout.strip()}
-            else:
-                return {'success': False, 'error': 'Installation verification failed'}
-                
+
+            verify = subprocess.run([dotnet_exe, '--version'], capture_output=True, text=True)
+            if verify.returncode == 0:
+                print(f"✓ .NET SDK installed successfully: {verify.stdout.strip()}")
+                return {'success': True, 'path': dotnet_exe, 'version': verify.stdout.strip(), 'channel': channel}
+
+            return {'success': False, 'error': 'Installation verification failed'}
+
         except Exception as e:
             return {'success': False, 'error': str(e)}
     
@@ -89,7 +144,8 @@ class DependencyManager:
         
         tritext_exe = os.path.join(self.bin_dir, 'tritext')
         
-        if os.path.exists(tritext_exe):
+        sidecar_dll = os.path.join(self.bin_dir, 'tritext.dll')
+        if os.path.exists(tritext_exe) and os.path.exists(sidecar_dll):
             print("✓ tritext already installed")
             return {'success': True, 'path': tritext_exe}
         
@@ -130,10 +186,7 @@ class DependencyManager:
                     break
             
             if tritext_built and os.path.exists(tritext_built):
-                # Copy to bin directory
-                shutil.copy2(tritext_built, tritext_exe)
-                os.chmod(tritext_exe, 0o755)
-                
+                tritext_exe = self._install_dotnet_app(tritext_built, 'tritext')
                 print("✓ tritext built and installed successfully")
                 return {'success': True, 'path': tritext_exe}
             else:
@@ -161,7 +214,8 @@ class DependencyManager:
             for tool in tools:
                 tool_exe = os.path.join(self.bin_dir, tool)
                 
-                if os.path.exists(tool_exe):
+                sidecar_dll = os.path.join(self.bin_dir, f'{tool}.dll')
+                if os.path.exists(tool_exe) and os.path.exists(sidecar_dll):
                     print(f"✓ {tool} already installed")
                     results[tool] = {'success': True, 'path': tool_exe}
                     continue
@@ -189,8 +243,7 @@ class DependencyManager:
                         break
                 
                 if tool_built and os.path.exists(tool_built):
-                    shutil.copy2(tool_built, tool_exe)
-                    os.chmod(tool_exe, 0o755)
+                    tool_exe = self._install_dotnet_app(tool_built, tool)
                     print(f"✓ {tool} built and installed successfully")
                     results[tool] = {'success': True, 'path': tool_exe}
                 else:

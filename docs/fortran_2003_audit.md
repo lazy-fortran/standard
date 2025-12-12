@@ -815,7 +815,9 @@ Existing umbrella issues relevant to this audit:
 - #309 – **Fixed-form source with column-1 C comments not parsed**:
   - **RESOLVED IN GRAMMAR AND TESTS**: `Fortran2003Lexer.g4` now enforces column‑1 `C`/`c` comments per ISO/IEC 1539‑1:2004 Section 3.3.2, the `fixed_form_f2003.f` fixture parses without errors, and its xfail entry has been removed.
 - #343 – **Fortran 2003 fixed-form C comments require whitespace after column-1 C**:
-  - Tracks the remaining gap where column‑1 `C`/`c` comment lines without trailing whitespace (for example `C*** heading`) are rejected instead of treated as comment lines.
+  - **RESOLVED**: `FIXED_FORM_COMMENT` now treats column‑1 `C`/`c` followed by
+    whitespace **or non‑alphanumeric text** as a comment line, so forms like
+    `C*** heading` are accepted as fixed‑form comments.
 - #584 – **Complex part designator %RE/%IM support (ISO/IEC 1539-1:2004 Section 6.1.2.5, R615)**:
   - **RESOLVED**: `complex_part_designator` now participates in both `primary` and `lhs_expression`, enabling `%RE`/`%IM` access for expressions and assignments across F2003 and all inheriting grammars.
   - Fixture `tests/fixtures/Fortran2003/test_issue584_complex_parts/complex_part_designator.f90` demonstrates assignments, expressions, array elements, and derived-component chains that cover the new behavior.
