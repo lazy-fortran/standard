@@ -433,6 +433,44 @@ END
 """
         tree = self.parse(program_text, 'main_program')
         self.assertIsNotNone(tree)
+
+    def test_statement_ordering_valid_fixture(self):
+        """Parse a program exercising Section 3.5 statement ordering."""
+        program_text = load_fixture(
+            "FORTRAN77",
+            "test_fortran77_parser",
+            "statement_ordering_valid.f",
+        )
+        tree = self.parse(program_text, 'main_program')
+        self.assertIsNotNone(tree)
+
+    def test_statement_ordering_invalid_programs_rejected(self):
+        """Ensure invalid ordering across statement groups is rejected."""
+        invalid_programs = [
+            """PROGRAM BAD
+A = 1.0
+REAL A
+END
+""",
+            """PROGRAM BAD2
+REAL X
+F(Y) = Y + 1.0
+DATA X /1.0/
+END
+""",
+        ]
+
+        for text in invalid_programs:
+            with self.subTest(program=text):
+                input_stream = InputStream(text)
+                lexer = FORTRAN77Lexer(input_stream)
+                token_stream = CommonTokenStream(lexer)
+                parser = FORTRAN77Parser(token_stream)
+                parser.main_program()
+                self.assertGreater(
+                    parser.getNumberOfSyntaxErrors(), 0,
+                    "Program with invalid statement ordering should be rejected",
+                )
     
     def test_structured_programming_example(self):
         """Test complete structured programming example (FORTRAN 77)"""
