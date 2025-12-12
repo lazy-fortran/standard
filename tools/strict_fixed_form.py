@@ -218,6 +218,22 @@ class StrictFixedFormProcessor:
             sequence_field=seq_field
         )
 
+    def _validate_1957_numeric_constants(self, card: Card) -> List[ValidationError]:
+        """Validate numeric constants for FORTRAN 1957 dialect."""
+        violations = validate_fortran1957_numeric_constants(
+            card.statement_text,
+            line_number=card.line_number,
+            column_offset=7,
+        )
+        return [
+            ValidationError(
+                line_number=v.line_number,
+                column=v.column,
+                message=v.message,
+            )
+            for v in violations
+        ]
+
     def validate_cards(self, cards: List[Card]) -> Tuple[List[ValidationError],
                                                          List[ValidationError]]:
         """
@@ -287,19 +303,7 @@ class StrictFixedFormProcessor:
                 ))
 
             if self.dialect == "1957":
-                violations = validate_fortran1957_numeric_constants(
-                    card.statement_text,
-                    line_number=card.line_number,
-                    column_offset=7,
-                )
-                for violation in violations:
-                    errors.append(
-                        ValidationError(
-                            line_number=violation.line_number,
-                            column=violation.column,
-                            message=violation.message,
-                        )
-                    )
+                errors.extend(self._validate_1957_numeric_constants(card))
 
         for i, card in enumerate(cards):
             if card.card_type == CardType.CONTINUATION and i == 0:
