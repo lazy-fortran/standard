@@ -170,17 +170,59 @@ exit_stmt
     ;
 
 // ====================================================================
-// IF CONSTRUCT - ISO/IEC 1539:1991 Section 8.1.1
+// IF STATEMENT AND CONSTRUCT - ISO/IEC 1539:1991 Section 8.1.1
 // ====================================================================
 //
-// ISO/IEC 1539:1991 Section 8.1.1 defines the IF construct:
-// - R802 (if-construct) -> if-then-stmt block [else-if-stmt block]...
-//                          [else-stmt block] end-if-stmt
-// - R803 (if-then-stmt) -> [if-construct-name :]
-//                          IF (scalar-logical-expr) THEN
-// - R804 (else-if-stmt) -> ELSE IF (scalar-logical-expr) THEN [if-construct-name]
-// - R805 (else-stmt) -> ELSE [if-construct-name]
-// - R806 (end-if-stmt) -> END IF [if-construct-name]
+// ISO/IEC 1539:1991 Section 8.1.1 defines two forms of IF:
+// 1. IF statement (R807) - Inline form with single action statement
+//    - R807 (if-stmt) -> IF (scalar-logical-expr) action-stmt
+// 2. IF construct (R802-R806) - Block form with IF-THEN-END IF
+//    - R802 (if-construct) -> if-then-stmt block [else-if-stmt block]...
+//                             [else-stmt block] end-if-stmt
+//    - R803 (if-then-stmt) -> [if-construct-name :]
+//                             IF (scalar-logical-expr) THEN
+//    - R804 (else-if-stmt) -> ELSE IF (scalar-logical-expr) THEN [if-construct-name]
+//    - R805 (else-stmt) -> ELSE [if-construct-name]
+//    - R806 (end-if-stmt) -> END IF [if-construct-name]
+
+// IF statement - ISO/IEC 1539:1991 Section 8.1.1, R807
+// This is the inline form: IF (condition) action-stmt
+// NOTE: We use action_stmt_f90_non_control to avoid left-recursion.
+// The action statement after IF cannot be another IF statement or construct.
+// This prevents ambiguity and performance issues from backtracking.
+if_stmt_f90
+    : IF LPAREN expr_f90 RPAREN action_stmt_f90_non_control
+    ;
+
+// Action statements that can appear after inline IF (excluding control structures)
+// ISO/IEC 1539:1991 Section 2.3.3, R215 (restricted form)
+// Excludes if_stmt_f90, constructs, and do-terminal-stmt to prevent left-recursion
+action_stmt_f90_non_control
+    : cycle_stmt                     // Section 8.1.4.4.1 - F90 loop control (common)
+    | exit_stmt                      // Section 8.1.4.4.2 - F90 loop control (common)
+    | assignment_stmt_f90            // Section 7.5.1 - Variable assignments (common)
+    | call_stmt_f90                  // Section 12.4 - Enhanced procedure calls
+    | return_stmt                    // Section 12.4.3
+    | stop_stmt                      // Section 8.3
+    | continue_stmt                  // Section 8.2
+    | goto_stmt                      // Section 8.2
+    | arithmetic_if_stmt             // Section 8.1.1.2 (obsolescent)
+    | read_stmt_f90                  // Section 9.4 - Enhanced I/O
+    | write_stmt_f90                 // Section 9.4 - Enhanced I/O
+    | print_stmt_f90                 // Section 9.4 - F77-inherited print
+    | allocate_stmt                  // Section 6.3.1 - F90 memory management
+    | deallocate_stmt                // Section 6.3.3 - F90 memory management
+    | nullify_stmt                   // Section 6.3.2 - F90 pointer nullification
+    | where_stmt                     // Section 7.5.3 - F90 array conditional
+    | pointer_assignment_stmt        // Section 7.5.2 - F90 pointer assignment
+    | open_stmt_f90                  // Section 9.7.1 - File connection (R904)
+    | close_stmt_f90                 // Section 9.7.2 - File disconnection (R908)
+    | inquire_stmt_f90               // Section 9.7.3 - File inquiry (R929)
+    | backspace_stmt_f90             // Section 9.6.1 - File positioning (R923)
+    | endfile_stmt_f90               // Section 9.6.2 - File positioning (R924)
+    | rewind_stmt_f90                // Section 9.6.3 - File positioning (R925)
+    | entry_stmt_f90                 // Section 12.5.2.4 - F90 ENTRY statement
+    ;
 
 // IF construct - ISO/IEC 1539:1991 Section 8.1.1, R802
 // NOTE: Uses _f90 suffix to avoid collision with F77 if_then_stmt which

@@ -194,7 +194,8 @@ executable_construct
 
 // Action statement - ISO/IEC 1539:1991 Section 2.3.3, R215
 executable_stmt
-    : call_stmt_f90                  // Section 12.4 - Enhanced procedure calls
+    : if_stmt_f90                    // Section 8.1.1 - F90 inline IF statement (R807)
+    | call_stmt_f90                  // Section 12.4 - Enhanced procedure calls
     | return_stmt                    // Section 12.4.3
     | stop_stmt                      // Section 8.3
     | cycle_stmt                     // Section 8.1.4.4.1 - F90 loop control
