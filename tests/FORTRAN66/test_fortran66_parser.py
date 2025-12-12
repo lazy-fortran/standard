@@ -48,6 +48,17 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
         # Get the parse method by rule name
         rule_method = getattr(parser, rule_name)
         return rule_method()
+
+    def parse_with_errors(self, text, rule_name='fortran66_program'):
+        """Parse text and return syntax error count."""
+        input_stream = InputStream(text)
+        lexer = FORTRAN66Lexer(input_stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = FORTRAN66Parser(token_stream)
+
+        rule_method = getattr(parser, rule_name)
+        tree = rule_method()
+        return tree, parser.getNumberOfSyntaxErrors()
     
     def test_block_data_subprogram(self):
         """Test BLOCK DATA subprogram (NEW in FORTRAN 66)"""
@@ -1762,6 +1773,59 @@ class TestFORTRAN66Parser(StatementFunctionTestMixin, unittest.TestCase):
         """
         tree = self.parse(valid_program, 'fortran66_program')
         self.assertIsNotNone(tree)
+
+    def test_statement_ordering_rejects_invalid_sequences(self):
+        """Reject misordered statement groups (X3.9-1966 Section 7)."""
+        invalid_programs = [
+            (
+                """
+                X = 1
+                INTEGER X
+                END
+                """,
+                "executable before specification",
+            ),
+            (
+                """
+                F(X) = X + 1
+                INTEGER X
+                END
+                """,
+                "statement function before specification",
+            ),
+            (
+                """
+                DATA X /1/
+                INTEGER X
+                END
+                """,
+                "data before specification",
+            ),
+            (
+                """
+                INTEGER X
+                X = 1
+                DATA X /2/
+                END
+                """,
+                "data after executable",
+            ),
+            (
+                """
+                INTEGER X
+                X = 1
+                REAL Y
+                END
+                """,
+                "specification after executable",
+            ),
+        ]
+
+        for text, reason in invalid_programs:
+            with self.subTest(reason=reason):
+                tree, errors = self.parse_with_errors(text, "fortran66_program")
+                self.assertIsNotNone(tree)
+                self.assertGreater(errors, 0)
 
 
 if __name__ == "__main__":

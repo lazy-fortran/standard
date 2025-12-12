@@ -115,7 +115,7 @@ Statements cannot appear out of order—the parser will reject invalid orderings
 
 ### Test Coverage
 
-17 comprehensive test cases in `tests/FORTRAN66/test_fortran66_parser.py`:
+18 comprehensive test cases in `tests/FORTRAN66/test_fortran66_parser.py`:
 
 - `test_statement_ordering_specification_before_executable`
 - `test_statement_ordering_specification_before_statement_functions`
@@ -134,8 +134,9 @@ Statements cannot appear out of order—the parser will reject invalid orderings
 - `test_statement_ordering_external_before_executable`
 - `test_statement_ordering_intrinsic_before_executable`
 - `test_statement_ordering_blank_lines_allowed`
+- `test_statement_ordering_rejects_invalid_sequences`
 
-All tests pass with 100% coverage of valid orderings.
+All tests pass with 100% coverage of valid and invalid orderings.
 
 ### Compliance Status
 
