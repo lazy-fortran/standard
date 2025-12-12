@@ -139,6 +139,12 @@ class TestScaleFactors:
         result = self.validator.validate_format_descriptor_string("1P3E12.4")
         assert not result.has_errors
 
+    def test_scale_factor_does_not_hide_invalid_descriptor(self):
+        """Scale factor followed by invalid descriptor semantics should error."""
+        result = self.validator.validate_format_descriptor_string("1P3F0.4")
+        assert result.has_errors
+        assert any("width must be positive" in d.message for d in result.diagnostics)
+
 
 class TestHollerthFields:
     """Test Hollerith field descriptors (nH...)."""

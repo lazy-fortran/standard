@@ -172,9 +172,13 @@ class FormatDescriptorValidator:
             return
 
         # Handle scale factor (nP)
-        scale_match = re.match(r"^([+-]?\d+)P$", token, re.IGNORECASE)
+        scale_match = re.match(r"^([+-]?\d+)P(.*)$", token, re.IGNORECASE)
         if scale_match:
+            rest = scale_match.group(2).strip()
             self._validate_scale_factor(scale_match.group(1), result, context)
+            if rest:
+                # Validate the descriptor that follows the scale factor
+                self._validate_single_descriptor(rest, result, context)
             return
 
         # Handle I-conversion (Iw or nIw)
