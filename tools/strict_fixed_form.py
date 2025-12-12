@@ -71,6 +71,12 @@ DIALECT_CONFIG = {
         "reference": "X3.9-1978",
         "parser": "FORTRAN77Parser",
     },
+    "90": {
+        "comment_markers": ("C", "*"),
+        "label_max": 99999,
+        "reference": "ISO/IEC 1539:1991",
+        "parser": "Fortran90Parser",
+    },
 }
 
 
@@ -772,6 +778,56 @@ def convert_to_lenient_77(source: str,
     """
     return convert_to_lenient(source, strict_width, allow_tabs,
                               strip_comments, dialect="77")
+
+
+def validate_strict_fixed_form_90(source: str,
+                                  strict_width: bool = True,
+                                  allow_tabs: bool = False) -> ValidationResult:
+    """
+    Validate source code as strict fixed-form Fortran 90.
+
+    Convenience wrapper for validate_strict_fixed_form with dialect="90".
+
+    Per ISO/IEC 1539:1991 Section 3.3 (Source Form - Fixed):
+    - Labels must be 1-99999
+    - C or * in column 1 marks a comment card
+    - Column 6 continuation mark
+    - Columns 7-72 contain statement text
+    - Columns 73-80 contain sequence field
+
+    Args:
+        source: Source code text
+        strict_width: Enforce 80-column cards
+        allow_tabs: Allow tab characters
+
+    Returns:
+        ValidationResult with validation status, errors, and parsed cards
+    """
+    return validate_strict_fixed_form(source, strict_width, allow_tabs,
+                                      dialect="90")
+
+
+def convert_to_lenient_90(source: str,
+                          strict_width: bool = True,
+                          allow_tabs: bool = False,
+                          strip_comments: bool = False
+                          ) -> Tuple[str, ValidationResult]:
+    """
+    Validate and convert Fortran 90 strict fixed-form to lenient form.
+
+    Convenience wrapper for convert_to_lenient with dialect="90".
+
+    Args:
+        source: Source code text
+        strict_width: Enforce 80-column cards
+        allow_tabs: Allow tab characters
+        strip_comments: If True, omit comment lines from output
+
+    Returns:
+        Tuple of (lenient_source, validation_result)
+    """
+    return convert_to_lenient(source, strict_width, allow_tabs,
+                              strip_comments, dialect="90")
 
 
 if __name__ == "__main__":
