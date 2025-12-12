@@ -236,10 +236,25 @@ Implemented (full IBM 704 I/O statement family):
 - `REWIND i` (rewind tape to beginning) via `rewind_stmt`.
 - `BACKSPACE i` (backspace one record) via `backspace_stmt`.
 
+Semantic validation:
+
+- FORMAT descriptor semantic validation is provided by
+  `tools/f57_format_descriptor_validator.py`, which enforces C28-6003
+  Chapter 5 requirements:
+  - Integer descriptors (Iw): width must be positive
+  - Fixed-point descriptors (Fw.d): width > 0, precision >= 0
+  - Exponential descriptors (Ew.d): width > 0, precision >= 0 (if >= 10, treated mod 10)
+  - Scale factors (nP): applied to E/F conversions
+  - Hollerith fields (nH): count must be positive, exactly n characters
+  - Multi-record and grouped specifications supported
+  - Comprehensive test suite: `tests/FORTRAN/test_format_descriptor_validator.py`
+    (40 tests covering all descriptor types)
+  - Issue tracking: #668 (FORMAT descriptor width/precision semantics)
+
 Known limitations (from fixtures and comments):
 
-- FORMAT grammar accepts common edit descriptors but does not enforce
-  strict width/precision semantics or all IBM 704 edge cases.
+- FORMAT grammar accepts common edit descriptors; strict fixed-form mode
+  validator enforces C28-6003 edge cases (issue #668).
 
 ## 5. Hollerith, DIMENSION/EQUIVALENCE and other 1957-specific features
 
