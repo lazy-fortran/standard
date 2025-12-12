@@ -332,41 +332,20 @@ class F90ArraySpecPointerTargetListener(Fortran90ParserListener):
                     )
 
     def _get_array_spec_type(self, array_spec_ctx) -> Optional[str]:
-        """Determine array spec type: explicit-shape, assumed-shape, deferred-shape, assumed-size."""
+        """Determine array spec type via the parse tree alternatives."""
         if array_spec_ctx is None:
             return None
 
-        try:
-            spec_text = array_spec_ctx.getText()
-
-            # Deferred-shape: contains only colons and commas, e.g., (:) or (:,:)
-            if ':' in spec_text:
-                # Count colons and commas
-                colon_count = spec_text.count(':')
-                comma_count = spec_text.count(',')
-                # Pure deferred: (:,:,...)
-                if all(c in '(:,)' for c in spec_text):
-                    return 'deferred-shape'
-                # Mixed with bounds: might be assumed-size or explicit-shape with some deferred
-                elif '*' in spec_text:
-                    return 'assumed-size'
-                else:
-                    # Has expressions and colons - could be explicit-shape with some dims
-                    return 'explicit-shape'
-
-            # Assumed-shape: has colons (checked above) or lower bound with colon
-            # Explicit-shape: bounds only, no colons
-            if all(c.isdigit() or c in '(),-' for c in spec_text.replace(' ', '')):
-                return 'explicit-shape'
-
-            # Assumed-size: ends with *
-            if '*' in spec_text:
-                return 'assumed-size'
-
-            # Default: explicit-shape
+        if array_spec_ctx.assumed_shape_spec_list():
+            return 'assumed-shape'
+        if array_spec_ctx.deferred_shape_spec_list():
+            return 'deferred-shape'
+        if array_spec_ctx.assumed_size_spec():
+            return 'assumed-size'
+        if array_spec_ctx.explicit_shape_spec_list():
             return 'explicit-shape'
-        except Exception:
-            return None
+
+        return None
 
 
 def validate_f90_array_spec_pointer_target(source: str) -> ArraySpecPointerTargetResult:

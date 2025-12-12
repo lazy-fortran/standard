@@ -73,9 +73,7 @@ end program test
             d for d in result.diagnostics if d.severity == DiagnosticSeverity.ERROR
         ]
         e676_errors = [e for e in errors if "E676-004" in e.code]
-        # Validator may detect this if it tracks declaration contexts
-        # For now, check result is present
-        assert result is not None
+        assert len(e676_errors) > 0
 
 
 class TestF90PointerArraySpecConstraint:
@@ -115,8 +113,7 @@ end program test
             d for d in result.diagnostics if d.severity == DiagnosticSeverity.ERROR
         ]
         e676_errors = [e for e in errors if "E676-006" in e.code]
-        # Validator should detect this constraint violation
-        assert result is not None
+        assert len(e676_errors) > 0
 
     def test_pointer_assumed_shape_invalid(self):
         """Test invalid POINTER array with assumed-shape spec (E676-007).
@@ -134,7 +131,11 @@ contains
 end program test
 """
         result = validate_f90_array_spec_pointer_target(source)
-        assert result is not None
+        errors = [
+            d for d in result.diagnostics if d.severity == DiagnosticSeverity.ERROR
+        ]
+        e676_errors = [e for e in errors if "E676-007" in e.code]
+        assert len(e676_errors) > 0
 
 
 class TestF90AllocatableArraySpecConstraint:
@@ -173,8 +174,8 @@ end program test
         errors = [
             d for d in result.diagnostics if d.severity == DiagnosticSeverity.ERROR
         ]
-        # Validator should detect this constraint violation
-        assert result is not None
+        e676_errors = [e for e in errors if "E676-008" in e.code]
+        assert len(e676_errors) > 0
 
 
 class TestF90AttributeCompatibility:
