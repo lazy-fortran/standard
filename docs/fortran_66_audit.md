@@ -542,13 +542,8 @@ syntax errors under the generic entry rule:
 - `FORTRAN66/test_fortran66_parser/standard_program.f`
 - `FORTRAN66/test_fortran66_parser/subroutine_program.f`
 
-Fixtures that fail are marked as xfail with explicit issue references
-(see issue #311 for Fortran 90 grammar gaps that affect FORTRAN 66
-compatibility).
-
-The gaps identified represent grammar limitations tracked in the
-crosswalk table above. Resolution requires implementing the missing
-ANSI X3.9-1966 statement forms.
+Generic fixture harness currently has 0 expected failures for FORTRAN 66.
+The spec→grammar crosswalk table above indicates no remaining syntax gaps.
 
 ## 7. Summary
 
@@ -580,12 +575,9 @@ The FORTRAN 66 grammar in this repository:
   - Implied DO loops for array initialization
   - Repeat counts for constant values
   - Integration with BLOCK DATA subprograms
-- Still rejects some richer, spec-inspired fixtures, which are
-  tracked as XPASS in the generic fixture harness.
+- All current FORTRAN 66 fixtures parse without XPASS/xfail markers.
 
 Future work should:
 
-- Align the generic fixture parser entry rule and expectations for
-  FORTRAN 66 with the dedicated `fortran66_program` rule.
-- Use the XPASS fixtures as a concrete checklist for closing the
-  remaining gaps.
+- Grammar work is feature‑complete for ANSI X3.9‑1966. Any remaining
+  work is in semantic validation tooling rather than syntax coverage.

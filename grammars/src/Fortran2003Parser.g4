@@ -32,7 +32,7 @@ options {
 // - Procedure pointers and ABSTRACT INTERFACE (Section 12.3.2.3)
 // - C interoperability: BIND(C), ISO_C_BINDING (Section 15)
 // - IEEE arithmetic modules (Section 14)
-// - Enhanced ALLOCATE with SOURCE/MOLD (Section 6.3.1)
+// - Enhanced ALLOCATE with SOURCE (Section 6.3.1)
 // - ASSOCIATE constructs (Section 8.1.3)
 // - Enhanced I/O: WAIT, FLUSH, stream I/O (Section 9)
 // - IMPORT statement (Section 12.3.2.1)
@@ -87,7 +87,6 @@ identifier_or_keyword
     | STAT         // STAT can be used as variable name in ALLOCATE
     | ERRMSG       // ERRMSG can be used as variable name in ALLOCATE
     | SOURCE       // SOURCE can be used as variable name
-    | MOLD         // MOLD can be used as variable name
     | UNIT         // UNIT can be used as variable name in I/O
     | IOSTAT       // IOSTAT can be used as variable name
     | FILE         // FILE can be used as variable name in I/O
@@ -993,13 +992,12 @@ import_name
 // ENHANCED ALLOCATE STATEMENT (ISO/IEC 1539-1:2004 Section 6.3.1)
 // ====================================================================
 //
-// F2003 enhances ALLOCATE with SOURCE and MOLD specifiers.
+// F2003 enhances ALLOCATE with SOURCE specifier.
 // - R623 (allocate-stmt) -> ALLOCATE ( [type-spec ::] allocation-list
 //                           [, alloc-opt-list] )
 // - R627 (alloc-opt) -> STAT = stat-variable | ERRMSG = errmsg-variable
-//                     | SOURCE = source-expr | MOLD = source-expr
+//                     | SOURCE = source-expr
 // SOURCE= clones data from an existing object
-// MOLD= clones only the type (without data)
 
 // Allocate statement (ISO/IEC 1539-1:2004 R623)
 allocate_stmt_f2003
@@ -1044,12 +1042,11 @@ alloc_opt_list
 
 // Allocation option (ISO/IEC 1539-1:2004 R627)
 // R627: alloc-opt -> STAT = stat-variable | ERRMSG = errmsg-variable
-//                  | SOURCE = source-expr | MOLD = source-expr
+//                  | SOURCE = source-expr
 alloc_opt
     : STAT EQUALS identifier_or_keyword
     | ERRMSG EQUALS identifier_or_keyword
     | SOURCE EQUALS expr_f2003          // Clone data (Section 6.3.1)
-    | MOLD EQUALS expr_f2003            // Clone type only (Section 6.3.1)
     ;
 
 // ====================================================================

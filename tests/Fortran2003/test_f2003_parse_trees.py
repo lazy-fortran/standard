@@ -108,7 +108,7 @@ class TestFortran2003ParseTrees:
             assert found_association, "Association structure not found in parse tree"
     
     def test_enhanced_allocate_semantics(self):
-        """NON-SHALLOW: Validate enhanced ALLOCATE with SOURCE/MOLD semantics."""
+        """NON-SHALLOW: Validate enhanced ALLOCATE with SOURCE semantics."""
         code = "allocate(array, source=source_array)\n"
         tree, errors, parser = self.parse_and_validate(code, 'allocate_stmt_f2003')
 

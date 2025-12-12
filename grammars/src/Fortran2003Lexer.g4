@@ -94,11 +94,10 @@ LEN              : L E N ;
 // ENHANCED ALLOCATABLE (ISO/IEC 1539-1:2004 Section 6.3.1)
 // ====================================================================
 //
-// F2003 adds SOURCE and MOLD specifiers to ALLOCATE.
+// F2003 adds SOURCE specifier to ALLOCATE.
 // F2003 introduces MOVE_ALLOC intrinsic subroutine (Section 13.7.80).
 
 SOURCE           : S O U R C E ;
-MOLD             : M O L D ;
 MOVE_ALLOC       : M O V E '_' A L L O C ;
 
 // F2003 OOP and memory intrinsic functions (Section 13.7)

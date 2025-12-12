@@ -397,7 +397,7 @@ Gaps:
 Specification:
 
 - F2003 extends ALLOCATE/DEALLOCATE with:
-  - SOURCE= and MOLD= specifiers.
+  - SOURCE= specifier (MOLD= is introduced later in Fortran 2008; issue #679).
   - Extended STAT and ERRMSG handling.
   - Type‑spec forms for allocating PDTs.
 
@@ -411,7 +411,7 @@ Grammar implementation:
   - `derived_type_spec :: identifier_or_keyword (shape)?` for PDTs.
 - `alloc_opt`:
   - `STAT = identifier_or_keyword`, `ERRMSG = identifier_or_keyword`,
-    `SOURCE = expr_f2003`, `MOLD = expr_f2003`.
+    `SOURCE = expr_f2003`.
 - DEALLOCATE:
   - `deallocate_stmt` reuses `allocation_list` for consistency.
 
@@ -419,15 +419,13 @@ Tests:
 
 - `enhanced_allocate.f90` in
   `test_fortran_2003_comprehensive.py` demonstrates:
-  - ALLOCATE with SOURCE, MOLD and PDT type‑spec forms.
+  - ALLOCATE with SOURCE and PDT type‑spec forms.
   - DEALLOCATE of the same objects.
 
 Gaps:
 
-- As with F90/F95, the grammar does not enforce:
-  - All contextual constraints on where SOURCE/MOLD may appear.
-  - Semantics of automatic deallocation or interactions with PDT
-    parameters. These are left to semantic checks.
+- As with F90/F95, the grammar does not enforce all contextual constraints on where SOURCE= may appear (semantic gap tracked by issue #680).
+- Automatic deallocation and PDT parameter interaction constraints are semantic and handled downstream (see issues #407 and #90).
 
 ---
 
@@ -783,7 +781,7 @@ The Fortran 2003 layer in this repository:
   - Parameterized derived types and PDT structure constructors.
   - Procedure pointers and abstract interfaces.
   - ASSOCIATE constructs.
-  - Enhanced ALLOCATE/DEALLOCATE with SOURCE, MOLD, STAT, ERRMSG.
+  - Enhanced ALLOCATE/DEALLOCATE with SOURCE, STAT, ERRMSG (MOLD introduced in F2008; issue #679).
   - F2003 I/O (WAIT, FLUSH, extended OPEN/READ/WRITE/CLOSE) and
     generic defined derived‑type I/O at the READ/WRITE level.
   - C interoperability syntax and IEEE intrinsic modules.
@@ -815,7 +813,9 @@ Existing umbrella issues relevant to this audit:
 - #309 – **Fixed-form source with column-1 C comments not parsed**:
   - **RESOLVED IN GRAMMAR AND TESTS**: `Fortran2003Lexer.g4` now enforces column‑1 `C`/`c` comments per ISO/IEC 1539‑1:2004 Section 3.3.2, the `fixed_form_f2003.f` fixture parses without errors, and its xfail entry has been removed.
 - #343 – **Fortran 2003 fixed-form C comments require whitespace after column-1 C**:
-  - Tracks the remaining gap where column‑1 `C`/`c` comment lines without trailing whitespace (for example `C*** heading`) are rejected instead of treated as comment lines.
+  - **RESOLVED**: `FIXED_FORM_COMMENT` now treats column‑1 `C`/`c` followed by
+    whitespace **or non‑alphanumeric text** as a comment line, so forms like
+    `C*** heading` are accepted as fixed‑form comments.
 - #584 – **Complex part designator %RE/%IM support (ISO/IEC 1539-1:2004 Section 6.1.2.5, R615)**:
   - **RESOLVED**: `complex_part_designator` now participates in both `primary` and `lhs_expression`, enabling `%RE`/`%IM` access for expressions and assignments across F2003 and all inheriting grammars.
   - Fixture `tests/fixtures/Fortran2003/test_issue584_complex_parts/complex_part_designator.f90` demonstrates assignments, expressions, array elements, and derived-component chains that cover the new behavior.

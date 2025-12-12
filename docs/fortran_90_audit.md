@@ -180,11 +180,7 @@ Grammar:
 
 Gaps:
 
-- The grammar does not enforce all context restrictions, such as:
-  - Where assumed‑shape and deferred‑shape arrays are allowed (e.g.
-    dummy arguments vs locals).
-  - The full rules for pointer vs target combinations.
-  - Those are left to semantic analysis or downstream tooling.
+- The grammar does not enforce all context restrictions on assumed‑shape/deferred‑shape arrays or POINTER/TARGET combinations; semantic validation is required (issue #676).
 
 ## 5. Control constructs (IF, CASE, DO, WHERE)
 
@@ -217,10 +213,7 @@ Grammar:
 
 Gaps:
 
-- Complex nesting rules and interactions between named constructs and
-  `CYCLE` / `EXIT` are not fully validated. The generic fixture suite
-  still marks several F90 integration fixtures as XPASS because of
-  current limitations in the entry rule and integration of constructs.
+- Semantic constraints on named constructs and CYCLE/EXIT binding are not enforced (issue #677).
 
 ## 6. Expressions and literals
 
@@ -258,12 +251,7 @@ Grammar:
 
 Gaps:
 
-- The expression rule is deliberately highly permissive and does not
-  encode precedence using a tower of nonterminals; precedence and
-  conformability semantics are assumed to be handled downstream.
-  This is a practical divergence from the careful precedence
-  discussion in N692 §7.1/§7.2 but adequate for syntactic parsing.
-  (Some constraints are encoded by test expectations.)
+- Expression precedence and associativity are not encoded in a standard‑accurate way; downstream tooling cannot rely on parse‑tree structure (issue #678).
 
 ## 7. I/O: READ, WRITE, NAMELIST, control lists
 

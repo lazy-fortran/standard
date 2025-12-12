@@ -11,9 +11,10 @@ GRAMMAR_GEN_MODERN = $(GRAMMAR_DIR)/generated/modern
 TEST_DIR = tests
 PYTEST = python -m pytest
 
-# Detect whether a Java runtime is available for ANTLR regeneration.
-# If Java is not available, existing generated lexer/parser sources are used.
+# Detect whether a Java runtime and ANTLR4 CLI are available for regeneration.
+# If either is not available, existing generated lexer/parser sources are used.
 JAVA_AVAILABLE := $(shell java -version >/dev/null 2>&1 && echo yes || echo no)
+ANTLR4_AVAILABLE := $(shell command -v $(ANTLR4) >/dev/null 2>&1 && echo yes || echo no)
 
 # Grammar inheritance chain (build order matters!)
 GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023 LazyFortran2025
@@ -44,122 +45,177 @@ LazyFortran2025: $(GRAMMAR_GEN_MODERN)/LazyFortran2025Lexer.py
 # FORTRAN I (1957) - Foundation
 $(GRAMMAR_GEN_EARLY)/FORTRANLexer.py: $(GRAMMAR_SRC)/FORTRANLexer.g4 $(GRAMMAR_SRC)/FORTRANParser.g4
 	@echo "Building FORTRAN I (1957)..."
-	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/early FORTRANLexer.g4 && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/early FORTRANParser.g4; \
 	else \
-		echo "Java runtime not available; using existing FORTRAN I (1957) lexer/parser sources"; \
+		if [ -f "$@" ]; then \
+			echo "ANTLR4 CLI not available; using existing FORTRAN I (1957) lexer/parser sources"; \
+		else \
+			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
+			exit 1; \
+		fi; \
 	fi
 
 # FORTRAN II (1958) - Independent Compilation
 $(GRAMMAR_GEN_EARLY)/FORTRANIILexer.py: $(GRAMMAR_SRC)/FORTRANIILexer.g4 $(GRAMMAR_SRC)/FORTRANIIParser.g4 FORTRAN
 	@echo "Building FORTRAN II (1958)..."
-	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/early FORTRANIILexer.g4 && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/early FORTRANIIParser.g4; \
 	else \
-		echo "Java runtime not available; using existing FORTRAN II (1958) lexer/parser sources"; \
+		if [ -f "$@" ]; then \
+			echo "ANTLR4 CLI not available; using existing FORTRAN II (1958) lexer/parser sources"; \
+		else \
+			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
+			exit 1; \
+		fi; \
 	fi
 
 # FORTRAN 66 (1966) - First FORTRAN Standard with merged FORTRAN IV features
 $(GRAMMAR_GEN_EARLY)/FORTRAN66Lexer.py: $(GRAMMAR_SRC)/FORTRAN66Lexer.g4 $(GRAMMAR_SRC)/FORTRAN66Parser.g4 FORTRANII
 	@echo "Building FORTRAN 66 (1966)..."
-	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/early FORTRAN66Lexer.g4 && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/early FORTRAN66Parser.g4; \
 	else \
-		echo "Java runtime not available; using existing FORTRAN 66 (1966) lexer/parser sources"; \
+		if [ -f "$@" ]; then \
+			echo "ANTLR4 CLI not available; using existing FORTRAN 66 (1966) lexer/parser sources"; \
+		else \
+			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
+			exit 1; \
+		fi; \
 	fi
 
 # FORTRAN 77 (1977) - Structured Programming
 $(GRAMMAR_GEN_EARLY)/FORTRAN77Lexer.py: $(GRAMMAR_SRC)/FORTRAN77Lexer.g4 $(GRAMMAR_SRC)/FORTRAN77Parser.g4 FORTRAN66
 	@echo "Building FORTRAN 77 (1977)..."
-	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/early FORTRAN77Lexer.g4 && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/early FORTRAN77Parser.g4; \
 	else \
-		echo "Java runtime not available; using existing FORTRAN 77 (1977) lexer/parser sources"; \
+		if [ -f "$@" ]; then \
+			echo "ANTLR4 CLI not available; using existing FORTRAN 77 (1977) lexer/parser sources"; \
+		else \
+			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
+			exit 1; \
+		fi; \
 	fi
 
 # Fortran 90 (1990) - Modern Foundation
 $(GRAMMAR_GEN_MODERN)/Fortran90Lexer.py: $(GRAMMAR_SRC)/Fortran90Lexer.g4 $(GRAMMAR_SRC)/Fortran90Parser.g4 FORTRAN77
 	@echo "Building Fortran 90 (1990)..."
-	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran90Lexer.g4 && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran90Parser.g4; \
 	else \
-		echo "Java runtime not available; using existing Fortran 90 (1990) lexer/parser sources"; \
+		if [ -f "$@" ]; then \
+			echo "ANTLR4 CLI not available; using existing Fortran 90 (1990) lexer/parser sources"; \
+		else \
+			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
+			exit 1; \
+		fi; \
 	fi
 
 # Fortran 95 (1995) - Minor Update
 $(GRAMMAR_GEN_MODERN)/Fortran95Lexer.py: $(GRAMMAR_SRC)/Fortran95Lexer.g4 $(GRAMMAR_SRC)/Fortran95Parser.g4 Fortran90
 	@echo "Building Fortran 95 (1995)..."
-	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran95Lexer.g4 && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran95Parser.g4; \
 	else \
-		echo "Java runtime not available; using existing Fortran 95 (1995) lexer/parser sources"; \
+		if [ -f "$@" ]; then \
+			echo "ANTLR4 CLI not available; using existing Fortran 95 (1995) lexer/parser sources"; \
+		else \
+			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
+			exit 1; \
+		fi; \
 	fi
 
 # Fortran 2003 (2003) - Object-Oriented Programming
 $(GRAMMAR_GEN_MODERN)/Fortran2003Lexer.py: $(GRAMMAR_SRC)/Fortran2003Lexer.g4 $(GRAMMAR_SRC)/Fortran2003Parser.g4 Fortran95
 	@echo "Building Fortran 2003 (2003)..."
-	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran2003Lexer.g4 && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran2003Parser.g4; \
 	else \
-		echo "Java runtime not available; using existing Fortran 2003 (2003) lexer/parser sources"; \
+		if [ -f "$@" ]; then \
+			echo "ANTLR4 CLI not available; using existing Fortran 2003 (2003) lexer/parser sources"; \
+		else \
+			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
+			exit 1; \
+		fi; \
 	fi
 
 # Fortran 2008 (2008) - Enhanced Parallel Programming
 $(GRAMMAR_GEN_MODERN)/Fortran2008Lexer.py: $(GRAMMAR_SRC)/Fortran2008Lexer.g4 $(GRAMMAR_SRC)/Fortran2008Parser.g4 Fortran2003
 	@echo "Building Fortran 2008 (2008)..."
-	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran2008Lexer.g4 && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran2008Parser.g4; \
 	else \
-		echo "Java runtime not available; using existing Fortran 2008 (2008) lexer/parser sources"; \
+		if [ -f "$@" ]; then \
+			echo "ANTLR4 CLI not available; using existing Fortran 2008 (2008) lexer/parser sources"; \
+		else \
+			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
+			exit 1; \
+		fi; \
 	fi
 
 # Fortran 2018 (2018) - Modern Fortran Revolution
 $(GRAMMAR_GEN_MODERN)/Fortran2018Lexer.py: $(GRAMMAR_SRC)/Fortran2018Lexer.g4 $(GRAMMAR_SRC)/Fortran2018Parser.g4 Fortran2008
 	@echo "Building Fortran 2018 (2018)..."
-	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran2018Lexer.g4 && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran2018Parser.g4; \
 	else \
-		echo "Java runtime not available; using existing Fortran 2018 (2018) lexer/parser sources"; \
+		if [ -f "$@" ]; then \
+			echo "ANTLR4 CLI not available; using existing Fortran 2018 (2018) lexer/parser sources"; \
+		else \
+			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
+			exit 1; \
+		fi; \
 	fi
 
 # Fortran 2023 (2023) - Latest ISO Standard
 $(GRAMMAR_GEN_MODERN)/Fortran2023Lexer.py: $(GRAMMAR_SRC)/Fortran2023Lexer.g4 $(GRAMMAR_SRC)/Fortran2023Parser.g4 Fortran2018
 	@echo "Building Fortran 2023 (2023)..."
-	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran2023Lexer.g4 && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran2023Parser.g4; \
 	else \
-		echo "Java runtime not available; using existing Fortran 2023 (2023) lexer/parser sources"; \
+		if [ -f "$@" ]; then \
+			echo "ANTLR4 CLI not available; using existing Fortran 2023 (2023) lexer/parser sources"; \
+		else \
+			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
+			exit 1; \
+		fi; \
 	fi
 
 # Lazy Fortran 2025 (future standard) - Relaxed syntax on top of Fortran 2023
 $(GRAMMAR_GEN_MODERN)/LazyFortran2025Lexer.py: $(GRAMMAR_SRC)/LazyFortran2025Lexer.g4 $(GRAMMAR_SRC)/LazyFortran2025Parser.g4 Fortran2023
 	@echo "Building Lazy Fortran 2025..."
-	@if [ "$(JAVA_AVAILABLE)" = "yes" ]; then \
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern LazyFortran2025Lexer.g4 && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern LazyFortran2025Parser.g4; \
 	else \
-		echo "Java runtime not available; using existing Lazy Fortran 2025 lexer/parser sources"; \
+		if [ -f "$@" ]; then \
+			echo "ANTLR4 CLI not available; using existing Lazy Fortran 2025 lexer/parser sources"; \
+		else \
+			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
+			exit 1; \
+		fi; \
 	fi
 
 
