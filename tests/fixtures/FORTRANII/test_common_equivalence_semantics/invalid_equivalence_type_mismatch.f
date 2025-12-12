@@ -1,0 +1,7 @@
+      SUBROUTINE TEST_INVALID_EQUIV
+      INTEGER I
+      LOGICAL L
+      EQUIVALENCE (I, L)
+      I = 1
+      RETURN
+      END
