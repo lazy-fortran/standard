@@ -144,6 +144,10 @@ Gaps (spec vs grammar):
 
 - The grammar does not syntactically enforce:
   - That KIND and LEN selectors are integer constant expressions.
+    **ADDRESSED**: Semantic validator `tools/f90_kind_len_selector_validator.py`
+    now enforces KIND/LEN selector constraints per ISO/IEC 1539:1991 Section 4.3
+    (issue #674). Test suite validates KIND/LEN selector semantics with 10 test
+    cases covering literals, variables, and expressions.
   - Many fine‑grained attribute ordering and consistency rules (e.g.
     not all attribute combinations are valid for every context).
 
