@@ -90,7 +90,7 @@ class TestFortran2003Unified:
         self.parse_fortran_code(code)
     
     def test_enhanced_allocate(self):
-        """Test F2003 enhanced ALLOCATE with SOURCE and MOLD."""
+        """Test F2003 enhanced ALLOCATE with SOURCE."""
         code = load_fixture(
             "Fortran2003",
             "test_fortran_2003_comprehensive",

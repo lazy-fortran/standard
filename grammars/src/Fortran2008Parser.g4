@@ -762,6 +762,21 @@ allocate_stmt_f2008
       (COMMA alloc_opt_list)? RPAREN NEWLINE
     ;
 
+// Allocation option list (ISO/IEC 1539-1:2010 R627, with MOLD= added in F2008)
+alloc_opt_list
+    : alloc_opt (COMMA alloc_opt)*
+    ;
+
+// Allocation option (ISO/IEC 1539-1:2010 R629)
+// R629: alloc-opt -> STAT=stat-variable | ERRMSG=errmsg-variable
+//                  | SOURCE=source-expr | MOLD=source-expr
+alloc_opt
+    : STAT EQUALS identifier_or_keyword
+    | ERRMSG EQUALS identifier_or_keyword
+    | SOURCE EQUALS expr_f2003
+    | MOLD EQUALS expr_f2003
+    ;
+
 // Allocation list (ISO/IEC 1539-1:2010 R627)
 allocation_list_f2008
     : allocation_f2008 (COMMA allocation_f2008)*

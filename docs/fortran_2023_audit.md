@@ -206,7 +206,7 @@ Tests:
   - Parses `conditional_expression.f90` via `program_unit_f2023`.
 - Additional fixtures:
   - `conditional_expression.f90` also appears in the generic fixture
-    harness; XPASS is configured to tolerate current parser limitations.
+    harness and parses cleanly via `program_unit_f2023`.
 
 Gaps (tracked by issue #310):
 
@@ -344,14 +344,12 @@ Tests:
     not the grammar’s responsibility.
 - NAMELIST:
   - `namelist_enhancements_module.f90` is included in the fixtures and
-    XPASS’d in the generic test harness; only tokenization is asserted
-    in the comprehensive tests.
+    parses via `program_unit_f2023`; F2023 NAMELIST refinements are
+    semantic clarifications rather than new syntax.
 
 Gaps:
 
-- NAMELIST and BOZ refinements are only lightly modeled; they are
-  primarily present to keep tests compiling and to indicate where
-  future work might go.
+- NAMELIST and BOZ refinements rely on inherited F2018 syntax; Fortran 2023 adds mainly semantic clarifications here (prior dead‑code attempt resolved by issue #457).
 - SYSTEM_CLOCK semantic requirements (same kind) are not encoded; this
   is explicitly deferred to compilers or semantic tools.
 

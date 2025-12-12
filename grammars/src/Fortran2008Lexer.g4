@@ -28,6 +28,9 @@ import Fortran2003Lexer;
 // coarrays for SPMD (Single Program Multiple Data) parallelism and the DO
 // CONCURRENT construct for explicit parallelization.
 
+// MOLD= specifier is added to ALLOCATE in Fortran 2008 (Section 6.7.1).
+MOLD             : M O L D ;
+
 // ============================================================================
 // COARRAY SUPPORT (ISO/IEC 1539-1:2010 Section 2.4.7, 5.3.6, 6.6)
 // ============================================================================

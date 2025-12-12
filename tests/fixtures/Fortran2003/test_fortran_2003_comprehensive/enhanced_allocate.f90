@@ -13,8 +13,8 @@ program test_enhanced_allocate
         stop
     end if
 
-    ! Allocate with MOLD
-    allocate(array2, mold=source_array, stat=stat)
+    ! Another allocation with SOURCE
+    allocate(array2, source=source_array, stat=stat)
     if (stat == 0) then
         array2 = [10, 20, 30, 40, 50]
     end if
@@ -30,4 +30,3 @@ program test_enhanced_allocate
     deallocate(array1, array2, array3)
 
 end program test_enhanced_allocate
-
