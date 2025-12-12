@@ -56,11 +56,16 @@ Grammar:
 
 Notable simplifications / gaps:
 
-- Detailed rules about which specification statements may appear in
-  which program unit contexts and in which order (N692 §5.2.1) are
-  only partially enforced: `specification_part` allows a broad
-  `declaration_construct*` sequence and some minor reordering
-  differences are accepted.
+- **Specification-statement ordering validation (N692 §5.2.1)**: Detailed rules
+  about which specification statements may appear in which program unit contexts
+  and in which order (N692 §5.2.1) are now enforced via the semantic validator
+  `tools/f90_specification_ordering_validator.py` (issue #672). The validator
+  checks USE statement placement (must be first), IMPLICIT ordering, and
+  context-specific constraints (e.g., INTENT/OPTIONAL in procedures only). Full
+  implementation includes test suite with 23 test cases covering main programs,
+  procedures, modules, and internal subprograms. Implementation status: Phase 1
+  complete (main programs and procedures); future phases cover modules, block
+  data, and advanced constraints.
 - Separate module subprograms (introduced later) are not modeled; F90
   does not require them, so this is historically acceptable.
 
