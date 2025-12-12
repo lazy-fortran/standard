@@ -280,14 +280,21 @@ Parser usage:
 
 - `format_item` allows `HOLLERITH` as a standalone format item.
 
+Semantic validation (Issue #671 resolved):
+
+- The `tools/strict_fixed_form.py` module now validates Hollerith constants
+  in FORMAT statements when using FORTRAN II mode (dialect="II"):
+  - `_validate_ii_hollerith_length_counts_in_format()` checks that the digit
+    count `n` matches the number of characters following `H` per C28-6000-2.
+  - Entry point: `validate_strict_fixed_form_ii(source)` validates strict
+    fixed-form card layout and Hollerith counts for FORTRAN II programs.
+  - Test coverage in `tests/FORTRANII/test_strict_fixed_form.py` class
+    `TestHollerthValidation` with 8 test cases covering valid/invalid counts.
+
 Limitations:
 
-- The grammar does not enforce that the digit count `n` matches the
-  number of characters following `H`:
-  - This is a lexical/semantic check left to downstream tools.
 - Outside FORMAT, Hollerith usage is limited to the simple lexer rule;
-  the tests treat Hollerith handling primarily as “token is
-  recognized” rather than as strict, length-checked semantics.
+  semantic validation applies only to FORMAT statements.
 
 ## 7. Fixture status
 

@@ -298,6 +298,89 @@ class TestFixtures(unittest.TestCase):
         self.assertFalse(result.valid)
 
 
+class TestHollerthValidation(unittest.TestCase):
+    """Test Hollerith constant validation for FORTRAN II FORMAT statements.
+
+    Per C28-6000-2 Part I Chapter 2, Hollerith constants must have the
+    declared count match the number of characters that follow the H.
+    """
+
+    def setUp(self):
+        if not PROCESSOR_AVAILABLE:
+            self.skipTest("StrictFixedFormProcessor not available")
+        self.processor = StrictFixedFormProcessor(dialect="II")
+
+    def test_valid_hollerith_in_format(self):
+        """Test valid Hollerith constants in FORMAT statements."""
+        source = """      FORMAT (5HHELLO)
+"""
+        result = self.processor.process(source)
+        self.assertTrue(result.valid, f"Errors: {result.errors}")
+        self.assertEqual(len(result.errors), 0)
+
+    def test_valid_multiple_hollerith(self):
+        """Test multiple valid Hollerith constants in FORMAT."""
+        source = """      FORMAT (5HHELLO, 1H*, 10HFORTRAN II)
+"""
+        result = self.processor.process(source)
+        self.assertTrue(result.valid, f"Errors: {result.errors}")
+        self.assertEqual(len(result.errors), 0)
+
+    def test_invalid_hollerith_count_high(self):
+        """Test Hollerith with count too high (declares 5 but has 4)."""
+        source = """      FORMAT (5HHELL)
+"""
+        result = self.processor.process(source)
+        self.assertFalse(result.valid)
+        self.assertEqual(len(result.errors), 1)
+        self.assertIn("declared 5", result.errors[0].message)
+        self.assertIn("got 4", result.errors[0].message)
+
+    def test_invalid_hollerith_count_low(self):
+        """Test Hollerith with count too low (declares 3 but has 5)."""
+        source = """      FORMAT (3HHELLO)
+"""
+        result = self.processor.process(source)
+        self.assertFalse(result.valid)
+        self.assertEqual(len(result.errors), 1)
+        self.assertIn("declared 3", result.errors[0].message)
+        self.assertIn("got 5", result.errors[0].message)
+
+    def test_invalid_multiple_hollerith_one_error(self):
+        """Test multiple Hollerith with one invalid."""
+        source = """      FORMAT (5HHELLO, 2HABC, 3HFOO)
+"""
+        result = self.processor.process(source)
+        self.assertFalse(result.valid)
+        self.assertEqual(len(result.errors), 1)
+        self.assertIn("declared 2", result.errors[0].message)
+
+    def test_hollerith_with_spaces(self):
+        """Test Hollerith with spaces (count must include spaces)."""
+        source = """      FORMAT (8HHI WORLD)
+"""
+        result = self.processor.process(source)
+        self.assertTrue(result.valid, f"Errors: {result.errors}")
+        self.assertEqual(len(result.errors), 0)
+
+    def test_hollerith_not_in_format(self):
+        """Test Hollerith in non-FORMAT statement is not validated."""
+        source = """      X = 5HHELL
+"""
+        result = self.processor.process(source)
+        self.assertTrue(result.valid, f"Errors: {result.errors}")
+        self.assertEqual(len(result.errors), 0)
+
+    def test_hollerith_1957_in_format(self):
+        """Test that 1957 dialect validates correctly."""
+        processor_1957 = StrictFixedFormProcessor(dialect="1957")
+        source = """      FORMAT (5HHELL)
+"""
+        result = processor_1957.process(source)
+        self.assertFalse(result.valid)
+        self.assertEqual(len(result.errors), 1)
+
+
 class TestIntegrationWithParser(unittest.TestCase):
     """Test that converted lenient output parses with FORTRANIIParser."""
 
