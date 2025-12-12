@@ -96,6 +96,28 @@ Implication:
   intentionally less strict than N692 §3. It is practical for parsing
   typical legacy F77/F90 code but not card‑accurate.
 
+**Strict Fixed-Form Support (Issue #673):**
+
+A complementary **strict fixed-form validator** (`tools/strict_fixed_form.py`)
+now enforces card layout semantics per ISO/IEC 1539:1991 Section 3.3:
+
+- **Module**: `StrictFixedFormProcessor` with Fortran 90 dialect ("90")
+- **Configuration**: Columns 1–5 labels (1–99999), column 6 continuation,
+  columns 7–72 statement text, columns 73–80 sequence field
+- **Validation**: Labels must be numeric, continuation cards must not have labels,
+  proper card sequencing enforced
+- **Conversion**: `convert_to_lenient_90()` transforms strict source to layout-lenient
+  form suitable for `Fortran90Parser`
+- **Test Suite**: `tests/Fortran90/test_strict_fixed_form.py` with 24 test cases
+- **Fixtures**: `tests/fixtures/Fortran90/test_strict_fixed_form/` with 5 valid and
+  3 invalid test cases
+- **Documentation**: `docs/fixed_form_support.md` Section 3.2 documents usage and
+  constraints
+
+This implementation closes Issue #673 by providing full card-image validation for
+Fortran 90 fixed-form source while maintaining backward compatibility with the
+layout-lenient grammar parsing mode.
+
 ## 3. Types, derived types and declarations
 
 Specification (N692 §§4–5):

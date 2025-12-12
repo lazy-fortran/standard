@@ -213,6 +213,61 @@ demonstrates valid F90 fixed-form source using the supported constructs.
 This approach aligns with F90 being a transitional standard that strongly
 encouraged adoption of free-form source and modern control structures.
 
+### 3.2 Fortran 90 Strict Fixed-Form Mode (Issue #673)
+
+Fortran 90 now provides an optional **strict fixed-form validator** that enforces
+card layout semantics per ISO/IEC 1539:1991 Section 3.3, complementing the
+layout-lenient grammar parsing mode.
+
+**Usage:**
+
+```python
+from tools.strict_fixed_form import validate_strict_fixed_form_90, convert_to_lenient_90
+
+# Validate strict 80-column Fortran 90 source
+result = validate_strict_fixed_form_90(source)
+if not result.valid:
+    for error in result.errors:
+        print(f"Line {error.line_number}, Col {error.column}: {error.message}")
+
+# Convert to layout-lenient form for Fortran90Parser
+lenient, result = convert_to_lenient_90(source, strip_comments=False)
+```
+
+**Card Layout Validation** per ISO/IEC 1539:1991 Section 3.3:
+- Columns 1–5: Statement labels (numeric 1–99999 or blank)
+- Column 6: Continuation mark (non-blank = continuation)
+- Columns 7–72: Statement text
+- Columns 73–80: Sequence/identification field (ignored)
+- Column 1: `C` or `*` marks a comment card
+
+**Key Constraints Enforced:**
+- Labels must be numeric and in range 1–99999
+- Continuation cards (column 6 non-blank) must not have labels
+- Continuation cards must follow a statement card
+- Comment cards are recognized by column 1 markers (`C` or `*`)
+- Sequence numbers (cols 73–80) are stripped during conversion
+
+**Test Fixtures** in `tests/fixtures/Fortran90/test_strict_fixed_form/`:
+- `valid_program.f90`: Basic program with proper column layout
+- `valid_with_labels.f90`: Labeled statements in columns 1–5
+- `valid_with_continuation.f90`: Multi-card statements with column 6 marks
+- `valid_star_comment.f90`: Star comments in column 1
+- `valid_module.f90`: Module syntax in strict fixed form
+- `invalid_alpha_label.f90`: Non-numeric label (rejected)
+- `invalid_continuation_with_label.f90`: Continuation with label (rejected)
+- `invalid_label_out_of_range.f90`: Invalid label format (rejected)
+
+**Test Suite** in `tests/Fortran90/test_strict_fixed_form.py`:
+- 24 test cases covering card parsing, validation, and lenient conversion
+- Comprehensive fixture testing for both valid and invalid cases
+
+The strict mode preprocessor enables historical audits requiring exact
+card-image conformance while keeping the lenient grammar parsing mode
+available for modern Fortran 90 tooling. Issue #673 implements this feature
+to achieve full ISO/IEC 1539:1991 Section 3.3 compliance for Fortran 90
+fixed-form source validation.
+
 ## 4. Fortran 2003 Fixed-form (Unified Grammar)
 
 Fortran 2003 inherits the unified fixed/free architecture:
