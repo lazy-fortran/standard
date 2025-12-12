@@ -1,0 +1,3 @@
+      PRINT 200
+  200 FORMAT (5HXY)
+      END

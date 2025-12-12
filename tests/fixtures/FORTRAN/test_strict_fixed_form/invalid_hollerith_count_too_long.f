@@ -1,0 +1,3 @@
+      PRINT 100
+  100 FORMAT (3HABCD)
+      END

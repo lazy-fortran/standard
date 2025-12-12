@@ -261,9 +261,10 @@ Implemented:
   - Tests verify that the lexer correctly recognizes HOLLERITH tokens
     and that FORMAT statements with Hollerith constants parse with zero
     syntax errors.
-  - Note: Strict length-count semantics (exactly n characters after H)
-    would require a semantic check; the current lexer uses delimiter-based
-    matching for practical robustness.
+  - Note: The lexer still uses delimiter-based matching, but strict
+    length-count semantics (declared n must match the tokenized character
+    count) are enforced by the strict fixed-form validator for FORTRAN 1957
+    (issue #669).
 
 ## 6. Fixed-form source and card layout
 
