@@ -114,15 +114,17 @@ class F90ArraySpecPointerTargetListener(Fortran90ParserListener):
             )
         )
 
-    def enterSubroutineSubprogramPart(self, ctx):
+    def enterSubroutine_subprogram_f90(self, ctx):
         """Track subroutine subprograms."""
-        # Extract dummy arg names from subroutine prefix
+        # Clear and populate dummy arg names for this subprogram
+        self._dummy_arg_names = set()
         if hasattr(ctx, 'subroutine_stmt') and ctx.subroutine_stmt():
             self._extract_dummy_args(ctx.subroutine_stmt())
 
-    def enterFunctionSubprogramPart(self, ctx):
+    def enterFunction_subprogram_f90(self, ctx):
         """Track function subprograms."""
-        # Extract dummy arg names from function prefix
+        # Clear and populate dummy arg names for this subprogram
+        self._dummy_arg_names = set()
         if hasattr(ctx, 'function_stmt') and ctx.function_stmt():
             self._extract_dummy_args(ctx.function_stmt())
 
@@ -130,16 +132,24 @@ class F90ArraySpecPointerTargetListener(Fortran90ParserListener):
         """Extract dummy argument names from subroutine/function stmt."""
         if stmt_ctx is None:
             return
-        # Look for dummy_arg_list in the statement
         try:
-            # Navigate to find args
-            if hasattr(stmt_ctx, 'dummy_arg_list'):
+            # Look for dummy_arg_name_list (F90) or dummy_arg_list in the statement
+            dummy_list = None
+            if hasattr(stmt_ctx, 'dummy_arg_name_list'):
+                dummy_list = stmt_ctx.dummy_arg_name_list()
+            elif hasattr(stmt_ctx, 'dummy_arg_list'):
                 dummy_list = stmt_ctx.dummy_arg_list()
-                if dummy_list and hasattr(dummy_list, 'dummy_arg'):
-                    for arg in dummy_list.dummy_arg():
-                        if hasattr(arg, 'IDENTIFIER'):
-                            name = arg.IDENTIFIER().getText()
-                            self._dummy_arg_names.add(name.lower())
+
+            if dummy_list:
+                # Iterate through children to find identifiers
+                for i in range(dummy_list.getChildCount()):
+                    child = dummy_list.getChild(i)
+                    # Skip commas and other non-identifier elements
+                    if hasattr(child, 'getText'):
+                        text = child.getText()
+                        # If it's not a comma, treat it as a name
+                        if text != ',':
+                            self._dummy_arg_names.add(text.lower())
         except Exception:
             pass
 
@@ -147,6 +157,7 @@ class F90ArraySpecPointerTargetListener(Fortran90ParserListener):
         """Check type declaration statements for attribute conflicts."""
         # Clear attributes for new declaration
         self._current_attributes = set()
+        self._current_dimension_spec = None
 
         # Extract all attributes using getChild to iterate through alternatives
         try:
@@ -167,6 +178,9 @@ class F90ArraySpecPointerTargetListener(Fortran90ParserListener):
                             attr_name = self._extract_attribute_from_parse_node(child)
                             if attr_name:
                                 self._current_attributes.add(attr_name)
+                            # Extract array spec from DIMENSION attribute
+                            if attr_name == 'DIMENSION':
+                                self._current_dimension_spec = self._extract_array_spec_from_dimension(child)
         except Exception:
             pass
 
@@ -220,6 +234,25 @@ class F90ArraySpecPointerTargetListener(Fortran90ParserListener):
             pass
         return None
 
+    def _extract_array_spec_from_dimension(self, attr_ctx):
+        """Extract array spec from DIMENSION attribute node."""
+        if attr_ctx is None:
+            return None
+        try:
+            # Look for array_spec_f90 inside the DIMENSION(...) attribute
+            for i in range(attr_ctx.getChildCount()):
+                child = attr_ctx.getChild(i)
+                if hasattr(child, 'getRuleIndex'):
+                    try:
+                        rule_name = attr_ctx.parser.ruleNames[child.getRuleIndex()]
+                        if rule_name == 'array_spec_f90':
+                            return child
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+        return None
+
     def _check_attribute_compatibility(self, ctx):
         """Check for incompatible attribute combinations."""
         # E676-001: POINTER and TARGET are mutually exclusive
@@ -257,21 +290,26 @@ class F90ArraySpecPointerTargetListener(Fortran90ParserListener):
         if entity_ctx is None:
             return
 
-        # Get entity name
+        # Get entity name from first child (identifier_or_keyword)
         entity_name = None
-        if hasattr(entity_ctx, 'object_name') and entity_ctx.object_name():
-            obj_name = entity_ctx.object_name()
-            if hasattr(obj_name, 'IDENTIFIER'):
-                entity_name = obj_name.IDENTIFIER().getText().lower()
+        if hasattr(entity_ctx, 'getChildCount') and entity_ctx.getChildCount() > 0:
+            first_child = entity_ctx.getChild(0)
+            if first_child:
+                entity_name = first_child.getText().lower()
 
-        # Check for array specification
+        # Check for array specification: could be on entity or in DIMENSION attribute
         array_spec = None
         if hasattr(entity_ctx, 'array_spec_f90') and entity_ctx.array_spec_f90():
             array_spec = entity_ctx.array_spec_f90()
+        elif self._current_dimension_spec:
+            # Use dimension spec from DIMENSION attribute if no entity spec
+            array_spec = self._current_dimension_spec
 
         if array_spec and entity_name:
-            # Determine spec type
-            spec_type = self._get_array_spec_type(array_spec)
+            # Check if this entity is a dummy argument
+            is_dummy = entity_name in self._dummy_arg_names
+            # Determine spec type (pass context info)
+            spec_type = self._get_array_spec_type(array_spec, is_dummy)
 
             # E676-004: Assumed-shape arrays only in dummy arguments
             if spec_type == 'assumed-shape':
@@ -331,19 +369,38 @@ class F90ArraySpecPointerTargetListener(Fortran90ParserListener):
                         'ISO/IEC 1539:1991 Section 5.1.2.4'
                     )
 
-    def _get_array_spec_type(self, array_spec_ctx) -> Optional[str]:
-        """Determine array spec type via the parse tree alternatives."""
+    def _get_array_spec_type(self, array_spec_ctx, is_dummy: bool = False) -> Optional[str]:
+        """Determine array spec type via the parse tree alternatives.
+
+        In Fortran 90 grammar, both assumed-shape and deferred-shape parse as
+        assumed_shape_spec_list. We disambiguate based on context:
+        - POINTER/ALLOCATABLE in local scope -> deferred-shape (`:`)
+        - POINTER in dummy argument with `:` -> treated as assumed-shape (invalid)
+        - In dummy argument without POINTER -> assumed-shape (`:`)
+        - Other contexts -> explicit-shape
+        """
         if array_spec_ctx is None:
             return None
 
-        if array_spec_ctx.assumed_shape_spec_list():
-            return 'assumed-shape'
+        # Check explicit alternatives first (these are unambiguous)
         if array_spec_ctx.deferred_shape_spec_list():
             return 'deferred-shape'
         if array_spec_ctx.assumed_size_spec():
             return 'assumed-size'
         if array_spec_ctx.explicit_shape_spec_list():
             return 'explicit-shape'
+
+        # Now handle the ambiguous assumed_shape_spec_list
+        if array_spec_ctx.assumed_shape_spec_list():
+            # POINTER/ALLOCATABLE in local scope -> deferred-shape
+            if 'POINTER' in self._current_attributes or 'ALLOCATABLE' in self._current_attributes:
+                if is_dummy:
+                    # POINTER in dummy with `:` is treated as assumed-shape (which is invalid)
+                    return 'assumed-shape'
+                # POINTER/ALLOCATABLE in local scope with `:` -> deferred-shape
+                return 'deferred-shape'
+            # No POINTER/ALLOCATABLE: it's assumed-shape
+            return 'assumed-shape'
 
         return None
 
