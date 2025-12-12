@@ -749,10 +749,13 @@ attr_spec
 // ALLOCATE statement with coarray support for allocating coarray codimensions.
 //
 // Key rules from ISO/IEC 1539-1:2010:
-// - R626: allocate-stmt -> ALLOCATE ([type-spec::] allocation-list [, alloc-opt-list])
-// - R628: allocation -> allocate-object [(allocate-shape-spec-list)]
-//                       [allocate-coarray-spec]
-// - R636: allocate-coarray-spec -> [allocate-coshape-spec-list,] [lower-bound-expr:]
+// - R626: allocate-stmt -> ALLOCATE ([type-spec :: ] allocation-list
+//                                   [, alloc-opt-list])
+// - R627: alloc-opt -> ERRMSG=errmsg-variable | MOLD=source-expr
+//                    | SOURCE=source-expr | STAT=stat-variable
+// - R631: allocation -> allocate-object [(allocate-shape-spec-list)]
+//                       [allocate-co-array-spec]
+// - R636: allocate-co-array-spec -> [allocate-co-shape-spec-list,] [lower-bound-expr:]
 
 // ALLOCATE statement with coarray support (ISO/IEC 1539-1:2010 R626)
 allocate_stmt_f2008
@@ -762,14 +765,14 @@ allocate_stmt_f2008
       (COMMA alloc_opt_list)? RPAREN NEWLINE
     ;
 
-// Allocation option list (ISO/IEC 1539-1:2010 R627, with MOLD= added in F2008)
+// Allocation option list (alloc-opt-list in R626; elements are R627 alloc-opt)
 alloc_opt_list
     : alloc_opt (COMMA alloc_opt)*
     ;
 
-// Allocation option (ISO/IEC 1539-1:2010 R629)
-// R629: alloc-opt -> STAT=stat-variable | ERRMSG=errmsg-variable
-//                  | SOURCE=source-expr | MOLD=source-expr
+// Allocation option (ISO/IEC 1539-1:2010 R627)
+// R627: alloc-opt -> ERRMSG=errmsg-variable | MOLD=source-expr
+//                  | SOURCE=source-expr | STAT=stat-variable
 alloc_opt
     : STAT EQUALS identifier_or_keyword
     | ERRMSG EQUALS identifier_or_keyword
@@ -777,14 +780,14 @@ alloc_opt
     | MOLD EQUALS expr_f2003
     ;
 
-// Allocation list (ISO/IEC 1539-1:2010 R627)
+// Allocation list (allocation-list in R626)
 allocation_list_f2008
     : allocation_f2008 (COMMA allocation_f2008)*
     ;
 
-// Allocation with coarray codimension (ISO/IEC 1539-1:2010 R628)
-// R628: allocation -> allocate-object [(allocate-shape-spec-list)]
-//                     [allocate-coarray-spec]
+// Allocation with coarray codimension (ISO/IEC 1539-1:2010 R631)
+// R631: allocation -> allocate-object [(allocate-shape-spec-list)]
+//                     [allocate-co-array-spec]
 allocation_f2008
     : IDENTIFIER coarray_spec? (LPAREN allocate_shape_spec_list RPAREN)?
     | derived_type_spec DOUBLE_COLON IDENTIFIER coarray_spec?
