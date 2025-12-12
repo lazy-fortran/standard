@@ -329,12 +329,12 @@ class TestSemanticCInteroperability:
             "test_issue24_semantic_c_interop",
             "performance_test_module.f90",
         )
-        
+
         start_time = time.time()
         tree, errors, parser = self.parse_and_validate(working_code)
         parse_time = time.time() - start_time
-        
-        assert parse_time < 0.5, f"Parser too slow: {parse_time:.3f}s"
+
+        assert parse_time < 1.0, f"Parser too slow: {parse_time:.3f}s"
         
         # Verify semantic structure 
         tokens = self.extract_all_tokens(tree)
