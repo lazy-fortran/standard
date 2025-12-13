@@ -43,9 +43,17 @@ options {
 // ============================================================================
 
 // FORTRAN II program with separately compiled units
-// C28-6000-2 Part I, Chapter 1: A source deck consists of one program unit
+// C28-6000-2 Part I, Chapter 1: A source deck typically contains one program unit,
+// but may contain multiple subroutines and functions for testing/library purposes
 fortran_program
-    : (main_program | subroutine_subprogram | function_subprogram) EOF
+    : NEWLINE* program_unit (NEWLINE+ program_unit)* NEWLINE* EOF
+    ;
+
+// Individual program unit (main, subroutine, or function)
+program_unit
+    : main_program
+    | subroutine_subprogram
+    | function_subprogram
     ;
 
 // Main program - C28-6000-2 Part I, Chapter 1
@@ -130,8 +138,14 @@ type_spec
 
 // Strict 1958 FORTRAN II program entry point
 fortran_program_strict
-    : (main_program_strict | subroutine_subprogram_strict
-      | function_subprogram_strict) EOF
+    : NEWLINE* program_unit_strict (NEWLINE+ program_unit_strict)* NEWLINE* EOF
+    ;
+
+// Individual program unit (strict mode)
+program_unit_strict
+    : main_program_strict
+    | subroutine_subprogram_strict
+    | function_subprogram_strict
     ;
 
 // Strict main program - C28-6000-2 Part I, Chapter 1
@@ -174,7 +188,10 @@ function_subprogram_strict
 
 // Relaxed mode statement body - allows named COMMON blocks
 statement_body
-    : common_stmt           // NEW in FORTRAN II (relaxed mode)
+    : type_decl_stmt        // Type declarations (INTEGER, REAL)
+    | dimension_stmt        // DIMENSION declarations
+    | equivalence_stmt      // EQUIVALENCE declarations
+    | common_stmt           // NEW in FORTRAN II (relaxed mode)
     | return_stmt           // NEW in FORTRAN II
     | call_stmt             // NEW in FORTRAN II
     | end_file_stmt         // Disambiguate END FILE before bare END
@@ -183,11 +200,25 @@ statement_body
 
 // Strict 1958 mode statement body - enforces blank COMMON only
 statement_body_strict
-    : common_stmt_strict    // NEW in FORTRAN II (strict blank COMMON)
+    : type_decl_stmt        // Type declarations (INTEGER, REAL)
+    | dimension_stmt        // DIMENSION declarations
+    | equivalence_stmt      // EQUIVALENCE declarations
+    | common_stmt_strict    // NEW in FORTRAN II (strict blank COMMON)
     | return_stmt           // NEW in FORTRAN II
     | call_stmt             // NEW in FORTRAN II
     | end_file_stmt         // Disambiguate END FILE before bare END
     | statement_body_fi     // All FORTRAN I (1957) statements
+    ;
+
+// Type declaration statement - INTEGER, REAL declarations
+// Note: DIMENSION, EQUIVALENCE are handled separately but also declarations
+type_decl_stmt
+    : (INTEGER | REAL) identifier_list
+    ;
+
+// List of identifiers for type declarations
+identifier_list
+    : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
 // ============================================================================

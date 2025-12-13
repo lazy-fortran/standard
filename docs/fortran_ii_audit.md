@@ -420,6 +420,16 @@ Tape/drum I/O forms (READ INPUT TAPE, WRITE OUTPUT TAPE, READ/WRITE
 TAPE/DRUM) are now implemented (issue #153 closed). There are no
 remaining significant gaps for FORTRAN II coverage.
 
+- **COMMON/EQUIVALENCE semantic validation**: Implemented via
+  `tools/fortranii_common_equivalence_validator.py` (issue #670, closed).
+  Provides semantic analysis for storage association legality:
+  - Detects illegal EQUIVALENCE overlays (type incompatibility)
+  - Validates COMMON block consistency and redeclaration errors
+  - Checks COMMON/EQUIVALENCE cross-constraints
+  - Reports diagnostics with ISO section references per C28-6000-2
+  - Comprehensive test suite (16 test cases) in
+    `tests/FORTRANII/test_common_equivalence_semantics.py`
+
 ## 9. Summary
 
 The FORTRAN II grammar in this repository:
@@ -444,6 +454,11 @@ The FORTRAN II grammar in this repository:
     before converting to lenient form for parsing
 - Provides Hollerith support for FORMAT items but does not enforce
   length checks on the `nH...` form.
+- Provides COMMON/EQUIVALENCE semantic validation (issue #670 resolved):
+  - Storage association legality checking via listener-based ANTLR analyzer
+  - Type compatibility validation for EQUIVALENCE sets
+  - COMMON block consistency and redeclaration detection
+  - Diagnostics with ISO section references (C28-6000-2)
 
 Further work on this standard should reference this audit together with
 the open issues for expanding FORTRAN II coverage.
