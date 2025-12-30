@@ -28,7 +28,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../grammars/gener
 
 # Try to import generated parser components
 try:
-    from antlr4 import CommonTokenStream, InputStream
+    from antlr4 import CommonTokenStream, InputStream, Token
     from LFortranLexer import LFortranLexer
     from LFortranParser import LFortranParser
     PARSER_AVAILABLE = True
@@ -36,6 +36,7 @@ except ImportError:
     PARSER_AVAILABLE = False
     LFortranLexer = None
     LFortranParser = None
+    Token = None
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -57,7 +58,7 @@ def tokenize(source: str) -> list:
     tokens = []
     while True:
         token = lexer.nextToken()
-        if token.type == LFortranLexer.EOF:
+        if token.type == Token.EOF:
             break
         tokens.append(token)
     return tokens

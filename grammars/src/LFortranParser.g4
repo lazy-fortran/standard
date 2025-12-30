@@ -16,6 +16,7 @@
 //    - Bare declarations at top level
 //
 // Reference: LFortran compiler (https://lfortran.org)
+// J3 Generics: Based on J3/24-107r1 proposal
 // ============================================================================
 
 parser grammar LFortranParser;
@@ -48,7 +49,7 @@ script_unit
     | implicit_stmt               // Bare implicit statement (global scope)
     | declaration_construct       // Bare declaration (global scope)
     | executable_construct        // Bare statement (global scope)
-    | expr end_of_stmt            // Bare expression (global scope / REPL)
+    | expr_f2003 NEWLINE*         // Bare expression (global scope / REPL)
     ;
 
 // ============================================================================
@@ -64,10 +65,10 @@ script_unit
 //   END TEMPLATE [ template-name ]
 
 template_construct
-    : TEMPLATE_KW NAME LPAREN template_param_list RPAREN end_of_stmt
+    : TEMPLATE_KW NAME LPAREN template_param_list RPAREN NEWLINE*
       template_specification_part?
       template_contains_part?
-      END_TEMPLATE NAME? end_of_stmt
+      END_TEMPLATE NAME? NEWLINE*
     ;
 
 template_param_list
@@ -92,17 +93,17 @@ template_specification_stmt
 
 // TYPE, DEFERRED :: type-parameter
 type_deferred_stmt
-    : TYPE COMMA DEFERRED_KW DOUBLE_COLON NAME end_of_stmt
+    : TYPE COMMA DEFERRED_KW DOUBLE_COLON NAME NEWLINE*
     ;
 
 template_contains_part
-    : CONTAINS end_of_stmt
+    : CONTAINS NEWLINE*
       template_subprogram+
     ;
 
 template_subprogram
-    : function_subprogram
-    | subroutine_subprogram
+    : function_subprogram_f2018
+    | subroutine_subprogram_f2018
     ;
 
 // ============================================================================
@@ -117,10 +118,10 @@ template_subprogram
 //   END REQUIREMENT [ requirement-name ]
 
 requirement_construct
-    : REQUIREMENT_KW NAME LPAREN template_param_list RPAREN end_of_stmt
+    : REQUIREMENT_KW NAME LPAREN template_param_list RPAREN NEWLINE*
       requirement_specification_part?
       requirement_interface_part?
-      END_REQUIREMENT NAME? end_of_stmt
+      END_REQUIREMENT NAME? NEWLINE*
     ;
 
 requirement_specification_part
@@ -138,12 +139,12 @@ requirement_interface_part
     ;
 
 abstract_interface_body
-    : function_stmt
+    : function_stmt_f2018
       specification_part?
-      END_FUNCTION NAME? end_of_stmt
-    | subroutine_stmt
+      END_FUNCTION NAME? NEWLINE*
+    | subroutine_stmt_f2018
       specification_part?
-      END_SUBROUTINE NAME? end_of_stmt
+      END_SUBROUTINE NAME? NEWLINE*
     ;
 
 // ============================================================================
@@ -155,7 +156,7 @@ abstract_interface_body
 //   REQUIRE :: requirement-reference-list
 
 require_stmt
-    : REQUIRE_KW DOUBLE_COLON requirement_reference_list end_of_stmt
+    : REQUIRE_KW DOUBLE_COLON requirement_reference_list NEWLINE*
     ;
 
 requirement_reference_list
@@ -180,7 +181,7 @@ actual_param_list
 
 instantiate_stmt
     : INSTANTIATE_KW NAME LPAREN instantiate_type_list RPAREN
-      instantiate_only_clause? end_of_stmt
+      instantiate_only_clause? NEWLINE*
     ;
 
 instantiate_type_list
@@ -188,7 +189,7 @@ instantiate_type_list
     ;
 
 instantiate_type
-    : intrinsic_type_spec         // INTEGER, REAL(8), etc.
+    : intrinsic_type_spec_f95     // INTEGER, REAL(8), etc.
     | derived_type_spec           // TYPE(my_type)
     ;
 
@@ -201,6 +202,6 @@ rename_list
     ;
 
 rename
-    : NAME ARROW NAME             // local-name => template-name
+    : NAME POINTER_ASSIGN NAME    // local-name => template-name
     | NAME                        // use-name
     ;
