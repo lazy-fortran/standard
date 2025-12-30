@@ -43,8 +43,8 @@ lfortran_unit
     : NEWLINE* program_unit_f2023 NEWLINE*        // Standard: program, module, etc.
     | NEWLINE* template_construct NEWLINE*        // J3 Generics: template definition
     | NEWLINE* requirement_construct NEWLINE*     // J3 Generics: requirement definition
-    | NEWLINE* simple_template_function NEWLINE*  // J3 Generics: simple template function
-    | NEWLINE* simple_template_subroutine NEWLINE* // J3 Generics: simple template subroutine
+    | NEWLINE* simple_template_function NEWLINE*   // J3: template function
+    | NEWLINE* simple_template_subroutine NEWLINE* // J3: template subroutine
     ;
 
 // ============================================================================
@@ -182,7 +182,7 @@ instantiation_arg
 // Explicit instantiation of a template with concrete types.
 //
 // Syntax (J3/24-107r1):
-//   INSTANTIATE [::] template-name { instantiation-arg-spec-list } [, ONLY : rename-list ]
+//   INSTANTIATE [::] template-name { arg-spec-list } [, ONLY : rename-list ]
 
 instantiate_stmt
     : INSTANTIATE_KW DOUBLE_COLON? NAME LBRACE instantiation_arg_spec_list? RBRACE
