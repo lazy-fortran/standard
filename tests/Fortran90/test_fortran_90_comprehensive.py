@@ -810,7 +810,7 @@ if __name__ == '__main__':
     print("=" * 80)
     print("Testing revolutionary bridge between fixed-form and free-form Fortran")
     print("F90 Major Innovations: Modules, Derived Types, Dynamic Arrays, Array Operations")
-    print("Foundation Status: Ready for F95 → F2003 → ... → LazyFortran2025 chain")
+    print("Foundation Status: Ready for F95 → F2003 → ... → F2023 chain")
     print("=" * 80)
     
     # Run the tests

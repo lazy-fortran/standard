@@ -240,7 +240,7 @@ F_C_STRING       : F '_' C '_' S T R I N G ;
 //    - Declare entities with same type as another entity
 //
 // This lexer captures F2023 tokens while maintaining full compatibility
-// with F2018. Foundation for LazyFortran2025 type inference extensions.
+// with F2018.
 //
 // ============================================================================
 

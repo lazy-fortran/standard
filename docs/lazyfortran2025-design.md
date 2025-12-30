@@ -3,6 +3,11 @@
 **Status:** Draft
 **Base standard:** Fortran 2023 (ISO/IEC 1539-1:2023)
 
+> **See also:** For normative specifications, refer to:
+> - [LFortran Standard](lfortran-standard.md) - Stricter Fortran 2023 dialect
+> - [Lazy Fortran Standard](lazy-fortran-standard.md) - Type inference and modern features
+> - [Design Rationale](design-rationale.md) - Explains key design decisions
+
 ---
 
 ## Summary
@@ -147,7 +152,7 @@ s = "goodbye"      ! reallocates to len=7 (standard Fortran behavior)
 
 ### Expression Type Rules
 
-Expression types follow ISO/IEC 1539-1:2023 Clause 10.1.5 (Numeric intrinsic operations). Mixed numeric array constructors use type promotion: `[1, 2.0, 3]` promotes all elements to real(8).
+Expression types follow standard Fortran type promotion rules for numeric intrinsic operations. Mixed numeric array constructors use type promotion: `[1, 2.0, 3]` promotes all elements to real(8).
 
 ### Interaction with implicit none
 
@@ -213,7 +218,7 @@ n = 42
 ! Output (Standard Fortran)
 real(8) :: x
 integer :: n
-x = 1.0_8
+x = 1.0_dp
 n = 42
 ```
 
@@ -244,7 +249,7 @@ i + int(u)                  ! OK: explicit conversion to signed
 **Overflow behavior (Rust-like):**
 
 - Default: **NO wraparound** - debug-time error on overflow/underflow
-- With `--fast` mode: undefined behavior (optimizations assume no overflow)
+- With `--fast` mode: wraparound (modular arithmetic, well-defined)
 - Explicit modular arithmetic via intrinsics when wraparound is intended
 
 ```fortran
@@ -293,7 +298,7 @@ The standardizer emits unsigned operations using appropriate intrinsics or compi
 
 ## Default Intent
 
-Lazy Fortran uses `intent(in)` as the default for all procedure arguments. This is stricter than standard Fortran, which has no default intent (arguments without explicit intent can be read and modified).
+Both LFortran Standard and Lazy Fortran use `intent(in)` as the default for all procedure arguments. This is stricter than ISO Fortran, which has no default intent (arguments without explicit intent can be read and modified). Lazy Fortran inherits this behavior from LFortran Standard.
 
 To modify an argument, explicitly specify `intent(inout)` or `intent(out)`:
 
@@ -516,8 +521,8 @@ Output (script.f90):
 program main
     implicit none
     type(particle_t) :: p
-    p%x = 5.0_8
-    p%y = 3.0_8
+    p%x = 5.0_dp
+    p%y = 3.0_dp
     print *, p%x + p%y
 end program main
 ```
@@ -540,7 +545,7 @@ program main
     real(8) :: y
     character(:), allocatable :: s
     x = 5
-    y = 3.14_8
+    y = 3.14_dp
     s = "hello"
     print *, x, y, s
 end program main
@@ -589,7 +594,7 @@ program main
     integer :: x
     real(8) :: y
     x = add_int(5, 3)
-    y = add_real(2.5_8, 1.5_8)
+    y = add_real(2.5_dp, 1.5_dp)
 end program main
 ```
 
@@ -768,6 +773,9 @@ The global scope extension allows statements, declarations, and expressions at t
 ## References
 
 - ISO/IEC 1539-1:2023 (Fortran 2023)
+- [LFortran Standard](lfortran-standard.md) - Stricter Fortran 2023 dialect
+- [Lazy Fortran Standard](lazy-fortran-standard.md) - Type inference and modern features
+- [Design Rationale](design-rationale.md) - Rationale for key design decisions
 - [LFortran Compiler](https://lfortran.org) - Implementation target
 - [LFortran Design Document](https://docs.lfortran.org/design/) - Architecture details
 - [J3 Generics Repository](https://github.com/j3-fortran/generics)

@@ -17,7 +17,7 @@ JAVA_AVAILABLE := $(shell java -version >/dev/null 2>&1 && echo yes || echo no)
 ANTLR4_AVAILABLE := $(shell command -v $(ANTLR4) >/dev/null 2>&1 && echo yes || echo no)
 
 # Grammar inheritance chain (build order matters!)
-GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023 LazyFortran2025
+GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023 LFortran LFortranInfer
 
 # Default target
 .PHONY: all clean test help download-standards lint
@@ -39,8 +39,8 @@ Fortran2003: $(GRAMMAR_GEN_MODERN)/Fortran2003Lexer.py
 Fortran2008: $(GRAMMAR_GEN_MODERN)/Fortran2008Lexer.py
 Fortran2018: $(GRAMMAR_GEN_MODERN)/Fortran2018Lexer.py
 Fortran2023: $(GRAMMAR_GEN_MODERN)/Fortran2023Lexer.py
-
-LazyFortran2025: $(GRAMMAR_GEN_MODERN)/LazyFortran2025Lexer.py
+LFortran: $(GRAMMAR_GEN_MODERN)/LFortranLexer.py
+LFortranInfer: $(GRAMMAR_GEN_MODERN)/LFortranInferLexer.py
 
 # FORTRAN I (1957) - Foundation
 $(GRAMMAR_GEN_EARLY)/FORTRANLexer.py: $(GRAMMAR_SRC)/FORTRANLexer.g4 $(GRAMMAR_SRC)/FORTRANParser.g4
@@ -212,16 +212,32 @@ $(GRAMMAR_GEN_MODERN)/Fortran2023Lexer.py: $(GRAMMAR_SRC)/Fortran2023Lexer.g4 $(
 		fi; \
 	fi
 
-# Lazy Fortran 2025 (future standard) - Relaxed syntax on top of Fortran 2023
-$(GRAMMAR_GEN_MODERN)/LazyFortran2025Lexer.py: $(GRAMMAR_SRC)/LazyFortran2025Lexer.g4 $(GRAMMAR_SRC)/LazyFortran2025Parser.g4 Fortran2023
-	@echo "Building Lazy Fortran 2025..."
+# LFortran - Fortran 2023 + J3 Generics (strict mode)
+$(GRAMMAR_GEN_MODERN)/LFortranLexer.py: $(GRAMMAR_SRC)/LFortranLexer.g4 $(GRAMMAR_SRC)/LFortranParser.g4 Fortran2023
+	@echo "Building LFortran (F2023 + J3 Generics)..."
 	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
-		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern LazyFortran2025Lexer.g4 && \
-		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern LazyFortran2025Parser.g4; \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern LFortranLexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern LFortranParser.g4; \
 	else \
 		if [ -f "$@" ]; then \
-			echo "ANTLR4 CLI not available; using existing Lazy Fortran 2025 lexer/parser sources"; \
+			echo "ANTLR4 CLI not available; using existing LFortran lexer/parser sources"; \
+		else \
+			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
+			exit 1; \
+		fi; \
+	fi
+
+# LFortranInfer - LFortran + Global Scope (infer/script mode)
+$(GRAMMAR_GEN_MODERN)/LFortranInferLexer.py: $(GRAMMAR_SRC)/LFortranInferLexer.g4 $(GRAMMAR_SRC)/LFortranInferParser.g4 LFortran
+	@echo "Building LFortranInfer (LFortran + Global Scope)..."
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
+		cd $(GRAMMAR_SRC) && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern LFortranInferLexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern LFortranInferParser.g4; \
+	else \
+		if [ -f "$@" ]; then \
+			echo "ANTLR4 CLI not available; using existing LFortranInfer lexer/parser sources"; \
 		else \
 			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
 			exit 1; \
@@ -250,7 +266,7 @@ lint:
 	@echo "=========================================="
 	@echo "Running lint checks (Python syntax)"
 	@echo "=========================================="
-	@python -m compileall lazyfortran_tooling.py lflint lfmt tools tests scripts
+	@python -m compileall tools tests scripts
 	@echo "✅ Lint completed successfully"
 
 # Run all tree-sitter tests
@@ -307,6 +323,14 @@ test-fortran2018: Fortran2018
 test-fortran2023: Fortran2023
 	@echo "Testing Fortran 2023 (2023)..."
 	$(PYTEST) $(TEST_DIR)/Fortran2023/ -v --tb=short || echo "No tests for Fortran 2023 yet"
+
+test-lfortran: LFortran
+	@echo "Testing LFortran (F2023 + J3 Generics)..."
+	$(PYTEST) $(TEST_DIR)/LFortran/ -v --tb=short
+
+test-lfortran-infer: LFortranInfer
+	@echo "Testing LFortranInfer (LFortran + Global Scope)..."
+	$(PYTEST) $(TEST_DIR)/LFortranInfer/ -v --tb=short
 
 
 # Cross-validation against kaby76/fortran examples
@@ -443,7 +467,7 @@ help:
 	@echo "  FORTRAN (1957) → FORTRAN II (1958) → FORTRAN IV (1962)"
 	@echo "  → FORTRAN 66 (1966) → FORTRAN 77 (1977) → Fortran 90 (1990)"
 	@echo "  → Fortran 95 (1995) → Fortran 2003 (2003) → Fortran 2008 (2008)"
-	@echo "  → Fortran 2018 (2018) → Fortran 2023 (2023)"
+	@echo "  → Fortran 2018 (2018) → Fortran 2023 (2023) → LFortran → LFortranInfer"
 	@echo ""
 	@echo "BUILD TARGETS:"
 	@echo "  all                    - Build all grammars (default)"
@@ -457,6 +481,8 @@ help:
 	@echo "  Fortran2008            - Build Fortran 2008 (2008)"
 	@echo "  Fortran2018            - Build Fortran 2018 (2018)"
 	@echo "  Fortran2023            - Build Fortran 2023 (2023)"
+	@echo "  LFortran               - Build LFortran (F2023 + J3 Generics)"
+	@echo "  LFortranInfer          - Build LFortranInfer (LFortran + Global Scope)"
 	@echo ""
 	@echo "TEST TARGETS:"
 	@echo "  test                   - Run all tests"
@@ -465,6 +491,8 @@ help:
 	@echo "  test-fortran2003       - Test Fortran 2003"
 	@echo "  test-fortran2018       - Test Fortran 2018"
 	@echo "  test-fortran2023       - Test Fortran 2023"
+	@echo "  test-lfortran          - Test LFortran (J3 Generics)"
+	@echo "  test-lfortran-infer    - Test LFortranInfer (Global Scope)"
 	@echo "  [etc. for all standards]"
 	@echo ""
 	@echo "UTILITY TARGETS:"

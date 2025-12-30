@@ -672,8 +672,7 @@ derived_type_spec
 //    - Declare entities with same type as another entity
 //
 // This parser captures F2023 refinements while maintaining full
-// compatibility with the F2018 foundation. Serves as the
-// complete foundation for LazyFortran2025.
+// compatibility with the F2018 foundation.
 //
 // ============================================================================
 
