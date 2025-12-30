@@ -1,5 +1,7 @@
 # Fortran Standard Specifications
 
+> **Note**: This project is experimental and subject to major changes. APIs and specifications may change without notice.
+
 This repository contains specifications for LFortran Standard and LFortran Infer mode, plus historic ANTLR4 grammars for Fortran language standards from 1957 to 2023.
 
 ## Standards Hierarchy
