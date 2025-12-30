@@ -1,4 +1,4 @@
-# Lazy Fortran Standard
+# LFortran Infer Mode
 
 **Status:** Draft
 **Derived from:** [LFortran Standard](lfortran-standard.md)
@@ -8,9 +8,9 @@
 
 ## Overview
 
-The Lazy Fortran Standard extends the [LFortran Standard](lfortran-standard.md) with features for rapid prototyping and interactive use. It is enabled with the `--infer` flag or implicitly in the LFortran interactive REPL.
+LFortran Infer mode extends the [LFortran Standard](lfortran-standard.md) with features for rapid prototyping and interactive use. It is enabled with the `--infer` flag or implicitly in the LFortran interactive REPL.
 
-Lazy Fortran maintains all the safety guarantees of LFortran Standard while adding:
+LFortran Infer maintains all the safety guarantees of LFortran Standard while adding:
 
 1. **Type inference** at global scope (intrinsic types only)
 2. **Global scope** for bare statements without `program`/`end program`
@@ -21,7 +21,7 @@ Lazy Fortran maintains all the safety guarantees of LFortran Standard while addi
 
 ## Feature Comparison
 
-| Feature | LFortran Standard | Lazy Fortran (Infer) |
+| Feature | LFortran Standard | LFortran Infer |
 |---------|-------------------|----------------------|
 | Default real | 8 bytes | 8 bytes |
 | Default integer | 4 bytes | 4 bytes |
@@ -75,7 +75,7 @@ Expression types follow standard Fortran type promotion rules for numeric intrin
 Bare statements are allowed without `program`/`end program` wrapper:
 
 ```fortran
-! Valid Lazy Fortran file
+! Valid LFortran Infer file
 x = 5.0
 y = 3.0
 print *, x + y
@@ -112,7 +112,7 @@ fixed = [4.0, 5.0]        ! ERROR: shape mismatch
 
 ## Standardizer
 
-The standardizer transforms Lazy Fortran to ISO Fortran 2023.
+The standardizer transforms LFortran Infer code to ISO Fortran 2023.
 
 ### Output Structure Rules
 
@@ -194,7 +194,7 @@ a.member     ! Member access (no spaces)
 
 ## Unsigned Integers
 
-Lazy Fortran adds an `unsigned` attribute for integers:
+LFortran Infer adds an `unsigned` attribute for integers:
 
 ```fortran
 integer, unsigned :: count          ! 4-byte unsigned (0 to 4,294,967,295)
@@ -254,7 +254,7 @@ wrap_mul(a, b)              ! a * b with wraparound
 
 ## Generic Programming
 
-Lazy Fortran uses **strongly typed generics/traits** with explicit instantiation. No implicit monomorphization or whole-program type inference.
+LFortran uses **strongly typed generics/traits** with explicit instantiation. No implicit monomorphization or whole-program type inference.
 
 ### Design Principles
 
@@ -356,7 +356,7 @@ instantiate min_value{integer}, only: min_int => min_value
 
 ### Syntax Clarification
 
-Lazy Fortran uses **curly braces `{}`** for generic type parameters (following the Traits-for-Fortran proposal):
+LFortran uses **curly braces `{}`** for generic type parameters (following the Traits-for-Fortran proposal):
 
 | Construct | Syntax | Example |
 |-----------|--------|---------|
@@ -364,7 +364,7 @@ Lazy Fortran uses **curly braces `{}`** for generic type parameters (following t
 | Inline template call | `call proc{type}(args)` | `call swap{integer}(a, b)` |
 | Trait-bounded generic | `func{Trait :: T}(args)` | `min_value{IComparable :: T}(a, b)` |
 
-**Note:** The J3 TEMPLATE proposal uses `^()` syntax for inline instantiation (`call sub^(integer)(x)`). Lazy Fortran's `{}` syntax is an alternative that avoids ambiguity with exponentiation operators and aligns with the Traits-for-Fortran proposal.
+**Note:** The J3 TEMPLATE proposal uses `^()` syntax for inline instantiation (`call sub^(integer)(x)`). LFortran's `{}` syntax is an alternative that avoids ambiguity with exponentiation operators and aligns with the Traits-for-Fortran proposal.
 
 ### Why No Implicit Monomorphization
 

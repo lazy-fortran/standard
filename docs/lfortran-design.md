@@ -1,20 +1,20 @@
-# Lazy Fortran 2025
+# LFortran Design Document
 
 **Status:** Draft
 **Base standard:** Fortran 2023 (ISO/IEC 1539-1:2023)
 
 > **See also:** For normative specifications, refer to:
 > - [LFortran Standard](lfortran-standard.md) - Stricter Fortran 2023 dialect
-> - [Lazy Fortran Standard](lazy-fortran-standard.md) - Type inference and modern features
+> - [LFortran Infer](lfortran-infer.md) - Type inference and infer mode features
 > - [Design Rationale](design-rationale.md) - Explains key design decisions
 
 ---
 
 ## Summary
 
-Lazy Fortran 2025 extends Fortran 2023 with strongly typed generics/traits, sensible defaults, and modern syntax. The goal is reduced boilerplate while maintaining compatibility with standard Fortran compilers through a source-to-source standardizer.
+LFortran extends Fortran 2023 with J3 Generics, strongly typed traits, sensible defaults, and modern syntax. The goal is reduced boilerplate while maintaining compatibility with standard Fortran compilers through a source-to-source standardizer.
 
-All standard Fortran 2023 programs remain valid Lazy Fortran programs.
+All standard Fortran 2023 programs remain valid LFortran programs.
 
 ### Design Principles
 
@@ -48,7 +48,7 @@ All features are **single-pass (local or module-local analysis only)**:
 
 ## Dot Notation for Member Access
 
-**RESOLVED:** Lazy Fortran supports both `.` (dot) and `%` for derived type member access:
+**RESOLVED:** LFortran supports both `.` (dot) and `%` for derived type member access:
 
 ```fortran
 ! Both syntaxes are valid
@@ -66,7 +66,7 @@ The standardizer converts dot notation to `%` for standard Fortran output.
 
 ### Disambiguation from User-Defined Operators
 
-User-defined operators like `.add.` could conflict with member access. Lazy Fortran uses spacing rules:
+User-defined operators like `.add.` could conflict with member access. LFortran uses spacing rules:
 
 ```fortran
 a .op. b     ! User-defined operator (spaces required)
@@ -156,7 +156,7 @@ Expression types follow standard Fortran type promotion rules for numeric intrin
 
 ### Interaction with implicit none
 
-`implicit none` is the default in Lazy Fortran. In standard mode, undeclared names are errors. In infer mode, undeclared intrinsic-typed variables are inferred; derived types still require explicit declaration.
+`implicit none` is the default in LFortran. In standard mode, undeclared names are errors. In infer mode, undeclared intrinsic-typed variables are inferred; derived types still require explicit declaration.
 
 ### Resolved Issues (Infer Mode)
 
@@ -169,7 +169,7 @@ Expression types follow standard Fortran type promotion rules for numeric intrin
 
 ## Default Precision
 
-**RESOLVED:** Lazy Fortran uses different defaults for reals and integers:
+**RESOLVED:** LFortran uses different defaults for reals and integers:
 
 - **Reals:** 8 bytes (64-bit) - precision matters for scientific computing
 - **Integers:** 4 bytes (32-bit) - like Rust/C/Java, better performance
@@ -181,7 +181,7 @@ This applies to:
 3. **Unqualified declarations** - `real :: x` means `real(8) :: x`; `integer :: n` stays default
 
 ```fortran
-! Lazy Fortran
+! LFortran
 x = 1.0              ! real(8)
 y = 1.0e3            ! real(8)
 n = 42               ! integer (4 bytes)
@@ -211,7 +211,7 @@ real(4) :: single_precision
 The standardizer generates explicit kind specifiers for reals:
 
 ```fortran
-! Input (Lazy Fortran)
+! Input (LFortran)
 x = 1.0
 n = 42
 
@@ -226,7 +226,7 @@ n = 42
 
 ## Unsigned Integers
 
-**NEW:** Lazy Fortran adds an `unsigned` attribute for integers:
+**NEW:** LFortran adds an `unsigned` attribute for integers:
 
 ```fortran
 integer, unsigned :: count          ! 4-byte unsigned (0 to 4,294,967,295)
@@ -298,7 +298,7 @@ The standardizer emits unsigned operations using appropriate intrinsics or compi
 
 ## Default Intent
 
-Both LFortran Standard and Lazy Fortran use `intent(in)` as the default for all procedure arguments. This is stricter than ISO Fortran, which has no default intent (arguments without explicit intent can be read and modified). Lazy Fortran inherits this behavior from LFortran Standard.
+Both LFortran Standard and LFortran Infer use `intent(in)` as the default for all procedure arguments. This is stricter than ISO Fortran, which has no default intent (arguments without explicit intent can be read and modified). LFortran Infer inherits this behavior from LFortran Standard.
 
 To modify an argument, explicitly specify `intent(inout)` or `intent(out)`:
 
@@ -339,7 +339,7 @@ end subroutine
 
 ## Generic Programming
 
-**RESOLVED:** Lazy Fortran uses **strongly typed generics/traits** with explicit instantiation. No implicit monomorphization or whole-program type inference.
+**RESOLVED:** LFortran uses **strongly typed generics/traits** with explicit instantiation. No implicit monomorphization or whole-program type inference.
 
 Two complementary approaches are available:
 
@@ -348,7 +348,7 @@ Two complementary approaches are available:
 
 ### Key Design Decision: No Implicit Monomorphization
 
-Unlike C++ templates or Julia, Lazy Fortran does NOT automatically generate specializations from call sites. All generic instantiation is explicit:
+Unlike C++ templates or Julia, LFortran does NOT automatically generate specializations from call sites. All generic instantiation is explicit:
 
 ```fortran
 ! WRONG (would require whole-program analysis):
@@ -487,13 +487,13 @@ instantiate min_value{integer}, only: min_int => min_value
 - Uses **curly braces `{T}`** for generic type parameters: `function sum{INumeric :: T}(x)`
 - Type constraints precede parameter name: `{ITrait :: T}` or inline `{integer | real :: T}`
 
-Lazy Fortran adopts the traits syntax with curly braces for generic parameters.
+LFortran adopts the traits syntax with curly braces for generic parameters.
 
 ---
 
 ## Standardizer
 
-The standardizer transforms Lazy Fortran (.lf) to standard Fortran (.f90).
+The standardizer transforms LFortran code (.lf) to standard Fortran (.f90).
 
 ### Transformations
 
@@ -602,7 +602,7 @@ end program main
 
 ## Compiler Modes
 
-Lazy Fortran 2025 extends the [LFortran compiler](https://lfortran.org). LFortran provides three compilation modes:
+LFortran extends the [LFortran compiler](https://lfortran.org). LFortran provides three compilation modes:
 
 ### Mode Summary
 
@@ -666,7 +666,7 @@ print *, x + sum(y)
 - Default `intent(in)` for arguments
 - `dp` predefined for double precision
 
-**Additional Lazy Fortran 2025 features (all modes):**
+**Additional LFortran features (all modes):**
 - Dot notation `a.b` for member access
 
 **Important restrictions:**
@@ -690,7 +690,7 @@ Each compiler mode can be combined with build modes:
 
 ## LFortran Implementation
 
-Lazy Fortran 2025 features are implemented in [LFortran](https://github.com/lfortran/lfortran), a modern LLVM-based Fortran compiler.
+LFortran features are implemented in [LFortran](https://github.com/lfortran/lfortran), a modern LLVM-based Fortran compiler.
 
 ### Current Implementation Status
 
@@ -774,7 +774,7 @@ The global scope extension allows statements, declarations, and expressions at t
 
 - ISO/IEC 1539-1:2023 (Fortran 2023)
 - [LFortran Standard](lfortran-standard.md) - Stricter Fortran 2023 dialect
-- [Lazy Fortran Standard](lazy-fortran-standard.md) - Type inference and modern features
+- [LFortran Infer](lfortran-infer.md) - Type inference and infer mode features
 - [Design Rationale](design-rationale.md) - Rationale for key design decisions
 - [LFortran Compiler](https://lfortran.org) - Implementation target
 - [LFortran Design Document](https://docs.lfortran.org/design/) - Architecture details

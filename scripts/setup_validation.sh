@@ -8,7 +8,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 
-echo "=== Lazy Fortran Standard - Validation Infrastructure Setup ==="
+echo "=== LFortran Standard - Validation Infrastructure Setup ==="
 echo "Repository root: $REPO_ROOT"
 echo ""
 

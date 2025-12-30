@@ -1,6 +1,6 @@
 # Fortran Standard Specifications
 
-This repository contains specifications for LFortran Standard and Lazy Fortran, plus historic ANTLR4 grammars for Fortran language standards from 1957 to 2023.
+This repository contains specifications for LFortran Standard and LFortran Infer mode, plus historic ANTLR4 grammars for Fortran language standards from 1957 to 2023.
 
 ## Standards Hierarchy
 
@@ -14,9 +14,10 @@ LFortran Standard (--std=lf)
     |   - Default real = 8 bytes, integer = 4 bytes
     |   - Default intent(in)
     |   - dp predefined
+    |   - J3 Generics (TEMPLATE, REQUIREMENT, INSTANTIATE)
     |
     v
-Lazy Fortran / LFortran Infer Mode (--infer)
+LFortran Infer Mode (--infer)
         - Adds type inference at global scope
         - Adds automatic array reallocation
         - Adds global scope (bare statements)
@@ -28,8 +29,8 @@ Lazy Fortran / LFortran Infer Mode (--infer)
 | Document | Description |
 |----------|-------------|
 | [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran 2023 dialect with sensible defaults |
-| [Lazy Fortran Standard](docs/lazy-fortran-standard.md) | Extends LFortran with type inference and modern features |
-| [Design Document](docs/lazyfortran2025-design.md) | Detailed feature descriptions and examples |
+| [LFortran Infer](docs/lfortran-infer.md) | Extends LFortran with type inference and infer mode features |
+| [Design Document](docs/lfortran-design.md) | Detailed feature descriptions and examples |
 | [Design Rationale](docs/design-rationale.md) | Explains key design decisions and trade-offs |
 
 ## Historic ANTLR4 Grammars
@@ -40,7 +41,7 @@ The `grammars/` directory contains ANTLR4 grammars for historic Fortran versions
 - Educational purposes and historical research
 - Testing and validation against the ISO standards
 
-**Note:** LFortran Standard and Lazy Fortran are NOT defined by ANTLR grammars. They are prose specifications implemented directly in the [LFortran compiler](https://lfortran.org), which uses its own bison-based parser.
+**Note:** LFortran Standard and LFortran Infer are NOT defined by ANTLR grammars. They are prose specifications implemented directly in the [LFortran compiler](https://lfortran.org), which uses its own bison-based parser.
 
 ### Grammar Inheritance Chain
 
@@ -74,8 +75,8 @@ FORTRAN IV (1962) is not implemented as a separate grammar; its functionality is
 standard/
 ├── docs/               # Specifications and documentation
 │   ├── lfortran-standard.md      # LFortran Standard spec
-│   ├── lazy-fortran-standard.md  # Lazy Fortran spec
-│   ├── lazyfortran2025-design.md # Design rationale
+│   ├── lfortran-infer.md         # LFortran Infer spec
+│   ├── lfortran-design.md        # Design rationale
 │   └── fortran_*_audit.md        # Grammar audit documents
 ├── grammars/           # Historic ANTLR4 grammar files (.g4)
 ├── tests/              # Test suites grouped by standard
@@ -205,7 +206,7 @@ The project includes a growing test suite:
 
 ## Related Projects
 
-- [LFortran Compiler](https://lfortran.org) - Implementation target for LFortran Standard and Lazy Fortran
+- [LFortran Compiler](https://lfortran.org) - Implementation target for LFortran Standard and LFortran Infer
 - [LFortran GitHub](https://github.com/lfortran/lfortran) - Source code for LFortran
 
 ## Contact
