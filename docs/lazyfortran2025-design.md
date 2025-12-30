@@ -768,6 +768,9 @@ The global scope extension allows statements, declarations, and expressions at t
 ## References
 
 - ISO/IEC 1539-1:2023 (Fortran 2023)
+- [LFortran Standard](lfortran-standard.md) - Stricter Fortran 2023 dialect
+- [Lazy Fortran Standard](lazy-fortran-standard.md) - Type inference and modern features
+- [Design Rationale](design-rationale.md) - Rationale for key design decisions
 - [LFortran Compiler](https://lfortran.org) - Implementation target
 - [LFortran Design Document](https://docs.lfortran.org/design/) - Architecture details
 - [J3 Generics Repository](https://github.com/j3-fortran/generics)
