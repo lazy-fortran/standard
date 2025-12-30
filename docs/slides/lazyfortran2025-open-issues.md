@@ -156,7 +156,7 @@ i + int(u)                  ! OK
 ! u + i                     ! ERROR
 ```
 
-**Overflow:** Wrap around (or runtime error with `-fcheck=overflow`)
+**Overflow (Rust-like):** NO wraparound by default (debug error). Use `wrap_add/sub/mul` for explicit modular arithmetic.
 
 **Use cases:** Array indexing, bit manipulation, C interop
 
@@ -171,7 +171,7 @@ i + int(u)                  ! OK
 x = 42           ! integer (4 bytes)
 y = 3.14         ! real(8)
 s = "hello"      ! character(:), allocatable
-arr = [1, 2, 3]  ! integer, allocatable - NOT reallocated on assignment
+arr = [1, 2, 3]  ! integer, allocatable - auto-reallocated in infer mode
 
 ! NOT inferred - requires explicit declaration
 p = particle_t() ! ERROR in infer mode
@@ -180,8 +180,8 @@ p = particle_t() ! ERROR in infer mode
 **Key restrictions:**
 - Only intrinsic types (int, real, complex, logical, character)
 - Derived types always require explicit declaration
-- Arrays are NOT reallocated on assignment (unlike standard Fortran)
-- Derived type instances ARE reallocated on assignment
+- Arrays ARE reallocated on assignment (infer mode sets `--realloc-lhs-arrays`)
+- In strict mode: shape mismatch = runtime error
 
 ---
 
@@ -379,8 +379,9 @@ function sum(x) result(s)
 | Default intent | `intent(in)` |
 | Implicit typing | `implicit none` default |
 | Member access | Both `a.b` and `a%b` supported |
-| Arrays (infer mode) | NOT reallocated on assignment |
-| Types (infer mode) | ARE reallocated on assignment |
+| Unsigned overflow | **NO wraparound** (debug error, Rust-like) |
+| Arrays (infer mode) | ARE reallocated on assignment |
+| Arrays (strict mode) | NOT reallocated (runtime error) |
 
 ---
 
@@ -388,27 +389,47 @@ function sum(x) result(s)
 
 | Decision | Resolution |
 |----------|------------|
-| Whole-program analysis | **NOT supported** |
+| Whole-program analysis | **NOT supported** - all features single-pass |
 | Generics | Strongly typed traits, explicit instantiation |
 | Generic syntax | Curly braces `{Constraint :: T}` |
 | Dispatch | **Both** - `type(T)` static, `class(Trait)` dynamic |
 | @ annotations | **No** - use curly braces syntax |
 | Type inference | Infer mode only (intrinsic types) |
-| Default precision | real=8 bytes, int=4 bytes (like Rust) |
+| Default real | 8 bytes (64-bit) |
+| Default integer | 4 bytes (32-bit, like Rust) |
 | Unsigned integers | `integer, unsigned` attribute, Rust-like safety |
+| Unsigned overflow | **NO wraparound** by default (debug error) |
 | Default intent | `intent(in)` |
 | Implicit typing | `implicit none` default |
 | Member access | Both `a.b` and `a%b` supported |
 | Declaration placement | Anywhere in scope |
 | Fallback for unclear type | Compile error |
-| Arrays (infer mode) | NOT reallocated on assignment |
-| Types (infer mode) | ARE reallocated on assignment |
+| Arrays (infer mode) | ARE reallocated on assignment |
+| Arrays (strict mode) | NOT reallocated (runtime error on mismatch) |
+| Types (all modes) | ARE reallocated on assignment |
+
+---
+
+# Compiler Modes
+
+Implemented in [LFortran](https://lfortran.org) compiler:
+
+| Mode | Flag | Purpose |
+|------|------|---------|
+| **Strict** | `--std=lf` (default) | Stricter than standard, bounds checking ON |
+| **Standard** | `--std=f23` | ISO Fortran 2023 compatibility |
+| **Infer** | `--infer` | Type inference, auto array realloc, global scope |
+
+Interactive mode (REPL) implicitly uses `--infer` mode.
+
+LFortran strict mode is stricter than gfortran/ifort by default.
 
 ---
 
 # Resources
 
 - **Design Document:** [lazyfortran2025-design.md](../lazyfortran2025-design.md)
+- **LFortran Compiler:** [lfortran.org](https://lfortran.org)
 - **Base Standard:** ISO/IEC 1539-1:2023
 
 **Document Status:** DRAFT - All provisions subject to change
