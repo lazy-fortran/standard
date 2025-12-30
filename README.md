@@ -1,24 +1,61 @@
-# LazyFortran Standard Grammar Implementation
+# Fortran Standard Specifications
 
-A comprehensive, modular ANTLR4-based implementation of FORTRAN/Fortran language standards from 1957 to LazyFortran2025.
+This repository contains specifications for LFortran Standard and Lazy Fortran, plus historic ANTLR4 grammars for Fortran language standards from 1957 to 2023.
 
-## Project Overview
+## Standards Hierarchy
 
-This repository implements an ANTLR4 grammar hierarchy for many FORTRAN/Fortran standards, designed with:
+```
+ISO Fortran 2023 (ISO/IEC 1539-1:2023)
+    |
+    v
+LFortran Standard (--std=lf)
+    |   - Stricter than ISO Fortran
+    |   - Bounds checking ON by default
+    |   - Default real = 8 bytes, integer = 4 bytes
+    |   - Default intent(in)
+    |   - dp predefined
+    |
+    v
+Lazy Fortran / LFortran Infer Mode (--infer)
+        - Adds type inference at global scope
+        - Adds automatic array reallocation
+        - Adds global scope (bare statements)
+        - Interactive REPL uses this implicitly
+```
+
+## Specifications
+
+| Document | Description |
+|----------|-------------|
+| [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran 2023 dialect with sensible defaults |
+| [Lazy Fortran Standard](docs/lazy-fortran-standard.md) | Extends LFortran with type inference and modern features |
+| [Design Document](docs/lazyfortran2025-design.md) | Detailed design rationale and feature descriptions |
+
+## Historic ANTLR4 Grammars
+
+The `grammars/` directory contains ANTLR4 grammars for historic Fortran versions (1957-2023). These serve as **reference implementations** for understanding Fortran language evolution and are useful for:
+
+- Understanding Fortran syntax across different eras
+- Educational purposes and historical research
+- Testing and validation against the ISO standards
+
+**Note:** LFortran Standard and Lazy Fortran are NOT defined by ANTLR grammars. They are prose specifications implemented directly in the [LFortran compiler](https://lfortran.org), which uses its own bison-based parser.
+
+### Grammar Inheritance Chain
+
+```
+FORTRAN (1957) -> FORTRAN II (1958) -> FORTRAN 66 (1966) -> FORTRAN 77 (1977)
+                                                                      |
+                                                                 Fortran 90 (1990)
+                                                                      |
+                                          Fortran 95 -> 2003 -> 2008 -> 2018 -> 2023
+```
+
+The ANTLR4 grammars are designed with:
 - **Modular inheritance** - Each standard builds upon its predecessor
 - **Reuse** - Later grammars import and extend earlier ones
 - **Historical orientation** - Grammars are organized by language standard
 - **Clean architecture** - Source/build separation, proper dependencies
-
-## Grammar Inheritance Chain
-
-```
-FORTRAN (1957) → FORTRAN II (1958) → FORTRAN 66 (1966) → FORTRAN 77 (1977)
-                                                                      ↓
-                                                                 Fortran 90 (1990)
-                                                                      ↓
-                                          Fortran 95 → 2003 → 2008 → 2018 → 2023
-```
 
 This repository currently implements grammars for:
 
@@ -34,7 +71,12 @@ FORTRAN IV (1962) is not implemented as a separate grammar; its functionality is
 
 ```
 standard/
-├── grammars/           # Grammar source files (.g4)
+├── docs/               # Specifications and documentation
+│   ├── lfortran-standard.md      # LFortran Standard spec
+│   ├── lazy-fortran-standard.md  # Lazy Fortran spec
+│   ├── lazyfortran2025-design.md # Design rationale
+│   └── fortran_*_audit.md        # Grammar audit documents
+├── grammars/           # Historic ANTLR4 grammar files (.g4)
 ├── tests/              # Test suites grouped by standard
 ├── scripts/            # Helper / validation scripts
 ├── tools/              # Extra utilities
@@ -162,8 +204,8 @@ The project includes a growing test suite:
 
 ## Related Projects
 
-- [LazyFortran Compiler](https://github.com/lazy-fortran/compiler)
-- [LazyFortran Type Inference](https://github.com/lazy-fortran/type-inference)
+- [LFortran Compiler](https://lfortran.org) - Implementation target for LFortran Standard and Lazy Fortran
+- [LFortran GitHub](https://github.com/lfortran/lfortran) - Source code for LFortran
 
 ## Contact
 
