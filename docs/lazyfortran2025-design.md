@@ -15,7 +15,7 @@ All standard Fortran 2023 programs remain valid Lazy Fortran programs.
 
 1. **Strongly typed generics** - Traits with explicit type bounds. No weak generics or whole-program type inference. Procedural templates from standard Fortran are included when available.
 2. **No whole-program analysis** - All features are single-pass or module-local. No C++ template hell or Julia-style recompilation.
-3. **Infer mode** - Optional mode for interactive use and rapid prototyping that infers intrinsic types (int, real, string, etc.) from first assignment. Arrays are NOT reallocated on assignment (unlike standard Fortran). Derived type instances ARE reallocated on assignment.
+3. **Infer mode** - Optional mode for interactive use and rapid prototyping that infers intrinsic types (int, real, string, etc.) from first assignment. Arrays ARE automatically reallocated on assignment (via `--realloc-lhs-arrays` flag). In strict mode, shape mismatch triggers a runtime error.
 4. **Default precision** - Reals default to 8 bytes (64-bit) for scientific precision. Integers default to 4 bytes (32-bit) like Rust/C/Java for performance.
 5. **intent(in) default** - Arguments are read-only unless explicitly declared otherwise.
 6. **implicit none default** - All program units have `implicit none` by default.
@@ -97,22 +97,38 @@ p = particle_t()   ! ERROR: derived types require explicit declaration
 - Only intrinsic types (integer, real, complex, logical, character) are inferred
 - Derived types always require explicit declaration
 - Inferred strings are deferred-length allocatable
-- Inferred arrays are NOT reallocated on assignment (unlike standard Fortran allocatable arrays)
+- Inferred arrays ARE automatically reallocated on assignment (infer mode sets `--realloc-lhs-arrays`)
 - Derived type instances ARE reallocated on assignment
 
 Subsequent assignments use standard Fortran coercion rules.
 
-### Allocation Semantics (Infer Mode)
+### Allocation Semantics
 
-**Arrays are NOT reallocated on assignment** - this differs from standard Fortran allocatable array behavior:
+**Mode-dependent array reallocation:**
+
+| Mode | Array Reallocation | Behavior on Shape Mismatch |
+|------|-------------------|---------------------------|
+| **Infer** | Automatic (`--realloc-lhs-arrays`) | Silently reallocates |
+| **Strict** | Disabled | Runtime error |
+| **Standard** | Standard Fortran behavior | Depends on allocatable status |
+
+**Infer mode** (interactive/prototyping):
 
 ```fortran
 arr = [1, 2, 3]    ! integer, allocatable, size 3
 arr = [4, 5, 6]    ! OK: same shape
-arr = [7, 8]       ! ERROR: shape mismatch (Lazy Fortran rejects this)
+arr = [7, 8]       ! OK: automatically reallocates to size 2
 ```
 
-This prevents accidental reallocation and the associated performance/memory issues. To resize an array, use explicit `deallocate`/`allocate` or `reshape`.
+**Strict mode** (production):
+
+```fortran
+arr = [1, 2, 3]    ! integer, allocatable, size 3
+arr = [4, 5, 6]    ! OK: same shape
+arr = [7, 8]       ! ERROR: shape mismatch (runtime error)
+```
+
+The strict mode prevents accidental reallocation and the associated performance/memory issues. To resize an array, use explicit `deallocate`/`allocate` or `reshape`.
 
 **Derived type instances ARE reallocated on assignment:**
 
@@ -225,14 +241,24 @@ u + uint(i)                 ! OK: explicit conversion to unsigned
 i + int(u)                  ! OK: explicit conversion to signed
 ```
 
-**Overflow behavior:**
+**Overflow behavior (Rust-like):**
 
-- Default: wrap around (modular arithmetic)
-- With overflow checking enabled (`-fcheck=overflow`): runtime error
+- Default: **NO wraparound** - debug-time error on overflow/underflow
+- With `--fast` mode: undefined behavior (optimizations assume no overflow)
+- Explicit modular arithmetic via intrinsics when wraparound is intended
 
 ```fortran
 integer, unsigned :: u = 0
-u = u - 1                   ! wraps to 4,294,967,295 (or error if checked)
+u = u - 1                   ! ERROR: unsigned underflow (debug mode)
+u = wrap_sub(u, 1)          ! OK: explicit wraparound to 4,294,967,295
+```
+
+**Modular arithmetic intrinsics** (when wraparound is intentional):
+
+```fortran
+wrap_add(a, b)              ! a + b with wraparound
+wrap_sub(a, b)              ! a - b with wraparound
+wrap_mul(a, b)              ! a * b with wraparound
 ```
 
 ### Use Cases
@@ -569,8 +595,230 @@ end program main
 
 ---
 
+## Compiler Modes
+
+Lazy Fortran 2025 extends the [LFortran compiler](https://lfortran.org). LFortran provides three compilation modes:
+
+### Mode Summary
+
+| Mode | Flag | Purpose | Key Characteristics |
+|------|------|---------|---------------------|
+| **Strict** | `--std=lf` (default) | Production code | Bounds checking ON, implicit typing OFF, no array realloc |
+| **Standard** | `--std=f23` | ISO Fortran 2023 compatibility | Matches standard compiler behavior |
+| **Infer** | `--infer` | Interactive/prototyping | Type inference, auto array realloc, global scope |
+
+The **interactive mode** (REPL) implicitly uses `--infer` mode. The `--infer` flag allows using infer mode when compiling files, not just interactively.
+
+### Strict Mode (Default)
+
+LFortran's default mode is **stricter than standard Fortran** with sensible defaults:
+
+| Feature | Strict Mode | Standard Fortran |
+|---------|-------------|------------------|
+| Default real | **8 bytes** (64-bit) | Implementation-dependent (often 4) |
+| Default integer | 4 bytes (32-bit) | Implementation-dependent |
+| Bounds checking | **ON** by default | OFF by default |
+| Implicit typing | **OFF** (error) | OFF but allowed |
+| Implicit interface | **OFF** (error) | Allowed |
+| Implicit argument casting | **OFF** (error) | Allowed |
+| Array realloc on LHS | **OFF** (runtime error) | Compiler-dependent |
+| Default intent | `intent(in)` | No default |
+| `dp` predefined | **YES** | No |
+
+This mode catches bugs at compile/run time that would silently pass in standard Fortran, while providing sensible defaults for scientific computing.
+
+### Standard Mode (`--std=f23`)
+
+Matches ISO Fortran 2023 behavior for compatibility with other compilers:
+
+- Implicit typing allowed (unless `implicit none` specified)
+- Implicit interfaces allowed
+- Implicit argument casting allowed
+- Array reallocation on LHS enabled
+- No default intent (arguments can be modified)
+
+Use this mode when you need code to work identically across LFortran, gfortran, ifort, etc.
+
+### Infer Mode (`--infer`)
+
+Designed for **interactive use and rapid prototyping**. The `--infer` flag enables this mode for file compilation; interactive mode (REPL) uses it implicitly.
+
+**Infer mode features:**
+1. **Type inference** - Variables get types from first assignment (intrinsic types only)
+2. **Global scope** - Top-level statements, declarations, and expressions allowed
+3. **Automatic array reallocation** - Sets `--realloc-lhs-arrays` automatically
+4. **Predefined symbols** - `dp` for double precision available by default
+
+```fortran
+! Valid in infer mode (file or REPL)
+x = 5.0           ! real(8), inferred
+y = [1, 2, 3]     ! integer array, inferred
+print *, x + sum(y)
+```
+
+**Inherited from strict mode:**
+- Default real = 8 bytes, default integer = 4 bytes
+- Default `intent(in)` for arguments
+- `dp` predefined for double precision
+
+**Additional Lazy Fortran 2025 features (all modes):**
+- Dot notation `a.b` for member access
+
+**Important restrictions:**
+- Type inference only at global scope level
+- Inside `program`, `module`, `function`, `subroutine`: standard declaration rules apply
+- Derived types always require explicit declaration
+
+### Standardizer (Transpiler)
+
+In `--infer` mode, a **standardizer** transforms Lazy Fortran code into valid standard Fortran. This works for both interactive (REPL) and file compilation.
+
+**Automatic program unit wrapping:**
+
+The standardizer analyzes the code structure and infers the appropriate wrapper:
+
+| Input Structure | Generated Output |
+|-----------------|------------------|
+| Bare statements only | `program main ... end program` |
+| Bare statements + procedures | `program main ... contains ... end program` |
+| Only procedures (no executable statements) | `module <filename> ... contains ... end module` |
+| Already valid program units | Preserved as-is |
+
+**Example transformation:**
+
+```fortran
+! Input (infer mode)
+x = 5.0
+y = x * 2
+
+subroutine helper(a)
+    real(8), intent(inout) :: a
+    a = a + 1
+end subroutine
+```
+
+```fortran
+! Output (standard Fortran)
+program main
+    implicit none
+    real(8) :: x
+    real(8) :: y
+    x = 5.0_8
+    y = x * 2
+contains
+    subroutine helper(a)
+        real(8), intent(inout) :: a
+        a = a + 1
+    end subroutine
+end program main
+```
+
+The standardizer also:
+- Generates explicit type declarations from inferred types
+- Adds `implicit none` to all program units
+- Converts dot notation (`a.b`) to standard syntax (`a%b`)
+- Adds kind specifiers to literals (`1.0` → `1.0_8`)
+
+### Build Modes (Orthogonal)
+
+Each compiler mode can be combined with build modes:
+
+| Build Mode | Bounds Checking | Optimization | Use Case |
+|------------|-----------------|--------------|----------|
+| **Debug** (default) | ON | OFF | Development, testing |
+| **ReleaseFast** (`--fast`) | OFF | ON | Maximum performance |
+| **ReleaseSafe** | ON | ON | Production with safety |
+
+**ReleaseSafe** is the Rust-equivalent fast mode - optimized code that still catches runtime errors. LFortran aims to never segfault with bounds checking enabled.
+
+---
+
+## LFortran Implementation
+
+Lazy Fortran 2025 features are implemented in [LFortran](https://github.com/lfortran/lfortran), a modern LLVM-based Fortran compiler.
+
+### Current Implementation Status
+
+| Feature | LFortran Status | Notes |
+|---------|-----------------|-------|
+| Bounds checking (default ON) | Implemented | `--array-bounds-checking` |
+| Global scope / infer mode | Implemented | Type inference at top level |
+| Unsigned integers | ASR support | Syntax not yet exposed |
+| Default real = 8 bytes | Not yet | Currently follows standard (4 bytes) |
+| Default integer = 4 bytes | Implemented | Standard behavior |
+| Default `intent(in)` | Not yet | Planned for strict mode |
+| Dot notation | Not yet | Planned |
+| Templates/Traits | Partial | J3 template syntax in progress |
+
+### LFortran Design Choices vs Standard Fortran
+
+LFortran already makes several choices that differ from gfortran/ifort defaults:
+
+| Feature | LFortran Default | gfortran/ifort Default |
+|---------|-----------------|------------------------|
+| Bounds checking | **ON** | OFF |
+| Carriage control | **OFF** (modern) | ON (legacy) |
+| Implicit typing | OFF | OFF |
+| Implicit interface | OFF | Allowed |
+| Implicit argument casting | OFF | Allowed |
+
+### Architecture
+
+LFortran uses a multi-stage pipeline:
+
+1. **Parsing** - Source → AST (Abstract Syntax Tree)
+2. **Semantic Analysis** - AST → ASR (Abstract Semantic Representation)
+3. **ASR Passes** - High-level optimizations
+4. **Code Generation** - ASR → LLVM IR
+5. **Machine Code** - LLVM → executable/JIT
+
+The ASR is the key innovation: it represents **only valid Fortran code**. Invalid code is rejected at semantic analysis, making downstream stages simpler and more reliable.
+
+### Interactive/Jupyter Support
+
+LFortran can execute code interactively:
+
+```bash
+$ lfortran
+Interactive Fortran.
+>>> x = 5.0
+>>> print *, x * 2
+   10.0000000000000
+```
+
+The global scope extension allows statements, declarations, and expressions at the top level, with type inference from first assignment.
+
+---
+
+## Resolved Design Decisions
+
+| Decision | Resolution |
+|----------|------------|
+| Whole-program analysis | **NOT supported** - all features single-pass |
+| Generics | Strongly typed traits, explicit instantiation |
+| Generic syntax | Curly braces `{Constraint :: T}` |
+| Dispatch | **Both** - `type(T)` static, `class(Trait)` dynamic |
+| @ annotations | **No** - use curly braces syntax |
+| Type inference | Infer mode only (intrinsic types) |
+| Default real | 8 bytes (64-bit) |
+| Default integer | 4 bytes (32-bit, like Rust) |
+| Unsigned integers | `integer, unsigned` attribute, Rust-like safety |
+| Unsigned overflow | **NO wraparound** by default (debug error) |
+| Default intent | `intent(in)` |
+| Implicit typing | `implicit none` default |
+| Member access | Both `a.b` and `a%b` supported |
+| Declaration placement | Anywhere in scope |
+| Fallback for unclear type | Compile error |
+| Arrays (infer mode) | ARE reallocated on assignment |
+| Arrays (strict mode) | NOT reallocated (runtime error on mismatch) |
+| Types (all modes) | ARE reallocated on assignment |
+
+---
+
 ## References
 
 - ISO/IEC 1539-1:2023 (Fortran 2023)
+- [LFortran Compiler](https://lfortran.org) - Implementation target
+- [LFortran Design Document](https://docs.lfortran.org/design/) - Architecture details
 - [J3 Generics Repository](https://github.com/j3-fortran/generics)
 - [J3 Paper 24-107r1](https://j3-fortran.org/doc/year/24/) - TEMPLATE/INSTANTIATE syntax
