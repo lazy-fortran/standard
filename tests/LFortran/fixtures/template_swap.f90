@@ -1,7 +1,8 @@
 ! Test: Basic TEMPLATE construct with swap procedure
 ! Reference: J3/24-107r1 TEMPLATE syntax
+! Note: Uses curly braces {} for deferred argument list per J3 spec
 
-template swap_t(T)
+template swap_t{T}
     type, deferred :: T
 contains
     subroutine swap(x, y)

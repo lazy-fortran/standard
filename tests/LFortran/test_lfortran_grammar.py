@@ -81,7 +81,7 @@ class TestTemplateConstruct:
 
     def test_template_keyword_recognized(self):
         """Verify TEMPLATE keyword is tokenized correctly."""
-        tokens = tokenize("template swap_t(T)")
+        tokens = tokenize("template swap_t{T}")
         token_types = [t.type for t in tokens]
         assert LFortranLexer.TEMPLATE_KW in token_types
 
@@ -106,7 +106,7 @@ class TestTemplateConstruct:
     def test_template_minimal(self):
         """Test minimal template syntax."""
         source = """
-template empty_t(T)
+template empty_t{T}
     type, deferred :: T
 end template empty_t
 """
@@ -132,7 +132,7 @@ class TestRequirementConstruct:
 
     def test_requirement_keyword_recognized(self):
         """Verify REQUIREMENT keyword is tokenized correctly."""
-        tokens = tokenize("requirement comparable(T, less_than)")
+        tokens = tokenize("requirement comparable{T, less_than}")
         token_types = [t.type for t in tokens]
         assert LFortranLexer.REQUIREMENT_KW in token_types
 
@@ -148,7 +148,7 @@ class TestRequirementConstruct:
     def test_requirement_minimal(self):
         """Test minimal requirement syntax."""
         source = """
-requirement addable(T)
+requirement addable{T}
     type, deferred :: T
 end requirement addable
 """
@@ -169,26 +169,26 @@ end requirement addable
 
 
 # =============================================================================
-# J3 GENERICS: REQUIRE STATEMENT TESTS
+# J3 GENERICS: REQUIRES STATEMENT TESTS
 # =============================================================================
 
-class TestRequireStatement:
-    """Test REQUIRE statement parsing."""
+class TestRequiresStatement:
+    """Test REQUIRES statement parsing (J3/24-107r1)."""
 
-    def test_require_keyword_recognized(self):
-        """Verify REQUIRE keyword is tokenized correctly."""
-        tokens = tokenize("require :: comparable(T, less_than)")
+    def test_requires_keyword_recognized(self):
+        """Verify REQUIRES keyword is tokenized correctly."""
+        tokens = tokenize("requires :: comparable{T, less_than}")
         token_types = [t.type for t in tokens]
-        assert LFortranLexer.REQUIRE_KW in token_types
+        assert LFortranLexer.REQUIRES_KW in token_types
 
-    def test_template_with_require_fixture(self):
-        """Test template using REQUIRE constraint."""
+    def test_template_with_requires_fixture(self):
+        """Test template using REQUIRES constraint."""
         source = load_fixture("template_with_require.f90")
         try:
             tree = parse(source)
             assert tree is not None
         except Exception as e:
-            pytest.fail(f"Template with REQUIRE parsing failed: {e}")
+            pytest.fail(f"Template with REQUIRES parsing failed: {e}")
 
 
 # =============================================================================
@@ -200,7 +200,7 @@ class TestInstantiateStatement:
 
     def test_instantiate_keyword_recognized(self):
         """Verify INSTANTIATE keyword is tokenized correctly."""
-        tokens = tokenize("instantiate swap_t(integer)")
+        tokens = tokenize("instantiate swap_t{integer}")
         token_types = [t.type for t in tokens]
         assert LFortranLexer.INSTANTIATE_KW in token_types
 
@@ -217,7 +217,7 @@ class TestInstantiateStatement:
         """Test instantiation with kind specifier."""
         source = """
 program test_instantiate
-    instantiate swap_t(real(8)), only: swap_dp => swap
+    instantiate swap_t{real}, only: swap_dp => swap
 end program test_instantiate
 """
         try:
@@ -314,6 +314,209 @@ end program test_typeof
 
 
 # =============================================================================
+# J3 GENERICS: SIMPLE TEMPLATE PROCEDURES
+# =============================================================================
+
+class TestSimpleTemplateProcedures:
+    """Test simple template procedure syntax (J3 24-107r1).
+
+    Simple template procedures use curly braces in the procedure name:
+        function mysum{T}(x, y) result(z)
+        subroutine swap{T}(x, y)
+    """
+
+    def test_simple_template_function_fixture(self):
+        """Test simple template function with {T} syntax."""
+        source = load_fixture("simple_template_function.f90")
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Simple template function parsing failed: {e}")
+
+    def test_simple_template_subroutine_fixture(self):
+        """Test simple template subroutine with {T} syntax."""
+        source = load_fixture("simple_template_subroutine.f90")
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Simple template subroutine parsing failed: {e}")
+
+    def test_simple_template_multiple_params_fixture(self):
+        """Test simple template with multiple type parameters {T, U}."""
+        source = load_fixture("simple_template_multiple_params.f90")
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Simple template with multiple params parsing failed: {e}")
+
+    def test_simple_template_function_inline(self):
+        """Test inline simple template function."""
+        source = """
+function add{T}(x, y) result(z)
+    type, deferred :: T
+    type(T), intent(in) :: x, y
+    type(T) :: z
+    z = x + y
+end function add
+"""
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Inline simple template function parsing failed: {e}")
+
+
+# =============================================================================
+# J3 GENERICS: INLINE INSTANTIATION (CURLY BRACES)
+# =============================================================================
+
+class TestInlineInstantiationCurly:
+    """Test inline instantiation with curly braces (J3 24-107r1).
+
+    Syntax: template-name{type-list}(args)
+    Example: call swap{integer}(a, b)
+    """
+
+    def test_inline_curly_fixture(self):
+        """Test inline instantiation with curly braces."""
+        source = load_fixture("inline_instantiate_curly.f90")
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Inline instantiation (curly) parsing failed: {e}")
+
+    def test_inline_curly_subroutine_call(self):
+        """Test inline instantiation in subroutine call."""
+        source = """
+program test
+    integer :: a, b
+    a = 1
+    b = 2
+    call swap{integer}(a, b)
+end program test
+"""
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Inline curly subroutine call parsing failed: {e}")
+
+    def test_inline_curly_function_call(self):
+        """Test inline instantiation in function call."""
+        source = """
+program test
+    integer :: a, b, c
+    a = 1
+    b = 2
+    c = mysum{integer}(a, b)
+end program test
+"""
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Inline curly function call parsing failed: {e}")
+
+    def test_inline_curly_with_kind(self):
+        """Test inline instantiation with kind specifier."""
+        source = """
+program test
+    real(8) :: x, y
+    x = 1.0d0
+    y = 2.0d0
+    call swap{real(8)}(x, y)
+end program test
+"""
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Inline curly with kind parsing failed: {e}")
+
+
+# =============================================================================
+# J3 GENERICS: INLINE INSTANTIATION (CARET)
+# =============================================================================
+
+class TestInlineInstantiationCaret:
+    """Test inline instantiation with caret syntax (J3 r4 revision).
+
+    Syntax: template-name^(type-list)(args)
+    Example: call swap^(integer)(a, b)
+    """
+
+    def test_inline_caret_fixture(self):
+        """Test inline instantiation with caret syntax."""
+        source = load_fixture("inline_instantiate_caret.f90")
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Inline instantiation (caret) parsing failed: {e}")
+
+    def test_inline_caret_subroutine_call(self):
+        """Test inline instantiation with caret in subroutine call."""
+        source = """
+program test
+    integer :: a, b
+    a = 1
+    b = 2
+    call swap^(integer)(a, b)
+end program test
+"""
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Inline caret subroutine call parsing failed: {e}")
+
+    def test_inline_caret_function_call(self):
+        """Test inline instantiation with caret in function call."""
+        source = """
+program test
+    integer :: a, b, c
+    a = 1
+    b = 2
+    c = mysum^(integer)(a, b)
+end program test
+"""
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Inline caret function call parsing failed: {e}")
+
+    def test_inline_caret_with_kind(self):
+        """Test inline instantiation with caret and kind specifier."""
+        source = """
+program test
+    real(8) :: x, y
+    x = 1.0d0
+    y = 2.0d0
+    call swap^(real(8))(x, y)
+end program test
+"""
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Inline caret with kind parsing failed: {e}")
+
+    def test_inline_with_kind_fixture(self):
+        """Test inline instantiation with kind specifiers (both syntaxes)."""
+        source = load_fixture("inline_instantiate_with_kind.f90")
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Inline with kind parsing failed: {e}")
+
+
+# =============================================================================
 # INTEGRATION TESTS
 # =============================================================================
 
@@ -326,7 +529,7 @@ class TestIntegration:
 module generic_swap
     implicit none
 
-    template swap_t(T)
+    template swap_t{T}
         type, deferred :: T
     contains
         subroutine swap(x, y)
@@ -352,6 +555,6 @@ end module generic_swap
 if __name__ == '__main__':
     print("Running LFortran Grammar Test Suite...")
     print("=" * 80)
-    print("Testing J3 Generics: TEMPLATE, REQUIREMENT, REQUIRE, INSTANTIATE")
+    print("Testing J3 Generics: TEMPLATE, REQUIREMENT, REQUIRES, INSTANTIATE")
     print("=" * 80)
     pytest.main([__file__, '-v'])
