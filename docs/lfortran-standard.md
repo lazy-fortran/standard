@@ -200,7 +200,7 @@ Use `--std=f23` flag to compile in ISO Fortran 2023 mode for compatibility with 
 
 ## Related Standards
 
-- **[Lazy Fortran Standard](lazy-fortran-standard.md)** - Extends LFortran Standard with type inference and modern features
+- **[LFortran Infer](lfortran-infer.md)** - Extends LFortran Standard with type inference and infer mode features
 - **ISO/IEC 1539-1:2023** - Base standard
 
 ---

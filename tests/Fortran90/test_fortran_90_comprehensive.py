@@ -20,7 +20,7 @@ Test Coverage Philosophy:
 This suite validates that F90 grammar correctly recognizes all major
 language innovations while maintaining seamless integration with
 inherited SharedCore constructs. It serves as the foundation validation
-for the entire modern Fortran chain (F90 → F95 → F2003 → ... → LazyFortran).
+for the entire modern Fortran chain (F90 → F95 → F2003 → ... → LFortran).
 """
 
 import sys

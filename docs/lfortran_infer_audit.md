@@ -365,9 +365,9 @@ arr = [1,2,3]  ! Inferred as integer(:) allocatable
 
 This is a **semantic analysis feature**, not grammar. Current grammar already supports parsing these as bare statements; semantic phase will add inference.
 
-### Lazy Fortran Standard
+### LFortran Infer Mode
 
-The planned Lazy Fortran Standard will add:
+The LFortran Infer mode adds:
 - Type inference at global scope (intrinsic types only)
 - Automatic array reallocation on assignment
 - Enhanced standardizer for outputting ISO Fortran
@@ -391,7 +391,7 @@ Grammar is already prepared for these features.
 
 ## REFERENCES
 
-- **Issue #708:** Create Lazy Fortran Standard specification (Infer Mode)
+- **Issue #708:** Create LFortran Infer specification (Infer Mode)
 - **Issue #707:** Create LFortran Standard specification
 - **LFortran Compiler:** https://lfortran.org (`--infer` flag)
 - **docs/lfortran_audit.md:** LFortran base (J3 Generics) audit
@@ -399,4 +399,4 @@ Grammar is already prepared for these features.
 ---
 
 **Last Updated:** 2025-12-30
-**Next Review:** After Lazy Fortran Standard specification release
+**Next Review:** After LFortran Infer specification release

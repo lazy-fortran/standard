@@ -32,12 +32,12 @@ jobs:
       - name: Build Marp slides
         run: |
           mkdir -p docs/slides/html
-          marp docs/slides/lazyfortran2025-open-issues.md \
+          marp docs/slides/lfortran-open-issues.md \
             --html \
             --output docs/slides/html/index.html
-          marp docs/slides/lazyfortran2025-open-issues.md \
+          marp docs/slides/lfortran-open-issues.md \
             --pdf \
-            --output docs/slides/html/lazyfortran2025-open-issues.pdf \
+            --output docs/slides/html/lfortran-open-issues.pdf \
             --allow-local-files || true
 
       - name: Upload build artifact

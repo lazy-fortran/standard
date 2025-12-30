@@ -1,6 +1,6 @@
 # Design Rationale
 
-This document explains the design decisions behind LFortran Standard and Lazy Fortran, summarizing discussions and providing rationale for key choices.
+This document explains the design decisions behind LFortran Standard and LFortran Infer mode, summarizing discussions and providing rationale for key choices.
 
 ---
 
@@ -101,7 +101,7 @@ This approach causes:
 
 ### Solution: Explicit instantiation
 
-Lazy Fortran requires explicit template instantiation:
+LFortran requires explicit template instantiation:
 
 ```fortran
 template add_t(T)
@@ -141,7 +141,7 @@ Languages like Python infer types everywhere, which creates problems:
 
 ### Solution: Opt-in type inference
 
-Lazy Fortran restricts type inference to:
+LFortran Infer restricts type inference to:
 
 1. **Infer mode only** (`--infer` flag or REPL)
 2. **Global scope only** (not inside procedures)
@@ -172,7 +172,7 @@ Some languages force a choice:
 
 ### Solution: Both dispatch mechanisms
 
-Lazy Fortran provides both:
+LFortran provides both:
 
 | Syntax | Dispatch | Use case |
 |--------|----------|----------|
@@ -212,7 +212,7 @@ This causes security vulnerabilities and subtle bugs.
 
 ### Solution: Rust-like overflow behavior
 
-Lazy Fortran unsigned integers do not wrap by default:
+LFortran unsigned integers do not wrap by default:
 
 ```fortran
 integer, unsigned :: u = 0
@@ -241,7 +241,7 @@ a .lt. b     ! User-defined operator
 
 ### Solution: Spacing rules
 
-Lazy Fortran disambiguates by requiring spaces around user-defined operators:
+LFortran disambiguates by requiring spaces around user-defined operators:
 
 ```fortran
 a .op. b     ! User-defined operator (spaces required)
@@ -266,6 +266,6 @@ The standardizer enforces this rule and rejects ambiguous code at compile time.
 ## References
 
 - [LFortran Standard](lfortran-standard.md)
-- [Lazy Fortran Standard](lazy-fortran-standard.md)
+- [LFortran Infer](lfortran-infer.md)
 - [LFortran Compiler](https://lfortran.org)
 - [ISO/IEC 1539-1:2023](https://www.iso.org/standard/82170.html) - Fortran 2023

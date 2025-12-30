@@ -4,7 +4,7 @@
 Fixtures live under tests/fixtures/<Standard>/[...] with file extensions:
 - .f   : fixed-form Fortran (historical standards)
 - .f90 : free-form Fortran (Fortran 90+)
-- .lf  : Lazy Fortran source (future)
+- .lf  : LFortran source (future)
 """
 
 from pathlib import Path
