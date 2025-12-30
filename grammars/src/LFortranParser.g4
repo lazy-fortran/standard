@@ -1,19 +1,20 @@
 // ============================================================================
-// LFortran Parser - LFortran Standard Extensions to Fortran 2023
+// LFortran Parser - LFortran Standard (F2023 + J3 Generics)
 // ============================================================================
 //
-// This parser extends the Fortran 2023 parser with LFortran-specific features:
+// This parser extends the Fortran 2023 parser with J3 Generics:
 //
-// 1. J3 Generics (Fortran 202Y preview):
-//    - TEMPLATE construct with deferred type parameters
-//    - REQUIREMENT construct for type constraints
-//    - REQUIRE statement for constraint specifications
-//    - INSTANTIATE statement for explicit instantiation
+// J3 Generics (Fortran 202Y preview):
+//   - TEMPLATE construct with deferred type parameters
+//   - REQUIREMENT construct for type constraints
+//   - REQUIRE statement for constraint specifications
+//   - INSTANTIATE statement for explicit instantiation
 //
-// 2. Global scope support (infer mode):
-//    - Bare statements at top level without program/end program
-//    - Bare expressions at top level
-//    - Bare declarations at top level
+// LFortran Standard also enforces stricter semantic defaults:
+//   - Bounds checking ON
+//   - Implicit typing OFF
+//   - Default intent(in)
+//   - 8-byte real as default
 //
 // Reference: LFortran compiler (https://lfortran.org)
 // J3 Generics: Based on J3/24-107r1 proposal
@@ -26,30 +27,22 @@ options { tokenVocab = LFortranLexer; }
 import Fortran2023Parser;
 
 // ============================================================================
-// TOP-LEVEL PROGRAM STRUCTURE (Extended for Global Scope)
+// TOP-LEVEL PROGRAM STRUCTURE (Standard Fortran + J3 Generics)
 // ============================================================================
-// LFortran allows "script mode" where bare statements, declarations,
-// and expressions can appear at the top level without a program wrapper.
 
 program_lfortran
-    : script_unit_list EOF
+    : lfortran_unit_list EOF
     ;
 
-script_unit_list
-    : script_unit+
+lfortran_unit_list
+    : lfortran_unit+
     ;
 
-// A script unit can be a standard Fortran program unit OR bare code
-script_unit
-    : program_unit_f2023          // Standard: program, module, submodule, etc.
-    | template_construct          // J3 Generics: template definition
-    | requirement_construct       // J3 Generics: requirement definition
-    | instantiate_stmt            // J3 Generics: instantiation
-    | use_stmt                    // Bare use statement (global scope)
-    | implicit_stmt               // Bare implicit statement (global scope)
-    | declaration_construct       // Bare declaration (global scope)
-    | executable_construct        // Bare statement (global scope)
-    | expr_f2003 NEWLINE*         // Bare expression (global scope / REPL)
+// LFortran program unit: standard Fortran program units + J3 generics
+lfortran_unit
+    : NEWLINE* program_unit_f2023 NEWLINE*   // Standard: program, module, etc.
+    | NEWLINE* template_construct NEWLINE*   // J3 Generics: template definition
+    | NEWLINE* requirement_construct NEWLINE* // J3 Generics: requirement definition
     ;
 
 // ============================================================================

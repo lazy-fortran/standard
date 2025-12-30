@@ -2,7 +2,7 @@
 """
 LFortran Grammar Test Suite
 
-Tests the LFortran grammar extensions over Fortran 2023:
+Tests the LFortran grammar (F2023 + J3 Generics):
 
 1. J3 Generics (Fortran 202Y preview):
    - TEMPLATE construct with deferred type parameters
@@ -10,10 +10,7 @@ Tests the LFortran grammar extensions over Fortran 2023:
    - REQUIRE statement for constraint specifications
    - INSTANTIATE statement for explicit instantiation
 
-2. Global scope support (script/infer mode):
-   - Bare statements at top level
-   - Bare expressions at top level
-   - Bare declarations at top level
+2. Fortran 2023 compatibility (inherited)
 
 Reference: LFortran compiler (https://lfortran.org)
 """
@@ -210,84 +207,15 @@ class TestInstantiateStatement:
     def test_instantiate_with_kind(self):
         """Test instantiation with kind specifier."""
         source = """
-instantiate swap_t(real(8)), only: swap_dp => swap
+program test_instantiate
+    instantiate swap_t(real(8)), only: swap_dp => swap
+end program test_instantiate
 """
         try:
             tree = parse(source)
             assert tree is not None
         except Exception as e:
             pytest.fail(f"Instantiate with kind parsing failed: {e}")
-
-
-# =============================================================================
-# GLOBAL SCOPE TESTS
-# =============================================================================
-
-class TestGlobalScope:
-    """Test global scope / script mode parsing."""
-
-    def test_global_scope_basic_fixture(self):
-        """Test bare statements without program wrapper."""
-        source = load_fixture("global_scope_basic.f90")
-        try:
-            tree = parse(source)
-            assert tree is not None
-        except Exception as e:
-            pytest.fail(f"Global scope basic parsing failed: {e}")
-
-    def test_global_scope_arrays_fixture(self):
-        """Test global scope with arrays and expressions."""
-        source = load_fixture("global_scope_arrays.f90")
-        try:
-            tree = parse(source)
-            assert tree is not None
-        except Exception as e:
-            pytest.fail(f"Global scope arrays parsing failed: {e}")
-
-    def test_global_scope_with_functions_fixture(self):
-        """Test global scope with function definitions."""
-        source = load_fixture("global_scope_with_functions.f90")
-        try:
-            tree = parse(source)
-            assert tree is not None
-        except Exception as e:
-            pytest.fail(f"Global scope with functions parsing failed: {e}")
-
-    def test_bare_expression(self):
-        """Test bare expression at global scope."""
-        source = "2 + 2\n"
-        try:
-            tree = parse(source)
-            assert tree is not None
-        except Exception as e:
-            pytest.fail(f"Bare expression parsing failed: {e}")
-
-    def test_bare_declaration(self):
-        """Test bare declaration at global scope."""
-        source = "integer :: x\n"
-        try:
-            tree = parse(source)
-            assert tree is not None
-        except Exception as e:
-            pytest.fail(f"Bare declaration parsing failed: {e}")
-
-    def test_bare_assignment(self):
-        """Test bare assignment at global scope."""
-        source = "x = 42\n"
-        try:
-            tree = parse(source)
-            assert tree is not None
-        except Exception as e:
-            pytest.fail(f"Bare assignment parsing failed: {e}")
-
-    def test_bare_print(self):
-        """Test bare print statement at global scope."""
-        source = 'print *, "Hello, World!"\n'
-        try:
-            tree = parse(source)
-            assert tree is not None
-        except Exception as e:
-            pytest.fail(f"Bare print parsing failed: {e}")
 
 
 # =============================================================================
@@ -384,31 +312,10 @@ end module generic_swap
         except Exception as e:
             pytest.fail(f"Template in module parsing failed: {e}")
 
-    def test_mixed_script_and_program(self):
-        """Test mixing script-style and program units."""
-        source = """
-! Script-style declarations
-use iso_fortran_env, only: dp => real64
-
-! Standard program unit
-program main
-    implicit none
-    real(dp) :: x
-    x = 1.0_dp
-    print *, x
-end program main
-"""
-        try:
-            tree = parse(source)
-            assert tree is not None
-        except Exception as e:
-            pytest.fail(f"Mixed script and program parsing failed: {e}")
-
 
 if __name__ == '__main__':
     print("Running LFortran Grammar Test Suite...")
     print("=" * 80)
     print("Testing J3 Generics: TEMPLATE, REQUIREMENT, REQUIRE, INSTANTIATE")
-    print("Testing Global Scope: bare statements, expressions, declarations")
     print("=" * 80)
     pytest.main([__file__, '-v'])
