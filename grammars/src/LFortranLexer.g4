@@ -34,9 +34,9 @@ REQUIREMENT_KW
     : R E Q U I R E M E N T
     ;
 
-// REQUIRE statement - specifies required constraints
-REQUIRE_KW
-    : R E Q U I R E
+// REQUIRES statement - specifies required constraints (J3/24-107r1)
+REQUIRES_KW
+    : R E Q U I R E S
     ;
 
 // INSTANTIATE statement - explicit template instantiation
@@ -59,4 +59,25 @@ END_TEMPLATE
 
 END_REQUIREMENT
     : E N D WS* R E Q U I R E M E N T
+    ;
+
+// ============================================================================
+// J3 GENERICS INLINE INSTANTIATION TOKENS
+// ============================================================================
+// These tokens enable inline instantiation syntax:
+//   - Curly braces {T} (J3 24-107r1)
+//   - Caret ^(T) (J3 r4 revision)
+
+// Curly braces for inline instantiation (J3 24-107r1)
+LBRACE
+    : '{'
+    ;
+
+RBRACE
+    : '}'
+    ;
+
+// Caret for inline instantiation (J3 r4 alternative)
+CARET
+    : '^'
     ;

@@ -1,9 +1,10 @@
-! Test: TEMPLATE with REQUIRE constraint
-! Reference: J3/24-107r1 TEMPLATE + REQUIRE syntax
+! Test: TEMPLATE with REQUIRES constraint
+! Reference: J3/24-107r1 TEMPLATE + REQUIRES syntax
+! Note: Uses curly braces {} per J3 spec, REQUIRES (plural) keyword
 
-template min_t(T, less_than)
+template min_t{T, less_than}
     type, deferred :: T
-    require :: comparable(T, less_than)
+    requires :: comparable{T, less_than}
 contains
     function min_value(a, b) result(res)
         type(T), intent(in) :: a, b
