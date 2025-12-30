@@ -36,7 +36,7 @@ LFortran Standard uses 8-byte (64-bit) reals by default, providing ~15 decimal d
 
 ```fortran
 real :: x           ! real(8) in LFortran Standard
-x = 1.0             ! 1.0_8 semantically
+x = 1.0             ! 1.0_dp semantically
 ```
 
 ### Why not 4-byte integers too?
@@ -221,7 +221,7 @@ u = wrap_sub(u, 1)          ! OK: explicit wraparound when intended
 ```
 
 - **Debug mode**: Runtime error on overflow/underflow
-- **`--fast` mode**: Undefined behavior (optimizer assumes no overflow)
+- **`--fast` mode**: Wraparound (modular arithmetic, well-defined)
 - **Explicit modular arithmetic**: `wrap_add`, `wrap_sub`, `wrap_mul` when wraparound is intentional
 
 This catches accidental overflows while allowing intentional wraparound when explicitly requested.

@@ -29,7 +29,8 @@ Lazy Fortran / LFortran Infer Mode (--infer)
 |----------|-------------|
 | [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran 2023 dialect with sensible defaults |
 | [Lazy Fortran Standard](docs/lazy-fortran-standard.md) | Extends LFortran with type inference and modern features |
-| [Design Document](docs/lazyfortran2025-design.md) | Detailed design rationale and feature descriptions |
+| [Design Document](docs/lazyfortran2025-design.md) | Detailed feature descriptions and examples |
+| [Design Rationale](docs/design-rationale.md) | Explains key design decisions and trade-offs |
 
 ## Historic ANTLR4 Grammars
 

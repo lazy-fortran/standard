@@ -62,7 +62,7 @@ s = "hello"        ! character(:), allocatable
 
 ### Expression Type Rules
 
-Expression types follow ISO/IEC 1539-1:2023 Clause 10.1.5 (Numeric intrinsic operations):
+Expression types follow standard Fortran type promotion rules for numeric intrinsic operations:
 
 - Mixed numeric array constructors use type promotion: `[1, 2.0, 3]` promotes all to `real(8)`
 - Real literals are `real(8)` by default
@@ -87,17 +87,26 @@ The standardizer wraps these appropriately for standard Fortran output.
 
 ## Automatic Array Reallocation
 
-Arrays are automatically reallocated on assignment when shapes differ:
+**Allocatable arrays** are automatically reallocated on assignment when shapes differ:
 
 ```fortran
-arr = [1, 2, 3]    ! integer, allocatable, size 3
-arr = [4, 5, 6]    ! OK: same shape
-arr = [7, 8]       ! OK: automatically reallocates to size 2
+real, allocatable :: arr(:)
+arr = [1.0, 2.0, 3.0]   ! Allocates size 3
+arr = [4.0, 5.0, 6.0]   ! OK: same shape
+arr = [7.0, 8.0]        ! OK: automatically reallocates to size 2
 ```
 
 This is equivalent to the `--realloc-lhs-arrays` flag which is enabled implicitly in infer mode.
 
-**Note:** In LFortran Standard (strict mode), shape mismatch raises a runtime error. Use infer mode only for prototyping; switch to strict mode for production code.
+**Non-allocatable arrays** (fixed-size, automatic, pointer) follow standard Fortran rules - shapes must match:
+
+```fortran
+real :: fixed(3)
+fixed = [1.0, 2.0, 3.0]   ! OK: same shape
+fixed = [4.0, 5.0]        ! ERROR: shape mismatch
+```
+
+**Note:** In LFortran Standard (strict mode), allocatable array shape mismatch raises a runtime error. Use infer mode only for prototyping; switch to strict mode for production code.
 
 ---
 
@@ -113,6 +122,17 @@ The standardizer transforms Lazy Fortran to ISO Fortran 2023.
 | Bare statements + procedures | `program main ... contains ... end program` |
 | Only procedures | `module <filename> ... contains ... end module` |
 | Already valid program units | Preserved as-is |
+
+**Filename transformation for module names:**
+- File extension removed: `utils.lf` → `module utils`
+- Hyphens replaced with underscores: `my-utils.lf` → `module my_utils`
+- Leading digits prefixed with underscore: `3dmath.lf` → `module _3dmath`
+
+**Edge cases:**
+- Mixed `module` + bare statements: Error - invalid structure
+- Multiple `program` units: Error - only one program allowed per file
+- `submodule`: Preserved as-is (already a valid program unit)
+- `block data`: Preserved as-is (already a valid program unit)
 
 ### Transformation Example
 
@@ -196,14 +216,24 @@ i + int(u)                  ! OK: explicit conversion to signed
 
 ### Overflow Behavior (Rust-like)
 
-- **Debug mode:** NO wraparound - runtime error on overflow/underflow
-- **`--fast` mode:** Undefined behavior (optimizer assumes no overflow)
-- **Explicit modular arithmetic:** `wrap_add`, `wrap_sub`, `wrap_mul` intrinsics
+| Build Mode | Overflow Behavior | Use Case |
+|------------|-------------------|----------|
+| **Debug** (default) | Runtime error | Catch bugs during development |
+| **ReleaseSafe** | Runtime error | Production with safety |
+| **ReleaseFast** (`--fast`) | Wraparound (modular) | Maximum performance |
+
+Unlike C/C++ where overflow is undefined behavior, all modes have **defined semantics**:
 
 ```fortran
 integer, unsigned :: u = 0
-u = u - 1                   ! ERROR: unsigned underflow (debug mode)
-u = wrap_sub(u, 1)          ! OK: explicit wraparound to max value
+u = u - 1                   ! Debug/ReleaseSafe: runtime error
+                            ! ReleaseFast: wraps to 4294967295
+```
+
+**Explicit modular arithmetic** for intentional wraparound in any mode:
+
+```fortran
+u = wrap_sub(u, 1)          ! Always wraps, no error in any mode
 ```
 
 ### Modular Arithmetic Intrinsics
@@ -323,6 +353,18 @@ instantiate min_value{integer}, only: min_int => min_value
 |--------|----------|----------|
 | `type(T)` | Static | Zero overhead, inlinable |
 | `class(Trait)` | Dynamic | Runtime polymorphism |
+
+### Syntax Clarification
+
+Lazy Fortran uses **curly braces `{}`** for generic type parameters (following the Traits-for-Fortran proposal):
+
+| Construct | Syntax | Example |
+|-----------|--------|---------|
+| Template instantiation | `INSTANTIATE template(type)` | `instantiate swap_t(integer)` |
+| Inline template call | `call proc{type}(args)` | `call swap{integer}(a, b)` |
+| Trait-bounded generic | `func{Trait :: T}(args)` | `min_value{IComparable :: T}(a, b)` |
+
+**Note:** The J3 TEMPLATE proposal uses `^()` syntax for inline instantiation (`call sub^(integer)(x)`). Lazy Fortran's `{}` syntax is an alternative that avoids ambiguity with exponentiation operators and aligns with the Traits-for-Fortran proposal.
 
 ### Why No Implicit Monomorphization
 

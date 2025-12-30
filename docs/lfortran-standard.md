@@ -10,7 +10,7 @@
 
 The LFortran Standard defines a stricter dialect of Fortran 2023 with sensible defaults for scientific computing. It is the default mode of the [LFortran compiler](https://lfortran.org).
 
-All ISO Fortran 2023 programs are valid LFortran Standard programs, but LFortran Standard enforces additional compile-time and run-time checks that catch common errors.
+LFortran Standard enforces additional compile-time and run-time checks that catch common errors. Code written to LFortran Standard compiles with any ISO Fortran 2023 compiler, but not all ISO Fortran 2023 code compiles under LFortran Standard (see [Compatibility](#compatibility)).
 
 ---
 
@@ -63,6 +63,17 @@ The symbol `dp` is predefined as `real64` from `iso_fortran_env`:
 real(dp) :: x       ! Equivalent to real(8)
 x = 1.0_dp          ! Explicit kind suffix
 ```
+
+**Implementation:** The `dp` symbol is implicitly defined as if every program unit began with:
+
+```fortran
+use, intrinsic :: iso_fortran_env, only: dp => real64
+```
+
+This implicit import:
+- **Can be overridden** by explicit `use iso_fortran_env` statements in the same scope
+- **Is NOT a reserved keyword** - user code can redefine `dp` with a local declaration
+- **Follows normal Fortran scoping rules** - inner scopes can shadow outer definitions
 
 ---
 
@@ -166,11 +177,20 @@ LFortran Standard can be combined with build modes:
 
 ### With ISO Fortran 2023
 
-LFortran Standard is a strict superset of ISO Fortran 2023:
+LFortran Standard has **one-way compatibility** with ISO Fortran 2023:
 
-- All LFortran Standard restrictions can be satisfied by valid Fortran 2023 code
+**LFortran Standard → ISO Fortran 2023 (YES):**
 - Code written to LFortran Standard compiles with any Fortran 2023 compiler
+- All LFortran Standard restrictions can be satisfied by valid Fortran 2023 code
 - The standardizer emits explicit declarations and kind specifiers
+
+**ISO Fortran 2023 → LFortran Standard (NOT ALWAYS):**
+- ISO code using implicit typing will fail (LFortran requires explicit declarations)
+- ISO code using implicit interfaces will fail (LFortran requires explicit interfaces)
+- ISO code relying on implicit argument casting will fail
+- ISO code relying on LHS array reallocation may fail at runtime
+
+LFortran Standard is a **strict subset** of valid Fortran 2023 - it accepts only code that follows best practices.
 
 ### With Other Compilers
 
