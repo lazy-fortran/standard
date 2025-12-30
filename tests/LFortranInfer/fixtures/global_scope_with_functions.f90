@@ -1,5 +1,5 @@
-! Test: Global scope with function definitions
-! Reference: LFortran script mode
+! Test: Infer mode with function definitions
+! Reference: LFortran infer mode (--infer flag)
 
 ! Bare use statement
 use iso_fortran_env, only: dp => real64

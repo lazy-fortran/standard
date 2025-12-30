@@ -1,5 +1,5 @@
-! Test: Global scope - arrays and expressions
-! Reference: LFortran interactive mode / script mode
+! Test: Infer mode - arrays and expressions without program wrapper
+! Reference: LFortran infer mode (--infer flag)
 
 integer, allocatable :: arr(:)
 real(8) :: result

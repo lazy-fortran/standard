@@ -10,7 +10,7 @@
 //   - REQUIRE statement for constraint specifications
 //   - INSTANTIATE statement for explicit instantiation
 //
-// LFortran Standard also enforces stricter semantic defaults:
+// LFortran Standard semantic defaults (enforced by compiler, not grammar):
 //   - Bounds checking ON
 //   - Implicit typing OFF
 //   - Default intent(in)

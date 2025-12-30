@@ -1,5 +1,5 @@
-! Test: Global scope - bare statements without program wrapper
-! Reference: LFortran interactive mode / script mode
+! Test: Infer mode - bare statements without program wrapper
+! Reference: LFortran infer mode (--infer flag)
 
 integer :: x, y
 real(8) :: pi

@@ -1,16 +1,22 @@
 // ============================================================================
-// LFortranInfer Parser - LFortran Infer Mode (Global Scope / Script Mode)
+// LFortranInfer Parser - LFortran Infer Mode
 // ============================================================================
 //
-// This parser extends LFortran with global scope support for infer mode:
+// This parser extends LFortran with infer mode (global scope / script mode).
 //
-// Global scope features:
+// Infer mode features:
 //   - Bare statements at top level without program/end program
 //   - Bare expressions at top level (REPL mode)
 //   - Bare declarations at top level
 //   - Bare use/implicit statements at top level
 //
 // This enables script-style Fortran programming and interactive use.
+//
+// Grammar Inheritance Chain:
+//   Fortran 2023 → LFortran → LFortranInfer
+//   - Fortran 2023: ISO/IEC 1539-1:2023 base standard
+//   - LFortran: Adds J3 Generics (TEMPLATE, REQUIREMENT, etc.)
+//   - LFortranInfer: Adds infer mode (global scope)
 //
 // Reference: LFortran compiler (https://lfortran.org)
 // ============================================================================
@@ -19,13 +25,13 @@ parser grammar LFortranInferParser;
 
 options { tokenVocab = LFortranInferLexer; }
 
-import LFortranParser;
+import LFortranParser;  // Imports LFortran (J3 Generics) + Fortran 2023
 
 // ============================================================================
-// TOP-LEVEL PROGRAM STRUCTURE (Global Scope / Script Mode)
+// TOP-LEVEL PROGRAM STRUCTURE (Infer Mode)
 // ============================================================================
-// LFortran infer mode allows bare statements, declarations, and expressions
-// at the top level without requiring a program wrapper.
+// Infer mode allows bare statements, declarations, and expressions at the
+// top level without requiring a program wrapper.
 
 program_lfortran_infer
     : script_unit_list EOF

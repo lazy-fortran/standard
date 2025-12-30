@@ -158,6 +158,15 @@ end requirement addable
         except Exception as e:
             pytest.fail(f"Minimal requirement parsing failed: {e}")
 
+    def test_requirement_abstract_interface_fixture(self):
+        """Test requirement with abstract interface body (not interface block)."""
+        source = load_fixture("requirement_abstract_interface.f90")
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Requirement with abstract interface parsing failed: {e}")
+
 
 # =============================================================================
 # J3 GENERICS: REQUIRE STATEMENT TESTS
@@ -216,6 +225,33 @@ end program test_instantiate
             assert tree is not None
         except Exception as e:
             pytest.fail(f"Instantiate with kind parsing failed: {e}")
+
+    def test_instantiate_no_only_fixture(self):
+        """Test instantiation without ONLY clause."""
+        source = load_fixture("instantiate_no_only.f90")
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Instantiate without ONLY parsing failed: {e}")
+
+    def test_instantiate_multiple_types_fixture(self):
+        """Test instantiation with multiple type parameters."""
+        source = load_fixture("instantiate_multiple_types.f90")
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Instantiate with multiple types parsing failed: {e}")
+
+    def test_instantiate_derived_type_fixture(self):
+        """Test instantiation with derived type parameter."""
+        source = load_fixture("instantiate_derived_type.f90")
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Instantiate with derived type parsing failed: {e}")
 
 
 # =============================================================================
