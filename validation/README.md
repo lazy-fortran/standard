@@ -1,6 +1,6 @@
 # Validation Framework
 
-This directory contains tools and scripts for validating the LazyFortran2025 grammar implementation against external references.
+This directory contains tools and scripts for validating the Fortran grammar implementations against external references.
 
 ## Quick Setup
 

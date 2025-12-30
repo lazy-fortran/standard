@@ -17,7 +17,7 @@ JAVA_AVAILABLE := $(shell java -version >/dev/null 2>&1 && echo yes || echo no)
 ANTLR4_AVAILABLE := $(shell command -v $(ANTLR4) >/dev/null 2>&1 && echo yes || echo no)
 
 # Grammar inheritance chain (build order matters!)
-GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023 LazyFortran2025
+GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023
 
 # Default target
 .PHONY: all clean test help download-standards lint
@@ -39,8 +39,6 @@ Fortran2003: $(GRAMMAR_GEN_MODERN)/Fortran2003Lexer.py
 Fortran2008: $(GRAMMAR_GEN_MODERN)/Fortran2008Lexer.py
 Fortran2018: $(GRAMMAR_GEN_MODERN)/Fortran2018Lexer.py
 Fortran2023: $(GRAMMAR_GEN_MODERN)/Fortran2023Lexer.py
-
-LazyFortran2025: $(GRAMMAR_GEN_MODERN)/LazyFortran2025Lexer.py
 
 # FORTRAN I (1957) - Foundation
 $(GRAMMAR_GEN_EARLY)/FORTRANLexer.py: $(GRAMMAR_SRC)/FORTRANLexer.g4 $(GRAMMAR_SRC)/FORTRANParser.g4
@@ -212,21 +210,6 @@ $(GRAMMAR_GEN_MODERN)/Fortran2023Lexer.py: $(GRAMMAR_SRC)/Fortran2023Lexer.g4 $(
 		fi; \
 	fi
 
-# Lazy Fortran 2025 (future standard) - Relaxed syntax on top of Fortran 2023
-$(GRAMMAR_GEN_MODERN)/LazyFortran2025Lexer.py: $(GRAMMAR_SRC)/LazyFortran2025Lexer.g4 $(GRAMMAR_SRC)/LazyFortran2025Parser.g4 Fortran2023
-	@echo "Building Lazy Fortran 2025..."
-	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
-		cd $(GRAMMAR_SRC) && \
-		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern LazyFortran2025Lexer.g4 && \
-		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern LazyFortran2025Parser.g4; \
-	else \
-		if [ -f "$@" ]; then \
-			echo "ANTLR4 CLI not available; using existing Lazy Fortran 2025 lexer/parser sources"; \
-		else \
-			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
-			exit 1; \
-		fi; \
-	fi
 
 
 # ====================================================================

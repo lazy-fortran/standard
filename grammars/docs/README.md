@@ -191,11 +191,11 @@ FORTRAN (1957) → FORTRAN II (1958) → FORTRAN IV (1962) → FORTRAN 66 → FO
                                               Fortran 90 ← ← ← ← ← ← ← ← ←
 ```
 
-### Foundation for LazyFortran2025
-This historical stub:
-- Documents the complete evolutionary path
-- Preserves the mathematical focus of FORTRAN
-- Provides foundation for FORTRAN II extension
+### Historical Reference
+This grammar collection:
+- Documents the complete evolutionary path of Fortran
+- Preserves the mathematical focus of early FORTRAN
+- Provides foundation for understanding Fortran language evolution
 - Serves as educational contrast to modern Fortran features
 
 ## Contributing

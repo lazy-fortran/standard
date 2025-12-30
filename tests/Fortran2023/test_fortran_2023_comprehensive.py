@@ -2,13 +2,13 @@
 """
 Fortran 2023 (ISO/IEC 1539-1:2023) Comprehensive Test Suite
 
-Tests the complete Fortran 2023 implementation covering all incremental 
-improvements over Fortran 2018, focusing on error corrections and 
-new features that prepare for LazyFortran2025.
+Tests the complete Fortran 2023 implementation covering all incremental
+improvements over Fortran 2018, focusing on error corrections and
+new features.
 
 F2023 New Features Tested:
 - Enhanced enumerated types (ENUM improvements)
-- Conditional expressions (ternary operator ? :)  
+- Conditional expressions (ternary operator ? :)
 - IEEE arithmetic enhancements (IEEE_MAX, IEEE_MIN functions)
 - BOZ constant improvements in array constructors
 - NAMELIST enhancements (PUBLIC groups with PRIVATE variables)
@@ -18,7 +18,6 @@ F2023 New Features Tested:
 Test Coverage Philosophy:
 This suite validates that F2023 grammar correctly recognizes all incremental
 improvements while maintaining seamless compatibility with F2018.
-Serves as the foundation validation for LazyFortran2025 type inference.
 """
 
 import sys
@@ -695,15 +694,15 @@ class TestFortran2023Parser:
 
 
 class TestFortran2023Foundation:
-    """Test F2023 as foundation for LazyFortran2025."""
+    """Test F2023 as foundation for grammar extensions."""
 
     def test_f2023_foundation_readiness(self):
-        """Verify F2023 is ready as foundation for LazyFortran2025."""
-        # Test that F2023 lexer can be imported (foundation requirement)
+        """Verify F2023 grammar is functional."""
+        # Test that F2023 lexer can be imported
         assert Fortran2023Lexer is not None
-        
+
         # Test basic functionality
-        input_stream = InputStream("program lazy_fortran")
+        input_stream = InputStream("program test_foundation")
         lexer = Fortran2023Lexer(input_stream)
         token = lexer.nextToken()
         assert token is not None
@@ -742,17 +741,17 @@ class TestFortran2023Foundation:
         for feature in required_features:
             assert hasattr(Fortran2023Lexer, feature), f"Missing feature: {feature}"
 
-    def test_lazyfortran2025_preparation(self):
-        """Test F2023 preparation for LazyFortran2025 extension."""
-        # This test verifies F2023 grammar can be used as import base for LazyF2025
-        
+    def test_grammar_extension_points(self):
+        """Test F2023 grammar has extension points for derived grammars."""
+        # This test verifies F2023 grammar can be used as import base
+
         # Test that key extension points are available
         extension_points = [
-            'program_unit_f2023',     # Can be extended for LazyF2025 program units
-            'expr_f2023',             # Can be extended for LazyF2025 expressions
+            'program_unit_f2023',     # Can be extended for program units
+            'expr_f2023',             # Can be extended for expressions
             'type_declaration_stmt_f2023'  # Can be extended for type inference
         ]
-        
+
         if PARSER_AVAILABLE:
             for extension_point in extension_points:
                 assert hasattr(Fortran2023Parser, extension_point), f"Missing extension point: {extension_point}"
@@ -835,8 +834,7 @@ if __name__ == '__main__':
     print("=" * 80)
     print("Testing latest ISO standard with incremental improvements over F2018")
     print("F2023 Key Features: Enhanced ENUM, Conditional Expressions, IEEE Improvements")
-    print("Foundation Status: Ready for LazyFortran2025 type inference extensions")
     print("=" * 80)
-    
+
     # Run the tests
     pytest.main([__file__, '-v'])
