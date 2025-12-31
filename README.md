@@ -2,15 +2,19 @@
 
 > **Note**: This project is experimental and subject to major changes. APIs and specifications may change without notice.
 
-This repository contains specifications for LFortran Standard and LFortran Infer mode, plus historic ANTLR4 grammars for Fortran language standards from 1957 to 2023.
+This repository contains:
+1. **ANTLR4 grammars** for all Fortran standards from 1957 to 2023, plus LFortran and LFortranInfer extensions (all implemented and tested)
+2. **Specifications** for LFortran Standard and LFortran Infer mode (compiler support proposed for LFortran)
 
 ## Standards Hierarchy
+
+> **Grammars: IMPLEMENTED** in this repo | **Compiler flags: PROPOSED** for LFortran
 
 ```
 ISO Fortran 2023 (ISO/IEC 1539-1:2023)
     |
     v
-LFortran Standard (--std=lf)
+LFortran Standard (--std=lf)              [grammar: done, compiler: proposed]
     |   - Stricter than ISO Fortran
     |   - Bounds checking ON by default
     |   - Default real = 8 bytes, integer = 4 bytes
@@ -19,7 +23,7 @@ LFortran Standard (--std=lf)
     |   - J3 Generics (TEMPLATE, REQUIREMENT, INSTANTIATE)
     |
     v
-LFortran Infer Mode (--infer)
+LFortran Infer Mode (--infer)             [grammar: done, compiler: proposed]
         - Adds type inference at global scope
         - Adds automatic array reallocation
         - Adds global scope (bare statements)
@@ -28,22 +32,22 @@ LFortran Infer Mode (--infer)
 
 ## Specifications
 
-| Document | Description |
-|----------|-------------|
-| [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran 2023 dialect with sensible defaults |
-| [LFortran Infer](docs/lfortran-infer.md) | Extends LFortran with type inference and infer mode features |
-| [Design Document](docs/lfortran-design.md) | Detailed feature descriptions and examples |
-| [Design Rationale](docs/design-rationale.md) | Explains key design decisions and trade-offs |
+| Document | Description | Grammar | Compiler |
+|----------|-------------|---------|----------|
+| [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran 2023 dialect with sensible defaults | Done | Proposed |
+| [LFortran Infer](docs/lfortran-infer.md) | Extends LFortran with type inference and infer mode features | Done | Proposed |
+| [Design Document](docs/lfortran-design.md) | Detailed feature descriptions and examples | - | - |
+| [Design Rationale](docs/design-rationale.md) | Explains key design decisions and trade-offs | - | - |
 
-## Historic ANTLR4 Grammars
+## ANTLR4 Grammars
 
-The `grammars/` directory contains ANTLR4 grammars for historic Fortran versions (1957-2023). These serve as **reference implementations** for understanding Fortran language evolution and are useful for:
+The `grammars/` directory contains ANTLR4 grammars for:
 
-- Understanding Fortran syntax across different eras
-- Educational purposes and historical research
-- Testing and validation against the ISO standards
+- **Historic Fortran** (1957-2023): Reference implementations for language evolution
+- **LFortran Standard**: F2023 + J3 Generics (TEMPLATE, REQUIREMENT, INSTANTIATE)
+- **LFortran Infer**: LFortran Standard + type inference extensions
 
-**Note:** LFortran Standard and LFortran Infer are NOT defined by ANTLR grammars. They are prose specifications implemented directly in the [LFortran compiler](https://lfortran.org), which uses its own bison-based parser.
+All grammars are implemented and tested. The LFortran compiler does not yet support these extensions.
 
 ### Grammar Inheritance Chain
 
@@ -208,8 +212,9 @@ The project includes a growing test suite:
 
 ## Related Projects
 
-- [LFortran Compiler](https://lfortran.org) - Implementation target for LFortran Standard and LFortran Infer
+- [LFortran Compiler](https://lfortran.org) - Target compiler for LFortran Standard and Infer modes (not yet implemented)
 - [LFortran GitHub](https://github.com/lfortran/lfortran) - Source code for LFortran
+- [J3 Generics](https://github.com/j3-fortran/generics) - Official J3 Generics proposal (Fortran 202Y)
 
 ## Contact
 
