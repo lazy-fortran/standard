@@ -1,116 +1,85 @@
-# Project-Specific Instructions: Fortran Grammar Repository
+# Fortran Grammar Repository
 
-## ABSOLUTE REQUIREMENTS - ZERO TOLERANCE
+ANTLR4 grammars for Fortran standards from 1957 to 2023, plus LFortran extensions.
 
-### Feature Completeness and Historical Accuracy
+## Standard References
 
-This repository implements ANTLR4 grammars for ALL Fortran standards from 1957 to 2023.
-The following requirements are MANDATORY and NON-NEGOTIABLE:
+| Standard | Reference Document |
+|----------|-------------------|
+| FORTRAN 1957 | IBM Form C28-6003 |
+| FORTRAN II | IBM Form C28-6000-2 |
+| FORTRAN 66 | ANSI X3.9-1966 |
+| FORTRAN 77 | ANSI X3.9-1978 |
+| Fortran 90 | ISO/IEC 1539:1991 |
+| Fortran 95 | ISO/IEC 1539-1:1997 |
+| Fortran 2003 | ISO/IEC 1539-1:2004 |
+| Fortran 2008 | ISO/IEC 1539-1:2010 |
+| Fortran 2018 | ISO/IEC 1539-1:2018 |
+| Fortran 2023 | ISO/IEC 1539-1:2023 |
+| LFortran | J3/24-107r1 (Generics) |
 
-1. **FEATURE COMPLETE**: Every grammar MUST implement 100% of the syntax rules defined
-   in its corresponding ISO/ANSI standard. Partial implementations are BUGS.
+PDFs available in `validation/pdfs/`.
 
-2. **HISTORICALLY ACCURATE**: Features MUST appear in the FIRST standard that supports
-   them, NOT earlier, NOT later. PURE/ELEMENTAL belong in F95, NOT F90.
-
-3. **NO SHORTCUTS ALLOWED**: Every syntax rule from the standard MUST have a
-   corresponding grammar rule. Vague "intentionally minimal" language is FORBIDDEN.
-
-4. **EVERY GAP TRACKED**: Every missing feature, failing fixture, or known limitation
-   MUST have a GitHub issue. If you discover a gap without an issue, CREATE ONE.
-
-5. **EVERY xfail DOCUMENTED**: Every xfail/xpass fixture MUST reference the tracking
-   issue in its reason string. No orphan failures allowed.
-
-### Issue Filing Requirements
-
-When you discover a grammar gap that is NOT covered by an existing issue:
-
-1. **IMMEDIATELY** create a new GitHub issue with:
-   - Clear title identifying the standard and missing feature
-   - ISO/ANSI section reference (e.g., "ISO/IEC 1539:1991 Section 9")
-   - ISO R-number syntax rules affected (e.g., "R904 open-stmt")
-   - Impact description (what programs fail to parse)
-   - Acceptance criteria checklist
-
-2. **UPDATE** the relevant audit document (`docs/fortran_*_audit.md`) with the issue reference
-
-3. **UPDATE** `tests/xpass_fixtures.py` if the gap affects test fixtures
-
-### Standard References
-
-| Standard | Reference Document | Local Path |
-|----------|-------------------|------------|
-| FORTRAN 1957 | IBM Form C28-6003 | validation/pdfs/ |
-| FORTRAN II | IBM Form C28-6000-2 | validation/pdfs/ |
-| FORTRAN 66 | ANSI X3.9-1966 | validation/pdfs/ |
-| FORTRAN 77 | ANSI X3.9-1978 | validation/pdfs/ |
-| Fortran 90 | WG5 N692 / ISO/IEC 1539:1991 | validation/pdfs/ |
-| Fortran 95 | ISO/IEC 1539-1:1997 | validation/pdfs/ |
-| Fortran 2003 | J3/03-007 / ISO/IEC 1539-1:2004 | validation/pdfs/ |
-| Fortran 2008 | J3/08-007 / ISO/IEC 1539-1:2010 | validation/pdfs/ |
-| Fortran 2018 | J3/15-007 / ISO/IEC 1539-1:2018 | validation/pdfs/ |
-| Fortran 2023 | J3/22-007 / ISO/IEC 1539-1:2023 | validation/pdfs/ |
-
-### Grammar File Structure
+## Grammar Structure
 
 ```
 grammars/
-  FORTRANLexer.g4, FORTRANParser.g4           # FORTRAN 1957
-  FORTRANIILexer.g4, FORTRANIIParser.g4       # FORTRAN II
-  FORTRAN66Lexer.g4, FORTRAN66Parser.g4       # FORTRAN 66
-  FORTRAN77Lexer.g4, FORTRAN77Parser.g4       # FORTRAN 77
-  Fortran90Lexer.g4, Fortran90Parser.g4       # Fortran 90
-  Fortran95Lexer.g4, Fortran95Parser.g4       # Fortran 95
-  Fortran2003Lexer.g4, Fortran2003Parser.g4   # Fortran 2003
-  Fortran2008Lexer.g4, Fortran2008Parser.g4   # Fortran 2008
-  Fortran2018Lexer.g4, Fortran2018Parser.g4   # Fortran 2018
-  Fortran2023Lexer.g4, Fortran2023Parser.g4   # Fortran 2023
+  FORTRANLexer.g4, FORTRANParser.g4           # 1957
+  FORTRANIILexer.g4, FORTRANIIParser.g4       # 1958
+  FORTRAN66Lexer.g4, FORTRAN66Parser.g4       # 1966
+  FORTRAN77Lexer.g4, FORTRAN77Parser.g4       # 1977
+  Fortran90Lexer.g4, Fortran90Parser.g4       # 1990
+  Fortran95Lexer.g4, Fortran95Parser.g4       # 1995
+  Fortran2003Lexer.g4, Fortran2003Parser.g4   # 2003
+  Fortran2008Lexer.g4, Fortran2008Parser.g4   # 2008
+  Fortran2018Lexer.g4, Fortran2018Parser.g4   # 2018
+  Fortran2023Lexer.g4, Fortran2023Parser.g4   # 2023
+  LFortranLexer.g4, LFortranParser.g4         # LFortran Standard
+  LFortranInferLexer.g4, LFortranInferParser.g4  # LFortran Infer
 ```
 
-### Audit Documents
+Grammars inherit from predecessors. Each standard only defines NEW features.
 
-Each standard has an audit document in `docs/fortran_*_audit.md` that MUST contain:
+## Development
 
-1. Implementation coverage percentage
-2. List of implemented features with ISO section references
-3. List of GAPS with ISO R-numbers and tracking issue
-4. xfail fixture count and issue reference
-5. Future work priorities
+### Build and Test
 
-### Current Open Issues (Grammar Gaps)
+```bash
+make all      # Build all grammars
+make test     # Run all tests
+make clean    # Clean generated files
+```
 
-| Issue | Standard | Description |
-|-------|----------|-------------|
-| #415 | Fortran 95 | Interface-definition characteristics matching not enforced (ISO/IEC 1539-1:1997 Section 12.2) |
-| #427 | FORTRAN 1957 | IF statement forms from Appendix B rows 9-10 not implemented (C28-6003) |
+### Adding Features
 
-### Validation Workflow
+1. Add tokens to the appropriate `*Lexer.g4`
+2. Add parser rules to the appropriate `*Parser.g4`
+3. Add test fixtures in `tests/fixtures/<Standard>/`
+4. Run `make test` to verify
 
-Before ANY commit that modifies grammar files:
+### Historical Accuracy
 
-1. Run `make test` - ALL tests MUST pass
-2. Run `make lint` - ALL linting MUST pass
-3. Verify no new xfail fixtures without issue references
-4. Update audit documents if implementation status changed
+Features belong in the FIRST standard that supports them:
+- PURE/ELEMENTAL: Fortran 95 (not 90)
+- CLASS/EXTENDS: Fortran 2003 (not 95)
+- Coarrays: Fortran 2008 (not 2003)
+- Conditional expressions: Fortran 2023 (not 2018)
 
-### Test Coverage Requirements
+### Scope
 
-Every grammar feature MUST be covered by tests:
+These grammars are **syntactic only**. Out of scope:
+- Type checking
+- Interface characteristics matching
+- Semantic validation
 
-1. **EVERY grammar rule** MUST have at least one test fixture exercising it
-2. **EVERY lexer token** MUST be tested in context
-3. **Test fixtures MUST be realistic** - use actual Fortran code patterns from standards
-4. **NO untested grammar rules** - if a rule exists, it MUST have test coverage
-5. **Tests MUST verify correct parsing** - check parse tree structure, not just "no errors"
+Use GitHub issues for tracking gaps. Reference ISO R-numbers when relevant (e.g., R916 type-param-inquiry).
 
-### Forbidden Practices
+## Documentation
 
-- "Intentionally minimal" or "left for future work" without issue tracking
-- Features in wrong standard (e.g., F2003 features in F90 grammar)
-- xfail fixtures without issue reference in reason string
-- Grammar gaps without GitHub issues
-- Closing issues before fixtures pass
-- Claiming "complete" without 100% ISO rule coverage
-- Grammar rules without test coverage
-- Untested tokens or parser rules
+| Document | Purpose |
+|----------|---------|
+| [README.md](README.md) | Project overview and quick start |
+| [lfortran-standard.md](docs/lfortran-standard.md) | LFortran Standard specification |
+| [lfortran-infer.md](docs/lfortran-infer.md) | LFortran Infer mode specification |
+| [design-rationale.md](docs/design-rationale.md) | Design decisions explained |
+| [implementation-notes.md](docs/implementation-notes.md) | Status and known limitations |

@@ -1,225 +1,107 @@
 # Fortran Standard Specifications
 
-> **Note**: This project is experimental and subject to major changes. APIs and specifications may change without notice.
+> **Note**: This project is experimental and subject to major changes.
 
 This repository contains:
-1. **ANTLR4 grammars** for all Fortran standards from 1957 to 2023, plus LFortran and LFortranInfer extensions (all implemented and tested)
-2. **Specifications** for LFortran Standard and LFortran Infer mode (compiler support proposed for LFortran)
+1. **ANTLR4 grammars** for all Fortran standards from 1957 to 2023
+2. **LFortran extensions**: J3 Generics and type inference
+3. **Specifications** for LFortran Standard and LFortran Infer mode
 
 ## Standards Hierarchy
-
-> **Grammars: IMPLEMENTED** in this repo | **Compiler flags: PROPOSED** for LFortran
 
 ```
 ISO Fortran 2023 (ISO/IEC 1539-1:2023)
     |
     v
-LFortran Standard (--std=lf)              [grammar: done, compiler: proposed]
-    |   - Stricter than ISO Fortran
-    |   - Bounds checking ON by default
-    |   - Default real = 8 bytes, integer = 4 bytes
-    |   - Default intent(in)
-    |   - dp predefined
-    |   - J3 Generics (TEMPLATE, REQUIREMENT, INSTANTIATE)
+LFortran Standard (--std=lf)
+    |   - Fortran 2023 + J3 Generics
+    |   - Stricter defaults (bounds checking ON, implicit none)
+    |   - 8-byte reals, 4-byte integers
     |
     v
-LFortran Infer Mode (--infer)             [grammar: done, compiler: proposed]
-        - Adds type inference at global scope
-        - Adds automatic array reallocation
-        - Adds global scope (bare statements)
-        - Interactive REPL uses this implicitly
+LFortran Infer (--infer)
+    - Type inference at global scope
+    - Automatic array reallocation
+    - Interactive REPL mode
 ```
 
-## Specifications
+## Implementation Status
 
-| Document | Description | Grammar | Compiler |
-|----------|-------------|---------|----------|
-| [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran 2023 dialect with sensible defaults | Done | Proposed |
-| [LFortran Infer](docs/lfortran-infer.md) | Extends LFortran with type inference and infer mode features | Done | Proposed |
-| [Design Document](docs/lfortran-design.md) | Detailed feature descriptions and examples | - | - |
-| [Design Rationale](docs/design-rationale.md) | Explains key design decisions and trade-offs | - | - |
+All grammars are **complete and tested**.
 
-## ANTLR4 Grammars
+| Standard | Grammar | Tests | Key Features |
+|----------|---------|-------|--------------|
+| FORTRAN 1957 | Complete | Yes | Arithmetic IF, DO loops, FORMAT I/O |
+| FORTRAN II | Complete | Yes | SUBROUTINE, FUNCTION, COMMON |
+| FORTRAN 66 | Complete | Yes | First ANSI standard, LOGICAL/COMPLEX |
+| FORTRAN 77 | Complete | Yes | CHARACTER, IF-THEN-ELSE, PARAMETER |
+| Fortran 90 | Complete | Extensive | Free-form, modules, derived types, arrays |
+| Fortran 95 | Complete | Yes | FORALL, PURE/ELEMENTAL |
+| Fortran 2003 | Complete | Extensive | OOP, C interop, PDTs, IEEE |
+| Fortran 2008 | Complete | Yes | Coarrays, submodules, DO CONCURRENT |
+| Fortran 2018 | Complete | Yes | Teams, events, atomics |
+| Fortran 2023 | Complete | Yes | Conditional expressions, TYPEOF/CLASSOF |
+| LFortran | Complete | Yes | J3 Generics (TEMPLATE, REQUIREMENT, INSTANTIATE) |
+| LFortran Infer | Complete | Yes | Type inference, global scope |
 
-The `grammars/` directory contains ANTLR4 grammars for:
+## Quick Start
 
-- **Historic Fortran** (1957-2023): Reference implementations for language evolution
-- **LFortran Standard**: F2023 + J3 Generics (TEMPLATE, REQUIREMENT, INSTANTIATE)
-- **LFortran Infer**: LFortran Standard + type inference extensions
+```bash
+# Clone
+git clone git@github.com:lazy-fortran/standard.git
+cd standard
 
-All grammars are implemented and tested. The LFortran compiler does not yet support these extensions.
+# Build grammars
+make all
 
-### Grammar Inheritance Chain
-
+# Run tests
+make test
 ```
-FORTRAN (1957) -> FORTRAN II (1958) -> FORTRAN 66 (1966) -> FORTRAN 77 (1977)
-                                                                      |
-                                                                 Fortran 90 (1990)
-                                                                      |
-                                          Fortran 95 -> 2003 -> 2008 -> 2018 -> 2023
-```
 
-The ANTLR4 grammars are designed with:
-- **Modular inheritance** - Each standard builds upon its predecessor
-- **Reuse** - Later grammars import and extend earlier ones
-- **Historical orientation** - Grammars are organized by language standard
-- **Clean architecture** - Source/build separation, proper dependencies
+### Prerequisites
+- Python 3.8+
+- ANTLR4
+- Git
 
-This repository currently implements grammars for:
+## Documentation
 
-- FORTRAN (1957, IBM 704)
-- FORTRAN II (1958)
-- FORTRAN 66 (ANSI X3.9‑1966)
-- FORTRAN 77 (1977)
-- Fortran 90, 95, 2003, 2008, 2018 and 2023
-
-FORTRAN IV (1962) is not implemented as a separate grammar; its functionality is represented in the FORTRAN 66 grammar, reflecting the fact that FORTRAN 66 largely standardized the then‑current FORTRAN IV practice.
+| Document | Description |
+|----------|-------------|
+| [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran 2023 dialect specification |
+| [LFortran Infer](docs/lfortran-infer.md) | Type inference and infer mode specification |
+| [Design Rationale](docs/design-rationale.md) | Explains key design decisions |
+| [Implementation Notes](docs/implementation-notes.md) | Status and known limitations |
 
 ## Directory Structure
 
 ```
 standard/
 ├── docs/               # Specifications and documentation
-│   ├── lfortran-standard.md      # LFortran Standard spec
-│   ├── lfortran-infer.md         # LFortran Infer spec
-│   ├── lfortran-design.md        # Design rationale
-│   └── fortran_*_audit.md        # Grammar audit documents
-├── grammars/           # Historic ANTLR4 grammar files (.g4)
-├── tests/              # Test suites grouped by standard
-├── scripts/            # Helper / validation scripts
-├── tools/              # Extra utilities
-└── validation/         # External grammar validation tools
+├── grammars/src/       # ANTLR4 grammar files (.g4)
+├── tests/              # Test suites by standard
+├── tools/              # Semantic validators
+└── validation/         # Standard PDFs
 ```
 
-## Quick Start
+## Grammar Inheritance
 
-### Prerequisites
-- Python 3.8+
-- ANTLR4 (Java version)
-- Git
+Each grammar extends its predecessor, defining only NEW features:
 
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/lazy-fortran/standard.git
-cd standard
-
-# Install ANTLR4 (Arch Linux)
-sudo pacman -S antlr4
-
-# Install Python dependencies
-pip install antlr4-python3-runtime pytest
 ```
-
-### Building Grammars
-
-The project includes a comprehensive Makefile for building all grammars:
-
-```bash
-# Build all grammars in dependency order
-make all
-
-# Build specific standard
-make Fortran2003
-
-# Clean generated files
-make clean
-
-# Show available targets and help
-make help
-
-# Run tests after building
-make test
+FORTRAN 1957 -> FORTRAN II -> FORTRAN 66 -> FORTRAN 77
+                                                 |
+                                            Fortran 90
+                                                 |
+                              Fortran 95 -> 2003 -> 2008 -> 2018 -> 2023
+                                                                      |
+                                                              LFortran -> Infer
 ```
-
-### Running Tests
-
-```bash
-# Run all tests
-python -m pytest tests/ -v
-```
-
-## Implementation Status
-
-This project provides grammars and tests for many Fortran standards, but it does **not** implement every feature from each ISO standard and does **not** contain a separate FORTRAN IV grammar. The table below describes the state of the implementation in this repository (not the full language specifications):
-
-| Standard | Implemented here? | Tests present? | Notes |
-|----------|-------------------|----------------|-------|
-| FORTRAN (1957, IBM 704) | Yes (historical core subset) | Yes (`tests/FORTRAN`) | Fixed‑form syntax; arithmetic IF; DO loops; GOTO; I/O. Grammar is an explicitly documented historical stub rather than a full reconstruction of the original compiler. |
-| FORTRAN II (1958) | Yes | Yes (`tests/FORTRANII`) | Adds user‑written subroutines and functions (`SUBROUTINE`, `FUNCTION`, `CALL`, `RETURN`) and `COMMON` blocks, matching the historical FORTRAN II enhancements. |
-| FORTRAN 66 (1966) | Yes | Yes (`tests/FORTRAN66`) | Represents the first ANSI Fortran standard, incorporating the FORTRAN IV features such as LOGICAL, DOUBLE PRECISION and COMPLEX into a machine‑independent standard. |
-| FORTRAN 77 (1977) | Yes | Yes (`tests/FORTRAN77`) | Adds the CHARACTER type, block `IF ... THEN ... ELSE ... ENDIF`, PARAMETER, SAVE and other features; coverage is representative but not exhaustive. |
-| Fortran 90 (1990) | Yes | Extensive (`tests/Fortran90`) | Modern foundation: free‑form source, modules, derived types, array operations, dynamic arrays, enhanced control constructs (`SELECT CASE`, `WHERE`), etc. |
-| Fortran 95 (1995) | Yes | No dedicated suite yet | Grammar extends F90 with FORALL, enhancements to WHERE and additional intrinsics; tests are still to be written. |
-| Fortran 2003 (2003) | Yes | Extensive (`tests/Fortran2003`) | Adds object‑oriented features, C interoperability, procedure pointers, IEEE arithmetic support, etc. Remaining gaps are tracked in `docs/fortran_2003_audit.md` and spec‑grounded issues such as #90. |
-| Fortran 2008 (2008) | Yes | Present (`tests/Fortran2008`) | Introduces coarrays, submodules, `DO CONCURRENT`, new intrinsics and kinds. Remaining gaps are tracked in spec‑grounded Fortran 2008 issues such as #83. |
-| Fortran 2018 (2018) | Yes | Present (`tests/Fortran2018`) | Extends coarray parallelism with teams, events and related features. Remaining gaps are tracked in spec‑grounded Fortran 2018 issues such as #88. |
-| Fortran 2023 (2023) | Yes | Present (`tests/Fortran2023`) | Adds features such as improved enumerations, conditional expressions and further intrinsic enhancements. Current support is intentionally minimal and evolving. |
-
-At the moment the test suite consists of roughly 270 tests across these standards, and all of them pass after generating the grammars with ANTLR.
-
-## Key Features
-
-### FORTRAN (1957)
-
-Historically, the original IBM 704 FORTRAN provided fixed‑form source code, arithmetic expressions, DO loops, conditional branching with arithmetic IF, computed GOTOs, FORMAT‑driven I/O and related features. In this repository the FORTRAN grammar focuses on that core statement set and serves as the base of the inheritance chain.
-
-### FORTRAN II (1958)
-
-FORTRAN II added user‑written subprograms and shared storage:
-
-- `SUBROUTINE` / `FUNCTION` / `CALL` / `RETURN` statements for separately compiled procedures
-- `COMMON` blocks for sharing storage between program units
-- Hollerith constants (`nHtext`) for representing character data
-
-## Development
-
-### Test-Driven Development
-All features implemented using TDD:
-1. **RED** - Write failing test
-2. **GREEN** - Implement to pass
-3. **REFACTOR** - Clean up
-
-### Contributing
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-### Architecture Principles
-1. Each grammar only defines NEW features
-2. Import from predecessor in chain
-3. No duplication of rules or tokens
-4. Historical accuracy maintained
-5. Clean separation of concerns
-
-## Comprehensive Validation
-
-The project includes a growing test suite:
-- On the order of 270 unit tests across the implemented standards (all currently passing)
-- Historical code examples from different eras
-- Operator‑precedence validation in the older dialects
-- Parse‑tree checks for selected modern constructs
-- Cross‑standard compatibility testing where inheritance is involved
 
 ## License
 
 [MIT License](LICENSE)
 
-## Acknowledgments
-
-- Original FORTRAN team at IBM (John Backus et al.)
-- ANTLR4 project for grammar tooling
-- Historical FORTRAN documentation from IBM archives
-
 ## Related Projects
 
-- [LFortran Compiler](https://lfortran.org) - Target compiler for LFortran Standard and Infer modes (not yet implemented)
-- [LFortran GitHub](https://github.com/lfortran/lfortran) - Source code for LFortran
-- [J3 Generics](https://github.com/j3-fortran/generics) - Official J3 Generics proposal (Fortran 202Y)
-
-## Contact
-
-- GitHub Issues: [Report bugs or request features](https://github.com/lazy-fortran/standard/issues)
-- Project Lead: @krystophny
-
----
-*Building the future of Fortran through understanding its past.*
+- [LFortran](https://lfortran.org) - Modern Fortran compiler
+- [J3 Generics](https://github.com/j3-fortran/generics) - Fortran 202Y generics proposal
