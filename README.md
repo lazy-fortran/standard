@@ -81,7 +81,7 @@ standard/
 ├── grammars/src/       # ANTLR4 grammar files (.g4)
 ├── tests/              # Test suites by standard
 ├── tools/              # Semantic validators
-└── validation/         # Standard PDFs
+└── validation/         # Reference corpora, standards PDFs, and validation tooling
 ```
 
 ## Grammar Inheritance
