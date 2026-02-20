@@ -4,7 +4,7 @@
 
 This repository contains:
 1. **ANTLR4 grammars** for all Fortran standards from 1957 to 2023
-2. **LFortran extensions**: J3 Generics and type inference
+2. **LFortran extensions**: J3 Generics (base + inline instantiation) and type inference
 3. **Specifications** for LFortran Standard and LFortran Infer mode
 
 ## Standards Hierarchy
@@ -15,6 +15,7 @@ ISO Fortran 2023 (ISO/IEC 1539-1:2023)
     v
 LFortran Standard (--std=lf)
     |   - Fortran 2023 + J3 Generics
+    |   - Inline instantiation: `name{T}(...)` and `name^(T)(...)`
     |   - Stricter defaults (bounds checking ON, implicit none)
     |   - 8-byte reals, 4-byte integers
     |
@@ -41,7 +42,7 @@ All grammars are **complete and tested**.
 | Fortran 2008 | Complete | Yes | Coarrays, submodules, DO CONCURRENT |
 | Fortran 2018 | Complete | Yes | Teams, events, atomics |
 | Fortran 2023 | Complete | Yes | Conditional expressions, TYPEOF/CLASSOF |
-| LFortran | Complete | Yes | J3 Generics (TEMPLATE, REQUIREMENT, INSTANTIATE) |
+| LFortran | Complete | Yes | J3 Generics (`TEMPLATE`, `REQUIREMENT`, `INSTANTIATE`) + inline instantiation (`{}` and `^()`) |
 | LFortran Infer | Complete | Yes | Type inference (`:=`, `--infer`), global scope |
 
 ## Quick Start
@@ -105,3 +106,5 @@ FORTRAN 1957 -> FORTRAN II -> FORTRAN 66 -> FORTRAN 77
 
 - [LFortran](https://lfortran.org) - Modern Fortran compiler
 - [J3 Generics](https://github.com/j3-fortran/generics) - Fortran 202Y generics proposal
+- [Traits for Types (J3/20-109)](https://github.com/j3-fortran/fortran_proposals/blob/master/proposals/traits/20-109.txt) - Trait proposal track (not yet in this grammar)
+- [Traits-for-Fortran](https://github.com/difference-scheme/Traits-for-Fortran) - Community traits/generics design document

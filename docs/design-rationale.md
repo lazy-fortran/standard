@@ -174,19 +174,29 @@ LFortran provides both:
 
 | Syntax | Dispatch | Use case |
 |--------|----------|----------|
-| `type(T)` | Static | Zero overhead, inlinable |
-| `class(Trait)` | Dynamic | Runtime polymorphism |
+| `type(T)` in instantiated templates | Static | Zero overhead, inlinable |
+| `class(AbstractType)` | Dynamic | Runtime polymorphism |
 
 ```fortran
 ! Static dispatch - resolved at compile time
-function min_value{IComparable :: T}(a, b) result(res)
-    type(T), intent(in) :: a, b  ! Concrete type, inlinable
+template min_t(T)
+contains
+function min_value(a, b) result(res)
+    type(T), intent(in) :: a, b
+    type(T) :: res
     ...
 end function
+end template
 
 ! Dynamic dispatch - resolved at runtime
-subroutine sort_any(items)
-    class(IComparable), intent(inout) :: items(:)  ! Any type implementing trait
+type, abstract :: sortable_t
+contains
+    procedure(sort_i), deferred :: sort
+end type
+
+subroutine sort_any(strategy, items)
+    class(sortable_t), intent(in) :: strategy
+    real, intent(inout) :: items(:)
     ...
 end subroutine
 ```

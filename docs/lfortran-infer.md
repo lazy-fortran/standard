@@ -82,8 +82,21 @@ The standardizer can lower infer-mode source to explicit standard Fortran by:
 - Emitting explicit declarations for inferred symbols
 - Preserving explicit declaration semantics
 
+## Relation to Generics and Traits
+
+Infer mode is orthogonal to generic programming proposals.
+
+- Infer mode changes declaration behavior (`:=`, first-assignment `=` with `--infer`)
+  and allows global script-style units.
+- Generic syntax remains available exactly as in LFortran mode:
+  `TEMPLATE`, `REQUIREMENT`, `REQUIRES`, `INSTANTIATE`,
+  inline instantiation `name{T}(...)`, and inline instantiation `name^(T)(...)`.
+- Traits proposals (`trait`, `implements`, trait-typed declarations) are not part
+  of the current LFortranInfer grammar in this repository.
+
 ## References
 
 - [LFortran Standard](lfortran-standard.md)
+- [LFortran Design](lfortran-design.md)
 - [Design Rationale](design-rationale.md)
 - [LFortran Compiler](https://lfortran.org)
