@@ -4,9 +4,8 @@ This document describes how this repository models **fixed-form Fortran**
 across the historical standards (FORTRAN 1957, FORTRAN II, FORTRAN 66,
 FORTRAN 77) and the modern unified grammars (Fortran 90/95/2003+).
 
-The goal is to make the **supported subset explicit** and to point out
-fixed-form behaviours that remain **intentionally out of scope** and are
-tracked as missing work (umbrella Issue #91).
+The goal is to make the **supported subset explicit** and distinguish
+between grammar-level fixed-form parsing and strict card-image validation.
 
 ## 1. Conceptual Model vs. Strict Column Rules
 
@@ -26,11 +25,11 @@ In this repository:
   - Sequence numbers (73–80) are **not** modeled.
   - Column‑6 continuation is **not** implemented as a separate pre‑lexing
     phase.
-- Strict 80‑column enforcement and full historical line‑layout semantics
-  are **not yet implemented** and remain **out of scope** for now.
-
-Issue **#91** is the umbrella tracker for any future work toward
-full, column‑accurate fixed-form semantics.
+- Strict 80-column card-image validation is available via
+  `tools/strict_fixed_form.py` for FORTRAN 1957, FORTRAN II, FORTRAN 66,
+  FORTRAN 77, and Fortran 90.
+- For Fortran 2003+ unified grammars, strict column-aware fixed-form
+  preprocessing is not currently provided as a dedicated mode.
 
 ## 2. Historical Dialects (FORTRAN, FORTRAN II, FORTRAN 66, FORTRAN 77)
 
@@ -165,6 +164,18 @@ available for modern tooling.
   - Classic column‑1 comment forms (`C`/`*`) and sequence‑number handling
     are treated as historical context, not as part of the core subset.
 
+#### Strict Fixed-Form Mode for FORTRAN 66/77
+
+`tools/strict_fixed_form.py` also provides dialect-specific wrappers:
+
+- `validate_strict_fixed_form_66` / `convert_to_lenient_66`
+- `validate_strict_fixed_form_77` / `convert_to_lenient_77`
+
+These apply the same card-image model (label field, continuation column,
+statement field, sequence field) with FORTRAN 66/77 label/comment rules.
+Current test coverage includes dedicated FORTRAN 66 strict-mode tests and
+FORTRAN 77 strict-mode wrapper tests.
+
 ## 3. Fortran 90/95 Unified Fixed/Free Form
 
 Fortran 90 and later use a **unified grammar** that accepts both
@@ -213,7 +224,7 @@ demonstrates valid F90 fixed-form source using the supported constructs.
 This approach aligns with F90 being a transitional standard that strongly
 encouraged adoption of free-form source and modern control structures.
 
-### 3.2 Fortran 90 Strict Fixed-Form Mode (Issue #673)
+### 3.2 Fortran 90 Strict Fixed-Form Mode
 
 Fortran 90 now provides an optional **strict fixed-form validator** that enforces
 card layout semantics per ISO/IEC 1539:1991 Section 3.3, complementing the
@@ -258,15 +269,13 @@ lenient, result = convert_to_lenient_90(source, strip_comments=False)
 - `invalid_continuation_with_label.f90`: Continuation with label (rejected)
 - `invalid_label_out_of_range.f90`: Invalid label format (rejected)
 
-**Test Suite** in `tests/Fortran90/test_strict_fixed_form.py`:
+**Test Suite** in `tests/Fortran90/test_issue673_strict_fixed_form.py`:
 - 24 test cases covering card parsing, validation, and lenient conversion
 - Comprehensive fixture testing for both valid and invalid cases
 
 The strict mode preprocessor enables historical audits requiring exact
 card-image conformance while keeping the lenient grammar parsing mode
-available for modern Fortran 90 tooling. Issue #673 implements this feature
-to achieve full ISO/IEC 1539:1991 Section 3.3 compliance for Fortran 90
-fixed-form source validation.
+available for modern Fortran 90 tooling.
 
 ## 4. Fortran 2003 Fixed-form (Unified Grammar)
 
@@ -275,13 +284,9 @@ Fortran 2003 inherits the unified fixed/free architecture:
 - `Fortran2003Lexer.g4` imports `Fortran95Lexer.g4` and adds:
   - F2003 object‑oriented, C interoperability, IEEE arithmetic tokens.
   - Fixed-form comment tokens tuned for the representative test cases.
-- `docs/fortran_2003_audit.md` documents the current status:
-  - Representative fixed-form F2003 code paths are implemented and
-    tested (`tests/Fortran2003/test_fortran_2003_comprehensive.py`,
-    `tests/Fortran2003/test_issue72_fixed_form_f2003.py`).
-  - **Strict historical column semantics for fixed-form source are
-    explicitly listed as “Intentionally out of scope or not yet
-    implemented” and remain under umbrella Issue #91.**
+- Representative fixed-form F2003 code paths are implemented and tested:
+  - `tests/Fortran2003/test_fortran_2003_comprehensive.py`
+  - `tests/Fortran2003/test_issue72_fixed_form_f2003.py`
 
 In practice this means:
 
@@ -291,17 +296,16 @@ In practice this means:
   ISO text.
 - Tests assert that modern F2003 features (OOP, CLASS(*), BIND(C),
   PDTs) work correctly when written in typical fixed-form style, while
-  more exotic column‑sensitive behaviours are intentionally left out.
+  dedicated strict column preprocessing is not currently provided for
+  Fortran 2003+.
 
-## 5. Out-of-scope Fixed-form Features (Tracked by Issue #91)
+## 5. Remaining Fixed-form Gaps
 
 The following behaviours are **not currently implemented** and are
-considered out of scope for the subset implemented in this repository:
+not part of the current fixed-form implementation:
 
-- Full 80‑column line semantics per historical standards, including:
-  - Enforcing statement labels strictly in columns 1–5.
-  - Treating any non‑blank in column 6 as a continuation mark.
-  - Distinguishing statement text (7–72) from sequence numbers (73–80).
+- A strict fixed-form preprocessor for Fortran 2003+ unified grammars,
+  including full 80-column line semantics for those standards.
 - Vendor‑specific or dialect‑specific fixed-form extensions not covered
   by the tests in `tests/` (for example, non‑standard comment markers).
 - Card‑image reconstruction, listing‑file reproduction and other
@@ -309,14 +313,10 @@ considered out of scope for the subset implemented in this repository:
 
 Future work on these features should:
 
-- Reference **Issue #91** in the issue body and tests.
 - Include **spec‑grounded test cases** (preferably real historical
   programs) that demonstrate both:
   - The intended behaviour under strict column rules.
   - The current behaviour of this grammar (to avoid regressions).
 
-This document, together with the existing audit in
-`docs/fortran_2003_audit.md` and the fixture expectations in
-`tests/test_fixture_parsing.py`, forms the explicit specification of the
-fixed-form subset implemented today.
-
+This document and the fixture expectations in `tests/test_fixture_parsing.py`
+form the explicit specification of the fixed-form subset implemented today.

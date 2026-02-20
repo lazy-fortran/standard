@@ -39,7 +39,7 @@ class TestValidationPipeline(unittest.TestCase):
         except Exception as exc:
             pytest.skip(
                 f"External kaby76/fortran repository not available "
-                f"(see issue #92): {exc}"
+                f"(validation environment not provisioned): {exc}"
             )
         return ExtractionRunner(self.test_dir)
     
@@ -51,7 +51,7 @@ class TestValidationPipeline(unittest.TestCase):
         if not runner.verify_setup():
             pytest.skip(
                 "External Trash/.NET toolchain not available "
-                "(verify_setup() is False, see issue #92)"
+                "(verify_setup() is False)"
             )
         
         self.assertTrue(runner.verify_setup())
@@ -82,7 +82,7 @@ class TestValidationPipeline(unittest.TestCase):
         if not runner.verify_setup():
             pytest.skip(
                 "External Trash/.NET toolchain not available "
-                "(verify_setup() is False, see issue #92)"
+                "(verify_setup() is False)"
             )
         
         # Try to extract Fortran 2023 (should be most complete).
@@ -99,7 +99,7 @@ class TestValidationPipeline(unittest.TestCase):
         if not runner.verify_setup():
             pytest.skip(
                 "External Trash/.NET toolchain not available "
-                "(verify_setup() is False, see issue #92)"
+                "(verify_setup() is False)"
             )
         
         result = runner.extract_standard('Fortran 2023')

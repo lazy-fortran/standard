@@ -54,7 +54,7 @@ then
         validation/tools/run_extraction.py "$REPO_ROOT" "Fortran 2018"
 else
     echo "⚠ External extraction toolchain unavailable (.NET/Trash tools missing)"
-    echo "  Skipping grammar extraction steps (see issue #92)."
+    echo "  Skipping grammar extraction steps on this machine."
     echo ""
     echo "=== Validation Pipeline Complete (Partial) ==="
     echo "✓ Validation tests passing"
