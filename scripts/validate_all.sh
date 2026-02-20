@@ -1,8 +1,6 @@
 #!/bin/bash
-"""
-Main validation script that runs the complete validation pipeline.
-Downloads tools if needed, generates reference grammars, and validates them.
-"""
+# Main validation script that runs the complete validation pipeline.
+# Downloads tools if needed, generates reference grammars, and validates them.
 
 set -euo pipefail
 
@@ -25,22 +23,47 @@ fi
 # Run all validation tests
 echo "Running validation test suite..."
 cd "$REPO_ROOT"
+OMP_NUM_THREADS="${OMP_NUM_THREADS:-24}"
 
 echo ""
 echo "1. Testing kaby76 downloader..."
-OMP_NUM_THREADS=24 python3 validation/tools/test_download_kaby76.py
+OMP_NUM_THREADS="$OMP_NUM_THREADS" python3 -m pytest -q \
+    validation/tools/test_download_kaby76.py
 
 echo ""
 echo "2. Testing validation pipeline..."
-OMP_NUM_THREADS=24 python3 validation/tools/test_validation_pipeline.py
+OMP_NUM_THREADS="$OMP_NUM_THREADS" python3 -m pytest -q \
+    validation/tools/test_validation_pipeline.py
 
 echo ""
-echo "3. Generating reference grammars..."
-OMP_NUM_THREADS=24 python3 validation/tools/run_extraction.py "$REPO_ROOT" "Fortran 2023"
-OMP_NUM_THREADS=24 python3 validation/tools/run_extraction.py "$REPO_ROOT" "Fortran 2018"
+echo "3. Checking extraction toolchain availability..."
+if python3 - <<'PY'
+import os
+import sys
+sys.path.insert(0, os.path.join(os.getcwd(), "validation", "tools"))
+from run_extraction import ExtractionRunner
+sys.exit(0 if ExtractionRunner(os.getcwd()).verify_setup() else 1)
+PY
+then
+    echo "✓ External extraction toolchain available"
+    echo ""
+    echo "4. Generating reference grammars..."
+    OMP_NUM_THREADS="$OMP_NUM_THREADS" python3 \
+        validation/tools/run_extraction.py "$REPO_ROOT" "Fortran 2023"
+    OMP_NUM_THREADS="$OMP_NUM_THREADS" python3 \
+        validation/tools/run_extraction.py "$REPO_ROOT" "Fortran 2018"
+else
+    echo "⚠ External extraction toolchain unavailable (.NET/Trash tools missing)"
+    echo "  Skipping grammar extraction steps (see issue #92)."
+    echo ""
+    echo "=== Validation Pipeline Complete (Partial) ==="
+    echo "✓ Validation tests passing"
+    echo "⚠ Reference extraction skipped on this machine"
+    exit 0
+fi
 
 echo ""
-echo "4. Validating generated grammars exist..."
+echo "5. Validating generated grammars exist..."
 EXPECTED_GRAMMARS=(
     "validation/auto-generated/fortran2023/fortran2023.g4"
     "validation/auto-generated/fortran2018/fortran2018.g4"
