@@ -11,7 +11,9 @@ To download the kaby76/fortran reference repository:
 ./setup_validation.sh
 ```
 
-This will download the [kaby76/fortran](https://github.com/kaby76/fortran.git) repository into `external/kaby76-fortran/` for comparison with our grammar implementation.
+This ensures the [kaby76/fortran](https://github.com/kaby76/fortran.git)
+reference material is available under `external/kaby76-fortran/` for
+comparison with our grammar implementation.
 
 ## Directory Structure
 
@@ -20,8 +22,10 @@ validation/
 ├── tools/              # Validation utilities
 │   ├── download_kaby76.py      # Downloads kaby76/fortran repo
 │   └── ...
-├── external/           # External resources (git-ignored)
-│   └── kaby76-fortran/ # Downloaded on-demand from GitHub
+├── external/           # External resources (some committed, some synced)
+│   ├── flang-grammar/  # Committed reference material
+│   ├── FortranAS/      # Committed extraction framework mirror
+│   └── kaby76-fortran/ # Synced/updated by setup scripts
 ├── cache/             # Processing cache (git-ignored) 
 ├── auto-generated/    # Generated reference files (git-ignored)
 └── setup_validation.sh # One-click setup script
@@ -29,7 +33,10 @@ validation/
 
 ## Git Policy
 
-All content in `external/`, `cache/`, `auto-generated/`, and `pdfs/` directories is **git-ignored** and downloaded on-demand. This keeps the repository clean while providing access to reference materials for validation.
+- `cache/` and `auto-generated/` are git-ignored local artifacts.
+- `external/` contains committed reference materials plus content that setup
+  scripts may refresh locally.
+- `validation/pdfs/` is used by `make download-standards` as a local cache.
 
 ## Usage
 

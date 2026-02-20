@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Setup validation environment by downloading kaby76/fortran repository on-demand
-# This keeps the repo clean while providing access to reference grammars and examples
+# Setup validation environment by syncing the kaby76/fortran reference repository.
+# The validation tree also includes committed external reference material.
 #
 
 set -e
@@ -26,7 +26,7 @@ if [ -d "$KABY76_DIR" ]; then
     echo "    - $(ls -la "$KABY76_DIR/examples"/*.f90 2>/dev/null | wc -l) example files found"
     echo ""
     echo "Validation environment ready!"
-    echo "Files are git-ignored and downloaded on-demand."
+    echo "kaby76 reference content is now available/updated under external/."
 else
     echo "✗ Failed to setup validation environment"
     exit 1

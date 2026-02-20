@@ -378,26 +378,38 @@ download-standards:
 	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran90_WG5_N692.pdf \
 		https://wg5-fortran.org/N001-N1100/N692.pdf \
 		|| echo "    ⚠️  Failed to download WG5 N692 (Fortran 90 draft)"
-	@echo "  - Fortran 95 related document (Fortran 95 Request for Interpretation)"
+	@echo "  - Fortran 95 draft/final text (WG5 N1191)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran95_WG5_N1191.pdf \
+		https://wg5-fortran.org/N1151-N1200/N1191.pdf \
+		|| echo "    ⚠️  Failed to download WG5 N1191 (Fortran 95 draft/final)"
+	@echo "  - Fortran 95 related document (J3 RFI paper 98-114)"
 	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran95_J3_98-114_RFI.txt \
 		https://j3-fortran.org/doc/year/98/98-114.txt \
 		|| echo "    ⚠️  Failed to download J3 98-114 (Fortran 95 RFI)"
-	@echo "  - Fortran 2003 draft/final text (J3/03-007)"
-	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran2003_J3_03-007.pdf \
+	@echo "  - Fortran 2003 draft/final text (J3/04-007 preferred, 03-007 fallback)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran2003_J3_04-007.pdf \
+		https://j3-fortran.org/doc/year/04/04-007.pdf \
+		|| $(CURL_STD) -o $(STANDARDS_DIR)/Fortran2003_J3_04-007.pdf \
 		https://j3-fortran.org/doc/year/03/03-007.pdf \
-		|| echo "    ⚠️  Failed to download J3 03-007 (Fortran 2003)"
-	@echo "  - Fortran 2008 draft/final text (J3/08-007)"
-	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran2008_J3_08-007.pdf \
+		|| echo "    ⚠️  Failed to download J3 04-007/03-007 (Fortran 2003)"
+	@echo "  - Fortran 2008 draft/final text (J3/10-007r1 preferred, 08-007 fallback)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran2008_J3_10-007r1.pdf \
+		https://j3-fortran.org/doc/year/10/10-007r1.pdf \
+		|| $(CURL_STD) -o $(STANDARDS_DIR)/Fortran2008_J3_10-007r1.pdf \
 		https://j3-fortran.org/doc/year/08/08-007.pdf \
-		|| echo "    ⚠️  Failed to download J3 08-007 (Fortran 2008)"
-	@echo "  - Fortran 2018 draft/final text (J3/15-007)"
-	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran2018_J3_15-007.pdf \
+		|| echo "    ⚠️  Failed to download J3 10-007r1/08-007 (Fortran 2008)"
+	@echo "  - Fortran 2018 draft/final text (J3/18-007r1 preferred, 15-007 fallback)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran2018_J3_18-007r1.pdf \
+		https://j3-fortran.org/doc/year/18/18-007r1.pdf \
+		|| $(CURL_STD) -o $(STANDARDS_DIR)/Fortran2018_J3_18-007r1.pdf \
 		https://j3-fortran.org/doc/year/15/15-007.pdf \
-		|| echo "    ⚠️  Failed to download J3 15-007 (Fortran 2018)"
-	@echo "  - Fortran 2023 draft/final text (J3/22-007)"
-	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran2023_J3_22-007.pdf \
+		|| echo "    ⚠️  Failed to download J3 18-007r1/15-007 (Fortran 2018)"
+	@echo "  - Fortran 2023 draft/final text (J3/23-007r1 preferred, 22-007 fallback)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran2023_J3_23-007r1.pdf \
+		https://j3-fortran.org/doc/year/23/23-007r1.pdf \
+		|| $(CURL_STD) -o $(STANDARDS_DIR)/Fortran2023_J3_23-007r1.pdf \
 		https://j3-fortran.org/doc/year/22/22-007.pdf \
-		|| echo "    ⚠️  Failed to download J3 22-007 (Fortran 2023)"
+		|| echo "    ⚠️  Failed to download J3 23-007r1/22-007 (Fortran 2023)"
 	@echo "✅ Download complete (see $(STANDARDS_DIR))"
 
 # OCR historical scanned PDFs into plain text for audit use.
@@ -413,10 +425,11 @@ ocr-standards:
 		FORTRANII_1958_IBM704_C28-6000-2.pdf \
 		FORTRAN66_ANSI_X3.9-1966.pdf \
 		Fortran90_WG5_N692.pdf \
-		Fortran2003_J3_03-007.pdf \
-		Fortran2008_J3_08-007.pdf \
-		Fortran2018_J3_15-007.pdf \
-		Fortran2023_J3_22-007.pdf; do \
+		Fortran95_WG5_N1191.pdf \
+		Fortran2003_J3_04-007.pdf \
+		Fortran2008_J3_10-007r1.pdf \
+		Fortran2018_J3_18-007r1.pdf \
+		Fortran2023_J3_23-007r1.pdf; do \
 		if [ -f "$(STANDARDS_DIR)/$$pdf" ]; then \
 			base=$${pdf%.pdf}; \
 			txt_file="$(STANDARDS_DIR)/$${base}.txt"; \
