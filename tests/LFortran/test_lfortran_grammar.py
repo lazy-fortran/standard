@@ -62,14 +62,40 @@ def tokenize(source: str) -> list:
 
 
 def parse(source: str):
-    """Parse source code and return parse tree."""
+    """Parse source code and return parse tree with zero syntax errors."""
     if not PARSER_AVAILABLE:
         pytest.skip("LFortran parser not generated")
     input_stream = InputStream(source)
     lexer = LFortranLexer(input_stream)
     token_stream = CommonTokenStream(lexer)
     parser = LFortranParser(token_stream)
-    return parser.program_lfortran()
+    tree = parser.program_lfortran()
+    errors = parser.getNumberOfSyntaxErrors()
+    if errors > 0:
+        raise SyntaxError(f"LFortran parser reported {errors} syntax error(s)")
+    return tree
+
+
+WALRUS_FIXTURES = [
+    "infer_walrus_01.f90",
+    "infer_walrus_02.f90",
+    "infer_walrus_03.f90",
+    "infer_walrus_array_01.f90",
+    "infer_walrus_array_02.f90",
+    "infer_walrus_array_03.f90",
+    "infer_walrus_shadow_01.f90",
+    "infer_walrus_shadow_02.f90",
+    "infer_walrus_shadow_03.f90",
+    "infer_walrus_struct_01.f90",
+    "infer_walrus_struct_02.f90",
+    "infer_walrus_struct_03.f90",
+]
+
+WALRUS_SEMANTIC_SHAPE_FIXTURES = [
+    "infer_walrus_error_01.f90",
+    "infer_walrus_error_02.f90",
+    "infer_walrus_redecl_01.f90",
+]
 
 
 # =============================================================================
@@ -514,6 +540,40 @@ end program test
             assert tree is not None
         except Exception as e:
             pytest.fail(f"Inline with kind parsing failed: {e}")
+
+
+# =============================================================================
+# TYPE INFERENCE / WALRUS TESTS
+# =============================================================================
+
+class TestInferWalrus:
+    """Test walrus syntax and infer-related parsing in LFortran grammar."""
+
+    def test_walrus_token_recognized(self):
+        """Verify := is tokenized as COLON_EQUAL."""
+        tokens = tokenize("x := 1")
+        token_types = [t.type for t in tokens]
+        assert LFortranLexer.COLON_EQUAL in token_types
+
+    @pytest.mark.parametrize("fixture", WALRUS_FIXTURES)
+    def test_walrus_fixture_parses(self, fixture):
+        """Walrus feature fixtures should parse without syntax errors."""
+        source = load_fixture(fixture)
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Walrus fixture parsing failed ({fixture}): {e}")
+
+    @pytest.mark.parametrize("fixture", WALRUS_SEMANTIC_SHAPE_FIXTURES)
+    def test_walrus_semantic_error_shapes_still_parse(self, fixture):
+        """Semantic-error shapes from upstream should stay syntax-valid here."""
+        source = load_fixture(fixture)
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Walrus semantic-shape parsing failed ({fixture}): {e}")
 
 
 # =============================================================================

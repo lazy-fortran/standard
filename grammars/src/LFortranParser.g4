@@ -60,10 +60,10 @@ lfortran_unit
 //   END TEMPLATE [ template-name ]
 
 template_construct
-    : TEMPLATE_KW NAME LBRACE template_param_list RBRACE NEWLINE*
+    : TEMPLATE_KW identifier_or_keyword LBRACE template_param_list RBRACE NEWLINE*
       template_specification_part?
       template_contains_part?
-      END_TEMPLATE NAME? NEWLINE*
+      END_TEMPLATE identifier_or_keyword? NEWLINE*
     ;
 
 template_param_list
@@ -71,7 +71,7 @@ template_param_list
     ;
 
 template_param
-    : NAME                        // Type parameter name
+    : identifier_or_keyword       // Type parameter name
     ;
 
 template_specification_part
@@ -88,7 +88,7 @@ template_specification_stmt
 
 // TYPE, DEFERRED :: type-parameter
 type_deferred_stmt
-    : TYPE COMMA DEFERRED_KW DOUBLE_COLON NAME NEWLINE*
+    : TYPE COMMA DEFERRED_KW DOUBLE_COLON identifier_or_keyword NEWLINE*
     ;
 
 template_contains_part
@@ -113,10 +113,10 @@ template_subprogram
 //   END REQUIREMENT [ requirement-name ]
 
 requirement_construct
-    : REQUIREMENT_KW NAME LBRACE template_param_list RBRACE NEWLINE*
+    : REQUIREMENT_KW identifier_or_keyword LBRACE template_param_list RBRACE NEWLINE*
       requirement_specification_part?
       requirement_interface_part?
-      END_REQUIREMENT NAME? NEWLINE*
+      END_REQUIREMENT identifier_or_keyword? NEWLINE*
     ;
 
 requirement_specification_part
@@ -136,10 +136,10 @@ requirement_interface_part
 abstract_interface_body
     : function_stmt_f2018
       specification_part?
-      END_FUNCTION NAME? NEWLINE*
+      end_function_stmt
     | subroutine_stmt_f2018
       specification_part?
-      END_SUBROUTINE NAME? NEWLINE*
+      end_subroutine_stmt
     ;
 
 // ============================================================================
@@ -159,7 +159,7 @@ requirement_reference_list
     ;
 
 requirement_reference
-    : NAME LBRACE instantiation_arg_spec_list? RBRACE
+    : identifier_or_keyword LBRACE instantiation_arg_spec_list? RBRACE
     ;
 
 instantiation_arg_spec_list
@@ -167,13 +167,14 @@ instantiation_arg_spec_list
     ;
 
 instantiation_arg_spec
-    : (NAME EQUALS)? instantiation_arg
+    : (identifier_or_keyword EQUALS)? instantiation_arg
     ;
 
 instantiation_arg
-    : NAME                        // Type parameter or procedure name
+    : identifier_or_keyword       // Type parameter or procedure name
     | intrinsic_type_spec_f95     // INTEGER, REAL(8), etc.
     | derived_type_spec           // TYPE(my_type)
+    | TYPE LPAREN identifier_or_keyword RPAREN
     ;
 
 // ============================================================================
@@ -185,7 +186,8 @@ instantiation_arg
 //   INSTANTIATE [::] template-name { arg-spec-list } [, ONLY : rename-list ]
 
 instantiate_stmt
-    : INSTANTIATE_KW DOUBLE_COLON? NAME LBRACE instantiation_arg_spec_list? RBRACE
+    : INSTANTIATE_KW DOUBLE_COLON? identifier_or_keyword LBRACE
+      instantiation_arg_spec_list? RBRACE
       instantiate_only_clause? NEWLINE*
     ;
 
@@ -198,8 +200,9 @@ rename_list
     ;
 
 rename
-    : NAME POINTER_ASSIGN NAME    // local-name => template-name
-    | NAME                        // use-name
+    : identifier_or_keyword POINTER_ASSIGN identifier_or_keyword
+      // local-name => template-name
+    | identifier_or_keyword                                        // use-name
     ;
 
 // ============================================================================
@@ -215,27 +218,27 @@ rename
 // Reference: J3/24-107r1 - Simple template procedures
 
 simple_template_function
-    : prefix? FUNCTION NAME LBRACE deferred_arg_list RBRACE
+    : prefix? FUNCTION identifier_or_keyword LBRACE deferred_arg_list RBRACE
       LPAREN dummy_arg_name_list? RPAREN suffix? NEWLINE*
       template_specification_part?
       specification_part?
       execution_part?
       internal_subprogram_part_f2003?
-      END_FUNCTION NAME? NEWLINE*
+      end_function_stmt
     ;
 
 simple_template_subroutine
-    : prefix? SUBROUTINE NAME LBRACE deferred_arg_list RBRACE
+    : prefix? SUBROUTINE identifier_or_keyword LBRACE deferred_arg_list RBRACE
       LPAREN dummy_arg_name_list? RPAREN NEWLINE*
       template_specification_part?
       specification_part?
       execution_part?
       internal_subprogram_part_f2003?
-      END_SUBROUTINE NAME? NEWLINE*
+      end_subroutine_stmt
     ;
 
 deferred_arg_list
-    : NAME (COMMA NAME)*
+    : identifier_or_keyword (COMMA identifier_or_keyword)*
     ;
 
 // ============================================================================
@@ -256,28 +259,171 @@ inline_instantiate_args
 // Inline instantiated procedure reference (for function calls in expressions)
 // Matches: name{type}(args) or name^(type)(args)
 inline_instantiated_function_ref
-    : NAME LBRACE inline_instantiate_args RBRACE LPAREN actual_arg_list? RPAREN
-    | NAME CARET LPAREN inline_instantiate_args RPAREN LPAREN actual_arg_list? RPAREN
+    : identifier_or_keyword LBRACE inline_instantiate_args RBRACE
+      LPAREN actual_arg_list? RPAREN
+    | identifier_or_keyword CARET LPAREN inline_instantiate_args RPAREN
+      LPAREN actual_arg_list? RPAREN
     ;
 
 // Inline instantiated call statement
 // Matches: CALL name{type}(args) or CALL name^(type)(args)
 inline_instantiate_call_stmt
-    : CALL NAME LBRACE inline_instantiate_args RBRACE
+    : CALL identifier_or_keyword LBRACE inline_instantiate_args RBRACE
       LPAREN actual_arg_list? RPAREN NEWLINE*
-    | CALL NAME CARET LPAREN inline_instantiate_args RPAREN
+    | CALL identifier_or_keyword CARET LPAREN inline_instantiate_args RPAREN
       LPAREN actual_arg_list? RPAREN NEWLINE*
+    ;
+
+// Names accepted by LFortran extensions in contexts where the base grammars
+// still require strict IDENTIFIER matching.
+lfortran_name
+    : identifier_or_keyword
+    | C
+    | DOUBLE
+    ;
+
+// ============================================================================
+// PROCEDURE/PREFIX OVERRIDES (LFortran Extensions)
+// ============================================================================
+// Use modern prefix specs for all contexts that still reference legacy `prefix`.
+// Allow keyword-like names where LFortran accepts them.
+
+prefix
+    : prefix_spec_f2008+
+    ;
+
+function_stmt_f2018
+    : prefix? FUNCTION lfortran_name LPAREN dummy_arg_name_list? RPAREN
+      suffix? binding_spec? NEWLINE
+    ;
+
+subroutine_stmt_f2018
+    : prefix? SUBROUTINE lfortran_name (LPAREN dummy_arg_name_list? RPAREN)?
+      binding_spec? NEWLINE
+    ;
+
+function_stmt_interface
+    : (prefix)? FUNCTION lfortran_name LPAREN dummy_arg_name_list? RPAREN
+      (suffix)? binding_spec? NEWLINE
+    ;
+
+subroutine_stmt_interface
+    : (prefix)? SUBROUTINE lfortran_name
+      (LPAREN dummy_arg_name_list? RPAREN)? binding_spec? NEWLINE
+    ;
+
+end_subroutine_stmt_interface
+    : END (SUBROUTINE (lfortran_name)?)? NEWLINE
+    ;
+
+end_function_stmt_interface
+    : END (FUNCTION (lfortran_name)?)? NEWLINE
+    ;
+
+end_subroutine_stmt
+    : END (SUBROUTINE (lfortran_name)?)? NEWLINE?
+    ;
+
+end_function_stmt
+    : END (FUNCTION (lfortran_name)?)? NEWLINE?
+    ;
+
+// ============================================================================
+// NAME-ACCEPTANCE OVERRIDES (LFortran Extensions)
+// ============================================================================
+// Keep declaration and designator parsing robust when lexer tokenizes short
+// names like `c` and words like `double` as keyword tokens.
+
+designator_component
+    : lfortran_name designator_parentheses?
+    ;
+
+derived_component
+    : PERCENT lfortran_name designator_parentheses?
+    ;
+
+entity_decl
+    : lfortran_name (LPAREN array_spec RPAREN)? (EQUALS expr_f2003)?
+    ;
+
+entity_decl_f90
+    : lfortran_name (LPAREN array_spec_f90 RPAREN)? (MULTIPLY char_length)?
+      (ASSIGN expr_f90)?
+    ;
+
+// ============================================================================
+// DECLARATION CONSTRUCT OVERRIDE (LFortran Extensions)
+// ============================================================================
+// Allow J3 generics constructs in F2018 specification parts (e.g. modules).
+
+declaration_construct_f2018
+    : template_construct
+    | requirement_construct
+    | instantiate_stmt
+    | derived_type_def_f2003
+    | class_declaration_stmt
+    | procedure_declaration_stmt
+    | interface_block
+    | volatile_stmt
+    | protected_stmt
+    | contiguous_stmt
+    | event_declaration_stmt
+    | team_declaration_stmt
+    | type_declaration_stmt_f2018
+    | format_stmt
+    | declaration_construct_f2008
     ;
 
 // ============================================================================
 // EXECUTABLE CONSTRUCT OVERRIDE (LFortran Extensions)
 // ============================================================================
-// Override F2023 executable_construct to include J3 Generics inline instantiation
+// Override F2023 executable_construct to include J3 Generics inline
+// instantiation and explicit instantiate statements.
 
-executable_construct_lfortran
+executable_construct_f2018
     : inline_instantiate_call_stmt       // J3 Generics: call name{type}(args)
     | instantiate_stmt                   // J3 Generics: explicit instantiate
-    | executable_construct_f2018         // Inherit F2023 constructs
+    | type_declaration_stmt_f2018
+      // Keep declarations reachable if execution-part is chosen
+    | assignment_stmt                 // Inherit from F2003
+    | call_stmt                       // Inherit from F2003
+    | print_stmt                      // Inherit from F2003
+    | stop_stmt_f2018                 // Enhanced in F2018 (R1160)
+    | error_stop_stmt_f2018           // Enhanced in F2018 (R1161)
+    | select_type_construct           // Inherit from F2003
+    | select_rank_construct           // NEW in F2018 (R1148-R1151)
+    | associate_construct             // Inherit from F2003
+    | block_construct_f2008           // Inherit from F2008
+    | allocate_stmt_f2008             // Inherit from F2008
+    | collective_subroutine_call      // NEW in F2018 (Section 16.9.46-50)
+    | team_construct                  // NEW in F2018 (teams: R1111-R1115, R1175-R1178)
+    | event_construct                 // NEW in F2018 (events: R1170-R1173)
+    | notify_wait_stmt_f2023          // NEW in F2023 (Section 11.6, R1179)
+    | sync_construct                  // Inherit from F2008
+    | wait_stmt                       // Inherit from F2003
+    | flush_stmt                      // Inherit from F2003
+    | open_stmt                       // I/O: OPEN (Section 12.5.6)
+    | close_stmt                      // I/O: CLOSE (Section 12.5.7)
+    | write_stmt                      // I/O: WRITE (Section 12.6.2)
+    | read_stmt                       // I/O: READ (Section 12.6.1)
+    | inquire_stmt                    // I/O: INQUIRE (Section 12.10.3)
+    | if_construct                    // Inherit from F95
+    | do_construct_f2018              // Enhanced in F2018 (R1119-R1132, DO CONCURRENT)
+    | select_case_construct           // Inherit from F95
+    | executable_construct_f2008      // Inherit F2008 constructs
+    ;
+
+// ============================================================================
+// ASSIGNMENT OVERRIDE (LFortran Extensions)
+// ============================================================================
+// Extend assignment syntax with walrus declaration operator used by infer mode.
+// This mirrors LFortran parser behavior where walrus support is syntax-level
+// and semantic restrictions are enforced later in compilation.
+
+assignment_stmt
+    : lhs_expression EQUALS expr_f2003
+    | lhs_expression POINTER_ASSIGN primary
+    | lhs_expression COLON_EQUAL expr_f2003
     ;
 
 // ============================================================================
@@ -285,8 +431,30 @@ executable_construct_lfortran
 // ============================================================================
 // Override to include inline instantiated function calls in expressions
 
-// Primary expression extended with inline instantiation
-primary_lfortran
+primary
     : inline_instantiated_function_ref   // J3 Generics: name{type}(args)
-    | primary                            // Inherit from F2023
+    | complex_literal_constant           // Legacy and modern complex literal syntax
+    | designator
+    | complex_part_designator
+    | type_param_inquiry
+    | identifier_or_keyword (PERCENT identifier_or_keyword)*
+    | identifier_or_keyword LPAREN actual_arg_list? RPAREN
+    | identifier_or_keyword DOUBLE_QUOTE_STRING
+    | identifier_or_keyword SINGLE_QUOTE_STRING
+    | intrinsic_function_call_f2018
+    | ieee_constant
+    | INTEGER_LITERAL
+    | LABEL
+    | REAL_LITERAL
+    | SINGLE_QUOTE_STRING
+    | DOUBLE_QUOTE_STRING
+    | '*'
+    | array_constructor
+    | LPAREN primary RPAREN
+    ;
+
+// Complex literal constant:
+//   (real-part, imag-part)
+complex_literal_constant
+    : LPAREN expr_f2003 COMMA expr_f2003 RPAREN
     ;

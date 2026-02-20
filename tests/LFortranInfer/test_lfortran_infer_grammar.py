@@ -45,14 +45,28 @@ def load_fixture(name: str) -> str:
 
 
 def parse(source: str):
-    """Parse source code and return parse tree."""
+    """Parse source code and return parse tree with zero syntax errors."""
     if not PARSER_AVAILABLE:
         pytest.skip("LFortranInfer parser not generated")
     input_stream = InputStream(source)
     lexer = LFortranInferLexer(input_stream)
     token_stream = CommonTokenStream(lexer)
     parser = LFortranInferParser(token_stream)
-    return parser.program_lfortran_infer()
+    tree = parser.program_lfortran_infer()
+    errors = parser.getNumberOfSyntaxErrors()
+    if errors > 0:
+        raise SyntaxError(f"LFortranInfer parser reported {errors} syntax error(s)")
+    return tree
+
+
+INFER_FIXTURES = [
+    "infer_first_assignment_01.f90",
+    "infer_first_assignment_derived_01.f90",
+    "infer_walrus_global_01.f90",
+    "infer_walrus_global_02.f90",
+    "infer_walrus_shadow_01.f90",
+    "infer_walrus_error_shape_01.f90",
+]
 
 
 # =============================================================================
@@ -160,7 +174,7 @@ end program main
 use iso_fortran_env, only: dp => real64
 
 ! Template definition (J3 generics)
-template numeric_t(T)
+template numeric_t{T}
     type, deferred :: T
 contains
     function double(x) result(res)
@@ -180,6 +194,24 @@ print *, value
             assert tree is not None
         except Exception as e:
             pytest.fail(f"Script with template parsing failed: {e}")
+
+
+# =============================================================================
+# INFER MODE / WALRUS TESTS
+# =============================================================================
+
+class TestInferModeWalrus:
+    """Test infer-mode fixtures for first-assignment and walrus syntax."""
+
+    @pytest.mark.parametrize("fixture", INFER_FIXTURES)
+    def test_infer_mode_fixtures_parse(self, fixture):
+        """Infer-mode fixtures should parse without syntax errors."""
+        source = load_fixture(fixture)
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Infer-mode fixture parsing failed ({fixture}): {e}")
 
 
 # =============================================================================

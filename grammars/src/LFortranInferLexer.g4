@@ -27,5 +27,6 @@ import LFortranLexer;
 // All tokens are inherited from LFortranLexer (which includes):
 //   - Fortran 2023 tokens (from Fortran2023Lexer)
 //   - J3 Generics tokens (TEMPLATE, REQUIREMENT, REQUIRE, INSTANTIATE, DEFERRED)
-//   - No new tokens required for infer mode (handled in parser)
+//   - Type inference token (COLON_EQUAL for :=)
+//   - No additional infer-specific tokens required here
 // ============================================================================

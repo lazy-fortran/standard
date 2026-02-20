@@ -29,7 +29,7 @@ All features are **single-pass** (local or module-local analysis only):
 - Default `implicit none` injection
 - Default precision (real=8 bytes, integer=4 bytes)
 - Template/requirement instantiation
-- Type inference (infer mode only, intrinsic types only)
+- Type inference (`:=` syntax and `--infer` first assignment)
 
 **Explicitly NOT supported** (would require whole-program analysis):
 - Implicit monomorphization from call sites
