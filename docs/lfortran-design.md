@@ -20,6 +20,25 @@ For normative specifications, see:
 4. **Modern safety patterns** - Immutable by default, no silent overflow
 5. **Standard compatibility** - All code compiles with standard Fortran compilers
 
+## Generics and Traits Landscape
+
+The Fortran ecosystem currently has multiple related but distinct proposal tracks.
+These are often discussed together, but they are not the same feature set.
+
+| Track | Primary Sources | Scope | Current Grammar Status (this repo) |
+|------|------------------|-------|-------------------------------------|
+| **J3 Generics (official 202Y track)** | J3/24-107r1, J3 syntax papers 24-125r5/24-126r4/24-127r4 | Compile-time generic programming via `TEMPLATE`, `REQUIREMENT`, `REQUIRES`, `INSTANTIATE` | Implemented |
+| **LFortran "Simpler Generics" syntax** | LFortran issue discussions (e.g., lfortran/lfortran#1838) | User-facing syntax preference for inline instantiation with curly braces | Implemented (`name{T}(...)`) |
+| **Traits for Fortran proposals** | J3/20-109, fortran_proposals #125, Traits-for-Fortran repository | Trait/interface conformance (`trait`, `implements`, trait-typed entities), primarily runtime polymorphism and trait constraints | Not implemented |
+
+### Orthogonality
+
+J3 generics and traits proposals cover orthogonal concerns:
+- **J3 generics** parameterize procedures/templates at compile time.
+- **Traits proposals** define interface conformance contracts and polymorphic usage patterns.
+
+They can be composed in design discussions, but one does not replace the other.
+
 ## Feature Classification
 
 All features are **single-pass** (local or module-local analysis only):
@@ -28,7 +47,7 @@ All features are **single-pass** (local or module-local analysis only):
 - Default `intent(in)` for arguments
 - Default `implicit none` injection
 - Default precision (real=8 bytes, integer=4 bytes)
-- Template/requirement instantiation
+- Template/requirement instantiation and inline instantiation (`{}` and `^()`)
 - Type inference (`:=` syntax and `--infer` first assignment)
 
 **Explicitly NOT supported** (would require whole-program analysis):
@@ -97,11 +116,17 @@ LFortran features are implemented in [LFortran](https://github.com/lfortran/lfor
 | Default real = 8 bytes | Planned |
 | Default `intent(in)` | Planned |
 | Dot notation | Planned |
-| J3 Generics | In progress |
+| J3 Generics base (`TEMPLATE`/`REQUIREMENT`/`INSTANTIATE`) | In progress |
+| Inline instantiation syntax (`name{T}(...)`, `name^(T)(...)`) | In progress |
+| Traits syntax (`trait`, `implements`) | Not implemented |
 
 ## References
 
 - ISO/IEC 1539-1:2023 (Fortran 2023)
 - [LFortran Compiler](https://lfortran.org)
 - [J3 Generics Repository](https://github.com/j3-fortran/generics)
-- [J3 Paper 24-107r1](https://j3-fortran.org/doc/year/24/)
+- [J3 Paper 24-107r1](https://j3-fortran.org/doc/year/24/24-107r1.txt)
+- [J3 Syntax Paper 24-125r5](https://j3-fortran.org/doc/year/24/24-125r5.txt)
+- [Traits for Types (J3/20-109)](https://github.com/j3-fortran/fortran_proposals/blob/master/proposals/traits/20-109.txt)
+- [Traits For Types discussion](https://github.com/j3-fortran/fortran_proposals/issues/125)
+- [Traits-for-Fortran repository](https://github.com/difference-scheme/Traits-for-Fortran)
