@@ -20,7 +20,7 @@ LFortran Standard (--std=lf)
     |
     v
 LFortran Infer (--infer)
-    - Type inference at global scope
+    - Type inference (`:=` and first assignment with `--infer`)
     - Automatic array reallocation
     - Interactive REPL mode
 ```
@@ -42,7 +42,7 @@ All grammars are **complete and tested**.
 | Fortran 2018 | Complete | Yes | Teams, events, atomics |
 | Fortran 2023 | Complete | Yes | Conditional expressions, TYPEOF/CLASSOF |
 | LFortran | Complete | Yes | J3 Generics (TEMPLATE, REQUIREMENT, INSTANTIATE) |
-| LFortran Infer | Complete | Yes | Type inference, global scope |
+| LFortran Infer | Complete | Yes | Type inference (`:=`, `--infer`), global scope |
 
 ## Quick Start
 

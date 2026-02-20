@@ -128,7 +128,7 @@ Benefits:
 
 ---
 
-## Why Type Inference is Infer Mode Only
+## Why Type Inference Is Opt-In
 
 ### Problem with mandatory type inference
 
@@ -139,25 +139,23 @@ Languages like Python infer types everywhere, which creates problems:
 - IDE support is weaker without explicit types
 - Runtime type errors instead of compile-time
 
-### Solution: Opt-in type inference
+### Solution: opt-in inference forms
 
-LFortran Infer restricts type inference to:
+LFortran provides two explicit inference paths:
 
-1. **Infer mode only** (`--infer` flag or REPL)
-2. **Global scope only** (not inside procedures)
-3. **Intrinsic types only** (not derived types)
+1. `x := expr` (walrus) always declares a new variable
+2. `x = expr` first-assignment declaration when `--infer` is enabled
 
 ```fortran
-! Infer mode - types inferred at global scope
-x = 42             ! integer
-y = 3.14           ! real(8)
+! Explicit inference form
+x := 42
 
-! But NOT for derived types
-type(particle_t) :: p   ! Required explicit declaration
-p = particle_t(x=1.0)   ! OK after declaration
+! REPL / notebook-friendly inference form
+! (with --infer)
+y = 3.14
 ```
 
-This provides the convenience of type inference for prototyping while maintaining explicit typing for production code.
+This keeps production code explicit by default while allowing concise, inferred declarations where desired.
 
 ---
 

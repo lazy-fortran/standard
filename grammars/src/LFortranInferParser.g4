@@ -9,6 +9,7 @@
 //   - Bare expressions at top level (REPL mode)
 //   - Bare declarations at top level
 //   - Bare use/implicit statements at top level
+//   - Type inference syntax inherited from LFortran (:= walrus assignments)
 //
 // This enables script-style Fortran programming and interactive use.
 //
@@ -50,6 +51,6 @@ script_unit
     | NEWLINE* use_stmt NEWLINE*             // Bare use statement (global scope)
     | NEWLINE* implicit_stmt NEWLINE*        // Bare implicit statement (global scope)
     | NEWLINE* declaration_construct NEWLINE* // Bare declaration (global scope)
-    | NEWLINE* executable_construct NEWLINE* // Bare statement (global scope)
+    | NEWLINE* executable_construct_f2018 NEWLINE* // Bare statement (global scope)
     | NEWLINE* expr_f2003 NEWLINE*           // Bare expression (global scope / REPL)
     ;

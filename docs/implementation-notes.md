@@ -19,7 +19,7 @@ All grammars are **complete and tested**. Each implements the full syntax of its
 | Fortran 2018 | Complete | Yes | Teams, events, atomics |
 | Fortran 2023 | Complete | Yes | Conditional expressions, TYPEOF/CLASSOF |
 | LFortran | Complete | Yes | J3 Generics (TEMPLATE, REQUIREMENT, INSTANTIATE) |
-| LFortran Infer | Complete | Yes | Type inference, global scope, auto realloc |
+| LFortran Infer | Complete | Yes | Type inference (`:=`, `--infer`), global scope, auto realloc |
 
 ## Semantic Validation
 
