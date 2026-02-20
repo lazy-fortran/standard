@@ -195,7 +195,7 @@ contains
 end type
 
 subroutine sort_any(strategy, items)
-    class(sortable_t), intent(inout) :: strategy
+    class(sortable_t), intent(in) :: strategy
     real, intent(inout) :: items(:)
     ...
 end subroutine

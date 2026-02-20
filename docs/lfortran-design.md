@@ -28,7 +28,7 @@ These are often discussed together, but they are not the same feature set.
 | Track | Primary Sources | Scope | Current Grammar Status (this repo) |
 |------|------------------|-------|-------------------------------------|
 | **J3 Generics (official 202Y track)** | J3/24-107r1, J3 syntax papers 24-125r5/24-126r4/24-127r4 | Compile-time generic programming via `TEMPLATE`, `REQUIREMENT`, `REQUIRES`, `INSTANTIATE` | Implemented |
-| **LFortran "Simpler Generics" syntax** | LFortran issue discussions (e.g., lfortran/lfortran#1838) | User-facing syntax preference for inline instantiation with curly braces | Implemented (`name{T}(...)`) |
+| **LFortran "Simpler Generics" syntax** | LFortran issue discussions (e.g., lfortran/lfortran#1838) | User-facing inline instantiation syntax used in LFortran workflows | Implemented (`name{T}(...)` and `name^(T)(...)`) |
 | **Traits for Fortran proposals** | J3/20-109, fortran_proposals #125, Traits-for-Fortran repository | Trait/interface conformance (`trait`, `implements`, trait-typed entities), primarily runtime polymorphism and trait constraints | Not implemented |
 
 ### Orthogonality
