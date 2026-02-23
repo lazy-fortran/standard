@@ -52,11 +52,14 @@ def tokenize(source: str):
 
 class TestFortran2028Lexer:
     def test_f2028_keywords(self):
-        tokens = tokenize("template requirement require instantiate deferred constant")
+        tokens = tokenize(
+            "template requirement require requires instantiate deferred constant"
+        )
         ttypes = [t.type for t in tokens]
         assert Fortran2028Lexer.TEMPLATE_KW in ttypes
         assert Fortran2028Lexer.REQUIREMENT_KW in ttypes
         assert Fortran2028Lexer.REQUIRE_KW in ttypes
+        assert Fortran2028Lexer.REQUIRES_KW in ttypes
         assert Fortran2028Lexer.INSTANTIATE_KW in ttypes
         assert Fortran2028Lexer.DEFERRED_KW in ttypes
         assert Fortran2028Lexer.CONSTANT_KW in ttypes
@@ -68,8 +71,14 @@ class TestFortran2028Parser:
         [
             "template_construct_wd.f90",
             "requirement_construct_wd.f90",
+            "require_stmt_wd.f90",
+            "requires_stmt_wd.f90",
             "templated_function_wd.f90",
+            "templated_subroutine_wd.f90",
+            "deferred_constant_wd.f90",
             "instantiate_stmt_wd.f90",
+            "instantiate_proc_alias_wd.f90",
+            "instantiate_named_args_wd.f90",
             "f2028_program_compat.f90",
         ],
     )

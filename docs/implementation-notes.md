@@ -18,9 +18,24 @@ All grammars are **complete and tested**. Each implements the full syntax of its
 | Fortran 2008 | Complete | Yes | Coarrays, submodules, DO CONCURRENT |
 | Fortran 2018 | Complete | Yes | Teams, events, atomics |
 | Fortran 2023 | Complete | Yes | Conditional expressions, TYPEOF/CLASSOF |
-| Fortran 2028 (WD) | In progress | Yes | TEMPLATE/REQUIREMENT/INSTANTIATE facility |
+| Fortran 2028 (WD) | Complete | Yes | TEMPLATE/REQUIREMENT/REQUIRE(S)/INSTANTIATE facility |
 | LFortran | In progress | Yes | F2028 base + inline instantiation (`{}` and `^()`); traits proposal documented |
 | LFortran Infer | Complete | Yes | Type inference, global scope, auto realloc |
+
+## Fortran 2028 Delta Audit (J3/26-007)
+
+In-scope syntax delta implemented on top of Fortran 2023:
+
+- Tokens: `TEMPLATE`, `REQUIREMENT`, `REQUIRE`, `REQUIRES`, `INSTANTIATE`, `DEFERRED`, `CONSTANT`, `{`, `}`
+- Constructs:
+  - `template` / `end template`
+  - `requirement` / `end requirement`
+  - `require` and `requires` statements
+  - `instantiate` statements (including `ONLY` rename and procedure alias form)
+  - templated function and templated subroutine program units
+  - deferred type/constant/procedure declarations
+
+Missing productions/tokens in this in-scope F2028 template family: none.
 
 ## Semantic Validation
 

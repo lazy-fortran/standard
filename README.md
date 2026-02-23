@@ -45,7 +45,7 @@ All grammars are **complete and tested**.
 | Fortran 2008 | Complete | Yes | Coarrays, submodules, DO CONCURRENT |
 | Fortran 2018 | Complete | Yes | Teams, events, atomics |
 | Fortran 2023 | Complete | Yes | Conditional expressions, TYPEOF/CLASSOF |
-| Fortran 2028 (WD) | In progress | Yes | TEMPLATE/REQUIREMENT/INSTANTIATE facility |
+| Fortran 2028 (WD) | Complete | Yes | TEMPLATE/REQUIREMENT/REQUIRE(S)/INSTANTIATE facility |
 | LFortran | In progress | Yes | F2028 base + inline instantiation (`{}` and `^()`); traits proposal documented |
 | LFortran Infer | Complete | Yes | Type inference (`:=`, `--infer`), global scope |
 

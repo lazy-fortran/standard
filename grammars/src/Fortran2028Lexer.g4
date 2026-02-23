@@ -6,7 +6,7 @@
  * Source reference: J3 standing document 26-007 (Fortran 2028 Working Draft)
  *
  * This grammar defines lexical additions for F2028 template facilities:
- * - TEMPLATE / REQUIREMENT / REQUIRE / INSTANTIATE
+ * - TEMPLATE / REQUIREMENT / REQUIRE(S) / INSTANTIATE
  * - DEFERRED / CONSTANT attribute keywords for deferred arguments
  * - Curly braces used in instantiation argument syntax
  */
@@ -29,6 +29,10 @@ REQUIREMENT_KW
 
 REQUIRE_KW
     : R E Q U I R E
+    ;
+
+REQUIRES_KW
+    : R E Q U I R E S
     ;
 
 INSTANTIATE_KW

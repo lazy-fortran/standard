@@ -5,7 +5,6 @@
 // This lexer extends the Fortran 2028 lexer with LFortran-specific features:
 //
 // 1. LFortran generic syntax extensions:
-//    - REQUIRES (plural) statement keyword
 //    - Caret inline-instantiation syntax
 //
 // 2. Type inference syntax:
@@ -20,11 +19,6 @@
 lexer grammar LFortranLexer;
 
 import Fortran2028Lexer;
-
-// REQUIRES statement - LFortran extension keyword
-REQUIRES_KW
-    : R E Q U I R E S
-    ;
 
 // Caret for inline instantiation (J3 r4 alternative)
 CARET
