@@ -2,6 +2,11 @@
 
 This document explains the design decisions behind LFortran Standard and LFortran Infer mode, summarizing discussions and providing rationale for key choices.
 
+Status note:
+- This document explains rationale, not implementation completion.
+- For canonical parser-status claims, use [README: Implementation Status](../README.md#implementation-status) and [Implementation Notes: Grammar Status](implementation-notes.md#grammar-status).
+- For trait semantic items intentionally deferred beyond parsing, use [LFortran Design: Deferred Trait Items (Semantic Phase)](lfortran-design.md#deferred-trait-items-semantic-phase).
+
 ---
 
 ## Why LFortran Standard is Stricter than ISO Fortran

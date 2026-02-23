@@ -1,6 +1,6 @@
 # LFortran Standard
 
-**Status:** Draft
+**Status:** Maintained specification reference (grammar syntax support is complete; semantic/runtime enforcement is compiler-level)
 **Derived from:** Fortran 2028 Working Draft (J3/26-007), compatible subset with ISO Fortran 2023
 **Compiler flag:** `--std=lf` (default in LFortran)
 
@@ -9,6 +9,15 @@
 ## Overview
 
 The LFortran Standard defines a stricter dialect of the evolving Fortran language with sensible defaults for scientific computing. It is the default mode of the [LFortran compiler](https://lfortran.org).
+
+Repository status source of truth:
+- [README: Implementation Status](../README.md#implementation-status)
+- [Implementation Notes: Grammar Status](implementation-notes.md#grammar-status)
+- [LFortran Design: Deferred Trait Items (Semantic Phase)](lfortran-design.md#deferred-trait-items-semantic-phase)
+
+Scope boundary for this repository:
+- Parser/grammar syntax is implemented and tested.
+- Semantic/runtime behavior described here is a language-mode design target and compiler concern, not a parser validation claim.
 
 LFortran Standard enforces additional compile-time and run-time checks that catch common errors. Code written to LFortran Standard compiles with any ISO Fortran 2023 compiler, but not all ISO Fortran 2023 code compiles under LFortran Standard (see [Compatibility](#compatibility)).
 

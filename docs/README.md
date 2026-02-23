@@ -22,3 +22,12 @@
 |----------|-------------|
 | [implementation-notes.md](implementation-notes.md) | Grammar status and known limitations |
 | [fixed_form_support.md](fixed_form_support.md) | Fixed-form Fortran validation |
+
+## Status Source of Truth
+
+Use these sections for canonical implementation status in this repository:
+
+- [README: Implementation Status](../README.md#implementation-status)
+- [implementation-notes.md: Grammar Status](implementation-notes.md#grammar-status)
+- [implementation-notes.md: Fortran 2028 Delta Audit](implementation-notes.md#fortran-2028-delta-audit-j326-007)
+- [lfortran-design.md: Deferred Trait Items (Semantic Phase)](lfortran-design.md#deferred-trait-items-semantic-phase)
