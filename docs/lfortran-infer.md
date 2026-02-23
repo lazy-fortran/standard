@@ -91,8 +91,8 @@ Infer mode is orthogonal to generic programming proposals.
 - Generic syntax remains available exactly as in LFortran mode:
   `TEMPLATE`, `REQUIREMENT`, `REQUIRES`, `INSTANTIATE`,
   inline instantiation `name{T}(...)`, and inline instantiation `name^(T)(...)`.
-- Traits proposals (`trait`, `implements`, trait-typed declarations) are not part
-  of the current LFortranInfer grammar in this repository.
+- Trait syntax from LFortran mode is also available in infer mode, including
+  `implements`, `sealed`, and `initial` forms.
 
 ## References
 

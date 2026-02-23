@@ -25,11 +25,35 @@ CARET
     : '^'
     ;
 
-// ============================================================================
+// ============================================================================ 
 // TYPE INFERENCE TOKENS
 // ============================================================================
 // Walrus declaration syntax used by LFortran type inference:
 //   x := expr
 COLON_EQUAL
     : ':='
+    ;
+
+// ============================================================================
+// TRAITS PROPOSAL TOKENS
+// ============================================================================
+// Trait conformance and type-level extension syntax:
+//   type, sealed, implements(ITrait) :: my_type
+//   implements ITrait :: my_type
+//   initial :: init
+//   integer | real(real64)
+IMPLEMENTS_KW
+    : I M P L E M E N T S
+    ;
+
+SEALED_KW
+    : S E A L E D
+    ;
+
+INITIAL_KW
+    : I N I T I A L
+    ;
+
+PIPE
+    : '|'
     ;

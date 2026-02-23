@@ -46,7 +46,7 @@ All grammars are **complete and tested**.
 | Fortran 2018 | Complete | Yes | Teams, events, atomics |
 | Fortran 2023 | Complete | Yes | Conditional expressions, TYPEOF/CLASSOF |
 | Fortran 2028 (WD) | Complete | Yes | TEMPLATE/REQUIREMENT/REQUIRE(S)/INSTANTIATE facility |
-| LFortran | In progress | Yes | F2028 base + inline instantiation (`{}` and `^()`); traits proposal documented |
+| LFortran | Complete | Yes | F2028 base + inline instantiation (`{}` and `^()`); traits syntax (`implements`, `sealed`, `initial`) |
 | LFortran Infer | Complete | Yes | Type inference (`:=`, `--infer`), global scope |
 
 ## Quick Start
@@ -112,5 +112,5 @@ FORTRAN 1957 -> FORTRAN II -> FORTRAN 66 -> FORTRAN 77
 
 - [LFortran](https://lfortran.org) - Modern Fortran compiler
 - [J3 Generics](https://github.com/j3-fortran/generics) - Fortran 202Y generics proposal
-- [Traits for Types (J3/20-109)](https://github.com/j3-fortran/fortran_proposals/blob/master/proposals/traits/20-109.txt) - Trait proposal track (not yet in this grammar)
+- [Traits for Types (J3/20-109)](https://github.com/j3-fortran/fortran_proposals/blob/master/proposals/traits/20-109.txt) - Trait proposal track reflected in the LFortran grammar
 - [Traits-for-Fortran](https://github.com/difference-scheme/Traits-for-Fortran) - Community traits/generics design document

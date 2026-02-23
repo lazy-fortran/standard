@@ -218,7 +218,7 @@ rename
 // Reference: J3/24-107r1 - Simple template procedures
 
 simple_template_function
-    : prefix? FUNCTION identifier_or_keyword LBRACE deferred_arg_list RBRACE
+    : prefix? FUNCTION identifier_or_keyword generic_param_clause
       LPAREN dummy_arg_name_list? RPAREN suffix? NEWLINE*
       template_specification_part?
       specification_part?
@@ -228,7 +228,7 @@ simple_template_function
     ;
 
 simple_template_subroutine
-    : prefix? SUBROUTINE identifier_or_keyword LBRACE deferred_arg_list RBRACE
+    : prefix? SUBROUTINE identifier_or_keyword generic_param_clause
       LPAREN dummy_arg_name_list? RPAREN NEWLINE*
       template_specification_part?
       specification_part?
@@ -237,8 +237,17 @@ simple_template_subroutine
       end_subroutine_stmt
     ;
 
+generic_param_clause
+    : LBRACE deferred_arg_list RBRACE
+    ;
+
 deferred_arg_list
-    : identifier_or_keyword (COMMA identifier_or_keyword)*
+    : deferred_arg_spec (COMMA deferred_arg_spec)*
+    ;
+
+deferred_arg_spec
+    : identifier_or_keyword
+    | trait_name DOUBLE_COLON identifier_or_keyword
     ;
 
 // ============================================================================
@@ -293,22 +302,23 @@ prefix
     ;
 
 function_stmt_f2018
-    : prefix? FUNCTION lfortran_name LPAREN dummy_arg_name_list? RPAREN
+    : prefix? FUNCTION lfortran_name generic_param_clause?
+      LPAREN dummy_arg_name_list? RPAREN
       suffix? binding_spec? NEWLINE
     ;
 
 subroutine_stmt_f2018
-    : prefix? SUBROUTINE lfortran_name (LPAREN dummy_arg_name_list? RPAREN)?
-      binding_spec? NEWLINE
+    : prefix? SUBROUTINE lfortran_name generic_param_clause?
+      (LPAREN dummy_arg_name_list? RPAREN)? binding_spec? NEWLINE
     ;
 
 function_stmt_interface
-    : (prefix)? FUNCTION lfortran_name LPAREN dummy_arg_name_list? RPAREN
-      (suffix)? binding_spec? NEWLINE
+    : (prefix)? FUNCTION interface_proc_name generic_param_clause?
+      LPAREN dummy_arg_name_list? RPAREN (suffix)? binding_spec? NEWLINE
     ;
 
 subroutine_stmt_interface
-    : (prefix)? SUBROUTINE lfortran_name
+    : (prefix)? SUBROUTINE lfortran_name generic_param_clause?
       (LPAREN dummy_arg_name_list? RPAREN)? binding_spec? NEWLINE
     ;
 
@@ -326,6 +336,23 @@ end_subroutine_stmt
 
 end_function_stmt
     : END (FUNCTION (lfortran_name)?)? NEWLINE?
+    ;
+
+interface_proc_name
+    : lfortran_name
+    | OPERATOR LPAREN operator_token RPAREN
+    ;
+
+interface_stmt
+    : INTERFACE generic_spec? NEWLINE
+    | ABSTRACT_INTERFACE generic_spec? NEWLINE
+    | ABSTRACT_INTERFACE DOUBLE_COLON trait_name NEWLINE
+    ;
+
+interface_specification
+    : interface_body
+    | procedure_stmt
+    | trait_type_set_stmt
     ;
 
 // ============================================================================
@@ -352,6 +379,83 @@ entity_decl_f90
     ;
 
 // ============================================================================
+// TRAITS PROPOSAL RULES (LFortran Extensions)
+// ============================================================================
+
+trait_name
+    : identifier_or_keyword
+    ;
+
+trait_expr
+    : trait_name (PLUS trait_name)*
+    | LPAREN trait_name (PLUS trait_name)+ RPAREN
+    ;
+
+implements_attr
+    : IMPLEMENTS_KW LPAREN trait_expr RPAREN
+    ;
+
+implements_type_spec
+    : intrinsic_type_spec_f95
+    | derived_type_spec
+    | TYPE LPAREN identifier_or_keyword RPAREN
+    ;
+
+implements_stmt
+    : IMPLEMENTS_KW trait_expr DOUBLE_COLON implements_type_spec NEWLINE
+      end_implements_stmt?
+    ;
+
+end_implements_stmt
+    : END IMPLEMENTS_KW implements_type_spec? NEWLINE
+    ;
+
+trait_type_set_stmt
+    : trait_type_set_spec PIPE trait_type_set_spec
+      (PIPE trait_type_set_spec)* NEWLINE
+    ;
+
+trait_type_set_spec
+    : implements_type_spec
+    ;
+
+initial_procedure_stmt
+    : INITIAL_KW DOUBLE_COLON binding_name_list
+    ;
+
+binding_name_list
+    : binding_name (COMMA binding_name)*
+    ;
+
+type_attr_spec
+    : PUBLIC
+    | PRIVATE
+    | ABSTRACT
+    | EXTENDS LPAREN IDENTIFIER RPAREN
+    | BIND LPAREN C RPAREN
+    | SEALED_KW
+    | implements_attr
+    ;
+
+type_bound_proc_binding
+    : type_bound_procedure_stmt NEWLINE?
+    | type_bound_generic_stmt NEWLINE?
+    | final_procedure_stmt NEWLINE?
+    | initial_procedure_stmt NEWLINE?
+    ;
+
+declaration_construct
+    : implements_stmt
+    | derived_type_def_f2003
+    | class_declaration_stmt
+    | procedure_declaration_stmt
+    | interface_block
+    | type_declaration_stmt
+    | volatile_stmt
+    | protected_stmt
+    ;
+
+// ============================================================================
 // DECLARATION CONSTRUCT OVERRIDE (LFortran Extensions)
 // ============================================================================
 // Allow J3 generics constructs in F2018 specification parts (e.g. modules).
@@ -360,6 +464,7 @@ declaration_construct_f2018
     : template_construct
     | requirement_construct
     | instantiate_stmt
+    | implements_stmt
     | derived_type_def_f2003
     | class_declaration_stmt
     | procedure_declaration_stmt
