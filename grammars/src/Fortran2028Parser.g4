@@ -166,7 +166,7 @@ requirement_specification_stmt_f2028
     ;
 
 require_stmt_f2028
-    : REQUIRE_KW DOUBLE_COLON? requirement_reference_list_f2028 NEWLINE*
+    : (REQUIRE_KW | REQUIRES_KW) DOUBLE_COLON? requirement_reference_list_f2028 NEWLINE*
     ;
 
 requirement_reference_list_f2028

@@ -131,8 +131,8 @@ LFortran features are implemented in [LFortran](https://github.com/lfortran/lfor
 | Default real = 8 bytes | Planned |
 | Default `intent(in)` | Planned |
 | Dot notation | Planned |
-| F2028 templates (`TEMPLATE`/`REQUIREMENT`/`INSTANTIATE`) | In progress |
-| Inline instantiation syntax (`name{T}(...)`, `name^(T)(...)`) | In progress |
+| F2028 templates (`TEMPLATE`/`REQUIREMENT`/`REQUIRE(S)`/`INSTANTIATE`) | Implemented |
+| Inline instantiation syntax (`name{T}(...)`, `name^(T)(...)`) | Implemented |
 | Traits proposal (`implements`, `sealed`, `initial`, `itself`) | Draft spec (not implemented) |
 
 ## References
