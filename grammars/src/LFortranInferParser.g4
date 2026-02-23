@@ -14,8 +14,8 @@
 // This enables script-style Fortran programming and interactive use.
 //
 // Grammar Inheritance Chain:
-//   Fortran 2023 → LFortran → LFortranInfer
-//   - Fortran 2023: ISO/IEC 1539-1:2023 base standard
+//   Fortran 2028 → LFortran → LFortranInfer
+//   - Fortran 2028: J3 Fortran 2028 Working Draft base standard
 //   - LFortran: Adds J3 Generics (TEMPLATE, REQUIREMENT, etc.)
 //   - LFortranInfer: Adds infer mode (global scope)
 //
@@ -26,7 +26,7 @@ parser grammar LFortranInferParser;
 
 options { tokenVocab = LFortranInferLexer; }
 
-import LFortranParser;  // Imports LFortran (J3 Generics) + Fortran 2023
+import LFortranParser;  // Imports LFortran (J3 Generics) + Fortran 2028
 
 // ============================================================================
 // TOP-LEVEL PROGRAM STRUCTURE (Infer Mode)
@@ -44,7 +44,7 @@ script_unit_list
 
 // A script unit can be a standard program unit, J3 generic, OR bare code
 script_unit
-    : NEWLINE* program_unit_f2023 NEWLINE*   // Standard: program, module, etc.
+    : NEWLINE* program_unit_f2028 NEWLINE*   // Standard: program, module, etc.
     | NEWLINE* template_construct NEWLINE*   // J3 Generics: template definition
     | NEWLINE* requirement_construct NEWLINE* // J3 Generics: requirement definition
     | NEWLINE* instantiate_stmt NEWLINE*     // J3 Generics: instantiation

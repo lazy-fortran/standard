@@ -63,7 +63,7 @@ LFortran supports three complementary systems:
 
 | System | Primary role | Dispatch model |
 |--------|--------------|----------------|
-| J3 Generics (`template`/`instantiate`) | Module-level reusable generic definitions | Static, explicit instantiation |
+| F2028 templates (`template`/`instantiate`) | Module-level reusable generic definitions | Static, explicit instantiation |
 | Procedure-level generics (`{T}`) | Function/subroutine-local generic constraints | Static, call-site binding |
 | Traits (`abstract interface` + `implements`) | Capability contracts and nominal conformance | Static (`type(T)`) + dynamic (`class(ITrait)`) |
 
@@ -131,7 +131,7 @@ LFortran features are implemented in [LFortran](https://github.com/lfortran/lfor
 | Default real = 8 bytes | Planned |
 | Default `intent(in)` | Planned |
 | Dot notation | Planned |
-| J3 Generics base (`TEMPLATE`/`REQUIREMENT`/`INSTANTIATE`) | In progress |
+| F2028 templates (`TEMPLATE`/`REQUIREMENT`/`INSTANTIATE`) | In progress |
 | Inline instantiation syntax (`name{T}(...)`, `name^(T)(...)`) | In progress |
 | Traits proposal (`implements`, `sealed`, `initial`, `itself`) | Draft spec (not implemented) |
 

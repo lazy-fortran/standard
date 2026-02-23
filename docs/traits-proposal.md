@@ -1,7 +1,7 @@
 # Traits Proposal for LFortran
 
 **Status:** Draft proposal  
-**Base:** Fortran 2023 + LFortran generics extensions  
+**Base:** Fortran 2028 working draft + LFortran extensions  
 **Scope:** Design-level specification (syntax and intended behavior)
 
 ---
@@ -9,10 +9,10 @@
 ## Purpose
 
 This document formalizes the traits proposal referenced by issue #725.
-It specifies how traits compose with two existing LFortran generic systems:
+It specifies how traits compose with two existing generic systems:
 
-- **J3 generics:** `template` / `requirement` / `requires` / `instantiate`
-- **Procedure-level generics:** `{T}` syntax on function/subroutine definitions
+- **F2028 templates:** `template` / `requirement` / `require` / `instantiate`
+- **LFortran procedure-level generics:** `{T}` syntax on function/subroutine definitions
 
 Traits are complementary to both systems. They provide nominal conformance
 (`implements`), trait composition, and runtime polymorphism via `class(ITrait)`.
@@ -23,7 +23,7 @@ Traits are complementary to both systems. They provide nominal conformance
 
 | System | Primary role | Dispatch model |
 |--------|--------------|----------------|
-| J3 generics (`template`) | Module-level reusable generic definitions | Static, explicit instantiation |
+| F2028 templates (`template`) | Module-level reusable generic definitions | Static, explicit instantiation |
 | Procedure-level generics (`{T}`) | Procedure-local generic constraints | Static, call-site type binding |
 | Traits (`abstract interface` + `implements`) | Capability contracts and nominal conformance | Static (`type(T)`) and dynamic (`class(ITrait)`) |
 

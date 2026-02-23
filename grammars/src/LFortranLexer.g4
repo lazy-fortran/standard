@@ -1,12 +1,12 @@
 // ============================================================================
-// LFortran Lexer - LFortran Standard Extensions to Fortran 2023
+// LFortran Lexer - LFortran Standard Extensions to Fortran 2028
 // ============================================================================
 //
-// This lexer extends the Fortran 2023 lexer with LFortran-specific features:
+// This lexer extends the Fortran 2028 lexer with LFortran-specific features:
 //
-// 1. J3 Generics (Fortran 202Y preview):
-//    - TEMPLATE, REQUIREMENT, REQUIRE, INSTANTIATE keywords
-//    - DEFERRED keyword for type parameters
+// 1. LFortran generic syntax extensions:
+//    - REQUIRES (plural) statement keyword
+//    - Caret inline-instantiation syntax
 //
 // 2. Type inference syntax:
 //    - := walrus declaration operator
@@ -19,65 +19,11 @@
 
 lexer grammar LFortranLexer;
 
-import Fortran2023Lexer;
+import Fortran2028Lexer;
 
-// ============================================================================
-// J3 GENERICS KEYWORDS (Fortran 202Y Preview)
-// ============================================================================
-// These keywords enable parameterized programming with explicit instantiation.
-// Based on J3 papers 24-107r1 and related proposals.
-
-// TEMPLATE construct - defines parameterized procedures
-TEMPLATE_KW
-    : T E M P L A T E
-    ;
-
-// REQUIREMENT construct - defines type constraints
-REQUIREMENT_KW
-    : R E Q U I R E M E N T
-    ;
-
-// REQUIRES statement - specifies required constraints (J3/24-107r1)
+// REQUIRES statement - LFortran extension keyword
 REQUIRES_KW
     : R E Q U I R E S
-    ;
-
-// INSTANTIATE statement - explicit template instantiation
-INSTANTIATE_KW
-    : I N S T A N T I A T E
-    ;
-
-// DEFERRED keyword - for deferred type parameters in templates
-DEFERRED_KW
-    : D E F E R R E D
-    ;
-
-// ============================================================================
-// END CONSTRUCT KEYWORDS
-// ============================================================================
-
-END_TEMPLATE
-    : E N D WS* T E M P L A T E
-    ;
-
-END_REQUIREMENT
-    : E N D WS* R E Q U I R E M E N T
-    ;
-
-// ============================================================================
-// J3 GENERICS INLINE INSTANTIATION TOKENS
-// ============================================================================
-// These tokens enable inline instantiation syntax:
-//   - Curly braces {T} (J3 24-107r1)
-//   - Caret ^(T) (J3 r4 revision)
-
-// Curly braces for inline instantiation (J3 24-107r1)
-LBRACE
-    : '{'
-    ;
-
-RBRACE
-    : '}'
     ;
 
 // Caret for inline instantiation (J3 r4 alternative)

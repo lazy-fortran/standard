@@ -4,9 +4,10 @@
 
 | Document | Description |
 |----------|-------------|
-| [lfortran-standard.md](lfortran-standard.md) | LFortran Standard: stricter Fortran 2023 dialect |
+| [lfortran-standard.md](lfortran-standard.md) | LFortran Standard: stricter Fortran dialect (F2028 base) |
 | [lfortran-infer.md](lfortran-infer.md) | LFortran Infer: type inference mode |
 | [traits-proposal.md](traits-proposal.md) | Traits proposal: `implements`, `sealed`, `initial`, `{T}` |
+| [external-sources.md](external-sources.md) | External source sync policy and commands |
 
 ## Design
 

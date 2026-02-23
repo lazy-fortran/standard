@@ -1,8 +1,8 @@
 // ============================================================================
-// LFortran Parser - LFortran Standard (F2023 + J3 Generics)
+// LFortran Parser - LFortran Standard (F2028 + LFortran Generics)
 // ============================================================================
 //
-// This parser extends the Fortran 2023 parser with J3 Generics:
+// This parser extends the Fortran 2028 parser with LFortran extensions:
 //
 // J3 Generics (Fortran 202Y preview):
 //   - TEMPLATE construct with deferred type parameters
@@ -24,7 +24,7 @@ parser grammar LFortranParser;
 
 options { tokenVocab = LFortranLexer; }
 
-import Fortran2023Parser;
+import Fortran2028Parser;
 
 // ============================================================================
 // TOP-LEVEL PROGRAM STRUCTURE (Standard Fortran + J3 Generics)
@@ -40,7 +40,7 @@ lfortran_unit_list
 
 // LFortran program unit: standard Fortran program units + J3 generics
 lfortran_unit
-    : NEWLINE* program_unit_f2023 NEWLINE*        // Standard: program, module, etc.
+    : NEWLINE* program_unit_f2028 NEWLINE*        // Standard: program, module, etc.
     | NEWLINE* template_construct NEWLINE*        // J3 Generics: template definition
     | NEWLINE* requirement_construct NEWLINE*     // J3 Generics: requirement definition
     | NEWLINE* simple_template_function NEWLINE*   // J3: template function
@@ -63,7 +63,7 @@ template_construct
     : TEMPLATE_KW identifier_or_keyword LBRACE template_param_list RBRACE NEWLINE*
       template_specification_part?
       template_contains_part?
-      END_TEMPLATE identifier_or_keyword? NEWLINE*
+      END_TEMPLATE_STMT identifier_or_keyword? NEWLINE*
     ;
 
 template_param_list
@@ -116,7 +116,7 @@ requirement_construct
     : REQUIREMENT_KW identifier_or_keyword LBRACE template_param_list RBRACE NEWLINE*
       requirement_specification_part?
       requirement_interface_part?
-      END_REQUIREMENT identifier_or_keyword? NEWLINE*
+      END_REQUIREMENT_STMT identifier_or_keyword? NEWLINE*
     ;
 
 requirement_specification_part
@@ -377,8 +377,7 @@ declaration_construct_f2018
 // ============================================================================
 // EXECUTABLE CONSTRUCT OVERRIDE (LFortran Extensions)
 // ============================================================================
-// Override F2023 executable_construct to include J3 Generics inline
-// instantiation and explicit instantiate statements.
+// Override inherited executable_construct to include LFortran inline instantiation
 
 executable_construct_f2018
     : inline_instantiate_call_stmt       // J3 Generics: call name{type}(args)

@@ -107,6 +107,11 @@ STANDARD_CONFIGS: Dict[str, StandardConfig] = {
         parser_name="Fortran2023Parser",
         entry_rule="program_unit_f2023",
     ),
+    "Fortran2028": StandardConfig(
+        lexer_name="Fortran2028Lexer",
+        parser_name="Fortran2028Parser",
+        entry_rule="program_unit_f2028",
+    ),
 }
 
 
