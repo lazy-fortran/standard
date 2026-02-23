@@ -18,8 +18,9 @@ All grammars are **complete and tested**. Each implements the full syntax of its
 | Fortran 2008 | Complete | Yes | Coarrays, submodules, DO CONCURRENT |
 | Fortran 2018 | Complete | Yes | Teams, events, atomics |
 | Fortran 2023 | Complete | Yes | Conditional expressions, TYPEOF/CLASSOF |
-| LFortran | Complete | Yes | J3 Generics (`TEMPLATE`, `REQUIREMENT`, `INSTANTIATE`) + inline instantiation (`{}` and `^()`) |
-| LFortran Infer | Complete | Yes | Type inference (`:=`, `--infer`), global scope, auto realloc |
+| Fortran 2028 (WD) | In progress | Yes | TEMPLATE/REQUIREMENT/INSTANTIATE facility |
+| LFortran | In progress | Yes | F2028 base + inline instantiation (`{}` and `^()`); traits proposal documented |
+| LFortran Infer | Complete | Yes | Type inference, global scope, auto realloc |
 
 ## Semantic Validation
 
@@ -66,6 +67,7 @@ Grammars are **syntactic**. Type checking and interface matching are out of scop
 | Fortran 2008 | ISO/IEC 1539-1:2010 |
 | Fortran 2018 | ISO/IEC 1539-1:2018 |
 | Fortran 2023 | ISO/IEC 1539-1:2023 |
-| LFortran | J3/24-107r1 |
+| Fortran 2028 (WD) | J3/26-007 |
+| LFortran | J3/24-107r1 + traits proposal |
 
 PDFs in `validation/pdfs/`.

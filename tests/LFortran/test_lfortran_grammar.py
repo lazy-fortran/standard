@@ -2,7 +2,7 @@
 """
 LFortran Grammar Test Suite
 
-Tests the LFortran grammar (F2023 + J3 Generics):
+Tests the LFortran grammar (F2028 + LFortran extensions):
 
 1. J3 Generics (Fortran 202Y preview):
    - TEMPLATE construct with deferred type parameters
@@ -10,7 +10,7 @@ Tests the LFortran grammar (F2023 + J3 Generics):
    - REQUIRE statement for constraint specifications
    - INSTANTIATE statement for explicit instantiation
 
-2. Fortran 2023 compatibility (inherited)
+2. Fortran 2028 compatibility (inherited)
 
 Reference: LFortran compiler (https://lfortran.org)
 """
@@ -281,11 +281,11 @@ end program test_instantiate
 
 
 # =============================================================================
-# FORTRAN 2023 COMPATIBILITY TESTS
+# FORTRAN 2028 COMPATIBILITY TESTS
 # =============================================================================
 
-class TestFortran2023Compatibility:
-    """Test that LFortran grammar includes all Fortran 2023 features."""
+class TestFortran2028Compatibility:
+    """Test that LFortran grammar includes inherited Fortran 2028 features."""
 
     def test_standard_program(self):
         """Test standard program unit parses correctly."""
@@ -322,8 +322,8 @@ end module test_module
         except Exception as e:
             pytest.fail(f"Module parsing failed: {e}")
 
-    def test_f2023_typeof(self):
-        """Test F2023 TYPEOF type specifier."""
+    def test_typeof_inherited(self):
+        """Test inherited TYPEOF type specifier support."""
         source = """
 program test_typeof
     integer :: x

@@ -3,8 +3,8 @@
 > **Note**: This project is experimental and subject to major changes.
 
 This repository contains:
-1. **ANTLR4 grammars** for all Fortran standards from 1957 to 2023
-2. **LFortran extensions**: J3 Generics (base + inline instantiation) and type inference
+1. **ANTLR4 grammars** for all Fortran standards from 1957 to 2028 (working draft)
+2. **LFortran extensions**: F2028 generics base, inline instantiation, and infer mode
 3. **Specifications** for LFortran Standard and LFortran Infer mode
 
 ## Standards Hierarchy
@@ -13,8 +13,11 @@ This repository contains:
 ISO Fortran 2023 (ISO/IEC 1539-1:2023)
     |
     v
+Fortran 2028 Working Draft (J3/26-007)
+    |
+    v
 LFortran Standard (--std=lf)
-    |   - Fortran 2023 + J3 Generics
+    |   - Fortran 2028 base + LFortran extensions
     |   - Inline instantiation: `name{T}(...)` and `name^(T)(...)`
     |   - Stricter defaults (bounds checking ON, implicit none)
     |   - 8-byte reals, 4-byte integers
@@ -42,7 +45,8 @@ All grammars are **complete and tested**.
 | Fortran 2008 | Complete | Yes | Coarrays, submodules, DO CONCURRENT |
 | Fortran 2018 | Complete | Yes | Teams, events, atomics |
 | Fortran 2023 | Complete | Yes | Conditional expressions, TYPEOF/CLASSOF |
-| LFortran | Complete | Yes | J3 Generics (`TEMPLATE`, `REQUIREMENT`, `INSTANTIATE`) + inline instantiation (`{}` and `^()`) |
+| Fortran 2028 (WD) | In progress | Yes | TEMPLATE/REQUIREMENT/INSTANTIATE facility |
+| LFortran | In progress | Yes | F2028 base + inline instantiation (`{}` and `^()`); traits proposal documented |
 | LFortran Infer | Complete | Yes | Type inference (`:=`, `--infer`), global scope |
 
 ## Quick Start
@@ -68,8 +72,10 @@ make test
 
 | Document | Description |
 |----------|-------------|
-| [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran 2023 dialect specification |
+| [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran dialect specification (F2028 base) |
 | [LFortran Infer](docs/lfortran-infer.md) | Type inference and infer mode specification |
+| [Traits Proposal](docs/traits-proposal.md) | Traits, nominal conformance, and `{T}` procedure generics |
+| [External Sources](docs/external-sources.md) | Sync policy for Traits repo + Fortran 2028 draft |
 | [Design Rationale](docs/design-rationale.md) | Explains key design decisions |
 | [Implementation Notes](docs/implementation-notes.md) | Status and known limitations |
 
@@ -93,9 +99,9 @@ FORTRAN 1957 -> FORTRAN II -> FORTRAN 66 -> FORTRAN 77
                                                  |
                                             Fortran 90
                                                  |
-                              Fortran 95 -> 2003 -> 2008 -> 2018 -> 2023
-                                                                      |
-                                                              LFortran -> Infer
+                              Fortran 95 -> 2003 -> 2008 -> 2018 -> 2023 -> 2028
+                                                                              |
+                                                                      LFortran -> Infer
 ```
 
 ## License

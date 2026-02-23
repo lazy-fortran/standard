@@ -16,6 +16,9 @@ echo "Project root: $PROJECT_ROOT"
 echo "Downloading kaby76/fortran repository..."
 python3 "$SCRIPT_DIR/tools/download_kaby76.py" "$PROJECT_ROOT"
 
+echo "Syncing external traits and Fortran 2028 draft references..."
+python3 "$SCRIPT_DIR/tools/sync_external_specs.py" "$PROJECT_ROOT"
+
 # Verify setup
 KABY76_DIR="$SCRIPT_DIR/external/kaby76-fortran"
 if [ -d "$KABY76_DIR" ]; then

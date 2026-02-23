@@ -1,5 +1,5 @@
 # Makefile for FORTRAN/Fortran Standard Grammar Implementation
-# Historical FORTRAN/Fortran grammar inheritance chain: 1957 → 2023
+# Historical FORTRAN/Fortran grammar inheritance chain: 1957 → 2028
 
 # Configuration
 ANTLR4 = antlr4
@@ -17,10 +17,10 @@ JAVA_AVAILABLE := $(shell java -version >/dev/null 2>&1 && echo yes || echo no)
 ANTLR4_AVAILABLE := $(shell command -v $(ANTLR4) >/dev/null 2>&1 && echo yes || echo no)
 
 # Grammar inheritance chain (build order matters!)
-GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023 LFortran LFortranInfer
+GRAMMARS = FORTRAN FORTRANII FORTRAN66 FORTRAN77 Fortran90 Fortran95 Fortran2003 Fortran2008 Fortran2018 Fortran2023 Fortran2028 LFortran LFortranInfer
 
 # Default target
-.PHONY: all clean test help download-standards lint
+.PHONY: all clean test help download-standards download-traits download-f2028-draft sync-external-specs lint
 
 all: $(GRAMMARS)
 
@@ -39,6 +39,7 @@ Fortran2003: $(GRAMMAR_GEN_MODERN)/Fortran2003Lexer.py
 Fortran2008: $(GRAMMAR_GEN_MODERN)/Fortran2008Lexer.py
 Fortran2018: $(GRAMMAR_GEN_MODERN)/Fortran2018Lexer.py
 Fortran2023: $(GRAMMAR_GEN_MODERN)/Fortran2023Lexer.py
+Fortran2028: $(GRAMMAR_GEN_MODERN)/Fortran2028Lexer.py
 LFortran: $(GRAMMAR_GEN_MODERN)/LFortranLexer.py
 LFortranInfer: $(GRAMMAR_GEN_MODERN)/LFortranInferLexer.py
 
@@ -212,9 +213,25 @@ $(GRAMMAR_GEN_MODERN)/Fortran2023Lexer.py: $(GRAMMAR_SRC)/Fortran2023Lexer.g4 $(
 		fi; \
 	fi
 
-# LFortran - Fortran 2023 + J3 Generics (strict mode)
-$(GRAMMAR_GEN_MODERN)/LFortranLexer.py: $(GRAMMAR_SRC)/LFortranLexer.g4 $(GRAMMAR_SRC)/LFortranParser.g4 Fortran2023
-	@echo "Building LFortran (F2023 + J3 Generics)..."
+# Fortran 2028 (Working Draft) - Templates and deferred arguments
+$(GRAMMAR_GEN_MODERN)/Fortran2028Lexer.py: $(GRAMMAR_SRC)/Fortran2028Lexer.g4 $(GRAMMAR_SRC)/Fortran2028Parser.g4 Fortran2023
+	@echo "Building Fortran 2028 (Working Draft)..."
+	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
+		cd $(GRAMMAR_SRC) && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran2028Lexer.g4 && \
+		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern Fortran2028Parser.g4; \
+	else \
+		if [ -f "$@" ]; then \
+			echo "ANTLR4 CLI not available; using existing Fortran 2028 lexer/parser sources"; \
+		else \
+			echo "❌ ANTLR4 CLI not found and no generated sources present; install ANTLR4 to build grammars."; \
+			exit 1; \
+		fi; \
+	fi
+
+# LFortran - Fortran 2028 + LFortran extensions (strict mode)
+$(GRAMMAR_GEN_MODERN)/LFortranLexer.py: $(GRAMMAR_SRC)/LFortranLexer.g4 $(GRAMMAR_SRC)/LFortranParser.g4 Fortran2028
+	@echo "Building LFortran (F2028 + LFortran extensions)..."
 	@if [ "$(JAVA_AVAILABLE)" = "yes" ] && [ "$(ANTLR4_AVAILABLE)" = "yes" ]; then \
 		cd $(GRAMMAR_SRC) && \
 		$(ANTLR4) $(ANTLR4_PYTHON) -lib . -o ../generated/modern LFortranLexer.g4 && \
@@ -254,7 +271,7 @@ test: all test-tree-sitter
 	@echo "=========================================="
 	@echo "Running ALL Tests - Full Grammar Suite"
 	@echo "=========================================="
-	@echo "Standards Chain: FORTRAN(1957) → F2023"
+	@echo "Standards Chain: FORTRAN(1957) → F2028"
 	$(PYTEST) $(TEST_DIR)/ -v --tb=short
 	@echo ""
 	@echo "✅ All tests completed!"
@@ -324,8 +341,12 @@ test-fortran2023: Fortran2023
 	@echo "Testing Fortran 2023 (2023)..."
 	$(PYTEST) $(TEST_DIR)/Fortran2023/ -v --tb=short || echo "No tests for Fortran 2023 yet"
 
+test-fortran2028: Fortran2028
+	@echo "Testing Fortran 2028 (Working Draft)..."
+	$(PYTEST) $(TEST_DIR)/Fortran2028/ -v --tb=short
+
 test-lfortran: LFortran
-	@echo "Testing LFortran (F2023 + J3 Generics)..."
+	@echo "Testing LFortran (F2028 + LFortran extensions)..."
 	$(PYTEST) $(TEST_DIR)/LFortran/ -v --tb=short
 
 test-lfortran-infer: LFortranInfer
@@ -341,6 +362,19 @@ test-cross-validation: Fortran2018
 # ====================================================================
 # UTILITY TARGETS
 # ====================================================================
+
+# Sync external proposal/spec sources used by tests and docs.
+sync-external-specs:
+	@echo "Syncing external specs (Traits-for-Fortran + Fortran 2028 draft)..."
+	@python3 validation/tools/sync_external_specs.py .
+
+download-traits:
+	@echo "Syncing Traits-for-Fortran repository..."
+	@python3 validation/tools/sync_external_specs.py . --traits-only
+
+download-f2028-draft:
+	@echo "Downloading Fortran 2028 working draft reference..."
+	@python3 validation/tools/sync_external_specs.py . --f2028-only
 
 # Directory for downloaded standards/spec references (git-ignored)
 STANDARDS_DIR ?= validation/pdfs
@@ -410,6 +444,10 @@ download-standards:
 		|| $(CURL_STD) -o $(STANDARDS_DIR)/Fortran2023_J3_23-007r1.pdf \
 		https://j3-fortran.org/doc/year/22/22-007.pdf \
 		|| echo "    ⚠️  Failed to download J3 23-007r1/22-007 (Fortran 2023)"
+	@echo "  - Fortran 2028 working draft (J3/26-007)"
+	@$(CURL_STD) -o $(STANDARDS_DIR)/Fortran2028_J3_26-007.pdf \
+		https://j3-fortran.org/doc/year/26/26-007.pdf \
+		|| echo "    ⚠️  Failed to download J3 26-007 (Fortran 2028 WD)"
 	@echo "✅ Download complete (see $(STANDARDS_DIR))"
 
 # OCR historical scanned PDFs into plain text for audit use.
@@ -429,7 +467,8 @@ ocr-standards:
 		Fortran2003_J3_04-007.pdf \
 		Fortran2008_J3_10-007r1.pdf \
 		Fortran2018_J3_18-007r1.pdf \
-		Fortran2023_J3_23-007r1.pdf; do \
+		Fortran2023_J3_23-007r1.pdf \
+		Fortran2028_J3_26-007.pdf; do \
 		if [ -f "$(STANDARDS_DIR)/$$pdf" ]; then \
 			base=$${pdf%.pdf}; \
 			txt_file="$(STANDARDS_DIR)/$${base}.txt"; \
@@ -480,7 +519,7 @@ help:
 	@echo "  FORTRAN (1957) → FORTRAN II (1958) → FORTRAN IV (1962)"
 	@echo "  → FORTRAN 66 (1966) → FORTRAN 77 (1977) → Fortran 90 (1990)"
 	@echo "  → Fortran 95 (1995) → Fortran 2003 (2003) → Fortran 2008 (2008)"
-	@echo "  → Fortran 2018 (2018) → Fortran 2023 (2023) → LFortran → LFortranInfer"
+	@echo "  → Fortran 2018 (2018) → Fortran 2023 (2023) → Fortran 2028 (WD) → LFortran → LFortranInfer"
 	@echo ""
 	@echo "BUILD TARGETS:"
 	@echo "  all                    - Build all grammars (default)"
@@ -494,7 +533,8 @@ help:
 	@echo "  Fortran2008            - Build Fortran 2008 (2008)"
 	@echo "  Fortran2018            - Build Fortran 2018 (2018)"
 	@echo "  Fortran2023            - Build Fortran 2023 (2023)"
-	@echo "  LFortran               - Build LFortran (F2023 + J3 Generics)"
+	@echo "  Fortran2028            - Build Fortran 2028 (Working Draft)"
+	@echo "  LFortran               - Build LFortran (F2028 + LFortran extensions)"
 	@echo "  LFortranInfer          - Build LFortranInfer (LFortran + Global Scope)"
 	@echo ""
 	@echo "TEST TARGETS:"
@@ -504,11 +544,15 @@ help:
 	@echo "  test-fortran2003       - Test Fortran 2003"
 	@echo "  test-fortran2018       - Test Fortran 2018"
 	@echo "  test-fortran2023       - Test Fortran 2023"
-	@echo "  test-lfortran          - Test LFortran (J3 Generics)"
+	@echo "  test-fortran2028       - Test Fortran 2028"
+	@echo "  test-lfortran          - Test LFortran (F2028 + extensions)"
 	@echo "  test-lfortran-infer    - Test LFortranInfer (Global Scope)"
 	@echo "  [etc. for all standards]"
 	@echo ""
 	@echo "UTILITY TARGETS:"
+	@echo "  sync-external-specs    - Sync traits repo + Fortran 2028 draft refs"
+	@echo "  download-traits        - Sync Traits-for-Fortran repository only"
+	@echo "  download-f2028-draft   - Download Fortran 2028 draft reference only"
 	@echo "  clean                  - Clean generated files"
 	@echo "  clean-all              - Deep clean (includes test cache)"
 	@echo "  help                   - Show this help"

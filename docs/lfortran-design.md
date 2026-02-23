@@ -1,15 +1,16 @@
 # LFortran Design Document
 
 **Status:** Draft
-**Base standard:** Fortran 2023 (ISO/IEC 1539-1:2023)
+**Base standard:** Fortran 2028 Working Draft (J3/26-007)
 
 ## Overview
 
-LFortran extends Fortran 2023 with J3 Generics, sensible defaults, and modern syntax. All standard Fortran 2023 programs remain valid LFortran programs.
+LFortran extends the Fortran 2028 working draft with LFortran-specific generic syntax, sensible defaults, and modern ergonomics. All supported Fortran 2028 syntax remains valid in LFortran.
 
 For normative specifications, see:
 - [LFortran Standard](lfortran-standard.md) - Stricter defaults
 - [LFortran Infer](lfortran-infer.md) - Type inference mode
+- [Traits Proposal](traits-proposal.md) - Trait contracts, `implements`, `sealed`, `initial`
 - [Design Rationale](design-rationale.md) - Why we made these choices
 
 ## Design Principles
@@ -18,7 +19,8 @@ For normative specifications, see:
 2. **No whole-program analysis** - All features are single-pass or module-local
 3. **Scientific computing focus** - 8-byte reals, bounds checking ON by default
 4. **Modern safety patterns** - Immutable by default, no silent overflow
-5. **Standard compatibility** - All code compiles with standard Fortran compilers
+5. **Nominal trait conformance** - `implements` is explicit and auditable
+6. **Standard compatibility** - All code compiles with standard Fortran compilers
 
 ## Generics and Traits Landscape
 
@@ -55,12 +57,25 @@ All features are **single-pass** (local or module-local analysis only):
 - Function result type inference from body
 - Automatic specialization across compilation units
 
+## Generics and Traits Composition
+
+LFortran supports three complementary systems:
+
+| System | Primary role | Dispatch model |
+|--------|--------------|----------------|
+| F2028 templates (`template`/`instantiate`) | Module-level reusable generic definitions | Static, explicit instantiation |
+| Procedure-level generics (`{T}`) | Function/subroutine-local generic constraints | Static, call-site binding |
+| Traits (`abstract interface` + `implements`) | Capability contracts and nominal conformance | Static (`type(T)`) + dynamic (`class(ITrait)`) |
+
+The detailed traits syntax and rules are specified in [Traits Proposal](traits-proposal.md).
+
 ## Compiler Modes
 
 | Mode | Flag | Purpose |
 |------|------|---------|
 | **Strict** | `--std=lf` (default) | Production code with safety checks |
 | **Standard** | `--std=f23` | ISO Fortran 2023 compatibility |
+| **Working Draft** | `--std=f28` | Fortran 2028 working-draft syntax |
 | **Infer** | `--infer` | Interactive/prototyping with type inference |
 
 ### Build Modes (orthogonal)
@@ -116,13 +131,14 @@ LFortran features are implemented in [LFortran](https://github.com/lfortran/lfor
 | Default real = 8 bytes | Planned |
 | Default `intent(in)` | Planned |
 | Dot notation | Planned |
-| J3 Generics base (`TEMPLATE`/`REQUIREMENT`/`INSTANTIATE`) | In progress |
+| F2028 templates (`TEMPLATE`/`REQUIREMENT`/`INSTANTIATE`) | In progress |
 | Inline instantiation syntax (`name{T}(...)`, `name^(T)(...)`) | In progress |
-| Traits syntax (`trait`, `implements`) | Not implemented |
+| Traits proposal (`implements`, `sealed`, `initial`, `itself`) | Draft spec (not implemented) |
 
 ## References
 
 - ISO/IEC 1539-1:2023 (Fortran 2023)
+- J3/26-007 (Fortran 2028 Working Draft)
 - [LFortran Compiler](https://lfortran.org)
 - [J3 Generics Repository](https://github.com/j3-fortran/generics)
 - [J3 Paper 24-107r1](https://j3-fortran.org/doc/year/24/24-107r1.txt)

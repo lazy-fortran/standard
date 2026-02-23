@@ -215,11 +215,11 @@ class TestInferModeWalrus:
 
 
 # =============================================================================
-# FORTRAN 2023 COMPATIBILITY TESTS (inherited)
+# FORTRAN 2028 COMPATIBILITY TESTS (inherited)
 # =============================================================================
 
-class TestFortran2023Compatibility:
-    """Test that LFortranInfer inherits Fortran 2023 features."""
+class TestFortran2028Compatibility:
+    """Test that LFortranInfer inherits Fortran 2028 features."""
 
     def test_standard_program(self):
         """Test standard program unit parses correctly."""

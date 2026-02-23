@@ -4,16 +4,21 @@ This directory contains tools and scripts for validating the Fortran grammar imp
 
 ## Quick Setup
 
-To download the kaby76/fortran reference repository:
+To download all external validation references:
 
 ```bash
-# Run from validation directory
+# Run from repository root
+make sync-external-specs
+
+# Or run from validation directory
 ./setup_validation.sh
 ```
 
-This ensures the [kaby76/fortran](https://github.com/kaby76/fortran.git)
-reference material is available under `external/kaby76-fortran/` for
-comparison with our grammar implementation.
+This downloads:
+
+- [kaby76/fortran](https://github.com/kaby76/fortran.git) reference grammar sources
+- [difference-scheme/Traits-for-Fortran](https://github.com/difference-scheme/Traits-for-Fortran.git) proposal examples
+- Fortran 2028 working draft PDF (J3 standing document `007`)
 
 ## Directory Structure
 
@@ -21,11 +26,12 @@ comparison with our grammar implementation.
 validation/
 ├── tools/              # Validation utilities
 │   ├── download_kaby76.py      # Downloads kaby76/fortran repo
+│   ├── sync_external_specs.py  # Sync traits repo + F2028 working draft
 │   └── ...
-├── external/           # External resources (some committed, some synced)
-│   ├── flang-grammar/  # Committed reference material
-│   ├── FortranAS/      # Committed extraction framework mirror
-│   └── kaby76-fortran/ # Synced/updated by setup scripts
+├── external/           # External resources (git-ignored)
+│   ├── kaby76-fortran/ # Downloaded on-demand from GitHub
+│   └── traits-for-fortran/ # Downloaded proposal examples
+├── pdfs/              # Downloaded standards drafts (git-ignored)
 ├── cache/             # Processing cache (git-ignored) 
 ├── auto-generated/    # Generated reference files (git-ignored)
 └── setup_validation.sh # One-click setup script
@@ -33,16 +39,14 @@ validation/
 
 ## Git Policy
 
-- `cache/` and `auto-generated/` are git-ignored local artifacts.
-- `external/` contains committed reference materials plus content that setup
-  scripts may refresh locally.
-- `validation/pdfs/` is used by `make download-standards` as a local cache.
+- `cache/`, `auto-generated/`, `external/`, and `pdfs/` are git-ignored local artifacts.
+- Sync scripts refresh external references on demand.
 
 ## Usage
 
-1. Run `./setup_validation.sh` to download reference materials
+1. Run `make sync-external-specs` or `./setup_validation.sh` to download reference materials
 2. Compare our grammars against `external/kaby76-fortran/*.g4`
-3. Test with example files in `external/kaby76-fortran/examples/`
+3. Test with example files in `external/kaby76-fortran/examples/` and `external/traits-for-fortran/Code/Fortran/`
 4. Validation artifacts are cached locally but not committed
 
 The validation environment is completely self-contained and reproducible.

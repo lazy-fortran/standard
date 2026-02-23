@@ -51,6 +51,12 @@ fi
 
 # Download reference Fortran grammars
 echo ""
+echo "Syncing external standards/proposal sources..."
+python3 validation/tools/sync_external_specs.py "$REPO_ROOT"
+echo "✓ External specs synchronized"
+
+# Download reference Fortran grammars
+echo ""
 echo "Downloading reference Fortran grammars from kaby76/fortran..."
 cd "$REPO_ROOT"
 python3 validation/tools/download_reference_grammars.py "$REPO_ROOT"
