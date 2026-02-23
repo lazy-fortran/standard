@@ -32,6 +32,13 @@ LFortran Infer (--infer)
 ## Implementation Status
 
 All grammars are **complete and tested**.
+This table tracks repository parser/grammar coverage; semantic/runtime behavior is
+tracked separately and is out of scope for this parser repository.
+
+Status source of truth:
+- [Implementation Notes: Grammar Status](docs/implementation-notes.md#grammar-status)
+- [Implementation Notes: Fortran 2028 Delta Audit](docs/implementation-notes.md#fortran-2028-delta-audit-j326-007)
+- [LFortran Design: Deferred Trait Items (Semantic Phase)](docs/lfortran-design.md#deferred-trait-items-semantic-phase)
 
 | Standard | Grammar | Tests | Key Features |
 |----------|---------|-------|--------------|

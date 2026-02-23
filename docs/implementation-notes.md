@@ -1,6 +1,7 @@
 # Implementation Notes
 
 Status and known limitations for the Fortran grammar collection.
+This is the canonical status reference for parser/grammar coverage in this repository.
 
 ## Grammar Status
 
@@ -21,6 +22,11 @@ All grammars are **complete and tested**. Each implements the full syntax of its
 | Fortran 2028 (WD) | Complete | Yes | TEMPLATE/REQUIREMENT/REQUIRE(S)/INSTANTIATE facility |
 | LFortran | Complete | Yes | F2028 base + inline instantiation (`{}` and `^()`); traits syntax (`implements`, `sealed`, `initial`) |
 | LFortran Infer | Complete | Yes | Type inference, global scope, auto realloc |
+
+Status boundaries:
+- "Complete" means grammar-level parsing support in this repository.
+- Semantic checks (trait conformance, inheritance restrictions, signature matching) are intentionally deferred to semantic analysis.
+- See [LFortran Design: Deferred Trait Items (Semantic Phase)](lfortran-design.md#deferred-trait-items-semantic-phase) for the deferred trait list.
 
 ## Fortran 2028 Delta Audit (J3/26-007)
 

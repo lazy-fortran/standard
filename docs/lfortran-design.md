@@ -1,6 +1,6 @@
 # LFortran Design Document
 
-**Status:** Draft
+**Status:** Maintained design reference (grammar syntax coverage is complete; semantic enforcement remains compiler/semantic-phase work)
 **Base standard:** Fortran 2028 Working Draft (J3/26-007)
 
 ## Overview
@@ -12,6 +12,11 @@ For normative specifications, see:
 - [LFortran Infer](lfortran-infer.md) - Type inference mode
 - [Traits Proposal](traits-proposal.md) - Trait contracts, `implements`, `sealed`, `initial`
 - [Design Rationale](design-rationale.md) - Why we made these choices
+
+Implementation status source of truth:
+- [README: Implementation Status](../README.md#implementation-status)
+- [Implementation Notes: Grammar Status](implementation-notes.md#grammar-status)
+- [Implementation Notes: Fortran 2028 Delta Audit](implementation-notes.md#fortran-2028-delta-audit-j326-007)
 
 ## Design Principles
 
@@ -119,21 +124,18 @@ program main
 end program main
 ```
 
-## LFortran Implementation
+## Repository Grammar Coverage
 
-LFortran features are implemented in [LFortran](https://github.com/lfortran/lfortran).
+This repository implements and tests parser support for:
 
-| Feature | Status |
-|---------|--------|
-| Bounds checking (default ON) | Implemented |
-| Global scope / infer mode | Implemented |
-| Unsigned integers | ASR support |
-| Default real = 8 bytes | Planned |
-| Default `intent(in)` | Planned |
-| Dot notation | Planned |
+| Feature | Parser Status |
+|---------|---------------|
 | F2028 templates (`TEMPLATE`/`REQUIREMENT`/`REQUIRE(S)`/`INSTANTIATE`) | Implemented |
 | Inline instantiation syntax (`name{T}(...)`, `name^(T)(...)`) | Implemented |
-| Traits proposal (`implements`, `sealed`, `initial`, `itself`) | Implemented (grammar-level syntax) |
+| Traits proposal syntax (`implements`, `sealed`, `initial`, `itself`) | Implemented (grammar-level syntax) |
+
+Compiler/runtime behavior beyond syntax is tracked in upstream
+[LFortran](https://github.com/lfortran/lfortran) and is outside this repository's parser scope.
 
 ### Deferred Trait Items (Semantic Phase)
 
