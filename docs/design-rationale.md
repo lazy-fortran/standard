@@ -128,6 +128,47 @@ Benefits:
 
 ---
 
+## Why Traits Use Nominal `implements` Instead of Structural Typing
+
+### Problem with structural typing for scientific codebases
+
+Pure structural typing ("if it has matching methods, it conforms") is concise
+but risky for large Fortran projects:
+
+- **Accidental conformance**: Unrelated types can match method shape by chance
+- **Hard-to-audit APIs**: Conformance changes when signatures drift
+- **Retroactive ambiguity**: Multiple packages may infer different trait intent
+
+### Solution: explicit nominal conformance
+
+LFortran traits use explicit `implements` declarations:
+
+```fortran
+type, sealed, implements(ISum) :: SimpleSum
+contains
+    procedure, nopass :: sum
+end type
+```
+
+This makes conformance intentional, reviewable, and stable under refactoring.
+It also allows explicit retroactive conformance for intrinsic types when needed:
+
+```fortran
+implements INumeric :: integer
+end implements integer
+```
+
+### Why this fits the rest of the design
+
+- **Explicit over implicit**: Same philosophy as explicit template instantiation
+- **Single-pass friendliness**: Conformance is declared locally, not inferred globally
+- **Safer evolution**: `sealed` and `initial` support controlled extension points
+
+Traits still support dynamic polymorphism (`class(ITrait)`) when runtime
+dispatch is required, but static dispatch remains available via `type(T)`.
+
+---
+
 ## Why Type Inference Is Opt-In
 
 ### Problem with mandatory type inference

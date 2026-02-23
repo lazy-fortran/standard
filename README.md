@@ -70,6 +70,7 @@ make test
 |----------|-------------|
 | [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran 2023 dialect specification |
 | [LFortran Infer](docs/lfortran-infer.md) | Type inference and infer mode specification |
+| [Traits Proposal](docs/traits-proposal.md) | Traits, nominal conformance, and `{T}` procedure generics |
 | [Design Rationale](docs/design-rationale.md) | Explains key design decisions |
 | [Implementation Notes](docs/implementation-notes.md) | Status and known limitations |
 

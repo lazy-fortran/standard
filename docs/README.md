@@ -6,6 +6,7 @@
 |----------|-------------|
 | [lfortran-standard.md](lfortran-standard.md) | LFortran Standard: stricter Fortran 2023 dialect |
 | [lfortran-infer.md](lfortran-infer.md) | LFortran Infer: type inference mode |
+| [traits-proposal.md](traits-proposal.md) | Traits proposal: `implements`, `sealed`, `initial`, `{T}` |
 
 ## Design
 
