@@ -97,6 +97,17 @@ WALRUS_SEMANTIC_SHAPE_FIXTURES = [
     "infer_walrus_redecl_01.f90",
 ]
 
+TRAITS_POSITIVE_FIXTURES = [
+    "traits_module_full.f90",
+    "traits_implements_intrinsic.f90",
+]
+
+TRAITS_NEGATIVE_FIXTURES = [
+    "traits_invalid_missing_parens_attr.f90",
+    "traits_invalid_initial_missing_colons.f90",
+    "traits_invalid_implements_missing_double_colon.f90",
+]
+
 
 # =============================================================================
 # J3 GENERICS: TEMPLATE CONSTRUCT TESTS
@@ -574,6 +585,44 @@ class TestInferWalrus:
             assert tree is not None
         except Exception as e:
             pytest.fail(f"Walrus semantic-shape parsing failed ({fixture}): {e}")
+
+
+# =============================================================================
+# TRAITS PROPOSAL TESTS
+# =============================================================================
+
+class TestTraitsProposal:
+    """Test documented traits syntax forms in the LFortran grammar."""
+
+    def test_traits_keywords_recognized(self):
+        """Verify trait-related keywords are tokenized correctly."""
+        tokens = tokenize("type, sealed, implements(INumeric) :: t")
+        token_types = [t.type for t in tokens]
+        assert LFortranLexer.SEALED_KW in token_types
+        assert LFortranLexer.IMPLEMENTS_KW in token_types
+
+    def test_initial_keyword_recognized(self):
+        """Verify INITIAL is tokenized for type-bound constructor declarations."""
+        tokens = tokenize("initial :: init")
+        token_types = [t.type for t in tokens]
+        assert LFortranLexer.INITIAL_KW in token_types
+
+    @pytest.mark.parametrize("fixture", TRAITS_POSITIVE_FIXTURES)
+    def test_traits_fixture_parses(self, fixture):
+        """Trait fixtures should parse without syntax errors."""
+        source = load_fixture(fixture)
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Traits fixture parsing failed ({fixture}): {e}")
+
+    @pytest.mark.parametrize("fixture", TRAITS_NEGATIVE_FIXTURES)
+    def test_traits_invalid_fixture_fails(self, fixture):
+        """Malformed trait syntax should produce parser syntax errors."""
+        source = load_fixture(fixture)
+        with pytest.raises(SyntaxError):
+            parse(source)
 
 
 # =============================================================================

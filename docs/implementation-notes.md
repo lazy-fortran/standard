@@ -19,7 +19,7 @@ All grammars are **complete and tested**. Each implements the full syntax of its
 | Fortran 2018 | Complete | Yes | Teams, events, atomics |
 | Fortran 2023 | Complete | Yes | Conditional expressions, TYPEOF/CLASSOF |
 | Fortran 2028 (WD) | Complete | Yes | TEMPLATE/REQUIREMENT/REQUIRE(S)/INSTANTIATE facility |
-| LFortran | In progress | Yes | F2028 base + inline instantiation (`{}` and `^()`); traits proposal documented |
+| LFortran | Complete | Yes | F2028 base + inline instantiation (`{}` and `^()`); traits syntax (`implements`, `sealed`, `initial`) |
 | LFortran Infer | Complete | Yes | Type inference, global scope, auto realloc |
 
 ## Fortran 2028 Delta Audit (J3/26-007)

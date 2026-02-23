@@ -31,7 +31,7 @@ These are often discussed together, but they are not the same feature set.
 |------|------------------|-------|-------------------------------------|
 | **J3 Generics (official 202Y track)** | J3/24-107r1, J3 syntax papers 24-125r5/24-126r4/24-127r4 | Compile-time generic programming via `TEMPLATE`, `REQUIREMENT`, `REQUIRES`, `INSTANTIATE` | Implemented |
 | **LFortran "Simpler Generics" syntax** | LFortran issue discussions (e.g., lfortran/lfortran#1838) | User-facing inline instantiation syntax used in LFortran workflows | Implemented (`name{T}(...)` and `name^(T)(...)`) |
-| **Traits for Fortran proposals** | J3/20-109, fortran_proposals #125, Traits-for-Fortran repository | Trait/interface conformance (`trait`, `implements`, trait-typed entities), primarily runtime polymorphism and trait constraints | Not implemented |
+| **Traits for Fortran proposals** | J3/20-109, fortran_proposals #125, Traits-for-Fortran repository | Trait/interface conformance (`trait`, `implements`, trait-typed entities), primarily runtime polymorphism and trait constraints | Implemented (grammar-level syntax) |
 
 ### Orthogonality
 
@@ -133,7 +133,17 @@ LFortran features are implemented in [LFortran](https://github.com/lfortran/lfor
 | Dot notation | Planned |
 | F2028 templates (`TEMPLATE`/`REQUIREMENT`/`REQUIRE(S)`/`INSTANTIATE`) | Implemented |
 | Inline instantiation syntax (`name{T}(...)`, `name^(T)(...)`) | Implemented |
-| Traits proposal (`implements`, `sealed`, `initial`, `itself`) | Draft spec (not implemented) |
+| Traits proposal (`implements`, `sealed`, `initial`, `itself`) | Implemented (grammar-level syntax) |
+
+### Deferred Trait Items (Semantic Phase)
+
+The grammar now accepts the documented trait syntax. The following items are
+intentionally deferred to semantic analysis and remain out of scope for this
+repository's parser layer:
+
+- Duplicate `implements` conformance checks in one scoping unit
+- Method signature conformance validation for trait requirements
+- `sealed` inheritance restriction enforcement (`extends(...)` on sealed parents)
 
 ## References
 

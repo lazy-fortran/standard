@@ -68,6 +68,14 @@ INFER_FIXTURES = [
     "infer_walrus_error_shape_01.f90",
 ]
 
+TRAITS_INFER_POSITIVE_FIXTURES = [
+    "traits_infer_script_valid.f90",
+]
+
+TRAITS_INFER_NEGATIVE_FIXTURES = [
+    "traits_infer_script_invalid.f90",
+]
+
 
 # =============================================================================
 # GLOBAL SCOPE TESTS
@@ -212,6 +220,31 @@ class TestInferModeWalrus:
             assert tree is not None
         except Exception as e:
             pytest.fail(f"Infer-mode fixture parsing failed ({fixture}): {e}")
+
+
+# =============================================================================
+# TRAITS INFER TESTS
+# =============================================================================
+
+class TestInferModeTraits:
+    """Test trait syntax in infer/script mode."""
+
+    @pytest.mark.parametrize("fixture", TRAITS_INFER_POSITIVE_FIXTURES)
+    def test_traits_infer_fixture_parses(self, fixture):
+        """Trait fixtures should parse in infer mode."""
+        source = load_fixture(fixture)
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Infer trait fixture parsing failed ({fixture}): {e}")
+
+    @pytest.mark.parametrize("fixture", TRAITS_INFER_NEGATIVE_FIXTURES)
+    def test_traits_infer_invalid_fixture_fails(self, fixture):
+        """Malformed trait syntax should fail in infer mode."""
+        source = load_fixture(fixture)
+        with pytest.raises(SyntaxError):
+            parse(source)
 
 
 # =============================================================================
