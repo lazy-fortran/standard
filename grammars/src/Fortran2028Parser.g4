@@ -50,7 +50,8 @@ external_subprogram_f2028
 // ============================================================================
 
 template_construct_f2028
-    : TEMPLATE_KW identifier_or_keyword LPAREN deferred_arg_name_list_f2028? RPAREN NEWLINE*
+    : TEMPLATE_KW identifier_or_keyword LPAREN
+      deferred_arg_name_list_f2028? RPAREN NEWLINE*
       template_specification_part_f2028?
       template_contains_part_f2028?
       END_TEMPLATE_STMT identifier_or_keyword? NEWLINE*
@@ -84,7 +85,8 @@ template_subprogram_f2028
 // ============================================================================
 
 templated_function_subprogram_f2028
-    : prefix? TEMPLATE_KW FUNCTION identifier_or_keyword LPAREN deferred_arg_name_list_f2028? RPAREN
+    : prefix? TEMPLATE_KW FUNCTION identifier_or_keyword LPAREN
+      deferred_arg_name_list_f2028? RPAREN
       LPAREN dummy_arg_name_list? RPAREN suffix? NEWLINE*
       templated_subp_specification_part_f2028?
       execution_part?
@@ -93,7 +95,8 @@ templated_function_subprogram_f2028
     ;
 
 templated_subroutine_subprogram_f2028
-    : prefix? TEMPLATE_KW SUBROUTINE identifier_or_keyword LPAREN deferred_arg_name_list_f2028? RPAREN
+    : prefix? TEMPLATE_KW SUBROUTINE identifier_or_keyword LPAREN
+      deferred_arg_name_list_f2028? RPAREN
       LPAREN dummy_arg_name_list? RPAREN NEWLINE*
       templated_subp_specification_part_f2028?
       execution_part?
@@ -127,11 +130,13 @@ deferred_type_declaration_stmt_f2028
     ;
 
 deferred_const_declaration_stmt_f2028
-    : type_spec_f2023 COMMA CONSTANT_KW DOUBLE_COLON deferred_arg_name_list_f2028 NEWLINE*
+    : type_spec_f2023 COMMA CONSTANT_KW DOUBLE_COLON
+      deferred_arg_name_list_f2028 NEWLINE*
     ;
 
 deferred_proc_declaration_stmt_f2028
-    : PROCEDURE (LPAREN identifier_or_keyword RPAREN)? DOUBLE_COLON deferred_arg_name_list_f2028 NEWLINE*
+    : PROCEDURE (LPAREN identifier_or_keyword RPAREN)? DOUBLE_COLON
+      deferred_arg_name_list_f2028 NEWLINE*
     ;
 
 deferred_arg_name_list_f2028
@@ -143,7 +148,8 @@ deferred_arg_name_list_f2028
 // ============================================================================
 
 requirement_construct_f2028
-    : REQUIREMENT_KW identifier_or_keyword LBRACE deferred_arg_name_list_f2028? RBRACE NEWLINE*
+    : REQUIREMENT_KW identifier_or_keyword LBRACE
+      deferred_arg_name_list_f2028? RBRACE NEWLINE*
       requirement_specification_part_f2028?
       END_REQUIREMENT_STMT identifier_or_keyword? NEWLINE*
     ;
@@ -176,9 +182,11 @@ requirement_reference_f2028
 // ============================================================================
 
 instantiate_stmt_f2028
-    : INSTANTIATE_KW DOUBLE_COLON? identifier_or_keyword LBRACE instantiation_arg_spec_list_f2028? RBRACE
+    : INSTANTIATE_KW DOUBLE_COLON? identifier_or_keyword LBRACE
+      instantiation_arg_spec_list_f2028? RBRACE
       instantiate_only_clause_f2028? NEWLINE*
-    | INSTANTIATE_KW DOUBLE_COLON? identifier_or_keyword POINTER_ASSIGN templated_subp_name_f2028 NEWLINE*
+    | INSTANTIATE_KW DOUBLE_COLON? identifier_or_keyword POINTER_ASSIGN
+      templated_subp_name_f2028 NEWLINE*
     ;
 
 templated_subp_name_f2028
