@@ -7,6 +7,10 @@ This repository contains:
 2. **LFortran extensions**: F2028 generics base, inline instantiation, and infer mode
 3. **Specifications** for LFortran Standard and LFortran Infer mode
 
+It is the Lazy Fortran ecosystem source of truth for intended language behavior.
+Implementation work in `fortfront`, `ffc`, `fortrun`, and `fortnb` should align
+with these specifications instead of inventing separate dialect rules.
+
 ## Standards Hierarchy
 
 ```
@@ -29,11 +33,21 @@ LFortran Infer (--infer)
     - Interactive REPL mode
 ```
 
+## Ecosystem Alignment
+
+- `fortfront` should treat this repo as the target for Lazy Fortran/Inferred
+  source semantics and document any temporary divergence.
+- `ffc` should compile the subset defined here, starting with a small executable
+  scalar subset.
+- `fortrun` and `fortnb` should not define separate language behavior; they
+  should delegate parsing/compilation to FortFront/`ffc`.
+
 ## Implementation Status
 
-All grammars are **complete and tested**.
-This table tracks repository parser/grammar coverage; semantic/runtime behavior is
-tracked separately and is out of scope for this parser repository.
+The grammar documents are intended to be complete for the tracked standards and
+extensions. This table tracks repository parser/grammar coverage;
+semantic/runtime behavior is tracked separately and is out of scope for this
+parser repository.
 
 Status source of truth:
 - [Implementation Notes: Grammar Status](docs/implementation-notes.md#grammar-status)

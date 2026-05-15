@@ -1,12 +1,16 @@
 # LFortran Infer Mode
 
-**Status:** Draft  
+**Status:** Draft source of truth for Lazy Fortran ecosystem alignment
 **Derived from:** [LFortran Standard](lfortran-standard.md)  
 **Compiler flag:** `--infer`
 
 ## Overview
 
 LFortran Infer mode extends LFortran Standard for interactive and rapid-prototyping workflows. It keeps standard Fortran syntax and adds inference-oriented behavior.
+
+Lazy Fortran tools should align with this behavior. Temporary implementation
+gaps in FortFront or `ffc` should be documented as gaps, not as separate dialect
+rules.
 
 ## Inference Forms
 
@@ -74,6 +78,21 @@ Equivalent to enabling `--realloc-lhs-arrays` behavior.
 | **Strict** | `--std=lf` (default) | YES (extension) | OFF | OFF |
 | **Standard** | `--std=f23` | YES (extension) | OFF | ON |
 | **Infer** | `--infer` | YES | ON | ON |
+
+## Minimal Compiler Subset
+
+For `ffc`, the first executable subset should preserve these Infer semantics but
+start small:
+
+- bare statements are allowed and lower to a main program
+- first assignment can declare scalar intrinsic variables
+- inferred declarations are explicit after lowering
+- simple scalar expressions, calls, `if`, and counted `do` are enough for the
+  first milestone
+
+Arrays, derived types, traits, templates, and cross-module behavior are part of
+the specification, but they do not need to block the first executable compiler
+milestone.
 
 ## Standardizer
 
