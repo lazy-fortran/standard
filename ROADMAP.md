@@ -7,7 +7,8 @@ implementing repositories.
 
 ## Current handoff (2026-08-03)
 
-- `main` is `9ad82a3` (specification baseline `b432327`).
+- The specification baseline is `b432327`; the roadmap commits are pushed on
+  current `main`.
 - Active proposals relevant to the compiler architecture include
   [#745](https://github.com/lazy-fortran/standard/issues/745) for shape/rank
   and checked broadcasting, [#753](https://github.com/lazy-fortran/standard/issues/753)
