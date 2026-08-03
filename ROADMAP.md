@@ -7,7 +7,7 @@ implementing repositories.
 
 ## Current handoff (2026-08-03)
 
-- `main` is `b432327571835e0fa10e51ad2211dabfcdcc86b7`.
+- `main` is `9ad82a3` (specification baseline `b432327`).
 - Active proposals relevant to the compiler architecture include
   [#745](https://github.com/lazy-fortran/standard/issues/745) for shape/rank
   and checked broadcasting, [#753](https://github.com/lazy-fortran/standard/issues/753)
