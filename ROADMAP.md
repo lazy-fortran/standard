@@ -1,34 +1,59 @@
 # Lazy Fortran standard roadmap
 
-The standard repository specifies language, runtime, ownership, layout, and
-reproducibility contracts. It is not an implementation backlog: accepted
-proposals are mapped to atomic issues in FortFront, ffc, LIRIC, fo, or other
-implementing repositories.
+Snapshot: 2026-08-06. This repository specifies language, runtime, ownership,
+layout, and reproducibility contracts. It is not an implementation backlog.
+An accepted proposal is mapped to small issues in the repositories that
+produce and consume its public contract.
 
-## Current handoff (2026-08-03)
+The audited baseline is `e4183d2`. All proposals #734 through #756 remain open. They do
+not expand ffc's current completion denominator merely because they exist.
 
-- The specification baseline is `b432327`; the roadmap commits are pushed on
-  current `main`.
-- Active proposals relevant to the compiler architecture include
-  [#745](https://github.com/lazy-fortran/standard/issues/745) for shape/rank
-  and checked broadcasting, [#753](https://github.com/lazy-fortran/standard/issues/753)
-  for stable module signatures, and [#756](https://github.com/lazy-fortran/standard/issues/756)
-  for Fortran Synthesis contracts.
-- These proposals remain specification inputs until accepted. Do not silently
-  change ffc's descriptor, module-artifact, or synthesis ABI to anticipate an
-  unaccepted proposal.
+## Compiler-critical proposals
 
-## Implementer links
+- [#745](https://github.com/lazy-fortran/standard/issues/745): shape/rank types,
+  checked broadcasting, and array contracts. Its accepted representation will
+  map to FortFront typed queries and ffc's one canonical descriptor/expression
+  model.
+- [#753](https://github.com/lazy-fortran/standard/issues/753): stable module
+  interface signatures. It must specify identity, schema versioning,
+  compatibility, target/runtime dependence, and invalidation before ffc
+  changes its published `.fmod` contract.
+- [#756](https://github.com/lazy-fortran/standard/issues/756): Fortran
+  Synthesis, contracts, proof obligations, and verified generation. The
+  implementation chain is FortFront #2976, ffc #632, then fo #120 only after
+  normative syntax and semantics are accepted.
 
-- Array and broadcasting decisions feed ffc [#337](https://github.com/lazy-fortran/ffc/issues/337),
-  [#338](https://github.com/lazy-fortran/ffc/issues/338), and [#339](https://github.com/lazy-fortran/ffc/issues/339).
-- Stable module signatures feed ffc [#297](https://github.com/lazy-fortran/ffc/issues/297),
-  [#414](https://github.com/lazy-fortran/ffc/issues/414), and [#415](https://github.com/lazy-fortran/ffc/issues/415).
-- Synthesis contracts feed FortFront and fo only after the accepted syntax and
-  proof obligations are split into independently verifiable implementation
-  issues.
+Related design inputs are exact strings #735, ownership/lifetimes #739,
+runtime extraction #740, reproducibility #748, layout #749, compile-time
+staging #752, and unsafe interop #754. They inform architecture discussions
+but cannot silently change standard-Fortran behavior or an existing ABI.
 
-## Delivery gate
+## Proposal-to-implementation rule
 
-Every accepted contract needs normative text, positive and negative examples,
-an implementation issue with an owner, and an independent behavioral oracle.
+Every accepted contract includes:
+
+- normative syntax and semantics, including evaluation order, side effects,
+  errors, ownership/lifetime, and interaction with standard Fortran.
+- positive, negative, boundary, and cross-feature examples.
+- a desugaring or independent reference model where possible.
+- compatibility and versioning rules for serialized/runtime contracts.
+- named producer and consumer repositories.
+- atomic implementation issues with independent behavioral oracles.
+
+Implementation order for a breaking cross-repository contract is additive
+provider API, migrated consumers, default switch, then prompt deletion of the
+old path. Temporary dual-mode comparison belongs in tests, not two permanent
+production semantics.
+
+## Verification
+
+Examples must be executable or mechanically checkable. A syntax example alone
+does not validate semantics. Array, ownership, staging, and reproducibility
+proposals need a small reference evaluator or standard-Fortran desugared twin,
+plus invalid neighbors. Module/runtime proposals need separate
+producer-consumer compile/link/run examples and incompatible-version rejection.
+
+When a proposal changes, update its implementer links. Do not copy live corpus
+counts or issue status here. The
+[ffc roadmap](https://github.com/lazy-fortran/ffc/blob/main/ROADMAP.md) owns the
+current compiler convergence plan.
