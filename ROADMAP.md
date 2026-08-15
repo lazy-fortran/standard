@@ -17,7 +17,8 @@ not expand ffc's current completion denominator merely because they exist.
 - [#753](https://github.com/lazy-fortran/standard/issues/753): stable module
   interface signatures. It must specify identity, schema versioning,
   compatibility, target/runtime dependence, and invalidation before ffc
-  changes its published `.fmod` contract.
+  changes its published `.fmod` contract. Draft specification:
+  [docs/module-interface-signatures.md](docs/module-interface-signatures.md).
 - [#756](https://github.com/lazy-fortran/standard/issues/756): Fortran
   Synthesis, contracts, proof obligations, and verified generation. The
   implementation chain is FortFront #2976, ffc #632, then fo #120 only after
