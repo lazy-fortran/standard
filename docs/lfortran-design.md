@@ -11,6 +11,7 @@ For normative specifications, see:
 - [LFortran Standard](lfortran-standard.md) - Stricter defaults
 - [LFortran Infer](lfortran-infer.md) - Type inference mode
 - [Traits Proposal](traits-proposal.md) - Trait contracts, `implements`, `sealed`, `initial`
+- [Arrays Proposal](arrays-proposal.md) - Shape/rank contracts and checked broadcasting
 - [Design Rationale](design-rationale.md) - Why we made these choices
 
 Implementation status source of truth:
@@ -55,6 +56,7 @@ All features are **single-pass** (local or module-local analysis only):
 - Default `implicit none` injection
 - Default precision (real=8 bytes, integer=4 bytes)
 - Template/requirement instantiation and inline instantiation (`{}` and `^()`)
+- Shape/rank array contracts (`shape(...)`) and explicit `broadcast(...)`
 - Type inference (`:=` syntax and `--infer` first assignment)
 
 **Explicitly NOT supported** (would require whole-program analysis):
@@ -133,6 +135,7 @@ This repository implements and tests parser support for:
 | F2028 templates (`TEMPLATE`/`REQUIREMENT`/`REQUIRE(S)`/`INSTANTIATE`) | Implemented |
 | Inline instantiation syntax (`name{T}(...)`, `name^(T)(...)`) | Implemented |
 | Traits proposal syntax (`implements`, `sealed`, `initial`, `itself`) | Implemented (grammar-level syntax) |
+| Arrays proposal syntax (`shape(...)`, `broadcast(...)`) | Implemented (grammar-level syntax) |
 
 Compiler/runtime behavior beyond syntax is tracked in upstream
 [LFortran](https://github.com/lfortran/lfortran) and is outside this repository's parser scope.

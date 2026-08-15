@@ -57,3 +57,15 @@ INITIAL_KW
 PIPE
     : '|'
     ;
+
+// ============================================================================
+// ARRAY CONTRACTS PROPOSAL TOKENS (issue #745)
+// ============================================================================
+// Explicit broadcasting operation:
+//   x = x + broadcast(dt * v, over=particle)
+// `broadcast` is reserved in LFortran so it is unambiguous in expressions.
+// (The `shape(...)` attribute reuses the inherited SHAPE_INTRINSIC token and
+// therefore does not reserve a new keyword.)
+BROADCAST_KW
+    : B R O A D C A S T
+    ;

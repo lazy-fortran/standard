@@ -11,9 +11,11 @@ not expand ffc's current completion denominator merely because they exist.
 ## Compiler-critical proposals
 
 - [#745](https://github.com/lazy-fortran/standard/issues/745): shape/rank types,
-  checked broadcasting, and array contracts. Its accepted representation will
-  map to FortFront typed queries and ffc's one canonical descriptor/expression
-  model.
+  checked broadcasting, and array contracts. Normative syntax and semantics are
+  specified in [docs/arrays-proposal.md](docs/arrays-proposal.md), with a
+  reference evaluator in `tools/array_contracts_checker.py` and grammar support
+  in the LFortran lexer/parser. Its accepted representation will map to
+  FortFront typed queries and ffc's one canonical descriptor/expression model.
 - [#753](https://github.com/lazy-fortran/standard/issues/753): stable module
   interface signatures. It must specify identity, schema versioning,
   compatibility, target/runtime dependence, and invalidation before ffc
