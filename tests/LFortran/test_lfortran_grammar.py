@@ -625,6 +625,68 @@ class TestTraitsProposal:
             parse(source)
 
 
+ARRAYS_POSITIVE_FIXTURES = [
+    "arrays_shape_contract.f90",
+    "arrays_named_axes.f90",
+    "arrays_rank_polymorphic.f90",
+]
+
+
+# =============================================================================
+# ARRAY CONTRACTS PROPOSAL TESTS (issue #745)
+# =============================================================================
+
+class TestArrayContractsProposal:
+    """Test shape/rank contracts and explicit broadcasting (issue #745)."""
+
+    def test_broadcast_keyword_recognized(self):
+        """Verify BROADCAST is tokenized as BROADCAST_KW."""
+        tokens = tokenize("broadcast(dt * v, over=particle)")
+        token_types = [t.type for t in tokens]
+        assert LFortranLexer.BROADCAST_KW in token_types
+
+    @pytest.mark.parametrize("fixture", ARRAYS_POSITIVE_FIXTURES)
+    def test_arrays_fixture_parses(self, fixture):
+        """Array-contract fixtures should parse without syntax errors."""
+        source = load_fixture(fixture)
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Array contract fixture parsing failed ({fixture}): {e}")
+
+    def test_shape_attribute_declaration(self):
+        """A declaration with the shape attribute parses."""
+        source = """
+program test
+    implicit none
+    integer :: n
+    real(dp), shape(n, 3), intent(inout) :: x
+    real(dp), shape(3) :: v
+    real(dp), shape(*) :: any_rank
+    x = x + broadcast(v, over=axis)
+end program test
+"""
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"shape attribute parsing failed: {e}")
+
+    def test_shape_invalid_implicit_broadcast_still_parses(self):
+        """Semantically invalid implicit broadcast stays syntax-valid here.
+
+        The grammar is syntactic only: rejecting the implicit broadcast is a
+        semantic/checking concern, so this fixture must still parse.
+        """
+        source = load_fixture("arrays_invalid_implicit_broadcast.f90")
+        try:
+            tree = parse(source)
+            assert tree is not None
+        except Exception as e:
+            pytest.fail(f"Implicit-broadcast fixture should stay syntax-valid: {e}")
+
+
 # =============================================================================
 # INTEGRATION TESTS
 # =============================================================================

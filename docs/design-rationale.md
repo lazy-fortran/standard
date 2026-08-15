@@ -306,6 +306,50 @@ The standardizer enforces this rule and rejects ambiguous code at compile time.
 
 ---
 
+## Why Shape/Rank Contracts Are Explicit (No Implicit Broadcasting)
+
+### Problem with NumPy-style implicit broadcasting
+
+Implicit broadcasting silently reshapes operands. This is convenient but
+hides bugs:
+
+```fortran
+a = b + v    ! If a and b are (2,2) and v is (2), NumPy "helpfully" broadcasts.
+             ! Was that intended? Often it is a rank/shape mistake.
+```
+
+Scientific codes routinely suffer from accidental scalar/vector/matrix
+confusion, transposed dimensions, and mixing particle/coordinate/species/time
+axes. Python catches many of these at runtime; C++/Rust hide them in libraries.
+
+### Solution: shape contracts + explicit broadcast
+
+LFortran lifts rank, shape, axis names, and broadcasting into the type system:
+
+```fortran
+real(dp), shape(particle, xyz), intent(inout) :: x
+real(dp), shape(particle),      intent(in)    :: mass
+x = x + broadcast(dt * v, over=particle)
+```
+
+- `shape(...)` documents rank and per-axis extent as a **contract**.
+- Named axes (`particle`, `xyz`) enforce that matching extents agree.
+- Broadcasting is **explicit** (`broadcast(src, over=axis)`); there is no
+  implicit broadcasting, so a shape mismatch is always an error.
+
+### Why this fits the rest of the design
+
+- **Explicit over implicit**: same philosophy as explicit template
+  instantiation and `intent(in)` defaults.
+- **Single-pass friendliness**: contracts are local, not inferred globally.
+- **Static metadata**: static shapes enable inlining, vectorization, and
+  bounds-check elimination; dynamic checks are hoisted out of loops.
+- **Thread-safety**: shape metadata is immutable, so descriptors are read-only
+  in parallel regions.
+
+The full specification, lowering, checking rules, diagnostics, and the
+reference evaluator live in [Arrays Proposal](arrays-proposal.md).
+
 ## Summary of Key Design Principles
 
 1. **Strictness by default**: Catch bugs at compile/run time, not in production
