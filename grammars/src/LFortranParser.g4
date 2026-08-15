@@ -536,7 +536,8 @@ assignment_stmt
 // Override to include inline instantiated function calls in expressions
 
 primary
-    : inline_instantiated_function_ref   // J3 Generics: name{type}(args)
+    : broadcast_call                     // Array contracts: broadcast(expr, over=axis)
+    | inline_instantiated_function_ref   // J3 Generics: name{type}(args)
     | complex_literal_constant           // Legacy and modern complex literal syntax
     | designator
     | complex_part_designator
@@ -561,4 +562,66 @@ primary
 //   (real-part, imag-part)
 complex_literal_constant
     : LPAREN expr_f2003 COMMA expr_f2003 RPAREN
+    ;
+
+// ============================================================================
+// ARRAY CONTRACTS PROPOSAL RULES (LFortran Extension, issue #745)
+// ============================================================================
+// Adds the `shape(...)` declaration attribute and the explicit `broadcast(...)`
+// operation from docs/arrays-proposal.md.
+//
+//   real(dp), shape(n, 3), intent(inout) :: x
+//   real(dp), shape(particle, xyz)       :: pos
+//   real(dp), shape(*)                   :: any_rank
+//   x = x + broadcast(dt * v, over=particle)
+//
+// The `shape(...)` attribute reuses the inherited SHAPE_INTRINSIC token, so
+// `shape` remains available as a normal identifier/intrinsic name elsewhere.
+
+// Override attr_spec (inherited from Fortran 2008) to add the shape contract.
+attr_spec
+    : PUBLIC
+    | PRIVATE
+    | ALLOCATABLE
+    | POINTER
+    | INTENT LPAREN intent_spec RPAREN
+    | OPTIONAL
+    | TARGET
+    | VOLATILE
+    | PROTECTED
+    | PARAMETER
+    | VALUE
+    | CONTIGUOUS
+    | CODIMENSION coarray_spec?
+    | SHAPE_INTRINSIC LPAREN shape_spec_list RPAREN
+    ;
+
+// shape-spec-list is shape-spec [ , shape-spec ]...
+shape_spec_list
+    : shape_spec (COMMA shape_spec)*
+    ;
+
+// shape-spec is '*' | identifier | expr
+//   '*'        -> assumed-shape / rank-polymorphic extent
+//   identifier -> named axis or extent parameter
+//   expr       -> constant or dynamic extent
+shape_spec
+    : MULTIPLY                 // '*' -> assumed-shape / rank-polymorphic extent
+    | identifier_or_keyword    // named axis or extent parameter
+    | expr_f2003               // constant or dynamic extent
+    ;
+
+// Explicit broadcast operation: broadcast(expr [, over=axis] [, align=axis])
+// broadcast_arg is the value expression or a keyword argument.
+broadcast_call
+    : BROADCAST_KW LPAREN broadcast_arg_list RPAREN
+    ;
+
+broadcast_arg_list
+    : broadcast_arg (COMMA broadcast_arg)*
+    ;
+
+broadcast_arg
+    : expr_f2003
+    | identifier_or_keyword EQUALS expr_f2003   // over=axis, align=axis, etc.
     ;

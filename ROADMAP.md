@@ -49,3 +49,6 @@ short and avoid repeating competing architecture narratives.
 
 Historical proposal connections remain at
 [the pre-revision roadmap](https://github.com/lazy-fortran/standard/blob/42aab99eec42a1fe67b5e5c87af72295dea04e60/ROADMAP.md).
+
+Array shape/rank and explicit broadcasting: [normative contract](docs/arrays-proposal.md)
+and `tools/array_contracts_checker.py` reference evaluator (#745).

@@ -96,6 +96,7 @@ make test
 | [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran dialect specification (F2028 base) |
 | [LFortran Infer](docs/lfortran-infer.md) | Type inference and infer mode specification |
 | [Traits Proposal](docs/traits-proposal.md) | Traits, nominal conformance, and `{T}` procedure generics |
+| [Arrays Proposal](docs/arrays-proposal.md) | `shape(...)`/rank contracts, checked broadcasting, array contracts |
 | [External Sources](docs/external-sources.md) | Sync policy for Traits repo + Fortran 2028 draft |
 | [Design Rationale](docs/design-rationale.md) | Explains key design decisions |
 | [Implementation Notes](docs/implementation-notes.md) | Status and known limitations |
