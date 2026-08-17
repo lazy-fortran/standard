@@ -81,5 +81,6 @@ Use GitHub issues for tracking gaps. Reference ISO R-numbers when relevant (e.g.
 | [README.md](README.md) | Project overview and quick start |
 | [lfortran-standard.md](docs/lfortran-standard.md) | LFortran Standard specification |
 | [lfortran-infer.md](docs/lfortran-infer.md) | LFortran Infer mode specification |
+| [lfortran-synthesis.md](docs/lfortran-synthesis.md) | LFortran Synthesis specification (proposal #756) |
 | [design-rationale.md](docs/design-rationale.md) | Design decisions explained |
 | [implementation-notes.md](docs/implementation-notes.md) | Status and known limitations |
