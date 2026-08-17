@@ -43,6 +43,20 @@ In-scope syntax delta implemented on top of Fortran 2023:
 
 Missing productions/tokens in this in-scope F2028 template family: none.
 
+## LFortran Synthesis (Proposal #756)
+
+Normative syntax and semantics for LFortran Synthesis are specified in
+[lfortran-synthesis.md](lfortran-synthesis.md): symbolic declarations,
+`assume`/`derive`/`prove`/`generate` statements, `requires`/`ensures`/
+`invariant` contracts, `specification`/`implementation` pairs, the three-valued
+proof status (`PROVED`/`DISPROVED`/`UNKNOWN`), evidence provenance, the
+symbolic/machine-number distinction, and the lowering/source-map contract.
+
+Grammar status for the Synthesis overlay is **draft**: the EBNF grammar in the
+specification is normative; ANTLR grammar support and fixtures will land with
+the FortFront #2976 frontend implementation, staged as symbolic synthesis
+(stage 1) then contracts (stage 2).
+
 ## Semantic Validation
 
 Grammar-level parsing is complete. Semantic validators exist in `tools/` for:

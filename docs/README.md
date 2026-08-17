@@ -6,6 +6,7 @@
 |----------|-------------|
 | [lfortran-standard.md](lfortran-standard.md) | LFortran Standard: stricter Fortran dialect (F2028 base) |
 | [lfortran-infer.md](lfortran-infer.md) | LFortran Infer: type inference mode |
+| [lfortran-synthesis.md](lfortran-synthesis.md) | LFortran Synthesis: symbolic derivation, contracts, proof obligations, verified generation (proposal #756) |
 | [traits-proposal.md](traits-proposal.md) | Traits proposal: `implements`, `sealed`, `initial`, `{T}` |
 | [external-sources.md](external-sources.md) | External source sync policy and commands |
 

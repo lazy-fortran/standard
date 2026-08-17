@@ -95,6 +95,7 @@ make test
 |----------|-------------|
 | [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran dialect specification (F2028 base) |
 | [LFortran Infer](docs/lfortran-infer.md) | Type inference and infer mode specification |
+| [LFortran Synthesis](docs/lfortran-synthesis.md) | Synthesis: symbolic derivation, contracts, proof obligations, verified generation (proposal #756) |
 | [Traits Proposal](docs/traits-proposal.md) | Traits, nominal conformance, and `{T}` procedure generics |
 | [External Sources](docs/external-sources.md) | Sync policy for Traits repo + Fortran 2028 draft |
 | [Design Rationale](docs/design-rationale.md) | Explains key design decisions |
