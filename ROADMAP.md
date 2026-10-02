@@ -21,7 +21,10 @@ not expand ffc's current completion denominator merely because they exist.
 - [#756](https://github.com/lazy-fortran/standard/issues/756): Fortran
   Synthesis, contracts, proof obligations, and verified generation. The
   implementation chain is FortFront #2976, ffc #632, then fo #120 only after
-  normative syntax and semantics are accepted.
+  normative syntax and semantics are accepted. The
+  [draft scalar contract](docs/synthesis-proposal.md) supplies a reviewable
+  grammar, evidence/source-map schemas, and a standard-Fortran twin; it is
+  not accepted language coverage.
 
 Related design inputs are exact strings #735, ownership/lifetimes #739,
 runtime extraction #740, reproducibility #748, layout #749, compile-time

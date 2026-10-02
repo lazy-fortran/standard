@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lazy-fortran.github.io/standard/synthesis-draft-1/source-map-v1.schema.json",
+  "title": "Draft Fortran Synthesis source map",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "contract", "original", "generated", "mappings"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "contract": {"const": "synthesis-draft-1"},
+    "original": {"$ref": "manifest-v1.schema.json#/$defs/artifact"},
+    "generated": {"$ref": "manifest-v1.schema.json#/$defs/artifact"},
+    "mappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["original_span", "generated_span", "origin"],
+        "properties": {
+          "original_span": {"$ref": "manifest-v1.schema.json#/$defs/span"},
+          "generated_span": {"$ref": "manifest-v1.schema.json#/$defs/span"},
+          "origin": {"enum": ["expression", "assumption", "domain", "declaration"]},
+          "claim_id": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

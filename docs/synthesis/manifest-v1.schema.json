@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lazy-fortran.github.io/standard/synthesis-draft-1/manifest-v1.schema.json",
+  "title": "Draft Fortran Synthesis obligation manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "contract", "source", "producer", "policy_sha256", "claims", "generated"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "contract": {"const": "synthesis-draft-1"},
+    "source": {"$ref": "#/$defs/artifact"},
+    "producer": {"$ref": "#/$defs/tool"},
+    "policy_sha256": {"$ref": "#/$defs/hash"},
+    "claims": {"type": "array", "items": {"$ref": "#/$defs/claim"}},
+    "generated": {"type": "array", "items": {"$ref": "#/$defs/generated"}}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "path": {"type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\\\]+$"},
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"},
+        "sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "span": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_byte", "end_byte"],
+      "properties": {
+        "start_byte": {"type": "integer", "minimum": 0},
+        "end_byte": {"type": "integer", "minimum": 0}
+      }
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "executable_sha256", "options_sha256"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "executable_sha256": {"$ref": "#/$defs/hash"},
+        "options_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "reason"],
+      "properties": {
+        "kind": {"enum": ["checked-proof", "checked-counterexample", "checked-negation", "numerical-probe", "test", "backend-failure"]},
+        "reason": {"type": "string", "minLength": 1},
+        "artifact": {"$ref": "#/$defs/artifact"},
+        "checker": {"$ref": "#/$defs/tool"}
+      },
+      "allOf": [{
+        "if": {"properties": {"kind": {"enum": ["checked-proof", "checked-counterexample", "checked-negation"]}}},
+        "then": {"required": ["artifact", "checker"]}
+      }]
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "semantic_sha256"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "semantic_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class", "semantic_sha256", "span", "assumptions_sha256", "dependencies", "status", "required_proof", "evidence"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "class": {"enum": ["assumption-consistency", "exact-domain", "exact-identity", "generated-kernel-equivalence"]},
+        "semantic_sha256": {"$ref": "#/$defs/hash"},
+        "span": {"$ref": "#/$defs/span"},
+        "assumptions_sha256": {"$ref": "#/$defs/hash"},
+        "dependencies": {"type": "array", "items": {"$ref": "#/$defs/dependency"}},
+        "status": {"enum": ["PROVED", "DISPROVED", "UNKNOWN"]},
+        "required_proof": {"type": "boolean"},
+        "evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidence"}}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "PROVED"}}},
+          "then": {"properties": {"evidence": {"contains": {"properties": {"kind": {"const": "checked-proof"}}, "required": ["kind"]}}}}
+        },
+        {
+          "if": {"properties": {"status": {"const": "DISPROVED"}}},
+          "then": {"properties": {"evidence": {"contains": {"properties": {"kind": {"enum": ["checked-counterexample", "checked-negation"]}}, "required": ["kind"]}}}}
+        }
+      ]
+    },
+    "generated": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "source_map", "interface_sha256", "backend", "numeric_target", "claims"],
+      "properties": {
+        "source": {"$ref": "#/$defs/artifact"},
+        "source_map": {"$ref": "#/$defs/artifact"},
+        "interface_sha256": {"$ref": "#/$defs/hash"},
+        "backend": {"$ref": "#/$defs/tool"},
+        "numeric_target": {"const": "iso_fortran_env.real64"},
+        "claims": {"type": "array", "items": {"$ref": "#/$defs/dependency"}}
+      }
+    }
+  }
+}
