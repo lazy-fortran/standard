@@ -1,5 +1,18 @@
 # Lazy Fortran standard roadmap
 
+## Compiler execution plan
+
+The full compiler roadmap is [ffc PLAN.md](https://github.com/lazy-fortran/ffc/blob/main/PLAN.md);
+[fo Gremlin PLAN.md](https://github.com/lazy-fortran/fo/blob/main/PLAN.md) owns the
+shared continuous-testing/bootstrap provider. Complete that enabling stage before
+further compiler work. Use explicit serial main-session or parallel luna worktree
+mode, one integration controller, shared CLI/MCP semantics and bounded corpus
+sampling/retention. Fix fo workflow defects first; use the updated CLI during
+execution when MCP cannot reload. Current delivery is planning only; execution awaits a later user
+instruction. Local contracts below retain their owner but do not override this
+compiler scheduling or exclude required modern standard Fortran facilities.
+Historical snapshots are dated evidence, not claims of current full green.
+
 Snapshot: 2026-08-06. This repository specifies language, runtime, ownership,
 layout, and reproducibility contracts. It is not an implementation backlog.
 An accepted proposal is mapped to small issues in the repositories that
@@ -58,5 +71,5 @@ producer-consumer compile/link/run examples and incompatible-version rejection.
 
 When a proposal changes, update its implementer links. Do not copy live corpus
 counts or issue status here. The
-[ffc roadmap](https://github.com/lazy-fortran/ffc/blob/main/ROADMAP.md) owns the
+[ffc roadmap](https://github.com/lazy-fortran/ffc/blob/main/PLAN.md) owns the
 current compiler convergence plan.
