@@ -1,77 +1,51 @@
-# Lazy Fortran standard roadmap
+# Language specification goals
 
-## Compiler execution plan
+Specify independently reviewable language behavior for accepted Lazy Fortran
+features while preserving the meaning of existing standard Fortran. Apply
+[goals and architectural freedom](https://github.com/lazy-fortran/fo/blob/main/doc/GOAL_DRIVEN_DEVELOPMENT.md).
+Open proposal issues define desired outcomes and questions; candidate syntax,
+representations and compiler architecture remain open until accepted.
 
-The full compiler roadmap is [ffc PLAN.md](https://github.com/lazy-fortran/ffc/blob/main/PLAN.md);
-[fo Gremlin PLAN.md](https://github.com/lazy-fortran/fo/blob/main/PLAN.md) owns the
-shared continuous-testing/bootstrap provider. Follow the master stage order:
-complete that enabling stage and verify the ffc adapter before compiler-feature
-work; independent provider tasks and read-only review can proceed in parallel
-when their prerequisites are met. Use explicit serial main-session or parallel
-luna worktree mode, one integration controller, shared CLI/MCP semantics and
-bounded corpus sampling/retention. Fix fo workflow defects first; use the updated
-CLI during execution when MCP cannot reload. Local contracts below retain their
-owners and scope within this authorized implementation sequence; they do not
-exclude required modern standard Fortran facilities.
-Historical snapshots are dated evidence, not claims of current full green.
+## Required proposal outcomes
 
-Snapshot: 2026-08-06. This repository specifies language, runtime, ownership,
-layout, and reproducibility contracts. It is not an implementation backlog.
-An accepted proposal is mapped to small issues in the repositories that
-produce and consume its public contract.
+- Precise user-visible meaning, evaluation/side effects, errors and interaction
+  with ordinary Fortran, with independently checkable positive/negative examples.
+- Ownership/lifetime, interoperability, numerical and concurrency guarantees
+  that are explicit and implementable for the claimed scope.
+- Compatibility/versioning for accepted public contracts and named implementers
+  when the proposal is ready to become an implementation obligation.
+- A reference/desugaring/model where useful. A syntax sketch or compiler-produced
+  output alone does not validate the promised semantics.
 
-The audited baseline is `e4183d2`. All proposals #734 through #756 remain open. They do
-not expand ffc's current completion denominator merely because they exist.
+## Goal families
 
-## Compiler-critical proposals
+| Family | Issues |
+| --- | --- |
+| Useful compatible language/runtime capabilities | #734, #740, #741 |
+| Strings, containers, traits and alternative values | #735–#738 |
+| Lifetime, safe sharing, effects and explicit unsafe behavior | #739, #743, #747, #754 |
+| Derivation, patterns and predictable staging | #742, #744, #752 |
+| Arrays, units, layout and tensor notation | #745, #746, #749, #755 |
+| Reproducible numerical behavior and differentiation | #748, #751 |
+| Contracts and efficient separate-compilation identities | #750, #753 |
+| Accepted scientific Synthesis semantics | #756 |
 
-- [#745](https://github.com/lazy-fortran/standard/issues/745): shape/rank types,
-  checked broadcasting, and array contracts. Its accepted representation will
-  map to FortFront typed queries and ffc's one canonical descriptor/expression
-  model.
-- [#753](https://github.com/lazy-fortran/standard/issues/753): stable module
-  interface signatures. It must specify identity, schema versioning,
-  compatibility, target/runtime dependence, and invalidation before ffc
-  changes its published `.fmod` contract.
-- [#756](https://github.com/lazy-fortran/standard/issues/756): Fortran
-  Synthesis, contracts, proof obligations, and verified generation. The
-  implementation chain is FortFront #2976, ffc #632, then fo #120 only after
-  normative syntax and semantics are accepted. The
-  [draft scalar contract](docs/synthesis-proposal.md) supplies a reviewable
-  grammar, evidence/source-map schemas, and a standard-Fortran twin; it is
-  not accepted language coverage.
+The open proposal set does not expand FFC's standard-Fortran completion scope
+merely by existing. Accepted contracts become scoped implementation goals in
+FortFront/FFC and their actual providers. Synthesis links #756, FortFront #2976
+and FFC #632; it does not reintroduce a proof system into Fo.
 
-Related design inputs are exact strings #735, ownership/lifetimes #739,
-runtime extraction #740, reproducibility #748, layout #749, compile-time
-staging #752, and unsafe interop #754. They inform architecture discussions
-but cannot silently change standard-Fortran behavior or an existing ABI.
+## Delivery
 
-## Proposal-to-implementation rule
+Revise proposals when examples reveal missing meaning; choose architecture only
+when implementation evidence requires it. Preserve authoritative standard and
+already accepted syntax/semantics. Track provider-consumer compatibility without
+prescribing migration steps or runtime layout in advance.
 
-Every accepted contract includes:
+[FFC PLAN](https://github.com/lazy-fortran/ffc/blob/main/PLAN.md) owns compiler
+delivery. [Fo #205](https://github.com/lazy-fortran/fo/issues/205) also covers
+unnecessary proposal/planning/documentation volume: keep active descriptions
+short and avoid repeating competing architecture narratives.
 
-- normative syntax and semantics, including evaluation order, side effects,
-  errors, ownership/lifetime, and interaction with standard Fortran.
-- positive, negative, boundary, and cross-feature examples.
-- a desugaring or independent reference model where possible.
-- compatibility and versioning rules for serialized/runtime contracts.
-- named producer and consumer repositories.
-- atomic implementation issues with independent behavioral oracles.
-
-Implementation order for a breaking cross-repository contract is additive
-provider API, migrated consumers, default switch, then prompt deletion of the
-old path. Temporary dual-mode comparison belongs in tests, not two permanent
-production semantics.
-
-## Verification
-
-Examples must be executable or mechanically checkable. A syntax example alone
-does not validate semantics. Array, ownership, staging, and reproducibility
-proposals need a small reference evaluator or standard-Fortran desugared twin,
-plus invalid neighbors. Module/runtime proposals need separate
-producer-consumer compile/link/run examples and incompatible-version rejection.
-
-When a proposal changes, update its implementer links. Do not copy live corpus
-counts or issue status here. The
-[ffc roadmap](https://github.com/lazy-fortran/ffc/blob/main/PLAN.md) owns the
-current compiler convergence plan.
+Historical proposal connections remain at
+[the pre-revision roadmap](https://github.com/lazy-fortran/standard/blob/42aab99eec42a1fe67b5e5c87af72295dea04e60/ROADMAP.md).
