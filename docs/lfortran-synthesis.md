@@ -77,18 +77,23 @@ INVARIANT     : 'invariant'
 SPECIFICATION : 'specification'
 IMPLEMENTATION: 'implementation'
 GENERATE      : 'generate'
+SYNTHESIS_KW  : 'synthesis'
 MODEL_KW      : 'model'
 PROVED_KW     : 'PROVED'
 DISPROVED_KW  : 'DISPROVED'
 UNKNOWN_KW    : 'UNKNOWN'
 ```
 
-`END MODEL`, `END SPECIFICATION`, and `END IMPLEMENTATION` are recognized as
-keyword phrases.
+`END MODEL`, `END SYNTHESIS MODEL`, `END SPECIFICATION`, and
+`END IMPLEMENTATION` are recognized as keyword phrases
+(`END_MODEL_STMT : END SYNTHESIS_KW? MODEL_KW`).
 
 ### Program units
 
-A Synthesis `model` is a new program unit, analogous to a `module`:
+A Synthesis `model` is a new program unit, analogous to a `module`. The
+optional `synthesis` prefix is the spelling used throughout this document
+(`synthesis model name` ... `end synthesis model`), and the shorter
+`model name` ... `end model` is equivalent:
 
 ```
 program_unit
@@ -97,7 +102,7 @@ program_unit
     ;
 
 synthesis_model
-    : MODEL_KW identifier NEWLINE*
+    : SYNTHESIS_KW? MODEL_KW identifier NEWLINE*
       model_part*
       END_MODEL_STMT identifier? NEWLINE*
     ;
@@ -117,6 +122,14 @@ model_part
 
 symbolic_decl
     : SYMBOLIC type_spec '::' symbol_attr_list NEWLINE*
+    ;
+
+symbol_attr_list
+    : symbol_entity (',' symbol_entity)*
+    ;
+
+symbol_entity
+    : identifier ('(' array_spec ')')?     // arrays keep shape and extent
     ;
 
 assumption_stmt
@@ -153,6 +166,12 @@ requires_clause : REQUIRES expr NEWLINE* ;
 ensures_clause  : ENSURES  expr NEWLINE* ;
 invariant_clause: INVARIANT expr NEWLINE* ;
 ```
+
+A `contract_stmt` is accepted wherever the base grammar accepts a
+`declaration_construct` or an `executable_construct` inside a procedure body,
+including the body of a `do` construct (for `invariant`). `procedure_spec` is
+the ordinary procedure header (prefixes, `function`/`subroutine`, name,
+dummy arguments, `result`) of the base grammar.
 
 ### Specification / implementation pairs
 
@@ -362,10 +381,10 @@ Example:
 
 ```fortran
 synthesis model harmonic
-    symbolic real :: q, p, m
+    symbolic real :: q, p, m, k
     assume(m > 0)
 
-    h = p**2/(2*m) + potential(q)
+    derive h = p**2/(2*m) + k*q**2/2
     derive qdot = diff(h, p)
     derive pdot = -diff(h, q)
 
@@ -577,9 +596,9 @@ end synthesis model
 
 ```fortran
 synthesis model harmonic
-    symbolic real :: q, p, m
+    symbolic real :: q, p, m, k
     assume(m > 0)
-    h = p**2/(2*m) + potential(q)
+    derive h = p**2/(2*m) + k*q**2/2
     derive qdot = diff(h, p)
     derive pdot = -diff(h, q)
     prove diff(qdot, q) + diff(pdot, p) == 0
