@@ -95,6 +95,7 @@ make test
 |----------|-------------|
 | [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran dialect specification (F2028 base) |
 | [LFortran Infer](docs/lfortran-infer.md) | Type inference and infer mode specification |
+| [LFortran Synthesis](docs/lfortran-synthesis.md) | Synthesis: symbolic derivation, contracts, proof obligations, verified generation (proposal #756) |
 | [Traits Proposal](docs/traits-proposal.md) | Traits, nominal conformance, and `{T}` procedure generics |
 | [Arrays Proposal](docs/arrays-proposal.md) | `shape(...)`/rank contracts, checked broadcasting, array contracts |
 | [Module Interface Signatures](docs/module-interface-signatures.md) | Stable module interface signatures for incremental builds (#753) |
