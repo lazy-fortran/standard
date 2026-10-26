@@ -7,6 +7,7 @@
 | [lfortran-standard.md](lfortran-standard.md) | LFortran Standard: stricter Fortran dialect (F2028 base) |
 | [lfortran-infer.md](lfortran-infer.md) | LFortran Infer: type inference mode |
 | [traits-proposal.md](traits-proposal.md) | Traits proposal: `implements`, `sealed`, `initial`, `{T}` |
+| [synthesis-proposal.md](synthesis-proposal.md) | Draft exact-scalar Synthesis contract, evidence schemas, and Fortran twin |
 | [external-sources.md](external-sources.md) | External source sync policy and commands |
 
 ## Design
