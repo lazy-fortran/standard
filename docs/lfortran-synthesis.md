@@ -454,8 +454,8 @@ synthesis model harmonic
 end synthesis model
 ```
 
-`generate` lowers to a module function, `pure` unless it carries mandatory
-runtime guards, since a pure function may not execute `error stop`. `prove`
+`generate` lowers to a `pure` module function. Mandatory runtime guards do not
+change this, because Fortran 2018 permits `error stop` in pure procedures. `prove`
 and `generate` are compile-time-only; they do not survive into the emitted
 standard Fortran except as the corresponding kernel and (per policy) runtime
 assertions or tests.
@@ -603,7 +603,7 @@ Rules:
 
 | Feature | Behavior |
 |---------|----------|
-| **Purity** | `derive`/`prove`/`generate` are pure; `symbolic` names are read-only. Contract expressions must be pure. A `specification` of a pure function yields a pure implementation, unless the kernel carries a mandatory runtime guard, which makes it impure. |
+| **Purity** | `derive`/`prove`/`generate` are pure; `symbolic` names are read-only. Contract expressions must be pure. A `specification` of a pure function yields a pure implementation, including kernels with mandatory runtime guards, since `error stop` is permitted in pure procedures (Fortran 2018). |
 | **Elemental** | Elemental procedures may carry contracts; contract expressions are elementally applied to each element. |
 | **Generics** | A Synthesis model may be parameterized by the same deferred type mechanism as LFortran templates; symbolic operations require a numeric deferred type. |
 | **Arrays** | `symbolic` arrays are exact elementwise; `diff` acts elementwise on arrays. `shape`/`size` are available in contracts and proofs. |
