@@ -7,6 +7,6 @@ contains
         real(dp), shape(particle, xyz), intent(in)    :: positions
         real(dp), shape(particle),      intent(in)    :: masses
         real(dp), shape(particle, xyz), intent(inout) :: forces
-        forces = broadcast(masses, over=particle) * positions
+        forces = broadcast(masses, over=xyz) * positions
     end subroutine force
 end module forces

@@ -89,10 +89,10 @@ class TestBroadcasting(unittest.TestCase):
         self.assertIn("no implicit broadcast", str(ctx.exception))
 
     def test_explicit_broadcast_over_axis(self):
-        # rank-1 source replicated over the xyz axis
-        self.env.check_broadcast(self.env.entities["x"], (3,), "v", over=2)
-        # rank-1 source replicated over the particle axis
-        self.env.check_broadcast(self.env.entities["x"], (1000,), "mass", over=1)
+        # velocity(3) replicated along the inserted particle axis (1)
+        self.env.check_broadcast(self.env.entities["x"], (3,), "velocity", over=1)
+        # mass(1000) replicated along the inserted xyz axis (2)
+        self.env.check_broadcast(self.env.entities["x"], (1000,), "mass", over=2)
 
     def test_broadcast_scalar_noop(self):
         self.env.check_broadcast(self.env.entities["x"], (), "dt", over=None)
@@ -104,7 +104,13 @@ class TestBroadcasting(unittest.TestCase):
 
     def test_broadcast_extent_mismatch_rejected(self):
         with self.assertRaises(ShapeError) as ctx:
-            self.env.check_broadcast(self.env.entities["x"], (4,), "v", over=2)
+            self.env.check_broadcast(self.env.entities["x"], (4,), "v", over=1)
+        self.assertIn("does not match", str(ctx.exception))
+
+    def test_broadcast_matching_axis_is_not_inserted_axis(self):
+        # v(3) with over=2 would need the remaining extent 1000 to equal 3
+        with self.assertRaises(ShapeError) as ctx:
+            self.env.check_broadcast(self.env.entities["x"], (3,), "v", over=2)
         self.assertIn("does not match", str(ctx.exception))
 
 

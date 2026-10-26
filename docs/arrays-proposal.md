@@ -232,20 +232,27 @@ x = x + broadcast(dt * v, over=particle)
 Semantics:
 
 - `broadcast(src, over=axis-name-or-index, [align=axis-name-or-index])`
-- The source is replicated along the named (or indexed) axis to match the
-  destination shape.
-- The `over=` axis must exist in the destination shape; the source must conform
-  to the destination after replication.
+- `over=` names the axis that the broadcast inserts, that is, the destination
+  axis along which the source is replicated. The source has no such axis.
+- The `over=` axis must exist in the destination shape. The extents of the
+  remaining destination axes, in order, must equal the extents of the source.
+  A rank-1 source `v(3)` therefore broadcasts along axis 1 of a destination
+  `x(1000, 3)` with `over=particle` (or `over=1`), and a rank-1 source
+  `m(1000)` broadcasts along axis 2 of the same destination with `over=xyz`.
+- Mismatched extents are rejected: `v(4)` with `over=particle` against
+  `x(1000, 3)` is an error, as is `v(3)` with `over=xyz`, because the
+  remaining extent 1000 differs from 3.
 - Broadcasting a scalar is always a no-op and is permitted without `over=`.
-- Broadcasting a rank-1 source over a rank-2 destination extends the source
-  along the second axis.
+- There is no implicit trailing-axis alignment as in NumPy. The inserted axis
+  is always named, because trailing alignment is ambiguous in column-major
+  Fortran.
 
 Lowering (desugared twin): an explicit broadcast lowers to a fused loop. No
 temporary array is materialized when the operation is fused with the consumer
 (see [Performance](#7-performance-requirements)).
 
 ```fortran
-! x(particle, xyz) = x(particle, xyz) + broadcast(dt * v(xyz), over=xyz)
+! x(particle, xyz) = x(particle, xyz) + broadcast(dt * v(xyz), over=particle)
 do p = 1, nparticle
     do c = 1, 3
         x(p, c) = x(p, c) + dt * v(c)
@@ -282,7 +289,7 @@ module particles
 contains
     subroutine advance(x, v, dt)
         real(dp), shape(n, 3), intent(inout) :: x
-        real(dp), shape(n, 3), intent(in)    :: v
+        real(dp), shape(3),    intent(in)    :: v
         real(dp),             intent(in)    :: dt
         x = x + broadcast(dt * v, over=particle)
     end subroutine
@@ -316,7 +323,7 @@ subroutine force(positions, masses, forces)
     real(dp), shape(particle, xyz), intent(inout) :: forces
     ! particle axis of positions, masses, forces must agree
     ! xyz axis of positions and forces must agree
-    forces = broadcast(masses, over=particle) * positions
+    forces = broadcast(masses, over=xyz) * positions
 end subroutine force
 ```
 

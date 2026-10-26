@@ -5,7 +5,7 @@ module particles
 contains
     subroutine step_positions(x, v, dt)
         real(dp), shape(n, 3), intent(inout) :: x
-        real(dp), shape(n, 3), intent(in)    :: v
+        real(dp), shape(3),    intent(in)    :: v
         real(dp),             intent(in)    :: dt
         x = x + broadcast(dt * v, over=particle)
     end subroutine step_positions

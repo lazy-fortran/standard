@@ -8,7 +8,7 @@ specified in docs/arrays-proposal.md:
 
   - shape/rank contracts (`shape(...)` attribute): static and dynamic checks
   - named axes: same-name axes must share extent
-  - broadcasting: no implicit broadcast; explicit `broadcast(src, over=axis)`
+  - broadcasting: no implicit broadcast; explicit `broadcast(src, over=axis)`, where `over` is the inserted axis
   - diagnostics: name entity, axis, expected extent, actual extent
 
 It is a standalone model (Python), not tied to the ANTLR grammar, so it can run
@@ -140,9 +140,10 @@ class ShapeEnvironment:
                         src_name: str, over: Optional[int]) -> None:
         """Check that src conforms to dest after an explicit broadcast.
 
-        ``over`` is the 1-based axis of ``dest`` along which a rank-1 source is
-        replicated. Without a scalar/rank-1 broadcast, shapes must already
-        conform.
+        ``over`` is the 1-based axis of ``dest`` that the broadcast inserts,
+        i.e. the axis along which a rank-1 source is replicated. The remaining
+        extents of ``dest`` must equal the source extent. Without a
+        scalar/rank-1 broadcast, shapes must already conform.
         """
         if dest.extent is None:
             raise ShapeError(f"destination '{dest.name}' has no bound extent")
@@ -166,13 +167,14 @@ class ShapeEnvironment:
                     f"broadcast axis {over} out of range for '{dest.name}' "
                     f"rank {len(de)}"
                 )
-            # The rank-1 source must match the dest extent along the 'over'
-            # axis; it is then replicated over every other axis.
-            if de[axis] != src_extent[0]:
+            # 'over' is the inserted axis; the source must match the
+            # remaining dest extents, in order.
+            remaining = de[:axis] + de[axis + 1:]
+            if remaining != src_extent:
                 raise ShapeError(
-                    f"broadcast: '{src_name}' extent {src_extent[0]} along "
-                    f"'over' axis {over} does not match '{dest.name}' extent "
-                    f"{de[axis]}"
+                    f"broadcast: '{src_name}' shape {src_extent} does not "
+                    f"match '{dest.name}' extents {remaining} remaining after "
+                    f"inserting 'over' axis {over}"
                 )
             return
         # multi-rank source: must conform without broadcasting
@@ -238,11 +240,11 @@ def example_no_implicit_broadcast() -> None:
 def example_explicit_broadcast_ok() -> None:
     env = ShapeEnvironment()
     env.bind_and_check("x", ["particle", "xyz"], (1000, 3))
-    # rank-1 source replicated over axis 2 (xyz)
-    env.check_broadcast(env.entities["x"], (3,), "v", over=2)
-    # rank-1 source replicated over axis 1 (particle)
+    # velocity(3) replicated along the inserted axis 1 (particle)
+    env.check_broadcast(env.entities["x"], (3,), "velocity", over=1)
+    # masses(1000) replicated along the inserted axis 2 (xyz)
     env.bind_and_check("masses", ["particle"], (1000,))
-    env.check_broadcast(env.entities["x"], (1000,), "masses", over=1)
+    env.check_broadcast(env.entities["x"], (1000,), "masses", over=2)
 
 
 def example_explicit_broadcast_bad_axis() -> None:
