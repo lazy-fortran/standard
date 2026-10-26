@@ -8,6 +8,7 @@
 | [lfortran-infer.md](lfortran-infer.md) | LFortran Infer: type inference mode |
 | [traits-proposal.md](traits-proposal.md) | Traits proposal: `implements`, `sealed`, `initial`, `{T}` |
 | [synthesis-proposal.md](synthesis-proposal.md) | Draft exact-scalar Synthesis contract, evidence schemas, and Fortran twin |
+| [arrays-proposal.md](arrays-proposal.md) | Arrays proposal: `shape(...)`/rank contracts, checked broadcasting |
 | [external-sources.md](external-sources.md) | External source sync policy and commands |
 
 ## Design
