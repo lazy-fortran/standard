@@ -9,6 +9,7 @@
 | [traits-proposal.md](traits-proposal.md) | Traits proposal: `implements`, `sealed`, `initial`, `{T}` |
 | [synthesis-proposal.md](synthesis-proposal.md) | Draft exact-scalar Synthesis contract, evidence schemas, and Fortran twin |
 | [arrays-proposal.md](arrays-proposal.md) | Arrays proposal: `shape(...)`/rank contracts, checked broadcasting |
+| [module-interface-signatures.md](module-interface-signatures.md) | Stable module interface signatures for fast incremental compilation (#753) |
 | [external-sources.md](external-sources.md) | External source sync policy and commands |
 
 ## Design
