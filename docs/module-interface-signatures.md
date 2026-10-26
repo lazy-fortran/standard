@@ -39,14 +39,17 @@ signature keys *semantic* public API stability.
   templates), public derived types and their public components/bindings,
   public constants/parameters, public generic instantiations, public trait
   implementations, and any public contracts that affect callers.
-- **Private implementation.** Module-body `contains` internals, private
-  components, private procedures, local state, and any entity not reachable
-  through the public interface.
+- **Private implementation.** Module-body `contains` internals, the names of
+  private components, private procedures, local state, and any entity not
+  reachable through the public interface. The one exception is storage
+  layout: every component of a public derived type, public or private, shapes
+  the layout that dependants compile against (see
+  [layout](#effects-shaperankunit-contracts-traits-layout)).
 
 The LF signature is a *fingerprint of the public interface*, not of the source
 text and not of the full `.mod` payload. Two modules with different private
-implementations but identical public interfaces produce identical LF
-signatures.
+implementations but identical public interfaces and identical type layouts
+produce identical LF signatures.
 
 ---
 
@@ -59,7 +62,7 @@ For each public entity the following are hashed:
 |--------|------------------|
 | Public procedure (function/subroutine) | Name, argument names, argument types, rank/shape (deferred where `assumed-shape`), intents, optionality, result type/rank/shape, `pure`/`elemental`/`impure`, **effects** (see below), trailing-argument defaults that affect caller ABI |
 | Public generic (`interface`/`generic`) | Generic name and the ordered set of specific procedures it resolves to, including any ambiguity-significant attributes |
-| Public derived type | Name, type parameters (kinds/lengths), public components (name, type, rank/shape, allocatable/pointer, deferred), public type-bound bindings (names and their signatures), parent type (for `extends`), **public layout/ABI policy** (see below) |
+| Public derived type | Name, type parameters (kinds/lengths), public components (name, type, rank/shape, allocatable/pointer, deferred), public type-bound bindings (names and their signatures), parent type (for `extends`), **layout** of all components, public and private, without private names (see below) |
 | Public constant/parameter | Name, type, kind, and the constant's value where it can affect callers (e.g. array bounds, kind parameters) |
 | Public generic/template instantiation | Template name, the actual type/constant arguments, and the resulting public procedures |
 | Public trait implementation | The implemented trait, the implementing type, and the resolved method set, where trait conformance is externally observable |
@@ -69,7 +72,9 @@ For each public entity the following are hashed:
 The following are **explicitly excluded** and therefore never invalidate a
 downstream rebuild:
 
-- Private procedures, private components, and module-body internals.
+- Private procedures, the names of private components, and module-body
+  internals. Private components still contribute to the layout part of the
+  signature (see below), but only as anonymous layout entries.
 - Statement reordering, whitespace, comments, and non-interface source text.
 - Implementation-only changes inside `contains` that preserve the public API.
 - Compiler-internal temporaries, inlining decisions, and optimization choices.
@@ -90,12 +95,18 @@ Trait implementations must have a stable public representation: the trait
 name, the implementing type, and the resolved method set are hashed
 canonically (see [Stable serialization](#stable-serialization)).
 
-Derived/variant public layout follows an explicit ABI/interface policy. When a
-public derived type's storage layout is part of the caller ABI (passed by
-reference, common blocks, `bind(C)`, variant/sum-type tag layout per #738),
-the layout policy version and the layout-relevant fields are part of the
-signature. If a public type is always passed by descriptor and its layout is
-implementation-defined, only the descriptor-visible contract is hashed.
+Every public derived type contributes a **layout part** to the signature,
+because dependants that declare, copy or pass objects of the type, or embed
+it in their own types, compile against its storage layout (including `bind(C)`
+and variant/sum-type tag layout per #738). The layout part consists of the layout
+policy version and, for **every** component, public or private and in storage
+order, its type, kind, rank, extents, allocatable/pointer status, alignment and
+the padding that results. The component names of private components are not
+hashed, and a private component whose type is a private derived type
+contributes that type's size and alignment, not its name. Consequently a
+change that alters the layout of a private component changes the signature and
+forces dependants to recompile, while renaming a private component, or
+changing a private procedure, does not.
 
 ---
 
@@ -208,8 +219,8 @@ compatibility rules:
   any new use. Build tools may opt into "additive-only" fast paths where the
   schema records a compatibility flag.
 - **Removed or renamed public entity:** always incompatible.
-- **Public derived-type layout change:** incompatible under the ABI/interface
-  policy (see above).
+- **Derived-type layout change:** incompatible under the layout part of the
+  signature (see above), whether the changed component is public or private.
 - **Target/runtime change:** incompatible when the target fingerprint differs.
 
 The schema version and compatibility tag must be specified before `ffc` changes
@@ -379,6 +390,35 @@ end module m
 Making `hidden` private still (unchanged) contributes nothing. Promoting a
 private procedure to `public` adds an entity to the signature and invalidates
 downstream units (new public surface).
+
+### 6. Private component changes the layout
+
+```fortran
+! before
+module m
+    private
+    public :: point_t
+    type :: point_t
+        real    :: x, y
+        integer, private :: tag        ! private component, 4 bytes
+    end type point_t
+end module m
+
+! after: only the private component changes its kind
+module m
+    private
+    public :: point_t
+    type :: point_t
+        real    :: x, y
+        integer(kind=8), private :: tag ! private component, 8 bytes
+    end type point_t
+end module m
+```
+
+**Result:** the public components `x` and `y` are unchanged, but the size,
+alignment and padding of `point_t` differ, so the layout part of the signature
+changes and downstream units rebuild. Renaming `tag` to `id` without changing
+its type, kind, rank or extents leaves the signature byte-identical.
 
 ---
 
