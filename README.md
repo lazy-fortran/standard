@@ -74,7 +74,7 @@ Status source of truth:
 
 ```bash
 # Clone
-git clone git@github.com:lazy-fortran/standard.git
+git clone https://github.com/lazy-fortran/standard.git
 cd standard
 
 # Build grammars
@@ -85,8 +85,9 @@ make test
 ```
 
 ### Prerequisites
-- Python 3.8+
-- ANTLR4
+- Python 3 with `antlr4-python3-runtime` and `pytest`
+- ANTLR 4 (CI uses the 4.13.2 complete jar:
+  `make all ANTLR4="java -jar antlr-4.13.2-complete.jar"`)
 - Git
 
 ## Documentation
@@ -95,10 +96,10 @@ make test
 |----------|-------------|
 | [LFortran Standard](docs/lfortran-standard.md) | Stricter Fortran dialect specification (F2028 base) |
 | [LFortran Infer](docs/lfortran-infer.md) | Type inference and infer mode specification |
-| [LFortran Synthesis](docs/lfortran-synthesis.md) | Synthesis: symbolic derivation, contracts, proof obligations, verified generation (proposal #756) |
+| [LFortran Synthesis](docs/lfortran-synthesis.md) | Synthesis: symbolic derivation, contracts, proof obligations, verified generation (proposal) |
 | [Traits Proposal](docs/traits-proposal.md) | Traits, nominal conformance, and `{T}` procedure generics |
 | [Arrays Proposal](docs/arrays-proposal.md) | `shape(...)`/rank contracts, checked broadcasting, array contracts |
-| [Module Interface Signatures](docs/module-interface-signatures.md) | Stable module interface signatures for incremental builds (#753) |
+| [Module Interface Signatures](docs/module-interface-signatures.md) | Stable module interface signatures for incremental builds |
 | [External Sources](docs/external-sources.md) | Sync policy for Traits repo + Fortran 2028 draft |
 | [Design Rationale](docs/design-rationale.md) | Explains key design decisions |
 | [Implementation Notes](docs/implementation-notes.md) | Status and known limitations |
