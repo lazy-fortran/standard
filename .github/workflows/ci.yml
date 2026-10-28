@@ -19,33 +19,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Install ANTLR4 tool
-        run: |
-          curl -L -o antlr-4.13.2-complete.jar https://www.antlr.org/download/antlr-4.13.2-complete.jar
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install antlr4-python3-runtime pytest pytest-xdist
+      - uses: ./.github/actions/test-setup
 
       - name: Build grammars
         run: |
-          make all ANTLR4="java -jar $PWD/antlr-4.13.2-complete.jar"
+          make all ANTLR4="java -jar $ANTLR_JAR"
 
+      # The runner allows two CPUs but reports 40, so `-n auto` started 40
+      # workers. The fixture sweep, the slow F2008 intrinsic tests and the
+      # LFortran dialect suites run in nightly.yml (job slow-tests); keep both
+      # lists in step.
       - name: Run tests
         run: |
-          python -m pytest tests -q -n auto
+          python -m pytest tests -q -n "$(nproc)" \
+            --ignore=tests/test_fixture_parsing.py \
+            --ignore=tests/Fortran2008/test_basic_f2008_features.py \
+            --ignore=tests/LFortran \
+            --ignore=tests/LFortranInfer
+
+      - name: Test the nightly triage logic
+        run: python scripts/test_nightly_triage.py
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || format('{0}-{1}', github.ref, github.run_id) }}

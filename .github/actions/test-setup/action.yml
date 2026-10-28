@@ -1,0 +1,29 @@
+name: Test setup
+description: >-
+  Install Python 3.11, Java 17, the ANTLR4 tool (as $ANTLR_JAR) and the Python
+  test dependencies.
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: "17"
+
+    - name: Install ANTLR4 tool
+      shell: bash
+      run: |
+        curl -L -o "$RUNNER_TEMP/antlr-4.13.2-complete.jar" https://www.antlr.org/download/antlr-4.13.2-complete.jar
+        echo "ANTLR_JAR=$RUNNER_TEMP/antlr-4.13.2-complete.jar" >> "$GITHUB_ENV"
+
+    - name: Install Python dependencies
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install antlr4-python3-runtime pytest pytest-xdist
