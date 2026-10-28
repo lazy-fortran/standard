@@ -1,0 +1,110 @@
+name: nightly
+
+# Slow tests run here once a night on main instead of in the merge queue. A
+# failing job bisects its own command between its last green nightly and this
+# commit; the report job files or updates one issue labelled nightly-failure,
+# and the next green run of those jobs closes it.
+run-name: >-
+  ${{ inputs.jobs && format('nightly: jobs {0}', inputs.jobs) || 'nightly: all jobs' }}
+
+on:
+  schedule:
+    - cron: "53 1 * * *"
+  workflow_dispatch:
+    inputs:
+      jobs:
+        description: Comma-separated jobs to run (empty runs all)
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: Plan
+    runs-on: [self-hosted, itp-ubuntu24]
+    outputs:
+      jobs: ${{ steps.plan.outputs.jobs }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        env:
+          JOBS: ${{ inputs.jobs }}
+        run: python3 scripts/nightly_triage.py plan --jobs "$JOBS"
+
+  slow-tests:
+    name: Nightly slow-tests
+    needs: plan
+    if: contains(fromJSON(needs.plan.outputs.jobs), 'slow-tests')
+    runs-on: [self-hosted, itp-ubuntu24]
+    timeout-minutes: 300
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/test-setup
+
+      - name: Run the slow tests
+        id: run
+        run: python scripts/nightly_triage.py run slow-tests
+
+      - name: Bisect the failure
+        if: failure() && steps.run.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/nightly_triage.py bisect slow-tests --out "$RUNNER_TEMP/bisect.json"
+
+      - uses: actions/upload-artifact@v4
+        if: failure() && steps.run.outcome == 'failure'
+        with:
+          name: nightly-bisect-slow-tests
+          path: ${{ runner.temp }}/bisect.json
+          if-no-files-found: ignore
+
+  report:
+    name: Report the failure
+    needs: [plan, slow-tests]
+    if: failure()
+    runs-on: [self-hosted, itp-ubuntu24]
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: nightly-bisect-*
+          path: bisect
+      - name: File or update the nightly-failure issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/nightly_triage.py report --results bisect
+
+  close:
+    name: Close the nightly-failure issue
+    needs: [plan, slow-tests]
+    if: >-
+      always() && needs.plan.result == 'success'
+      && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
+    runs-on: [self-hosted, itp-ubuntu24]
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Close the issue once its jobs pass
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOBS: ${{ inputs.jobs }}
+        run: python3 scripts/nightly_triage.py success --jobs "$JOBS"
